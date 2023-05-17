@@ -96,6 +96,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_800245D4);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800249BC);
 
+// 50 GPU standard library functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024BD0);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024DA0);
@@ -198,6 +199,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_800274F0);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800276DC);
 
+// standard c functions and kernel calls
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027710);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278A8);

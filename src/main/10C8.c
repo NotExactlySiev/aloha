@@ -70,13 +70,29 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D64);
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D78);
 
 // 4 basic functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DCC);
+//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DCC);
+//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DD8);
+//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DE8);
+//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DF8);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DD8);
+u32 func_80019DCC(void) {
+  return 0x10002;
+}
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DE8);
+u8 g_GameConfig[1280];  // 80014000
+s32 g_NextFile;         // 80047d5c
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DF8);
+void setNextFile(s32 id) {
+    g_NextFile = id;    
+}
+
+s32 setNextFile() {
+    return g_NextFile;
+}
+
+u8* getGameConfig() {
+    return &g_GameConfig;
+}
 
 // main
 INCLUDE_ASM("asm/nonmatchings/10C8", main);
@@ -357,7 +373,7 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_8001E7B0);
 // 1 very massive function
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001E998);
 
-// TODO
+// TODO: don't know what these exactly are but the mess around a lot with data
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001EEA4);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001EFAC);
@@ -386,6 +402,7 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_8001F9A4);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001F9EC);
 
+// 6 global var functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001FB38);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001FB58);
@@ -398,6 +415,7 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_8001FBE4);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001FC34);
 
+// 7 memory card event functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001FC5C);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001FCF4);
@@ -412,6 +430,7 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_8001FFD4);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020000);
 
+// 17 main memory card functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020020);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_800200C8);
@@ -446,12 +465,15 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_800206E4);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020808);
 
+// set jumptable and events for memory card stuff 0x280 to 0x2A1
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8002092C);
 
+// 2 memory card functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020C8C);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020D5C);
 
+// 11 pretty basic functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020DC4);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020DE8);
@@ -474,6 +496,7 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_80020F9C);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020FC0);
 
+// 2 linked list functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80020FD0);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80021028);
