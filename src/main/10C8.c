@@ -54,7 +54,7 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_80019AE8);
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019AF8);
 
 // 1 setup function (sets up jumptable)
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019B1C);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_80019B1C); // jumptable and interrupts?
 
 // 1 basic function
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019CA4);

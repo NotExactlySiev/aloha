@@ -55,6 +55,6 @@ k_new_card = 0x80023D18;
 k_card_read = 0x80023D28;
 
 stacksize = 0x80047440;
-g_NextFile = 80047d5c;
+g_NextFile = 0x80047d5c;
 bss  = 0x80047E6C;
 heap = 0x80054928;
