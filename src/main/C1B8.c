@@ -1,5 +1,8 @@
 #include "common.h"
 
+// 6 kernel functions which I removed
+
+// 5 timer functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023A38);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023AD4);
@@ -10,6 +13,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B40);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B74);
 
+// 24 or so kernel functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023BA8);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023BB8);
@@ -60,6 +64,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023D18);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023D28);
 
+// 9 pretty simple functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023D38);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023D70);
@@ -78,6 +83,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023E9C);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023EC0);
 
+// 6 MDEC DMA functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023EE4);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023FEC);
@@ -90,8 +96,10 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_800241A8);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024240);
 
+// 1 kernel function exit()
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024374);
 
+// 2 more MDEC stuff I think
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800245D4);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800249BC);
@@ -199,13 +207,14 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_800274F0);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800276DC);
 
-// standard c functions and kernel calls
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027710);
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278A8);
+// 2 standard c functions and kernel calls
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278A8); // memset
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278D4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278D4); // kernel call
 
+// 4 more GPU functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278E4);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002797C);
@@ -214,6 +223,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027994);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A30);
 
+// 6 basic functions doing bitwise operations
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A70);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A8C);
@@ -226,6 +236,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B20);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B44);
 
+// 24 very simple functions about some array struct thing
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B5C);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B84);
@@ -274,12 +285,14 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D54);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D74);
 
+// 3 these have printf and can help figure out the structs
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D94);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027DC8);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027F18);
 
+//
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027FC4);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800280B0);
@@ -500,6 +513,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E3AC);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E42C);
 
+// SOUND functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E49C);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E53C);
