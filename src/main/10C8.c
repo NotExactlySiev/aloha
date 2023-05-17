@@ -35,9 +35,9 @@ void func_8001987C(void) {
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019884);
 
 // 2 jumptable functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_800198B4);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_800198B4); // clear jumptable
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019908);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_80019908); // set jumptable
 
 // 2 timer functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019948);
@@ -60,20 +60,14 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_80019B1C);
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019CA4);
 
 // 2 jumptable functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019CB4);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_80019CB4); // clears all and sets 2, 6, and FF
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D0C);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D0C); // 
 
 // 2 exception functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D64);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D78);
-
-// 4 basic functions
-//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DCC);
-//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DD8);
-//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DE8);
-//INCLUDE_ASM("asm/nonmatchings/10C8", func_80019DF8);
 
 u32 func_80019DCC(void) {
   return 0x10002;
@@ -86,11 +80,11 @@ void setNextFile(s32 id) {
     g_NextFile = id;    
 }
 
-s32 setNextFile() {
+s32 getNextFile() {
     return g_NextFile;
 }
 
-u8* getGameConfig() {
+u8* getGameConfig() { //func_80019DF8
     return &g_GameConfig;
 }
 

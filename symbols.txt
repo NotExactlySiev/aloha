@@ -1,3 +1,4 @@
+g_GameConfig = 80014000;
 kernelbuf = 0xA000DF00;
 
 main   = 0x80019E04;
@@ -10,12 +11,50 @@ k_boot = 0x80023800;
 reset  = 0x80023810;
 reset2 = 0x80023850;
 reboot = 0x8002387C;
-k_CloseEvent = 0x800239A8;
 
+k_CloseEvent = 0x800239A8;
+k_Krom2RawAdd = 0x800239B8;
+k_EnterCriticalSection = 0x800239C8;
+k_lseek = 0x800239D8;
+k_close = 0x800239E8;
+k_write = 0x800239F8;
+k_EnableEvent = 0x80023A08;
+k_erase = 0x80023A18;
+k_format = 0x80023A28;
+
+tmidfunc0 = 0x80023A38;
+tmidfunc1 = 0x80023AD4;
+tmidfunc2 = 0x80023B0C;
+tmidfunc3 = 0x80023B40;
+tmidfunc4 = 0x80023B74;
+
+k_ChangeClearPAD = 0x80023BA8;
+k_InitHeap = 0x80023BB8;
+k_nextfile = 0x80023BC8;
+k_Exec = 0x80023BD8;
+k_OpenEvent = 0x80023BE8;
+k_read = 0x80023BF8;
+k_TestEvent = 0x80023C08;
+k_ExitCriticalSection = 0x80023C18;
+k_open = 0x80023C28;
+k_firstfile2 = 0x80023C38;
+k_FlushCache = 0x80023C48;
+k_malloc = 0x80023C58;
 k_strcat = 0x80023C68;
 k_printf = 0x80023C78;
 k_strcpy = 0x80023C88;
+k_card_load = 0x80023C98;
+k_card_info = 0x80023CA8;
+k_card_auto = 0x80023CB8;
+k_card_write = 0x80023CC8;
+k_InitCARD2 = 0x80023CD8;
+k_StopCARD2 = 0x80023CE8;
+k_StartCARD2 = 0x80023CF8;
+k_bu_init = 0x80023D08;
+k_new_card = 0x80023D18;
+k_card_read = 0x80023D28;
 
 stacksize = 0x80047440;
+g_NextFile = 80047d5c;
 bss  = 0x80047E6C;
 heap = 0x80054928;

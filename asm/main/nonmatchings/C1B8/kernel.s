@@ -130,17 +130,14 @@ glabel func_80023B74
 /* C3A4 80023BA4 00000000 */   nop
 
 
-kern 0xB0, 0x5B, k_ChangeClearPAD
+kern 0xB0, 0x5B, k_ChangeClearPAD   //80023BA8
 kern 0xA0, 0x39, k_InitHeap
 kern 0xB0, 0x43, k_nextfile
 kern 0xA0, 0x43, k_Exec
 kern 0xB0, 0x8, k_OpenEvent
 kern 0xB0, 0x34, k_read
 kern 0xB0, 0xB, k_TestEvent
-
 sysc 2, k_ExitCriticalSection
-
-
 kern 0xB0, 0x32, k_open
 kern 0xB0, 0x42, k_firstfile2
 kern 0xA0, 0x44, k_FlushCache
@@ -157,7 +154,7 @@ kern 0xB0, 0x4C, k_StopCARD2
 kern 0xB0, 0x4B, k_StartCARD2
 kern 0xA0, 0x70, k_bu_init
 kern 0xB0, 0x50, k_new_card
-kern 0xB0, 0x4F, k_card_read
+kern 0xB0, 0x4F, k_card_read        //80023D28
 
 
 glabel func_80023D38
