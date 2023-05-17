@@ -1,5 +1,10 @@
 #include "common.h"
 
+#define KSEG0(x)    (((u32) (x) & 0x0FFFFFFF) | 0x80000000)
+void* jmptable[1024];   // 0x80010000
+u8 g_GameConfig[1280];  // 80014000
+s32 g_NextFile;         // 80047d5c
+
 // 2 file execute functions (loop and get address)
 INCLUDE_ASM("asm/nonmatchings/10C8", func_800188C8);
 
@@ -27,17 +32,33 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_800197C8);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001983C);
 
-// 1 nop
-void func_8001987C(void) {
+
+void nop(void) {}
+
+void flush_cache_safe(void) {
+    k_EnterCriticalSection();
+    k_FlushCache();
+    k_ExitCriticalSection();
 }
 
-// 1 flush cache function
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019884);
 
-// 2 jumptable functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_800198B4); // clear jumptable
+// NONMATCHING
+void jt_clear(void) {
+   
+    int i;
+    for (i = 0; i < 1024; i++)
+    {
+        jmptable[i] = KSEG0((u32) nop);
+    }
+    flush_cache_safe();
+}
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019908); // set jumptable
+// NONMATCHING
+void jt_set(void* func, s32 idx) {
+    jmptable[idx] = KSEG0(func);
+    flush_cache_safe();
+}
+
 
 // 2 timer functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019948);
@@ -72,9 +93,6 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D78);
 u32 func_80019DCC(void) {
   return 0x10002;
 }
-
-u8 g_GameConfig[1280];  // 80014000
-s32 g_NextFile;         // 80047d5c
 
 void setNextFile(s32 id) {
     g_NextFile = id;    

@@ -1,6 +1,16 @@
+jmptable = 0x80010000;
 g_GameConfig = 80014000;
 kernelbuf = 0xA000DF00;
 
+nop = 0x8001987C;
+flush_cache_safe = 0x80019884;
+jt_clear = 0x800198B4;
+jt_set = 0x80019908;
+
+func_80019DCC = 0x80019DC8;
+setNextFile = 0x80019DD8;
+getNextFile = 0x80019DE8;
+getGameConfig = 0x80019DF8;
 main   = 0x80019E04;
 
 rle_decode = 0x800234B8;
