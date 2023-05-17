@@ -1,0 +1,30 @@
+options:
+  platform: psx
+  basename: main
+  base_path:  .
+  build_path: build
+  src_path:   src
+  target_path:  disc/SCUS_941.03
+  compiler: GCC
+  symbol_addrs_path: symbols.txt
+  use_legacy_include_asm: no
+  migrate_rodata_to_functions: no
+  section_order:
+    - ".data"
+    - ".text"
+    - ".rodata"
+segments:
+  - [0x0, header]
+  - name: main
+    type: code
+    start:  0x00000800
+    vram: 0x80018000
+    subsegments:
+      - [0x800, data]
+      - [0x10C8, c]
+      - [0xBCB8, c]
+      - [0xC1B8, c]
+      - [0x1A0B8, rodata]
+      - [0x1D4B4, .rodata, BCB8]
+      - [0x1D530, rodata]
+  - [0x30800]

@@ -1,0 +1,29 @@
+options:
+  platform: psx
+  basename: title
+  base_path:  .
+  build_path: build
+  target_path: disc/TITLE.PEX
+  asm_path:   asm/title
+  asset_path: assets/title
+  src_path:   src/title
+  compiler: GCC
+  symbol_addrs_path: symbols.title.txt
+  use_legacy_include_asm: no
+  migrate_rodata_to_functions: no
+  section_order:
+    - ".rodata"
+    - ".data"
+    - ".text"
+segments:
+  - [0x0, header]
+  - name: 
+    type: code
+    start:  0x800
+    vram: 0x800e0000
+    subsegments:
+      - [0x800, rodata]
+      - [0x1120, c]
+      - [0xA1F0, c]
+      - [0xB804, data]
+  - [0x15800]

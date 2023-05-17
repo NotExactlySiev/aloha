@@ -1,0 +1,21 @@
+kernelbuf = 0xA000DF00;
+
+main   = 0x80019E04;
+
+rle_decode = 0x800234B8;
+lz1_decode = 0x8002353C;
+__main = 0x8002373C;
+_start = 0x80023744;
+k_boot = 0x80023800;
+reset  = 0x80023810;
+reset2 = 0x80023850;
+reboot = 0x8002387C;
+k_CloseEvent = 0x800239A8;
+
+k_strcat = 0x80023C68;
+k_printf = 0x80023C78;
+k_strcpy = 0x80023C88;
+
+stacksize = 0x80047440;
+bss  = 0x80047E6C;
+heap = 0x80054928;

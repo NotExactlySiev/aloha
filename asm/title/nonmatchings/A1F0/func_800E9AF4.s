@@ -1,0 +1,38 @@
+.set noat      /* allow manual use of $at */
+.set noreorder /* don't insert nops after branches */
+
+glabel func_800E9AF4
+/* A2F4 800E9AF4 */ .word 0x8C880000
+/* A2F8 800E9AF8 */ .word 0x8C8A0004
+/* A2FC 800E9AFC */ .word 0x00084C03
+/* A300 800E9B00 */ .word 0x3108FFFF
+/* A304 800E9B04 */ .word 0x314AFFFF
+/* A308 800E9B08 */ .word 0x48864000
+/* A30C 800E9B0C */ .word 0x48884800
+/* A310 800E9B10 */ .word 0x48895000
+/* A314 800E9B14 */ .word 0x488A5800
+/* A318 800E9B18 */ .word 0x00000000
+/* A31C 800E9B1C */ .word 0x4B98003D # invalid instruction
+/* A320 800E9B20 */ .word 0x8CA80000
+/* A324 800E9B24 */ .word 0x8CAA0004
+/* A328 800E9B28 */ .word 0x00084C03
+/* A32C 800E9B2C */ .word 0x3108FFFF
+/* A330 800E9B30 */ .word 0x314AFFFF
+/* A334 800E9B34 */ .word 0x4802F800
+/* A338 800E9B38 */ .word 0x48874000
+/* A33C 800E9B3C */ .word 0x48884800
+/* A340 800E9B40 */ .word 0x48895000
+/* A344 800E9B44 */ .word 0x488A5800
+/* A348 800E9B48 */ .word 0x00000000
+/* A34C 800E9B4C */ .word 0x4BA8003E # invalid instruction
+/* A350 800E9B50 */ .word 0x48084800
+/* A354 800E9B54 */ .word 0x48095000
+/* A358 800E9B58 */ .word 0x3108FFFF
+/* A35C 800E9B5C */ .word 0x00094C00
+/* A360 800E9B60 */ .word 0x01094025
+/* A364 800E9B64 */ .word 0x8FAD0010
+/* A368 800E9B68 */ .word 0x480A5800
+/* A36C 800E9B6C */ .word 0xADA80000
+/* A370 800E9B70 */ .word 0xADAA0004
+/* A374 800E9B74 */ .word 0x03E00008
+/* A378 800E9B78 */ .word 0x00000000

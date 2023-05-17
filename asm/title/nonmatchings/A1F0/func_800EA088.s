@@ -1,0 +1,34 @@
+.set noat      /* allow manual use of $at */
+.set noreorder /* don't insert nops after branches */
+
+glabel func_800EA088
+/* A888 800EA088 */ .word 0x8C880000
+/* A88C 800EA08C */ .word 0x848A0004
+/* A890 800EA090 */ .word 0x00084C03
+/* A894 800EA094 */ .word 0x00084400
+/* A898 800EA098 */ .word 0x00084403
+/* A89C 800EA09C */ .word 0x48864000
+/* A8A0 800EA0A0 */ .word 0x48C8A800
+/* A8A4 800EA0A4 */ .word 0x48C9B000
+/* A8A8 800EA0A8 */ .word 0x48CAB800
+/* A8AC 800EA0AC */ .word 0x8CA80000
+/* A8B0 800EA0B0 */ .word 0x84AA0004
+/* A8B4 800EA0B4 */ .word 0x00084C03
+/* A8B8 800EA0B8 */ .word 0x00084400
+/* A8BC 800EA0BC */ .word 0x00084403
+/* A8C0 800EA0C0 */ .word 0x48884800
+/* A8C4 800EA0C4 */ .word 0x48895000
+/* A8C8 800EA0C8 */ .word 0x488A5800
+/* A8CC 800EA0CC */ .word 0x00000000
+/* A8D0 800EA0D0 */ .word 0x00000000
+/* A8D4 800EA0D4 */ .word 0x4A980011 # invalid instruction
+/* A8D8 800EA0D8 */ .word 0x48084800
+/* A8DC 800EA0DC */ .word 0x48095000
+/* A8E0 800EA0E0 */ .word 0x480A5800
+/* A8E4 800EA0E4 */ .word 0x3108FFFF
+/* A8E8 800EA0E8 */ .word 0x00094C00
+/* A8EC 800EA0EC */ .word 0x01094025
+/* A8F0 800EA0F0 */ .word 0xACE80000
+/* A8F4 800EA0F4 */ .word 0xACEA0004
+/* A8F8 800EA0F8 */ .word 0x03E00008
+/* A8FC 800EA0FC */ .word 0x00000000
