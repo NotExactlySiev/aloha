@@ -4,15 +4,15 @@
 // 6 kernel functions which I removed
 
 // 5 timer functions
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023A38);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023A38);    // SetRCnt
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023AD4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023AD4);    // GetRCnt
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B0C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B0C);    // StartRCnt
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B40);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B40);    // StopRCnt
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B74);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023B74);    // ResetRCnt
 
 // 24 or so kernel functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023BA8);
@@ -65,6 +65,7 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023D18);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023D28);
 
+// LIBPRESS
 // 9 pretty simple functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80023D38);
 

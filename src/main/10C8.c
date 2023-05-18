@@ -266,12 +266,12 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C374);
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C39C);
 
 //// THESE are ALL CD functions in some way
-// 10 CD functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C418);
+// 10 CD functions based on LIBCD
+INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C418);    // complete file path and pass
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C4F0);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C4F0);    // get_file_loc
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C564);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C564);    // get_file_size
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C5BC);
 
@@ -285,7 +285,7 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C780);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C7B4);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C7E8);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_8001C7E8);    // ww_command?
 
 // 2 execution functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_8001CA84);
