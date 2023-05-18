@@ -2,8 +2,9 @@ options:
   platform: psx
   basename: main
   base_path:  .
-  build_path: build
-  src_path:   src
+  build_path: build/main
+  src_path:   src/main
+  asm_path:   asm/main
   target_path:  disc/SCUS_941.03
   compiler: GCC
   symbol_addrs_path: symbols.txt
