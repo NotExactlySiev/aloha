@@ -215,8 +215,6 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278A8);    // memset
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278D4);    // k_GPU_cw
 
-
-//
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278E4);    // GetTPage
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002797C);    // GetClut
