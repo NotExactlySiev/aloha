@@ -1,17 +1,24 @@
 jmptable = 0x80010000;
 g_GameConfig = 80014000;
+
 kernelbuf = 0xA000DF00;
+get_file_addr = 0x80018A3C;
 
 nop = 0x8001987C;
 flush_cache_safe = 0x80019884;
 jt_clear = 0x800198B4;
 jt_set = 0x80019908;
 
+get_D_80047E6C = 0x80019CA4;
+jt_reset = 0x80019CB4;
+
 func_80019DCC = 0x80019DC8;
 setNextFile = 0x80019DD8;
 getNextFile = 0x80019DE8;
 getGameConfig = 0x80019DF8;
 main   = 0x80019E04;
+
+execute_compressed = 0x80021808;
 
 rle_decode = 0x800234B8;
 lz1_decode = 0x8002353C;
@@ -64,6 +71,7 @@ k_bu_init = 0x80023D08;
 k_new_card = 0x80023D18;
 k_card_read = 0x80023D28;
 
+g_Files = 0x800318b8;
 stacksize = 0x80047440;
 g_NextFile = 0x80047d5c;
 bss  = 0x80047E6C;

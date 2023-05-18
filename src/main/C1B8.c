@@ -1,5 +1,6 @@
 #include "common.h"
 
+// LIBAPI perhaps?
 // 6 kernel functions which I removed
 
 // 5 timer functions
@@ -104,8 +105,8 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_800245D4);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800249BC);
 
-// 50 GPU standard library functions
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024BD0);
+// LIBGPU
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024BD0);    // ResetGraph
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024DA0);
 
@@ -375,59 +376,69 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A438);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A448);
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A51C);
+// LIBCD    but probably starts earlier than this
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A51C);    // CdInit
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A5AC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A5AC);    // cbsync
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A5D4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A5D4);    // cbready
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A5FC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A5FC);    // cbread
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A624);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A624);    // k_DeliverEvent
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A634);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A634);    // StSetRing
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A68C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A68C);    // StClearRing
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A6DC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A6DC);    // StUnSetRing
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A734);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A734);    // data_ready_callback
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A7BC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A7BC);    // StSetStream
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A824);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A824);    // StSetEmulate
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A898);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A898);    // StFreeRing
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A954);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A954);    // init_ring_status
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A994);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A994);    // StGetNext
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002AA48);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002AA48);    // StSetMask
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002AA68);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002AA68);    // StCdInterrupt
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B518);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B518);    // dma_execute
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B6C8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B6C8);    // mem2mem
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B6FC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B6FC);    // StSetChannel
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B720);
+// LIBETC
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B720);    // ResetCallback
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B750);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B750);    // InterruptCallback
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B780);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B780);    // DMACallback
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B7B0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B7B0);    // VSyncCallbacks
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B7E0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B7E0);    // StopCallback
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B810);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B810);    // CheckCallback
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B824);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B824);    // GetIntrMask
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B83C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B83C);    // SetIntrMask
+
+// 4 weird ones
+//ResetEntryInt
+//trapIntr
+//stopIntr
+//restartIntr
+//startIntr
+//setIntr
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002B858);
 
@@ -437,44 +448,51 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BB0C);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BC34);
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BC9C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BC9C);    // memclr
 
+// 5 kernel functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BCC8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BCD8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BCE8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BCF8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BD08);
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BD7C);
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BDC4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BD18);    // startIntrDMA
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BF28);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BD7C);    // stopIntrDMA
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C030);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BDC4);    // trapIntrDMA
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002BF28);    // setIntrDMA
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C030);    // memclr
+
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C05C);
-
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C0BC);
-
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C0EC);
-
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C10C);
-
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C13C);
-
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C154);
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C164);
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C1DC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C164);    // startIntrVSync
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C214);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C1DC);    // stopIntrVSync
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C260);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C214);    // trapIntrVSync
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C298);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C260);    // setIntrVSync
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C2C4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C298);    // memclr
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C40C);
 
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C2C4);    // VSync
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C40C);    // v_wait
+
+// these have to be LIBSND
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C4A8);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002C4D0);
@@ -513,7 +531,6 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E3AC);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E42C);
 
-// SOUND functions
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E49C);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002E53C);

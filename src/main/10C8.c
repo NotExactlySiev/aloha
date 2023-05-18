@@ -1,21 +1,76 @@
 #include "common.h"
 
 #define KSEG0(x)    (((u32) (x) & 0x0FFFFFFF) | 0x80000000)
-void* jmptable[1024];   // 0x80010000
+
+typedef struct {                   
+    u32 pc0;      
+    u32 gp0;      
+    u32 t_addr;   
+    u32 t_size;   
+    u32 d_addr;   
+    u32 d_size;   
+    u32 b_addr;   
+    u32 b_size;   
+	u32 s_addr;
+	u32 s_size;
+	u32 sp,fp,gp,ret,base;
+} EXEC;
+
+typedef struct {
+    char magic[16];     // 0x10 0x00
+    EXEC header;        // 0x3C 0x10
+    char filler[0x7B4]; // 7B4  0x4C
+    u32 unk;            // 4    0x800
+    u8 data;            // ???  0x804
+} compexec_t;
+
+
+typedef struct {
+    void* header;
+    char* addr;
+} file_t;
+
+void func_80019B1C(void);
+
+
+void* jmptable[1024];   // 80010000
 u8 g_GameConfig[1280];  // 80014000
+s32 D_80047D4C;         // 80047d4c
+s32 D_80047D50;         // 80047d50
+
 s32 g_NextFile;         // 80047d5c
 
+s32 D_80047E6C;         // 80047e6c
+
+
+file_t g_Files[42];
+
+
+
+
 // 2 file execute functions (loop and get address)
-INCLUDE_ASM("asm/nonmatchings/10C8", func_800188C8);
+INCLUDE_ASM("asm/nonmatchings/10C8", func_800188C8); // execute loop
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80018A3C);
+char* get_file_addr(s32 idx) {
+    if (idx > 42) return 0;
+    return g_Files[idx].addr;
+}
 
-// 3 basic functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80018A6C);
+s32 func_80018A6C(void) {
+    return D_80047D50;
+}
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80018A7C);
+s32 func_80018A7C(void) {
+    return D_80047D4C;
+}
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80018A8C);
+void func_80018A8C(s32 arg0) {
+    if (arg0 != 0)
+        D_80047D4C = 1;
+    else
+        D_80047D4C = 0;
+}
+
 
 // 2 very massive functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80018AB4);
@@ -59,7 +114,6 @@ void jt_set(void* func, s32 idx) {
     flush_cache_safe();
 }
 
-
 // 2 timer functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019948);
 
@@ -77,13 +131,20 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_80019AF8);
 // 1 setup function (sets up jumptable)
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019B1C); // jumptable and interrupts?
 
-// 1 basic function
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019CA4);
 
-// 2 jumptable functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019CB4); // clears all and sets 2, 6, and FF
+s32 get_D_80047E6C(void) {
+    return D_80047E6C;
+}
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D0C); // 
+void* jt_reset(void) {
+    jt_clear();
+    jt_set(func_80019DCC, 0xFF);
+    jt_set(get_D_80047E6C, 0x2);
+    jt_set(get_file_addr, 0x6);
+    return func_80019B1C;
+}
+
+INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D0C); // has a loop through jt
 
 // 2 exception functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80019D64);
@@ -536,8 +597,15 @@ INCLUDE_ASM("asm/nonmatchings/10C8", func_80021600);
 
 INCLUDE_ASM("asm/nonmatchings/10C8", func_80021740);
 
-// 1 decode and execute file
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80021808);
+void execute_compressed(compexec_t* buf, u32 stack) {
+    EXEC header;
+    __builtin_memcpy(&header, buf+4, sizeof header);
+    lz1_decode(&buf->data, header.t_addr);
+    flush_cache_safe();
+    header.s_addr = stack;
+    k_Exec(&header, 1, 0);
+}
+
 
 // 6 memory card functions
 INCLUDE_ASM("asm/nonmatchings/10C8", func_800218A0);
