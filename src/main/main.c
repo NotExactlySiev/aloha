@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main.h"
 
 INCLUDE_ASM("asm/nonmatchings/main", func_800188C8);
 

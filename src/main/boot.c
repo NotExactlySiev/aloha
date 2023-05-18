@@ -1,9 +1,6 @@
 #include "common.h"
+#include "main.h"
 
-char kernelbuf[8]; // TODO: A000DF00
-void reboot(char*, char*);
-
-// and the rest in one file?
 INCLUDE_ASM("asm/nonmatchings/BCB8", k_boot);
 
 void reset(void) {
