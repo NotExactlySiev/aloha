@@ -109,199 +109,181 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_800249BC);
 // LIBGPU
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024BD0);    // ResetGraph
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024DA0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024DA0);    // SetGraphReverse
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024EB0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024EB0);    // SetGraphDebug
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024F18);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024F18);    // SetGraphQueue
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024FB4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024FB4);    // GetGraphType
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024FC4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024FC4);    // GetGraphDebug
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024FD4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80024FD4);    // DrawSyncCallback
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025030);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025030);    // SetDispMask
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800250A8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800250A8);    // DrawSync
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025114);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025114);    // checkRECT
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002522C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002522C);    // ClearImage
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800252C0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800252C0);    // LoadImage
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025324);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025324);    // StoreImage
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025388);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025388);    // MoveImage
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002542C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002542C);    // ClearOTag
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800254D8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800254D8);    // ClearOTagR
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025558);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025558);    // DrawPrim
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800255B8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800255B8);    // DrawOTag
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025628);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025628);    // PutDrawEnv
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025720);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025720);    // GetDrawEnv
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025780);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025780);    // PutDispEnv
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025BC8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025BC8);    // GetDispEnv
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025C2C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025C2C);    // GetODE
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025C60);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025C60);    // SetTexWindow
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025C9C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025C9C);    // SetDrawArea
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025D20);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025D20);    // SetDrawOffset
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025D64);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025D64);    // SetPriority
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025D8C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025D8C);    // SetDrawMode
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025DE4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80025DE4);    // SetDrawEnv
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002609C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002609C);    // get_mode
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800260EC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800260EC);    // get_cs
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800261B8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800261B8);    // get_ce
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026284);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026284);    // get_ofs
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800262C0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800262C0);    // get_tw
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026344);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026344);    // get_dx
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002641C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002641C);    // _status
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026434);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026434);    // _otc
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002651C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002651C);    // _clr
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026768);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026768);    // _dws
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800269F4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800269F4);    // _drs
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026CC4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026CC4);    // _ctl
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026CFC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026CFC);    // _getctl
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026D1C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026D1C);    // _cwb
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026D6C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026D6C);    // _cwc
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026DB8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026DB8);    // _param
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026DE8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026DE8);    // _addque
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026E0C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80026E0C);    // _addque2
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027074);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027074);    // _exeque
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027374);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027374);    // _reset
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800274F0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800274F0);    // _sync
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800276DC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800276DC);    // set_alarm
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027710);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027710);    // get_alarm
 
-// 2 standard c functions and kernel calls
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278A8); // memset
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278A8);    // memset
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278D4); // kernel call
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278D4);    // k_GPU_cw
 
-// 4 more GPU functions
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278E4);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002797C);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027994);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A30);
-
-// 6 basic functions doing bitwise operations
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A70);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A8C);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027AA8);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027AE4);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B20);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B44);
-
-// 24 very simple functions about some array struct thing
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B5C);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B84);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BAC);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BC0);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BD4);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BE8);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BFC);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C10);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C24);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C38);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C4C);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C60);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C74);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C88);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C9C);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CB0);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CC4);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CD8);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CEC);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D00);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D14);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D34);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D54);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D74);
-
-// 3 these have printf and can help figure out the structs
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D94);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027DC8);
-
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027F18);
 
 //
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027FC4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800278E4);    // GetTPage
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800280B0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002797C);    // GetClut
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_80028118);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027994);    // DumpTPage
 
-INCLUDE_ASM("asm/nonmatchings/C1B8", func_800281A8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A30);    // DumpClut
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A70);    // NextPrim
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027A8C);    // IsEndPrim
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027AA8);    // AddPrim
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027AE4);    // AddPrims
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B20);    // CatPrim
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B44);    // TermPrim
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B5C);    // SetSemiTrans
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027B84);    // SetShadeTex
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BAC);    // SetPoly(3,4)(F,FT,G,GT)
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BC0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BD4);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BE8);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027BFC);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C10);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C24);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C38);
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C4C);    // SetSprt8,16,
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C60);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C74);
+
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C88);    // SetTile1,8,16,
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027C9C);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CB0);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CC4);
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CD8);    // SetBlockFill
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027CEC);    // SetLine(2-4)(F,G)
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D00);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D14);   
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D34);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D54);
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D74);
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027D94);    // MargePrim
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027DC8);    // DumpDrawEnv
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027F18);    // DumpDispEnv
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80027FC4);    // LoadTPage
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800280B0);    // LoadClut
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_80028118);    // SetDefDrawEnv
+
+INCLUDE_ASM("asm/nonmatchings/C1B8", func_800281A8);    // SetDefDispEnv
+
+// LIBCD
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_800281E4);
 
@@ -377,7 +359,6 @@ INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A438);
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A448);
 
-// LIBCD    but probably starts earlier than this
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A51C);    // CdInit
 
 INCLUDE_ASM("asm/nonmatchings/C1B8", func_8002A5AC);    // cbsync
