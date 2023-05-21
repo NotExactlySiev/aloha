@@ -1,7 +1,7 @@
 #include "common.h"
 #include "main.h"
 
-INCLUDE_ASM("asm/nonmatchings/BCB8", k_boot);
+INCLUDE_ASM("asm/main/nonmatchings/boot", k_boot);
 
 void reset(void) {
     k_strcpy(kernelbuf, "PSDEMO");
@@ -13,4 +13,4 @@ void reset2(void) {
     reboot("PSX.EXE","SYSTEM.CNF");
 }
 
-INCLUDE_ASM("asm/nonmatchings/BCB8", reboot);
+INCLUDE_ASM("asm/main/nonmatchings/boot", reboot);

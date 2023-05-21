@@ -31,7 +31,9 @@ typedef struct {
 } file_t;
 
 void func_80019B1C(void);
+u32 func_80019DCC(void);
 void reboot(char*, char*);
+
 
 
 void* jmptable[1024];   // 80010000

@@ -2,7 +2,7 @@
 #include "main.h"
 
 // file execute loop
-INCLUDE_ASM("asm/nonmatchings/main", func_800188C8);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_800188C8);
 
 char* get_file_addr(s32 idx) {
     if (idx > 42) return 0;
@@ -25,19 +25,19 @@ void func_80018A8C(s32 arg0) {
 }
 
 // 2 very massive functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80018AB4);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80018AB4);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_8001926C);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_8001926C);
 
 // some setup thing
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019680);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019680);
 
 // 3 timer event functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_8001972C);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_8001972C);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_800197C8);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_800197C8);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_8001983C);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_8001983C);
 
 void nop(void) {}
 
@@ -66,21 +66,21 @@ void jt_set(void* func, s32 idx) {
 }
 
 // 2 timer functions
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019948);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019948);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019990);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019990);
 
 // 4 functions related to game version
-INCLUDE_ASM("asm/nonmatchings/10C8", func_800199D4);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_800199D4);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_800199E4);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_800199E4);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019AE8);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019AE8);
 
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019AF8);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019AF8);
 
 // 1 setup function (sets up jumptable)
-INCLUDE_ASM("asm/nonmatchings/10C8", func_80019B1C); // jumptable and interrupts?
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019B1C); // jumptable and interrupts?
 
 
 s32 get_D_80047E6C(void) {
@@ -96,12 +96,12 @@ void* jt_reset(void) {
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/main", func_80019D0C); // has a loop through jt
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D0C); // has a loop through jt
 
 // 2 exception functions
-INCLUDE_ASM("asm/nonmatchings/main", func_80019D64);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D64);
 
-INCLUDE_ASM("asm/nonmatchings/main", func_80019D78);
+INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D78);
 
 u32 func_80019DCC(void) {
   return 0x10002;
@@ -119,4 +119,4 @@ u8* getGameConfig() { //func_80019DF8
     return &g_GameConfig;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main", main);
+INCLUDE_ASM("asm/main/nonmatchings/main", main);
