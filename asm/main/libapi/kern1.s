@@ -2,7 +2,7 @@
 .set noreorder
 .include    "macro.inc"
 
-// TODO: get this one out of here
+# TODO: get this one out of here
 glabel func_800239A0
     jr         $ra
     nop
