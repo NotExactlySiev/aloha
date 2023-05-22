@@ -4,8 +4,8 @@ CC	:= wine CC1PSX.EXE
 AS	:= mipsel-linux-gnu-as 
 
 CPP_FLAGS	+= -Iinclude
-CC_FLAGS	+= -mcpu=3000 -quiet -G0 -w -O2 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fcommon -fverbose-asm -fgnu-linker -mgas -msoft-float
-AS_FLAGS	+= -Isrc -Iinclude -march=r3000 -mtune=r3000 -no-pad-sections -O1 -G0
+CC_FLAGS	+= -O2 -G0 -fverbose-asm -fgnu-linker -mgas -msoft-float
+AS_FLAGS	+= -Isrc -Iinclude -march=r3000 -mabi=32
 
 BUILD_DIR	:= build
 
