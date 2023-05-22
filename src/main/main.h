@@ -45,9 +45,9 @@ void lz1_decode(u8*, u8*);
 void setNextFile(s32);
 s32 getNextFile(void);
 u8* getGameConfig(void);
-s32 func_800199D4(void);
-s32 func_80019AE8(void);
-u8* func_80019AF8(void);
+s32 get_GameNP(void);
+s32 get_GameRegion(void);
+u8* get_VersionStr(void);
 void func_80019D64(void);
 s32 func_8001C780(char*, u32*, s32);
 

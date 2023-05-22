@@ -14,6 +14,10 @@ flush_cache_safe = 0x80019884;
 jt_clear = 0x800198B4;
 jt_set = 0x80019908;
 
+get_GameNP = 0x800199D4;
+read_version = 0x800199E4;
+get_GameRegion = 0x80019AE8;
+get_VersionStr = 0x80019AF8;
 jt_series1 = 0x80019B1C;
 get_D_80047E6C = 0x80019CA4;
 jt_reset = 0x80019CB4;
@@ -26,6 +30,27 @@ getGameConfig = 0x80019DF8;
 main   = 0x80019E04;
 
 execute_compressed = 0x80021808;
+
+call_StoreImage 	= 0x80022854;
+call_MoveImage 	= 0x80022874;
+call_GetDispEnv 	= 0x80022894;
+call_GetDrawEnv 	= 0x800228B4;
+call_SetDrawEnv 	= 0x800228D4;
+call_SetDrawOffset 	= 0x800228F4;
+call_SetDrawArea 	= 0x80022914;
+call_GetGraphType 	= 0x80022934;
+call_SetDefDispEnv 	= 0x80022954;
+call_SetDefDrawEnv 	= 0x800229B0;
+call_SetDrawMode 	= 0x800229D4;
+call_ClearImage 	= 0x800229F8;
+call_LoadImage 	= 0x80022A20;
+call_CleaOTag 	= 0x80022A40;
+call_ClearOTagR 	= 0x80022A60;
+call_DrawOTag 	= 0x80022A80;
+call_PutDispEnv 	= 0x80022AA0;
+call_PutDrawEnv 	= 0x80022AC0;
+call_DrawSync 	= 0x80022AE0;
+call_ResetGraph 	= 0x80022B00;
 
 strcpy	= 0x80022EE8;
 strcat	= 0x80022F14;

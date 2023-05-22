@@ -42,7 +42,6 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8001972C);
 // NON MATCHING
 s32 enable_timer3_event(void* handler) {
     s32 event;
-
     k_EnterCriticalSection();
     event = k_OpenEvent(0xF2000003, 2, 0x1000, handler);
     SetRCnt(0xF2000003, 1, 0x1000);
@@ -70,7 +69,6 @@ void flush_cache_safe(void) {
 
 // NONMATCHING
 void jt_clear(void) {
-   
     int i;
     for (i = 0; i < 1024; i++)
     {
@@ -91,12 +89,12 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80019948);
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019990);
 
 // 4 functions related to game version
-s32 func_800199D4(void) {
+s32 get_GameNP(void) {
     return g_GameNP;
 }
 
 // NON MATCHING (very close)
-void func_800199E4(void) {
+void read_version(void) {
     u8 buf[1024];
     s32 i;
     s32 tmp;
@@ -133,16 +131,16 @@ void func_800199E4(void) {
     }
 }
 
-s32 func_80019AE8(void) {
+s32 get_GameRegion(void) {
     return g_GameRegion;
 }
 
-u8* func_80019AF8(void) {
+u8* get_VersionStr(void) {
     if (g_GameIsZ == 0)
-        return 0;
-    
+        return 0;    
     return g_VersionStr;
 }
+
 void jt_series1(void) { // TODO: better name TODO: symbol
     ResetCallback();
     StopRCnt(0xF2000000);
@@ -162,11 +160,11 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     jt_set(setNextFile, 3);
     jt_set(getNextFile, 4);
     jt_set(getGameConfig, 5);
-    jt_set(func_800199D4, 7);
-    jt_set(func_80019AE8, 8);
+    jt_set(get_GameNP, 7);
+    jt_set(get_GameRegion, 8);
     jt_set(func_80018A7C, 9);
     jt_set(func_80018A8C, 0xA);
-    jt_set(func_80019AF8, 0xB);
+    jt_set(get_VersionStr, 0xB);
     memset(0x80014000, 0x4000, 0);
     func_80020F9C(5, 0);
     func_8001FBC0(0);
@@ -272,7 +270,7 @@ int main(int argc, char** argv) {
     func_80022C1C(0);
     func_80021600();
     func_8001972C();
-    func_80022B00(3);
+    call_ResetGraph(3);
     reset();
     return;
 }
