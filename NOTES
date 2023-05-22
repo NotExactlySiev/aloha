@@ -1,0 +1,2 @@
+I think the standard libraries are compiled using PSYQ-3.5 but the game code
+itself is compiled using gcc 2.8.1 from PSYQ-4.3

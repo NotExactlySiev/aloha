@@ -15,7 +15,8 @@ jt_series1 = 0x80019B1C;
 get_D_80047E6C = 0x80019CA4;
 jt_reset = 0x80019CB4;
 
-func_80019DCC = 0x80019DC8;
+enable_exception_event = 0x80019D78;
+func_80019DCC = 0x80019DCC;
 setNextFile = 0x80019DD8;
 getNextFile = 0x80019DE8;
 getGameConfig = 0x80019DF8;

@@ -145,7 +145,17 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D0C); // has a loop through 
 // 2 exception functions
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D64);
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D78);
+//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D78);
+s32 enable_exception_event(void* handler) {
+    s32 event;
+
+    k_EnterCriticalSection();
+    event = k_OpenEvent(0xF0000010, 0x4000, 0x1000, handler);
+    k_EnableEvent(event);
+    k_ExitCriticalSection();
+    return event;
+}
+
 
 u32 func_80019DCC(void) {
   return 0x10002;
