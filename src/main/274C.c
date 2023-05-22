@@ -392,6 +392,8 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
 
+
+// memory card stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);

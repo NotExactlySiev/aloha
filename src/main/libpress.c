@@ -18,6 +18,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80023E9C);   // DecDCTinCallb
 
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80023EC0);   // DecDCToutCallback
 
+//
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80023EE4);   // MDEC_reset
 
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80023FEC);   // MDEC_in
@@ -32,6 +33,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80024240);   // timeout
 
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80024374);   // k_exit + MDEC_vlc
 
+// or maybe with top MDEC_vlc are in one file idk i have to check the libs
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_800245D4);   // MDEC_vlc2
 
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_800249BC);   // ivlc_dct_dc_size
