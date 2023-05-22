@@ -13,8 +13,8 @@ glabel __main
 
 # Handwritten function
 glabel _start
-/* BF44 80023744 0480023C */  lui        $v0, %hi(bss)
-/* BF48 80023748 6C7E4224 */  addiu      $v0, $v0, %lo(bss)
+/* BF44 80023744 0480023C */  lui        $v0, %hi(D_80047E6C)
+/* BF48 80023748 6C7E4224 */  addiu      $v0, $v0, %lo(D_80047E6C)
 /* BF4C 8002374C 0580033C */  lui        $v1, %hi(D_80054924)
 /* BF50 80023750 24496324 */  addiu      $v1, $v1, %lo(D_80054924)
 .L80023754:

@@ -42,3 +42,7 @@
   jr         $ra
   nop
 .endm
+
+.macro tge a, b, c
+  .word 0x70170000
+.endm

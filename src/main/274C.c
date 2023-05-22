@@ -494,7 +494,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023060);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230A0);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230C8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", memset);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230E8);
 

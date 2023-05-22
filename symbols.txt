@@ -1,3 +1,6 @@
+TIMER_REGS = 0x1f801100;
+
+
 jmptable = 0x80010000;
 g_GameConfig = 80014000;
 
@@ -27,6 +30,7 @@ execute_compressed = 0x80021808;
 strcpy	= 0x80022EE8;
 strcat	= 0x80022F14;
 strnchr	= 0x80022F64;
+memset  = 0x800230C8;
 
 rle_decode = 0x800234B8;
 lz1_decode = 0x8002353C;
@@ -219,7 +223,21 @@ v_wait	= 0x8002C40C;
 
 
 g_Files = 0x800318b8;
+D_80034344 = 0x80034344;
+g_TimerRegs = 0x80034d38;
 stacksize = 0x80047440;
+g_GameNP = 0x80047d44;
+D_80047D4C = 0x80047d4c;
+D_80047D50 = 0x80047d50;
+g_GameIsZ = 0x80047d54;
+D_80047D58 = 0x80047d58;
 g_NextFile = 0x80047d5c;
+g_GameRegion = 0x80047d64;
+D_80047E6C = 0x80047e6c;
+tim3event = 0x80047e74;
+excpevent = 0x80047e7c;
+g_VersionStr = 0x80048048;
+kernelbuf = 0xA000DF00;
 bss  = 0x80047E6C;
 heap = 0x80054928;
+tmpfilebuf = 0x80100000;

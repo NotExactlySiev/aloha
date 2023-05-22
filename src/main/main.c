@@ -1,6 +1,10 @@
 #include "common.h"
 #include "main.h"
 
+
+
+
+
 // file execute loop
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800188C8);
 
@@ -163,7 +167,7 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     jt_set(func_80018A7C, 9);
     jt_set(func_80018A8C, 0xA);
     jt_set(func_80019AF8, 0xB);
-    k_memset(0x80014000, 0x4000, 0);
+    memset(0x80014000, 0x4000, 0);
     func_80020F9C(5, 0);
     func_8001FBC0(0);
     func_80020000(0);
@@ -249,10 +253,10 @@ int main(int argc, char** argv) {
     excpevent = enable_exception_event(func_80019D64);
     func_80020FC0(&D_80034344);
 
-    tmp = func_8001C780("SYS_SE.VAB", &tmpfilebuf, 0);
+    tmp = func_8001C780(g_SysSeFile, &tmpfilebuf, 0);
     while (tmp < 0 || tmpfilebuf != 0x56414270)
     {
-        tmp = func_8001C780("SYS_SE.VAB", &tmpfilebuf, 0);
+        tmp = func_8001C780(g_SysSeFile, &tmpfilebuf, 0);
         k_printf("VAB file Reload\n");
     }
 

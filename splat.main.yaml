@@ -10,10 +10,6 @@ options:
   symbol_addrs_path: symbols.txt
   use_legacy_include_asm: no
   migrate_rodata_to_functions: no
-  section_order:
-    - ".data"
-    - ".text"
-    - ".rodata"
 segments:
   - [0x0, header]
   - name: main
@@ -21,7 +17,8 @@ segments:
     start:  0x00000800
     vram: 0x80018000
     subsegments:
-      - [0x800, data]
+      - [0x800, .data, main]
+      - [0x944, data]
       - [0x10C8, c, main]
       - [0x274C, c]
       - [0xBCB8, asm, decode]
@@ -37,6 +34,6 @@ segments:
       - [0x13F20, c, libetc]
       - [0x14CA8, c, libsnd]
       - [0x1A0B8, rodata]
-      - [0x1D4B4, .rodata, decode]
+      - [0x1D4B4, .rodata, boot]
       - [0x1D530, rodata]
   - [0x30800]
