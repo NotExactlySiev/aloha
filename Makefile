@@ -20,3 +20,6 @@ $(BUILD_DIR)/asm/main/%.s.o: asm/main/%.s $(BUILD_DIR)/asm/main
 
 $(BUILD_DIR)/src/main/%.c.o: src/main/%.c $(BUILD_DIR)/src/main
 	$(CPP) $(CPP_FLAGS) $< | $(CC) $(CC_FLAGS) | $(AS) $(AS_FLAGS) -o $@
+
+split:
+	tools/n64splat/split.py splat.main.yaml

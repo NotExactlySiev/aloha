@@ -35,9 +35,26 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80019680);
 // 3 timer event functions
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001972C);
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800197C8);
+// NON MATCHING
+s32 enable_timer3_event(void* handler) {
+    s32 event;
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001983C);
+    k_EnterCriticalSection();
+    event = k_OpenEvent(0xF2000003, 2, 0x1000, handler);
+    SetRCnt(0xF2000003, 1, 0x1000);
+    StartRCnt(0xF2000003);
+    k_EnableEvent(event);
+    k_ExitCriticalSection();
+    return event;
+}
+
+// NON MATCHING
+void disable_timer3_event(u32 arg0) {
+    k_EnterCriticalSection();
+    StopRCnt(0xF2000003);
+    k_CloseEvent(arg0);
+    k_ExitCriticalSection();
+}
 
 void nop(void) {}
 
@@ -46,7 +63,6 @@ void flush_cache_safe(void) {
     k_FlushCache();
     k_ExitCriticalSection();
 }
-
 
 // NONMATCHING
 void jt_clear(void) {
@@ -79,8 +95,36 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80019AE8);
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019AF8);
 
-// 1 setup function (sets up jumptable)
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019B1C); // jumptable and interrupts?
+void jt_series1(void) { // TODO: better name TODO: symbol
+    ResetCallback();
+    StopRCnt(0xF2000000);
+    StopRCnt(0xF2000001);
+    StopRCnt(0xF2000002);
+    StopRCnt(0xF2000003);
+    VSyncCallbacks(0, 0);
+    D_80047E74 = func_800197C8(func_800232D4);
+    func_800232C4(1);
+    func_80019680();
+    k_ChangeClearPAD(0);
+    jt_set(jt_set, 1);
+    jt_set(func_80023144, 0xE0);
+    jt_set(func_800231CC, 0xE1);
+    jt_set(rle_decode, 0xC0);
+    jt_set(lz1_decode, 0xC1);
+    jt_set(setNextFile, 3);
+    jt_set(getNextFile, 4);
+    jt_set(getGameConfig, 5);
+    jt_set(func_800199D4, 7);
+    jt_set(func_80019AE8, 8);
+    jt_set(func_80018A7C, 9);
+    jt_set(func_80018A8C, 0xA);
+    jt_set(func_80019AF8, 0xB);
+    k_memset(0x80014000, 0x4000, 0);
+    func_80020F9C(5, 0);
+    func_8001FBC0(0);
+    func_80020000(0);
+}
+
 
 
 s32 get_D_80047E6C(void) {
@@ -116,7 +160,7 @@ s32 getNextFile() {
 }
 
 u8* getGameConfig() { //func_80019DF8
-    return &g_GameConfig;
+    return g_GameConfig;
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/main", main);

@@ -4,11 +4,14 @@ g_GameConfig = 80014000;
 kernelbuf = 0xA000DF00;
 get_file_addr = 0x80018A3C;
 
+enable_timer3_event = 0x800197C8;
+disable_timer3_event = 0x8001983C;
 nop = 0x8001987C;
 flush_cache_safe = 0x80019884;
 jt_clear = 0x800198B4;
 jt_set = 0x80019908;
 
+jt_series1 = 0x80019B1C;
 get_D_80047E6C = 0x80019CA4;
 jt_reset = 0x80019CB4;
 
