@@ -46,6 +46,9 @@ u8* getGameConfig(void);
 void func_800199D4(void);
 void func_80019AE8(void);
 void func_80019AF8(void);
+void func_80019D64(void);
+s32 func_8001C780(char*, u32*, s32);
+
 
 
 void func_80019B1C(void);
@@ -56,12 +59,37 @@ void reboot(char*, char*);
 
 void* jmptable[1024];   // 80010000
 u8 g_GameConfig[1280];  // 80014000
+s32 D_80034344;         // 80034344
 s32 D_80047D4C;         // 80047d4c
 s32 D_80047D50;         // 80047d50
 s32 g_NextFile;         // 80047d5c
 s32 D_80047E6C;         // 80047e6c
-s32 D_80047E74;         // 80047e74 TODO: timer3_event
+s32 tim3event;          // 80047e74 TODO: timer3_event
+s32 excpevent;          // 80047e7c
+u32 tmpfilebuf;         // 0x80100000
 
 
 file_t g_Files[42];
 char kernelbuf[8]; // TODO: A000DF00
+
+typedef struct {
+    int* elements;
+    int _pad;
+} ExCB;
+
+typedef struct {
+    int status;
+    int _pad;
+    int regs[32];
+    int epc;
+    int hi, lo;
+    int sr;
+    int cause;
+    int _pad2;
+} TCB;
+
+typedef struct {
+    TCB* current_tcb;
+} PCB;
+
+int D_80047D58;

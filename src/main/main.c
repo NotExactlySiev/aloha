@@ -32,7 +32,7 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_8001926C);
 // some setup thing
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019680);
 
-// 3 timer event functions
+// 1 timer event function
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001972C);
 
 // NON MATCHING
@@ -102,15 +102,15 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     StopRCnt(0xF2000002);
     StopRCnt(0xF2000003);
     VSyncCallbacks(0, 0);
-    D_80047E74 = func_800197C8(func_800232D4);
+    tim3event = func_800197C8(func_800232D4);
     func_800232C4(1);
     func_80019680();
     k_ChangeClearPAD(0);
     jt_set(jt_set, 1);
-    jt_set(func_80023144, 0xE0);
-    jt_set(func_800231CC, 0xE1);
-    jt_set(rle_decode, 0xC0);
-    jt_set(lz1_decode, 0xC1);
+    jt_set(func_80023144, 224);
+    jt_set(func_800231CC, 225);
+    jt_set(rle_decode, 192);
+    jt_set(lz1_decode, 193);
     jt_set(setNextFile, 3);
     jt_set(getNextFile, 4);
     jt_set(getGameConfig, 5);
@@ -140,10 +140,35 @@ void* jt_reset(void) {
 }
 
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D0C); // has a loop through jt
+void func_80019D0C()
+{
+    struct {
+        ExCB* excb[2];
+        PCB* pcb;
+        TCB* tcb;
+    } *bios_tables = (void*) 0x100;
+    
+    TCB *tcb = bios_tables->pcb->current_tcb;
+    if (D_80047D58 == 0) {
+        D_80047D58 = 1;
+        jt_reset();
+        tcb->regs[2] = (int) jt_series1;
+    }
+    else
+    {
+        tcb->regs[2] = 0;
+    }
+}
 
-// sets something in a struct to 0
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D64);
+void func_80019D64(void) {
+    struct {
+        ExCB* excb[2];
+        PCB* pcb;
+        TCB* tcb;
+    } *bios_tables = (void*) 0x100;
+
+    bios_tables->pcb->current_tcb->regs[2] = 0;
+}
 
 s32 enable_exception_event(void* handler) {
     s32 event;
@@ -172,4 +197,35 @@ u8* getGameConfig() { //func_80019DF8
     return g_GameConfig;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/main", main);
+int main(int argc, char** argv) {
+    s32 tmp;
+    k_printf("MAX ADR:%x\n", k_malloc(4));
+    D_80047E6C = 1;
+    jt_reset();
+    jt_series1();
+    excpevent = enable_exception_event(func_80019D64);
+    func_80020FC0(&D_80034344);
+
+    tmp = func_8001C780("SYS_SE.VAB", &tmpfilebuf, 0);
+    while (tmp < 0 || tmpfilebuf != 0x56414270)
+    {
+        tmp = func_8001C780("SYS_SE.VAB", &tmpfilebuf, 0);
+        k_printf("VAB file Reload\n");
+    }
+
+
+    func_80020D5C(0, &tmpfilebuf, 0);
+    func_8001926C();
+    if (func_8001E36C(0) == 6) {
+        D_80047D50 = 1;
+    }
+    setNextFile(0);
+    func_800188C8();
+    func_80022B54(0);
+    func_80022C1C(0);
+    func_80021600();
+    func_8001972C();
+    func_80022B00(3);
+    reset();
+    return;
+}
