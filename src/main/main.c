@@ -142,10 +142,9 @@ void* jt_reset(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D0C); // has a loop through jt
 
-// 2 exception functions
+// sets something in a struct to 0
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D64);
 
-//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019D78);
 s32 enable_exception_event(void* handler) {
     s32 event;
 

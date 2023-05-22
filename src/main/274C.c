@@ -93,6 +93,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C670);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C734);
 
+// 4 ww_read stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C780);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7B4);
@@ -100,6 +101,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7B4);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7E8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CA84);
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CCC0);
 
