@@ -87,14 +87,58 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80019948);
 INCLUDE_ASM("asm/main/nonmatchings/main", func_80019990);
 
 // 4 functions related to game version
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800199D4);
+s32 func_800199D4(void) {
+    return g_GameNP;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800199E4);
+// NON MATCHING (very close)
+void func_800199E4(void) {
+    u8 buf[1024];
+    s32 i;
+    s32 tmp;
+    u8 *p;
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019AE8);
+    do {
+        tmp = func_8001C780("COUNTRY.TXT", buf, 0x400);
+    } while (tmp == -1);
+    
+    g_GameRegion = 0;
+    g_GameNP = 0;
+    if (tmp == -2) return; 
+    
+    if (buf[0] == 'P') g_GameNP = 1;
+    
+    if (buf[1] == 'U') {
+        g_GameRegion = 1;
+    }
+    else if (buf[1] == 'E') {
+        g_GameRegion = 2;
+    }
+    
+    if (buf[1] == 'Z') {
+        g_GameRegion = 3;
+        i = 0;
+        p = &buf[2];
+        do {
+            g_VersionStr[i] = *p;
+            i += 1;
+            p += 1;
+        } while (i < 12);
+        strcpy("EXACT01", &g_VersionStr[12]);
+        g_GameIsZ = 1;
+    }
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019AF8);
+s32 func_80019AE8(void) {
+    return g_GameRegion;
+}
 
+u8* func_80019AF8(void) {
+    if (g_GameIsZ == 0)
+        return 0;
+    
+    return g_VersionStr;
+}
 void jt_series1(void) { // TODO: better name TODO: symbol
     ResetCallback();
     StopRCnt(0xF2000000);
@@ -126,7 +170,6 @@ void jt_series1(void) { // TODO: better name TODO: symbol
 }
 
 
-
 s32 get_D_80047E6C(void) {
     return D_80047E6C;
 }
@@ -136,11 +179,11 @@ void* jt_reset(void) {
     jt_set(func_80019DCC, 0xFF);
     jt_set(get_D_80047E6C, 0x2);
     jt_set(get_file_addr, 0x6);
-    return func_80019B1C;
+    return jt_series1;
 }
 
-
-void func_80019D0C()
+// NON MATCHING
+void func_80019D0C(void)
 {
     struct {
         ExCB* excb[2];
