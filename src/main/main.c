@@ -99,7 +99,7 @@ void func_800199E4(void) {
     u8 *p;
 
     do {
-        tmp = func_8001C780("COUNTRY.TXT", buf, 0x400);
+        tmp = func_8001C780("COUNTRY.TXT", (u32*) buf, 0x400);
     } while (tmp == -1);
     
     g_GameRegion = 0;

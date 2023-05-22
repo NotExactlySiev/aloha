@@ -24,7 +24,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002BB0C);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002BC34);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr1);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002BCC8);
 
@@ -36,7 +36,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libetc", trapIntrDMA);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", setIntrDMA);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr2);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002C05C);
 
@@ -58,7 +58,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libetc", trapIntrVSync);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", setIntrVSync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr3);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", VSync);
 

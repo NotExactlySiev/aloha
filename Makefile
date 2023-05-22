@@ -4,10 +4,13 @@ CC	:= wine CC1PSX.EXE
 AS	:= mipsel-linux-gnu-as 
 
 CPP_FLAGS	+= -Iinclude
-CC_FLAGS	+= -O2 -G0 -fverbose-asm -fgnu-linker -mgas -msoft-float
+CC_FLAGS	+= -O2 -G0 -quiet -fverbose-asm -fgnu-linker -mgas -msoft-float
 AS_FLAGS	+= -Isrc -Iinclude -march=r3000 -mabi=32
 
 BUILD_DIR	:= build
+
+MAIN_C_FILES	:= $(wildcard src/main/*.c)
+MAIN_O_FILES	:= $(foreach file,$(MAIN_C_FILES),$(BUILD_DIR)/$(file).o)
 
 $(BUILD_DIR)/asm/main:
 	mkdir -p $(BUILD_DIR)/asm/main
@@ -23,3 +26,10 @@ $(BUILD_DIR)/src/main/%.c.o: src/main/%.c $(BUILD_DIR)/src/main
 
 split:
 	tools/n64splat/split.py splat.main.yaml
+
+
+main: $(MAIN_O_FILES)
+
+clean:
+	git clean -fdx asm/
+	git clean -fdx build/
