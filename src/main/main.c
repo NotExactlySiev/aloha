@@ -34,10 +34,49 @@ INCLUDE_ASM("asm/main/nonmatchings/main", func_80018AB4);
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001926C);
 
 // some setup thing
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019680);
+//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019680); game_bootup
+// NOT MATCHING
+void func_80019680(void) {
+    s32 tmp;
+
+    func_8001A3B8();
+    read_version();
+    tmp = 0 != get_GameNP();
+    func_80022BA4(0);
+    func_8002C13C(tmp);
+    func_80022BA4(0);
+    call_ResetGraph(0);
+    func_80022BD8(0);
+    func_80022C1C(0);
+    func_8001DD7C();
+    func_80022CF0();
+    func_80018AB4();
+    func_8001E33C();
+    func_8002092C();
+    func_80021D54();
+    func_8001E7B0();
+    func_8001E38C();
+}
+
 
 // 1 timer event function
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001972C);
+//INCLUDE_ASM("asm/main/nonmatchings/main", func_8001972C); game_shutdown
+void func_8001972C(void) {
+    func_8001CD68();
+    func_8001B8DC();
+    func_8001A74C();
+    func_80020C8C();
+    func_8001DE98();
+    StopCallback();
+    func_8002C0EC();
+    disable_timer3_event(tim3event);
+    k_CloseEvent(excpevent);
+    StopRCnt(0xF2000000);
+    StopRCnt(0xF2000001);
+    StopRCnt(0xF2000002);
+    StopRCnt(0xF2000003);
+}
+
 
 // NON MATCHING
 s32 enable_timer3_event(void* handler) {
