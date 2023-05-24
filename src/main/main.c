@@ -30,8 +30,9 @@ void func_80018A8C(s32 arg0) {
 
 
 s32 D_80047D48;
-s32 D_80033000; // builtin logo data
+const u8 D_80033000; // builtin logo data, const
 
+// NON MATCHING
 void func_80018AB4(void) {
     DRAWENV drawenv;
     DISPENV dispenv;
@@ -79,13 +80,13 @@ void func_80018AB4(void) {
         LOAD_PRS((u8*) 0x80100004, 256, 240);
         SLEEP_FRAMES(10);
         
-        wait_one(0);
+        func_80022BA4(0);
         func_80022C1C(1); // set disp mask to show it
         
         FADE_IN(4);
         
         DrawSync(0);
-        wait_one(0);
+        func_80022BA4(0);
         
         SET_POLYS_COL(128);
         SLEEP_FRAMES(300);
@@ -93,11 +94,11 @@ void func_80018AB4(void) {
         FADE_OUT(4);
     }
     
-    wait_one(0);
+    func_80022BA4(0);
     func_80022C1C(0);
     
     do {
-        D_80047D48 = func_8001C780("TITLE.PRS", (u32* )0x80100000, 0); //read file
+        D_80047D48 = func_8001C780("TITLE.PRS", (u32* )0x80100000, 0);  // read file
     } while (D_80047D48 == -1);
 
     if (D_80047D48 == -2) {
@@ -105,7 +106,7 @@ void func_80018AB4(void) {
         LOAD_PRS(&D_80033000, 256, 96);
         SLEEP_FRAMES(10);
         
-        wait_one(0);
+        func_80022BA4(0);
         func_80022C1C(1);
         
         FADE_IN(4);
@@ -117,15 +118,76 @@ void func_80018AB4(void) {
         LOAD_PRS((u8*) 0x80100004, 320, 240);
         SLEEP_FRAMES(10);
         
-        wait_one(0);
+        func_80022BA4(0);
         func_80022C1C(1);
         
         FADE_IN(4);
     }
 }
 
+// NON MATCHING
+#define DrawSync        call_DrawSync
+#define func_80022BA4   func_80022B54
+void func_8001926C(void) {
+    DRAWENV drawenv;
+    DISPENV dispenv;
+    POLY_FT4 polys[5];
+    s32 i;
+    s32 left, rght, tex_x;
+    s32 y, h;
+    u32 col;
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_8001926C);
+    call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
+    call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
+    drawenv.isbg = 0;
+    drawenv.dtd = 1;
+    drawenv.dfe = 1;
+    dispenv.pad0 = 0;
+    if (get_GameNP() == 1) {
+        dispenv.pad0 = 1;
+        dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
+    }
+    call_PutDrawEnv(&drawenv);
+    call_PutDispEnv(&dispenv);
+
+    if (D_80047D48 == -2) {
+        MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
+        FADE_OUT(4);
+    } else {
+        if (get_GameRegion() == 1) { y = 120; h = 240; } 
+        else { y = 0; h = 480; }
+        
+        MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
+        FADE_OUT(4);
+    }
+    
+    func_80022B54(0);
+    call_SetDispMask(0);
+    call_SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
+    call_SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
+    dispenv.pad0 = 0;
+    if (get_GameNP() == 1) {
+        dispenv.pad0 = 1;
+        dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
+    }
+    drawenv.isbg = 1;
+    drawenv.r0 = 0;
+    drawenv.g0 = 0;
+    drawenv.b0 = 0;
+    
+    call_DrawSync(0);
+    func_80022B54(0);
+    call_PutDrawEnv(&drawenv);
+    call_PutDispEnv(&dispenv);
+    
+    call_DrawSync(0);
+    func_80022B54(0);
+    call_PutDrawEnv(&drawenv);
+    call_PutDispEnv(&dispenv);
+}
+#undef DrawSync
+#undef func_80022BA4
+
 
 // NOT MATCHING
 void func_80019680(void) { // game_bootup

@@ -2,8 +2,8 @@
 
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
 
-#define    SLEEP_FRAMES(f)    for (i = 0; i < f; i++) wait_one(0);
-#define    SET_POLYS_COL(c)    { DrawSync(0); wait_one(0); for (i = 0; i < 4; i += 1)                     \
+#define    SLEEP_FRAMES(f)    for (i = 0; i < f; i++) func_80022BA4(0);
+#define    SET_POLYS_COL(c)    { DrawSync(0); func_80022BA4(0); for (i = 0; i < 4; i += 1)                     \
             { polys[i].r0 = c; polys[i].g0 = c; polys[i].b0 = c;           \
             DrawPrim(&polys[i]); } }
 // maybe this one should add 4 itself?
@@ -64,7 +64,7 @@ void func_80023144(void);
 void func_800231CC(void);
 void func_800232D4(void);
 void rle_decode(s32, u8*, u8*);
-void lz1_decode(u8*, u8*);
+void lz1_decode(const u8*, u8*);
 void setNextFile(s32);
 s32 getNextFile(void);
 u8* getGameConfig(void);
