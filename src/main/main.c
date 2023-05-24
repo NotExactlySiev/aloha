@@ -25,10 +25,6 @@ void func_80018A8C(s32 arg0) {
         D_80047D4C = 0;
 }
 
-// 2 very massive functions
-//INCLUDE_ASM("asm/main/nonmatchings/main", func_80018AB4);
-
-
 s32 D_80047D48;
 const u8 D_80033000; // builtin logo data, const
 
@@ -77,7 +73,7 @@ void func_80018AB4(void) {
 
     if (tmp >= 0) {        
         MAKE_QUADS(64, 0, 128, 480, 0, 0, 128, 480, 64, 4);
-        LOAD_PRS((u8*) 0x80100004, 256, 240);
+        LOAD_PRS(&tmpfilebuf, 256, 240);
         SLEEP_FRAMES(10);
         
         func_80022BA4(0);
@@ -103,7 +99,7 @@ void func_80018AB4(void) {
 
     if (D_80047D48 == -2) {
         MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
-        LOAD_PRS(&D_80033000, 256, 96);
+        LOAD_PRS(&D_80032FFC, 256, 96);
         SLEEP_FRAMES(10);
         
         func_80022BA4(0);
@@ -115,7 +111,7 @@ void func_80018AB4(void) {
         else { y = 0; h = 480; }
         
         MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
-        LOAD_PRS((u8*) 0x80100004, 320, 240);
+        LOAD_PRS(&tmpfilebuf, 320, 240);
         SLEEP_FRAMES(10);
         
         func_80022BA4(0);
@@ -125,7 +121,6 @@ void func_80018AB4(void) {
     }
 }
 
-// NON MATCHING
 #define DrawSync        call_DrawSync
 #define func_80022BA4   func_80022B54
 void func_8001926C(void) {
@@ -274,9 +269,23 @@ void jt_set(void* func, s32 idx) {
 }
 
 // 2 timer functions
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019948);
+//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019948);
 
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80019990);
+//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019990);
+void func_80019948(void) {
+    if (D_80047D64 != 1) {
+        disable_timer3_event(tim3event);
+        D_80047D64 = 1;
+    }
+}
+
+// NON MATCHING
+void func_80019990(void) {
+    if (D_80047D64 != 0) {
+        tim3event = enable_timer3_event(func_800232D4);
+        D_80047D64 = 0;
+    }
+}
 
 // 4 functions related to game version
 s32 get_GameNP(void) {
@@ -316,7 +325,7 @@ void read_version(void) {
             i += 1;
             p += 1;
         } while (i < 12);
-        strcpy("EXACT01", &g_VersionStr[12]); // TODO: this string is actually extern
+        strcpy(EXACT01_str, &g_VersionStr[12]); // TODO: this string is actually extern
         g_GameIsZ = 1;
     }
 }

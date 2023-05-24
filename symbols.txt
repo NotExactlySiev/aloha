@@ -248,6 +248,8 @@ v_wait	= 0x8002C40C;
 
 
 g_Files = 0x800318b8;
+g_SysSeFile = 0x80031a08;
+
 D_80034344 = 0x80034344;
 g_TimerRegs = 0x80034d38;
 stacksize = 0x80047440;
@@ -257,7 +259,8 @@ D_80047D50 = 0x80047d50;
 g_GameIsZ = 0x80047d54;
 D_80047D58 = 0x80047d58;
 g_NextFile = 0x80047d5c;
-g_GameRegion = 0x80047d64;
+D_80047D64 = 0x80047D64;
+g_GameRegion = 0x80047d68;
 D_80047E6C = 0x80047e6c;
 tim3event = 0x80047e74;
 excpevent = 0x80047e7c;

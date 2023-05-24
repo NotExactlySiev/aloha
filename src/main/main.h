@@ -7,7 +7,7 @@
             { polys[i].r0 = c; polys[i].g0 = c; polys[i].b0 = c;           \
             DrawPrim(&polys[i]); } }
 // maybe this one should add 4 itself?
-#define    LOAD_PRS(p,W,H)    lz1_decode(p, (u8* )0x80060000);    \
+#define    LOAD_PRS(p,W,H)    lz1_decode(p+4, (u8* )0x80060000);    \
             rect.x = 640; rect.y = 256; rect.w = 256; rect.h = 1;                 \
             LoadImage(&rect, (void*) 0x80060014);  DrawSync(0);                   \
             rect.x = 640; rect.y = 0; rect.w = W; rect.h = H;                 \
@@ -72,7 +72,7 @@ s32 get_GameNP(void);
 s32 get_GameRegion(void);
 u8* get_VersionStr(void);
 void func_80019D64(void);
-s32 func_8001C780(char*, u32*, s32);
+s32 func_8001C780(char*, void*, s32);
 
 
 u32 func_80019DCC(void);
@@ -129,28 +129,33 @@ file_t g_Files[42] = {  // 800318b8
     DFILE(0x80080000, "JM6B\\MAIN.PEX"),
 };
 
-char g_SysSeFile[11] = "SYS_SE.VAB";
+char g_SysSeFile[11] = "SYS_SE.VAB"; // 80031a08
 
 
 
-
+// These are probably extern:
+u8 D_80032FFC;          // builtin intro prs image
 s32 D_80034344;         // 80034344
-u32 g_GameNP;           // 80047d44
 
+u32 g_GameNP;           // 80047d44
 s32 D_80047D4C;         // 80047d4c
 s32 D_80047D50;         // 80047d50
 s32 g_GameIsZ;          // 80047d54
 s32 D_80047D58;         // 80047d58
 s32 g_NextFile;         // 80047d5c
 
-s32 g_GameRegion;       // 80047d64
+s32 D_80047D64;         // 80047d64
+s32 g_GameRegion;       // 80047d68
+u8 EXACT01_str[8] = "EXACT01"; // 80047d6c
+
 s32 D_80047E6C;         // 80047e6c
 s32 tim3event;          // 80047e74
 s32 excpevent;          // 80047e7c
 u8 g_VersionStr[20];    // 80048048
-u32 tmpfilebuf;         // 80100000
 
-char kernelbuf[8]; // TODO: A000DF00
+u8 tmpfilebuf;         // 80100000
+
+u8 kernelbuf[8];      // A000DF00
 
 typedef struct {
     int* elements;
