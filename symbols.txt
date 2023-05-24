@@ -1,3 +1,5 @@
+kernelbuf = 0xA000DF00;
+
 TIMER_REGS = 0x1f801100;
 
 k_KER_DATE = 0xbfc00100;
@@ -6,7 +8,6 @@ k_CONSOLE_TYPE = 0xbfc00104;
 jmptable = 0x80010000;
 g_GameConfig = 80014000;
 
-kernelbuf = 0xA000DF00;
 get_file_addr = 0x80018A3C;
 
 enable_timer3_event = 0x800197C8;
