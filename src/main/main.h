@@ -2,6 +2,29 @@
 
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
 
+#define    SLEEP_FRAMES(f)    for (i = 0; i < f; i++) wait_one(0);
+#define    SET_POLYS_COL(c)    { DrawSync(0); wait_one(0); for (i = 0; i < 4; i += 1)                     \
+            { polys[i].r0 = c; polys[i].g0 = c; polys[i].b0 = c;           \
+            DrawPrim(&polys[i]); } }
+// maybe this one should add 4 itself?
+#define    LOAD_PRS(p,W,H)    lz1_decode(p, (u8* )0x80060000);    \
+            rect.x = 640; rect.y = 256; rect.w = 256; rect.h = 1;                 \
+            LoadImage(&rect, (void*) 0x80060014);  DrawSync(0);                   \
+            rect.x = 640; rect.y = 0; rect.w = W; rect.h = H;                 \
+            LoadImage(&rect, (void*) 0x80060220);  DrawSync(0)
+
+#define    FADE_IN(step)   for (col = 0; col < 128; col += step) SET_POLYS_COL(col);
+#define    FADE_OUT(step)   for (col = 128; col > 0; col -= step) SET_POLYS_COL(col);
+#define    MAKE_QUADS(x, y, w, h, u, v, tw, th, td, n)    left = x; rght = x + w; tex_x = 0x280;                   \
+            for (i=0; i < n; i++) { SetPolyFT4(&polys[i]); SetShadeTex(&polys[i], 0);     \
+            polys[i].tpage = GetTPage(1, 1, tex_x, 0); polys[i].clut = GetClut(0x280, 0x100);                \
+            polys[i].u0 = u; polys[i].v0 = v; polys[i].u1 = u+tw; polys[i].v1 = v;                            \
+            polys[i].u2 = u; polys[i].v2 = v+th; polys[i].u3 = u+tw; polys[i].v3 = v+th;                     \
+            polys[i].x0 = left; polys[i].y0 = y; polys[i].x1 = rght; polys[i].y1 = y;                        \
+            polys[i].x2 = left; polys[i].y2 = y+h; polys[i].x3 = rght; polys[i].y3 = y+h;                \
+            rght += w; left += w; tex_x += td; }
+
+
 typedef struct {                   
     u32 pc0;      
     u32 gp0;      

@@ -1,9 +1,6 @@
 #include "common.h"
 #include "main.h"
-
-
-
-
+#include "libgpu.h"
 
 // file execute loop
 INCLUDE_ASM("asm/main/nonmatchings/main", func_800188C8);
@@ -29,14 +26,109 @@ void func_80018A8C(s32 arg0) {
 }
 
 // 2 very massive functions
-INCLUDE_ASM("asm/main/nonmatchings/main", func_80018AB4);
+//INCLUDE_ASM("asm/main/nonmatchings/main", func_80018AB4);
+
+
+s32 D_80047D48;
+s32 D_80033000; // builtin logo data
+
+void func_80018AB4(void) {
+    DRAWENV drawenv;
+    DISPENV dispenv;
+    POLY_FT4 polys[5];
+    TILE tile;
+    RECT rect;
+    s16 left;
+    s16 rght;
+    s32 i;
+    s32 col;
+    s32 tmp;
+    s32 tex_x;
+    s32 y;
+    u32 h;
+
+    // set the enviroment
+    call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
+    call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
+    drawenv.isbg = 0;
+    drawenv.dtd = 1;
+    drawenv.dfe = 1;
+    dispenv.pad0 = 0;
+    if (get_GameNP() == 1) {
+        dispenv.pad0 = 1;
+        dispenv.screen.y += 24;
+    }
+    call_PutDrawEnv(&drawenv);
+    call_PutDispEnv(&dispenv);
+    DrawSync(0);
+    
+    // clear the screen with black
+    SetBlockFill(&tile);
+    tile.r0 = 0; tile.g0 = 0; tile.b0 = 0;
+    tile.x0 = 0; tile.y0 = 0;
+    tile.w = 640; tile.h = 480;
+    DrawPrim(&tile);
+    DrawSync(0);
+    
+    do {
+        tmp = func_8001C780("WARNING.PRS", (u32* )0x80100000, 0); //read file
+    } while (tmp == -1);
+
+    if (tmp >= 0) {        
+        MAKE_QUADS(64, 0, 128, 480, 0, 0, 128, 480, 64, 4);
+        LOAD_PRS((u8*) 0x80100004, 256, 240);
+        SLEEP_FRAMES(10);
+        
+        wait_one(0);
+        func_80022C1C(1); // set disp mask to show it
+        
+        FADE_IN(4);
+        
+        DrawSync(0);
+        wait_one(0);
+        
+        SET_POLYS_COL(128);
+        SLEEP_FRAMES(300);
+        
+        FADE_OUT(4);
+    }
+    
+    wait_one(0);
+    func_80022C1C(0);
+    
+    do {
+        D_80047D48 = func_8001C780("TITLE.PRS", (u32* )0x80100000, 0); //read file
+    } while (D_80047D48 == -1);
+
+    if (D_80047D48 == -2) {
+        MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
+        LOAD_PRS(&D_80033000, 256, 96);
+        SLEEP_FRAMES(10);
+        
+        wait_one(0);
+        func_80022C1C(1);
+        
+        FADE_IN(4);
+    } else {
+        if (get_GameRegion() == 1) { y = 120; h = 240; } 
+        else { y = 0; h = 480; }
+        
+        MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
+        LOAD_PRS((u8*) 0x80100004, 320, 240);
+        SLEEP_FRAMES(10);
+        
+        wait_one(0);
+        func_80022C1C(1);
+        
+        FADE_IN(4);
+    }
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/main", func_8001926C);
 
-// some setup thing
-//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019680); game_bootup
 // NOT MATCHING
-void func_80019680(void) {
+void func_80019680(void) { // game_bootup
     s32 tmp;
 
     func_8001A3B8();
@@ -58,10 +150,7 @@ void func_80019680(void) {
     func_8001E38C();
 }
 
-
-// 1 timer event function
-//INCLUDE_ASM("asm/main/nonmatchings/main", func_8001972C); game_shutdown
-void func_8001972C(void) {
+void func_8001972C(void) { // game_shutdown
     func_8001CD68();
     func_8001B8DC();
     func_8001A74C();
@@ -91,7 +180,7 @@ s32 enable_timer3_event(void* handler) {
 }
 
 // NON MATCHING
-void disable_timer3_event(u32 arg0) {
+void disable_timer3_event(s32 arg0) {
     k_EnterCriticalSection();
     StopRCnt(0xF2000003);
     k_CloseEvent(arg0);
@@ -165,7 +254,7 @@ void read_version(void) {
             i += 1;
             p += 1;
         } while (i < 12);
-        strcpy("EXACT01", &g_VersionStr[12]);
+        strcpy("EXACT01", &g_VersionStr[12]); // TODO: this string is actually extern
         g_GameIsZ = 1;
     }
 }
@@ -202,9 +291,9 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     jt_set(get_GameNP, 7);
     jt_set(get_GameRegion, 8);
     jt_set(func_80018A7C, 9);
-    jt_set(func_80018A8C, 0xA);
-    jt_set(get_VersionStr, 0xB);
-    memset(0x80014000, 0x4000, 0);
+    jt_set(func_80018A8C, 10);
+    jt_set(get_VersionStr, 11);
+    memset((void*) 0x80014000, 0x4000, 0);
     func_80020F9C(5, 0);
     func_8001FBC0(0);
     func_80020000(0);
@@ -277,7 +366,7 @@ s32 getNextFile() {
     return g_NextFile;
 }
 
-u8* getGameConfig() { //func_80019DF8
+u8* getGameConfig() {
     return g_GameConfig;
 }
 

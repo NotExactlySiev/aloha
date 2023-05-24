@@ -13,8 +13,8 @@ options:
   migrate_rodata_to_functions: no
   section_order:
     - ".rodata"
-    - ".data"
     - ".text"
+    - ".data"
 segments:
   - [0x0, header]
   - name: 
