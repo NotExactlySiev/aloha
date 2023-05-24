@@ -93,7 +93,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C670);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C734);
 
-// 4 ww_read stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C780);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7B4);
@@ -101,7 +100,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7B4);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7E8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CA84);
-
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CCC0);
 
@@ -392,8 +390,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
 
-
-// memory card stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);
@@ -416,45 +412,45 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022854); // call_StoreImage
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_StoreImage);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022874); // call_MoveImage
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_MoveImage);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022894); // call_GetDispEnv
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetDispEnv);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800228B4); // call_GetDrawEnv
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetDrawEnv);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800228D4); // call_SetDrawEnv
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawEnv);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800228F4); // call_SetDrawOffset
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawOffset);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022914); // call_SetDrawArea
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawArea);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022934); // call_GetGraphType
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetGraphType);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022954); // call_SetDefDispEnv
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDefDispEnv);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800229B0); // call_SetDefDrawEnv
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDefDrawEnv);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800229D4); // call_SetDrawMode
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawMode);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800229F8); // call_ClearImage
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_ClearImage);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022A20); // call_LoadImage
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadImage);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022A40); // call_CleaOTag
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_CleaOTag);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022A60); // call_ClearOTagR
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_ClearOTagR);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022A80); // call_DrawOTag
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawOTag);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022AA0); // call_PutDispEnv
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_PutDispEnv);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022AC0); // call_PutDrawEnv
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_PutDrawEnv);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022AE0); // call_DrawSync
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawSync);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B00); // call_ResetGraph
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_ResetGraph);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B54);
 
@@ -466,7 +462,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BA4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BD8);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C1C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDispMask);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C3C);
 

@@ -1,5 +1,7 @@
 TIMER_REGS = 0x1f801100;
 
+k_KER_DATE = 0xbfc00100;
+k_CONSOLE_TYPE = 0xbfc00104;
 
 jmptable = 0x80010000;
 g_GameConfig = 80014000;
@@ -51,6 +53,7 @@ call_PutDispEnv 	= 0x80022AA0;
 call_PutDrawEnv 	= 0x80022AC0;
 call_DrawSync 	= 0x80022AE0;
 call_ResetGraph 	= 0x80022B00;
+call_SetDispMask    = 0x80022c1c;
 
 strcpy	= 0x80022EE8;
 strcat	= 0x80022F14;
@@ -160,7 +163,7 @@ _reset	= 0x80027374;
 _sync	= 0x800274F0;
 set_alarm	= 0x800276DC;
 get_alarm	= 0x80027710;
-memset	= 0x800278A8;
+_memset	= 0x800278A8;
 k_GPU_cw	= 0x800278D4;
 GetTPage	= 0x800278E4;
 GetClut	= 0x8002797C;
@@ -250,7 +253,17 @@ v_wait	= 0x8002C40C;
 g_Files = 0x800318b8;
 g_SysSeFile = 0x80031a08;
 
+D_80032FFC = 0x80032FFC;
 D_80034344 = 0x80034344;
+
+default_conf = 0x80034cb4;
+demo_str     = 0x80034cc0;
+demo_exec    = 0x80034cc8;
+demo_conf    = 0x80034cd0;
+main_exec    = 0x80034cdc;
+main_conf    = 0x80034ce4;
+
+
 g_TimerRegs = 0x80034d38;
 stacksize = 0x80047440;
 g_GameNP = 0x80047d44;
@@ -262,6 +275,8 @@ g_NextFile = 0x80047d5c;
 g_CurrFile = 0x80047d60;
 D_80047D64 = 0x80047d64;
 g_GameRegion = 0x80047d68;
+EXACT01_str = 0x80047d6c;
+
 D_80047E6C = 0x80047e6c;
 tim3event = 0x80047e74;
 excpevent = 0x80047e7c;

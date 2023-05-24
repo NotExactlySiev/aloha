@@ -43,6 +43,6 @@ segments:
       - [0x14CA8, c, libsnd]
       - [0x1A0B8, .data, main]
       - [0x1A214, data]
-      - [0x1D4B4, data, boot]
+      - [0x1D4B4, .data, boot]
       - [0x1D530, data]
   - [0x30800]

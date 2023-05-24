@@ -10,8 +10,8 @@ typedef struct {
     u32 _pad;
 } cntregs_t;
 
-cntregs_t TIMER_REGS[4];             // TODO
-cntregs_t *g_TimerRegs = TIMER_REGS; // TODO
+extern cntregs_t TIMER_REGS[4];
+extern cntregs_t *g_TimerRegs;// = TIMER_REGS; // TODO
 
 INCLUDE_ASM("asm/main/nonmatchings/libapi/rcnt", SetRCnt);
 

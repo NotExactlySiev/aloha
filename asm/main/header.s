@@ -3,7 +3,7 @@
 .ascii "PS-X EXE"      /* Magic number */
 .word 0x00000000       /* Zerofilled */
 .word 0x00000000       /* Zerofilled */
-.word 0x80023744       /* Initial PC */
+.word _start           /* Initial PC */
 .word 0x00000000       /* Initial $gp/r28 */
 .word 0x80018000       /* .text start */
 .word 0x00030000       /* .text size */

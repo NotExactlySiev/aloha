@@ -109,7 +109,7 @@ void func_80018AB4(void) {
         SLEEP_FRAMES(10);
         
         func_80022BA4(0);
-        func_80022C1C(1); // set disp mask to show it
+        call_SetDispMask(1); // set disp mask to show it
         
         FADE_IN(4);
         
@@ -123,7 +123,7 @@ void func_80018AB4(void) {
     }
     
     func_80022BA4(0);
-    func_80022C1C(0);
+    call_SetDispMask(0);
     
     do {
         D_80047D48 = func_8001C780("TITLE.PRS", (u32* )0x80100000, 0);  // read file
@@ -135,7 +135,7 @@ void func_80018AB4(void) {
         SLEEP_FRAMES(10);
         
         func_80022BA4(0);
-        func_80022C1C(1);
+        call_SetDispMask(1);
         
         FADE_IN(4);
     } else {
@@ -147,7 +147,7 @@ void func_80018AB4(void) {
         SLEEP_FRAMES(10);
         
         func_80022BA4(0);
-        func_80022C1C(1);
+        call_SetDispMask(1);
         
         FADE_IN(4);
     }
@@ -228,7 +228,7 @@ void func_80019680(void) { // game_bootup
     func_80022BA4(0);
     call_ResetGraph(0);
     func_80022BD8(0);
-    func_80022C1C(0);
+    call_SetDispMask(0);
     func_8001DD7C();
     func_80022CF0();
     func_80018AB4();
@@ -375,7 +375,7 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     StopRCnt(0xF2000002);
     StopRCnt(0xF2000003);
     VSyncCallbacks(0, 0);
-    tim3event = func_800197C8(func_800232D4);
+    tim3event = enable_timer3_event(func_800232D4);
     func_800232C4(1);
     func_80019680();
     k_ChangeClearPAD(0);
@@ -494,7 +494,7 @@ int main(int argc, char** argv) {
     setNextFile(0);
     func_800188C8();
     func_80022B54(0);
-    func_80022C1C(0);
+    call_SetDispMask(0);
     func_80021600();
     func_8001972C();
     call_ResetGraph(3);
