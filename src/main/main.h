@@ -143,19 +143,19 @@ s32 D_80047D50;         // 80047d50
 s32 g_GameIsZ;          // 80047d54
 s32 D_80047D58;         // 80047d58
 s32 g_NextFile;         // 80047d5c
-
+s32 g_CurrFile;         // 80047d60
 s32 D_80047D64;         // 80047d64
 s32 g_GameRegion;       // 80047d68
-u8 EXACT01_str[8] = "EXACT01"; // 80047d6c
+extern u8 EXACT01_str[8];   // 80047d6c (should be "EXACT01")
 
 s32 D_80047E6C;         // 80047e6c
 s32 tim3event;          // 80047e74
 s32 excpevent;          // 80047e7c
 u8 g_VersionStr[20];    // 80048048
 
-u8 tmpfilebuf;         // 80100000
+u8 tmpfilebuf;          // 80100000
 
-u8 kernelbuf[8];      // A000DF00
+u8 kernelbuf[8];        // A000DF00
 
 typedef struct {
     int* elements;

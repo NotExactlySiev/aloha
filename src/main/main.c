@@ -3,7 +3,39 @@
 #include "libgpu.h"
 
 // file execute loop
-INCLUDE_ASM("asm/main/nonmatchings/main", func_800188C8);
+void func_800188C8(void) {
+    s32 *addr;
+    s32 tmp;
+    file_t *p = (file_t*) g_Files->addr;
+
+    while (1) {
+        if (g_CurrFile == -1) {
+            g_CurrFile = 0;
+        }
+        addr = g_Files[g_CurrFile].header;
+        if (addr != NULL) {
+            // if addr isn't NULL, it's compressed
+            if ((s32) addr & 1) {
+                addr = (s32) addr & ~0xF;
+                while (func_8001C780(g_Files[g_CurrFile].addr, addr, 0) < 0) {
+                    k_printf("Exec File Read Error\n");
+                }
+
+                while (addr[0] != 0x582D5350 || addr[1] != 0x45584520) {
+                    func_8001C780(g_Files[g_CurrFile].addr, addr, 0);
+                    k_printf("Exec File Read Error\n");
+                }    
+            }
+            execute_compressed(addr, 0);
+        } else {
+            // otherwise it's uncompressed and execute it normally
+            func_8001CCC0(g_Files[g_CurrFile].addr, 0);
+        }
+        g_CurrFile = getNextFile();
+    }
+}
+
+
 
 char* get_file_addr(s32 idx) {
     if (idx > 42) return 0;
@@ -268,10 +300,6 @@ void jt_set(void* func, s32 idx) {
     flush_cache_safe();
 }
 
-// 2 timer functions
-//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019948);
-
-//INCLUDE_ASM("asm/main/nonmatchings/main", func_80019990);
 void func_80019948(void) {
     if (D_80047D64 != 1) {
         disable_timer3_event(tim3event);
@@ -279,7 +307,7 @@ void func_80019948(void) {
     }
 }
 
-// NON MATCHING
+// NONMATCHING
 void func_80019990(void) {
     if (D_80047D64 != 0) {
         tim3event = enable_timer3_event(func_800232D4);

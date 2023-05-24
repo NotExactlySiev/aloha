@@ -21,7 +21,7 @@ segments:
     start:  0x00000800
     vram: 0x80018000
     subsegments:
-      - [0x800, rodata, main]
+      - [0x800, .rodata, main]
       - [0x944, rodata, libpress]
       - [0xA40, rodata, libgpu]
       - [0xCD8, rodata, libcd]
@@ -41,7 +41,7 @@ segments:
       - [0x109E4, c, libcd]
       - [0x13F20, c, libetc]
       - [0x14CA8, c, libsnd]
-      - [0x1A0B8, data, main]
+      - [0x1A0B8, .data, main]
       - [0x1A214, data]
       - [0x1D4B4, data, boot]
       - [0x1D530, data]
