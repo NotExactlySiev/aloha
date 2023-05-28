@@ -1,15 +1,15 @@
 #include "common.h"
-//include "main.h"
+
+// maybe this entire file is actually just handwritten assembly?
 
 typedef void (*boot_f)(char*,char*);
 
 //boot_f  k_boot;
 void reboot(char*, char*);
 
-
 extern u32 k_KER_DATE;
 extern u32 k_CONSOLE_TYPE;
-u8 kernelbuf[8];
+extern u8 kernelbuf[8];
 
 
 char default_conf[10]   = "SYSTEM.CNF"; 
@@ -32,12 +32,13 @@ __asm__(".section .text\n\t"
         ".set at\n");
 
 
+// SAME SIZE with as
 void reset(void) {
     k_strcpy(kernelbuf, demo_str);
     reboot(demo_exec, demo_conf);
 }
 
-// NONMATCHING
+// SAME SIZE with as
 void reset2(void) {
     reboot(main_exec, main_conf);
 }

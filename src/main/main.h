@@ -65,9 +65,6 @@ void func_800231CC(void);
 void func_800232D4(void);
 void rle_decode(s32, u8*, u8*);
 void lz1_decode(const u8*, u8*);
-void setNextFile(s32);
-s32 getNextFile(void);
-u8* getGameConfig(void);
 s32 get_GameNP(void);
 s32 get_GameRegion(void);
 u8* get_VersionStr(void);
@@ -75,7 +72,6 @@ void func_80019D64(void);
 s32 func_8001C780(char*, void*, s32);
 
 
-u32 func_80019DCC(void);
 void reboot(char*, char*);
 
 
@@ -177,3 +173,46 @@ typedef struct {
     TCB* current_tcb;
 } PCB;
 
+// What comes in the delay slot after jr $ra for each function
+
+void func_800188C8(void);               //  add stack
+char* get_file_addr(s32 idx);           //  nop             NO STACK
+s32 func_80018A6C(void);                //  nop             NO STACK
+s32 func_80018A7C(void);                //  nop             NO STACK
+void func_80018A8C(s32 arg0);           //  nop             NO STACK
+void func_80018AB4(void);               //  add stack
+void func_8001926C(void);               //  add stack
+void func_80019680(void);               //  add stack
+void func_8001972C(void);               //  add stack
+s32 enable_timer3_event(void*);         //  add stack
+void disable_timer3_event(s32);         //  add stack       
+void nop(void);                         //  nop             NO STACK
+void flush_cache_safe(void);            //  add stack
+void jt_clear(void);                    //  add stack
+void jt_set(void*, s32);                //  add stack
+void func_80019948(void);               //  add stack
+void func_80019990(void);               //  add stack
+s32 get_GameNP(void);                   //  nop             NO STACK
+void read_version(void);                //  add stack
+s32 get_GameRegion(void);               //  nop             NO STACK
+u8* get_VersionStr(void);               //  nop             NO STACK
+void jt_series1(void);                  //  add stack
+s32 get_D_80047E6C(void);               //  nop             NO STACK
+void* jt_reset(void);                   //  add stack
+void func_80019D0C(void);               //  add stack
+void func_80019D64(void);               //  sw (in ptr)     NO STACK    X
+s32 enable_exception_event(void*);      //  add stack
+u32 func_80019DCC(void);                //  imm ori         NO STACK    X
+void setNextFile(s32);                  //  nop             NO STACK
+s32 getNextFile();                      //  nop             NO STACK
+u8* getGameConfig();                    //  imm ori         NO STACK    X
+int main(int, char**);                  //  add stack
+
+
+// So nop after return always means there's no stack
+// i.e. having a stack always means we have something to put in the slot
+
+// What's interesting is the occasions where there's no stack, but we still have
+// something to put in the delay slot (marked with X)
+// I have to figure out what assembler has this behaviour (between as and aspsx,
+// and different settings like reorder, noat, -O etc)

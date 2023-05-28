@@ -216,7 +216,7 @@ void func_8001926C(void) {
 #undef func_80022BA4
 
 
-// NOT MATCHING
+// SAME SIZE with as
 void func_80019680(void) { // game_bootup
     s32 tmp;
 
@@ -256,7 +256,7 @@ void func_8001972C(void) { // game_shutdown
 }
 
 
-// NON MATCHING
+// SAME SIZE with as/aspsx
 s32 enable_timer3_event(void* handler) {
     s32 event;
     k_EnterCriticalSection();
