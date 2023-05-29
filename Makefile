@@ -1,16 +1,20 @@
 
 CPP_FLAGS	+= -Iinclude
 #CC_FLAGS	+= -O1 -quiet -mcpu=3000 -G8 -fverbose-asm -fgnu-linker -fcommon -mgas -msoft-float
-CC_FLAGS	+= -mcpu=3000 -quiet -w -O1 -mno-gpopt -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fcommon -fverbose-asm -fgnu-linker -mgas -msoft-float
+CC_FLAGS	+= -mcpu=3000 -quiet -w -O1 -G0 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fcommon -fverbose-asm -fgnu-linker -mgas -msoft-float
 
 AS_FLAGS	+= -Iinclude -mno-shared -march=r3000 -mtune=r3000 -no-pad-sections
 
-CPP	:= mipsel-linux-gnu-cpp 
+CROSS	:= mipsel-linux-gnu-
+
+CPP	:= $(CROSS)cpp 
 #CC	:= ./cc1-psx-26
 CC	:= wine CC1PSX.EXE
 #CC	:= dosemu -quiet -dumb -K . -E "CC1PSX.EXE ${CC_FLAGS}"
-#AS	:= mipsel-linux-gnu-as 
-AS	:= wine ASPSX.EXE
+AS	:= mipsel-linux-gnu-as 
+#AS	:= wine ASPSX.EXE
+LD	:= $(CROSS)ld
+COPY	:= $(CROSS)objcopy
 
 
 BUILD_DIR	:= build
@@ -37,16 +41,29 @@ $(BUILD_DIR)/asm/main/%.s.o: asm/main/%.s $(BUILD_DIR)/asm/main
 #	rm $@bj
 
 $(BUILD_DIR)/src/main/%.c.o: $(BUILD_DIR)/src/main/%.s $(BUILD_DIR)/src/main
-	#$(AS) $(AS_FLAGS) -o $@ $<
-	$(AS) -o $@bj $<
-	psyq-obj-parser $@bj -o $@
-	rm $@bj
+	$(AS) $(AS_FLAGS) -o $@ $<
+	#$(AS) -o $@bj $<
+	#psyq-obj-parser $@bj -o $@
+	#rm $@bj
 
 split:
 	tools/n64splat/split.py splat.main.yaml
 
 
-main: $(MAIN_O_FILES)
+$(BUILD_DIR)/main.elf: $(MAIN_O_FILES)
+	$(LD) -o $@ \
+	-Map=$(BUILD_DIR).map \
+	-T main.ld \
+	-T symbols.ld \
+	-T undefined_syms_auto.txt \
+	--no-check-sections \
+	-nostdlib \
+	-s
+
+#-T undefined_funcs_auto.txt \
+
+$(BUILD_DIR)/main.exe: $(BUILD_DIR)/main.elf
+	$(COPY) -O binary $< $@	
 
 clean:
 	git clean -fdx asm/

@@ -1,10 +1,9 @@
+
 kernelbuf = 0xA000DF00;
-
+tmpfilebuf = 0x80100000;
 TIMER_REGS = 0x1f801100;
-
 k_KER_DATE = 0xbfc00100;
 k_CONSOLE_TYPE = 0xbfc00104;
-
 jmptable = 0x80010000;
 g_GameConfig = 80014000;
 
@@ -250,10 +249,6 @@ memclr3	= 0x8002C298;
 VSync	= 0x8002C2C4;
 v_wait	= 0x8002C40C;
 
-
-g_Files = 0x800318b8;
-g_SysSeFile = 0x80031a08;
-
 D_80032FFC = 0x80032FFC;
 D_80034344 = 0x80034344;
 
@@ -285,4 +280,3 @@ g_VersionStr = 0x80048048;
 kernelbuf = 0xA000DF00;
 bss  = 0x80047E6C;
 heap = 0x80054928;
-tmpfilebuf = 0x80100000;

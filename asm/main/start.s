@@ -57,7 +57,7 @@ glabel _start
 /* BFE4 800237E4 8167000C */  jal        main
 /* BFE8 800237E8 00000000 */   nop
 /* BFEC 800237EC 4D000000 */  break      0, 1
-D_800237F0:
+glabel D_800237F0
 /* BFF0 800237F0 00002000 */  .word      0x00200000                    # sll        $zero, $zero, 0 # 00200000 <InstrIdType: CPU_SPECIAL>
 /* BFF4 800237F4 00002000 */  .word      0x00200000                    # sll        $zero, $zero, 0 # 00200000 <InstrIdType: CPU_SPECIAL>
 /* BFF8 800237F8 00002000 */  .word      0x00200000                    # sll        $zero, $zero, 0 # 00200000 <InstrIdType: CPU_SPECIAL>

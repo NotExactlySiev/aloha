@@ -54,22 +54,14 @@ typedef struct {
 } file_t;
 
 
-void nop(void);
-void flush_cache_safe(void);
-void jt_clear(void);
-void jt_set(void*, s32);
-
-void jt_series1(void);
 void func_80023144(void);
 void func_800231CC(void);
 void func_800232D4(void);
 void rle_decode(s32, u8*, u8*);
 void lz1_decode(const u8*, u8*);
-s32 get_GameNP(void);
-s32 get_GameRegion(void);
-u8* get_VersionStr(void);
-void func_80019D64(void);
-s32 func_8001C780(char*, void*, s32);
+
+//void func_80019D64(void);
+//s32 func_8001C780(char*, void*, s32);
 
 
 void reboot(char*, char*);

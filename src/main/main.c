@@ -36,11 +36,11 @@ void func_800188C8(void) {
 }
 
 
-INCLUDE_ASM("asm/main/nonmatchings/main", get_file_addr);   
-//char* get_file_addr(s32 idx) {
-//    if (idx > 42) return 0;
-//    return g_Files[idx].addr;
-//}
+//INCLUDE_ASM("asm/main/nonmatchings/main", get_file_addr);   
+char* get_file_addr(s32 idx) {
+    if (idx > 42) return 0;
+    return g_Files[idx].addr;
+}
 
 // MATCHING trivial
 s32 func_80018A6C(void) {
@@ -232,7 +232,7 @@ void func_80019680(void) { // game_bootup
     func_80022BA4(0);
     call_ResetGraph(0);
     func_80022BD8(0);
-    func_80022C1C(0);
+    call_SetDispMask(0);
     func_8001DD7C();
     func_80022CF0();
     func_80018AB4();
@@ -292,7 +292,7 @@ void flush_cache_safe(void) {
 }
 
 // NON MATCHING but matches with -O2
-void func_800198B4(void) {
+void jt_clear(void) {
     void** jmptable = (void**) 0x80010000;
     int i;
 
@@ -302,7 +302,7 @@ void func_800198B4(void) {
     flush_cache_safe();
 }
 // NON MATCHING but only regalloc
-void func_80019908(void* func, u32 idx) {
+void jt_set(void* func, s32 idx) {
     void** jmptable = (void**) 0x80010000;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();

@@ -3346,6 +3346,8 @@ def main() -> None:
     except ValueError as e:
         fail(str(e))
 
+    print(config)
+
     if config.algorithm == "levenshtein":
         try:
             import Levenshtein
