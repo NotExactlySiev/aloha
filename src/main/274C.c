@@ -4,19 +4,19 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019FB8);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A16C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A16C);   // try_CdControl
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A1CC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A1CC);   // try_CdControlB
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A22C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A22C);   // try_CdGetSector
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A270);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A270);   // try_CdRead
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A2C8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A2C8);   
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A318);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A318);   // try_CdMix
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A348);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A348);   // cd_get_status
 
 void func_8001A370(void) {
 }
@@ -25,6 +25,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A378);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A380);
 
+// jmptable setter 0x100-0x140
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A3B8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A74C);
@@ -382,6 +383,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021740);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", execute_compressed);
 
+// 6 memory card functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218A0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218B0);
@@ -394,8 +396,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);
 
+// jmptable setter 0x300-0x344
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
 
+// 8 loading and playing video
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021F7C);
@@ -412,6 +416,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);
 
+// indirect calls
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_StoreImage);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_MoveImage);
@@ -452,53 +457,57 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawSync);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_ResetGraph);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B54);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B54);   // call_wait_one
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B74);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B74);   // call_VSync
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B94);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B94);   // get_tim3_counter
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BA4);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BA4);   // wait_one
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BD8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BD8);   // call_SetGraphDebug
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDispMask);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C3C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C3C);   // call_DrawPrim
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C5C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C5C);   // call_LoadClut
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C7C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C7C);   // call_LoadTPage
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CB0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CD0);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CF0);
+// jmptable setter 0x180-0x19d
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CF0); 
 
+
+// standard str functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", strcpy);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", strcat);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", strnchr);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022F9C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022F9C);   // strupper
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022FDC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022FDC);   // strlen
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023004);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023004);   // get_path_leaf
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023060);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023060);   // strncmp
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230A0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230A0);   // memcpy
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", memset);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230E8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230E8);   // strlen again
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023110);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023110);   // card_write
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023144);
+// 5 task queue functions
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023144);   
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023188);
 

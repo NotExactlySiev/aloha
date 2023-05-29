@@ -130,28 +130,28 @@ char g_SysSeFile[11] = "SYS_SE.VAB"; // 80031a08
 
 
 // These are probably extern:
-u8 D_80032FFC;          // builtin intro prs image
-s32 D_80034344;         // 80034344
+extern u8 D_80032FFC;          // builtin intro prs image
+extern s32 D_80034344;         // 80034344
 
-u32 g_GameNP;           // 80047d44
-s32 D_80047D4C;         // 80047d4c
-s32 D_80047D50;         // 80047d50
-s32 g_GameIsZ;          // 80047d54
-s32 D_80047D58;         // 80047d58
-s32 g_NextFile;         // 80047d5c
-s32 g_CurrFile;         // 80047d60
-s32 D_80047D64;         // 80047d64
-s32 g_GameRegion;       // 80047d68
+extern u32 g_GameNP;           // 80047d44
+extern s32 D_80047D4C;         // 80047d4c
+extern s32 D_80047D50;         // 80047d50
+extern s32 g_GameIsZ;          // 80047d54
+extern s32 D_80047D58;         // 80047d58
+extern s32 g_NextFile;         // 80047d5c
+extern s32 g_CurrFile;         // 80047d60
+extern s32 D_80047D64;         // 80047d64
+extern s32 g_GameRegion;       // 80047d68
 extern u8 EXACT01_str[8];   // 80047d6c (should be "EXACT01")
 
-s32 D_80047E6C;         // 80047e6c
-s32 tim3event;          // 80047e74
-s32 excpevent;          // 80047e7c
-u8 g_VersionStr[20];    // 80048048
+extern s32 D_80047E6C;         // 80047e6c
+extern s32 tim3event;          // 80047e74
+extern s32 excpevent;          // 80047e7c
+extern u8 g_VersionStr[20];    // 80048048
 
-u8 tmpfilebuf;          // 80100000
+extern u8 tmpfilebuf;          // 80100000
 
-u8 kernelbuf[8];        // A000DF00
+extern u8 kernelbuf[8];        // A000DF00
 
 typedef struct {
     int* elements;
@@ -208,6 +208,12 @@ s32 getNextFile();                      //  nop             NO STACK
 u8* getGameConfig();                    //  imm ori         NO STACK    X
 int main(int, char**);                  //  add stack
 
+// as with -O2 does the stack ones correctly but puts sw in the slot even if not ptr
+// as with -O1 doesn't do the stack ones but does the sw correctly
+// they both do imm and get correctly
+
+// on 4.3 with full psyq stuff and with -O1, all of them match. It's probably the
+// closest one I have managed to find for now.
 
 // So nop after return always means there's no stack
 // i.e. having a stack always means we have something to put in the slot

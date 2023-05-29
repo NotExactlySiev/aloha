@@ -36,20 +36,23 @@ void func_800188C8(void) {
 }
 
 
+INCLUDE_ASM("asm/main/nonmatchings/main", get_file_addr);   
+//char* get_file_addr(s32 idx) {
+//    if (idx > 42) return 0;
+//    return g_Files[idx].addr;
+//}
 
-char* get_file_addr(s32 idx) {
-    if (idx > 42) return 0;
-    return g_Files[idx].addr;
-}
-
+// MATCHING trivial
 s32 func_80018A6C(void) {
     return D_80047D50;
 }
 
+// MATCHING trivial
 s32 func_80018A7C(void) {
     return D_80047D4C;
 }
 
+// NON MATCHING but I think can be fixed
 void func_80018A8C(s32 arg0) {
     if (arg0 != 0)
         D_80047D4C = 1;
@@ -216,19 +219,20 @@ void func_8001926C(void) {
 #undef func_80022BA4
 
 
-// SAME SIZE with as
+// NON MATCHING but mostly close 
 void func_80019680(void) { // game_bootup
     s32 tmp;
 
     func_8001A3B8();
     read_version();
-    tmp = 0 != get_GameNP();
+    tmp = get_GameNP();
+    if (tmp != 0) tmp = 1;
     func_80022BA4(0);
     func_8002C13C(tmp);
     func_80022BA4(0);
     call_ResetGraph(0);
     func_80022BD8(0);
-    call_SetDispMask(0);
+    func_80022C1C(0);
     func_8001DD7C();
     func_80022CF0();
     func_80018AB4();
@@ -239,6 +243,7 @@ void func_80019680(void) { // game_bootup
     func_8001E38C();
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 void func_8001972C(void) { // game_shutdown
     func_8001CD68();
     func_8001B8DC();
@@ -256,7 +261,7 @@ void func_8001972C(void) { // game_shutdown
 }
 
 
-// SAME SIZE with as/aspsx
+// NON MATCHING but with -O2 only two instruction are swapped
 s32 enable_timer3_event(void* handler) {
     s32 event;
     k_EnterCriticalSection();
@@ -268,7 +273,7 @@ s32 enable_timer3_event(void* handler) {
     return event;
 }
 
-// NON MATCHING
+// MATCHING with psyq4.3/aspsx and -O1
 void disable_timer3_event(s32 arg0) {
     k_EnterCriticalSection();
     StopRCnt(0xF2000003);
@@ -276,30 +281,34 @@ void disable_timer3_event(s32 arg0) {
     k_ExitCriticalSection();
 }
 
+// MATCHING trivial
 void nop(void) {}
 
+// MATCHING with psyq4.3/aspsx and -O1
 void flush_cache_safe(void) {
     k_EnterCriticalSection();
     k_FlushCache();
     k_ExitCriticalSection();
 }
 
-// NONMATCHING
-void jt_clear(void) {
+// NON MATCHING but matches with -O2
+void func_800198B4(void) {
+    void** jmptable = (void**) 0x80010000;
     int i;
-    for (i = 0; i < 1024; i++)
-    {
-        jmptable[i] = KSEG0((u32) nop);
+
+    for (i = 0; i < 1024; i++) {
+        *jmptable++ = KSEG0(nop);
     }
     flush_cache_safe();
 }
-
-// NONMATCHING
-void jt_set(void* func, s32 idx) {
+// NON MATCHING but only regalloc
+void func_80019908(void* func, u32 idx) {
+    void** jmptable = (void**) 0x80010000;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();
 }
 
+// NON MATCHING
 void func_80019948(void) {
     if (D_80047D64 != 1) {
         disable_timer3_event(tim3event);
@@ -307,7 +316,7 @@ void func_80019948(void) {
     }
 }
 
-// NONMATCHING
+// NON MATCHING
 void func_80019990(void) {
     if (D_80047D64 != 0) {
         tim3event = enable_timer3_event(func_800232D4);
@@ -315,12 +324,12 @@ void func_80019990(void) {
     }
 }
 
-// 4 functions related to game version
+// MATCHING with psyq4.3/aspsx and -O1
 s32 get_GameNP(void) {
     return g_GameNP;
 }
 
-// NON MATCHING (very close)
+// NON MATCHING, much closer on 3.5
 void read_version(void) {
     u8 buf[1024];
     s32 i;
@@ -358,16 +367,19 @@ void read_version(void) {
     }
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 s32 get_GameRegion(void) {
     return g_GameRegion;
 }
 
+// NON MATCHING but the same size
 u8* get_VersionStr(void) {
     if (g_GameIsZ == 0)
         return 0;    
     return g_VersionStr;
 }
 
+// NON MATCHING but almost perfect with 3.5
 void jt_series1(void) { // TODO: better name TODO: symbol
     ResetCallback();
     StopRCnt(0xF2000000);
@@ -398,11 +410,12 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     func_80020000(0);
 }
 
-
+// MATCHING with psyq4.3/aspsx and -O1
 s32 get_D_80047E6C(void) {
     return D_80047E6C;
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 void* jt_reset(void) {
     jt_clear();
     jt_set(func_80019DCC, 0xFF);
@@ -411,7 +424,7 @@ void* jt_reset(void) {
     return jt_series1;
 }
 
-// NON MATCHING
+// NON MATCHING, but very close with -O2, and even closer with 4.5
 void func_80019D0C(void)
 {
     struct {
@@ -432,6 +445,7 @@ void func_80019D0C(void)
     }
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 void func_80019D64(void) {
     struct {
         ExCB* excb[2];
@@ -442,6 +456,7 @@ void func_80019D64(void) {
     bios_tables->pcb->current_tcb->regs[2] = 0;
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 s32 enable_exception_event(void* handler) {
     s32 event;
 
@@ -452,24 +467,29 @@ s32 enable_exception_event(void* handler) {
     return event;
 }
 
-
+// MATCHING with psyq4.3/aspsx and -O1
 u32 func_80019DCC(void) {
   return 0x10002;
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 void setNextFile(s32 id) {
     g_NextFile = id;    
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 s32 getNextFile() {
     return g_NextFile;
 }
 
+// MATCHING with psyq4.3/aspsx and -O1
 u8* getGameConfig() {
-    return g_GameConfig;
+    //return g_GameConfig;
+    return 0x80014000;
 }
 
 int main(int argc, char** argv) {
+    s32 pad[22];
     s32 tmp;
     k_printf("MAX ADR:%x\n", k_malloc(4));
     D_80047E6C = 1;
