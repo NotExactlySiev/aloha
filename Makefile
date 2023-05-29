@@ -1,16 +1,19 @@
 
 CPP_FLAGS	+= -Iinclude
 #CC_FLAGS	+= -O1 -quiet -mcpu=3000 -G8 -fverbose-asm -fgnu-linker -fcommon -mgas -msoft-float
-CC_FLAGS	+= -mcpu=3000 -quiet -w -O1 -G0 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fcommon -fverbose-asm -fgnu-linker -mgas -msoft-float
+CC_FLAGS	+= -w -O2 -G0 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fcommon -fverbose-asm -msoft-float
 
-AS_FLAGS	+= -Iinclude -mno-shared -march=r3000 -mtune=r3000 -no-pad-sections
+AS_FLAGS	+= -Iinclude -mno-shared -msoft-float -march=r3000 -mtune=r3000 -no-pad-sections
+ARCH_FLAGS	= -march=mips1 -mabi=32 -EL -fno-pic -mno-shared -mno-abicalls
+ARCH_FLAGS	+= -mfp32 -fno-stack-protector -nostdlib -ffreestanding
 
 CROSS	:= mipsel-linux-gnu-
 
 CPP	:= $(CROSS)cpp 
 #CC	:= ./cc1-psx-26
-CC	:= wine CC1PSX.EXE
+#CC	:= wine CC1PSX.EXE
 #CC	:= dosemu -quiet -dumb -K . -E "CC1PSX.EXE ${CC_FLAGS}"
+CC	:= $(CROSS)gcc
 AS	:= mipsel-linux-gnu-as 
 #AS	:= wine ASPSX.EXE
 LD	:= $(CROSS)ld
@@ -33,7 +36,7 @@ $(BUILD_DIR)/src/main:
 	mkdir -p $(BUILD_DIR)/src/main
 
 $(BUILD_DIR)/src/main/%.s: src/main/%.c $(BUILD_DIR)/src/main
-	$(CPP) $(CPP_FLAGS) $< | $(CC) $(CC_FLAGS) -o $@
+	$(CPP) $(CPP_FLAGS) $< | $(CC) $(CC_FLAGS) $(ARCH_FLAGS) -o $@ -S -xc -
 
 $(BUILD_DIR)/asm/main/%.s.o: asm/main/%.s $(BUILD_DIR)/asm/main
 	$(AS) $(AS_FLAGS) -o $@ $<

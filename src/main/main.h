@@ -141,7 +141,7 @@ extern s32 tim3event;          // 80047e74
 extern s32 excpevent;          // 80047e7c
 extern u8 g_VersionStr[20];    // 80048048
 
-extern u8 tmpfilebuf;          // 80100000
+extern u32 tmpfilebuf;          // 80100000
 
 extern u8 kernelbuf[8];        // A000DF00
 
