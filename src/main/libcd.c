@@ -1,86 +1,86 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800281E4);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdReset);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028204);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdSync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028224);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdReady);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028244);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdSetDebug);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_8002825C);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdComstr);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028294);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdIntstr);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800282CC);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdSyncCallback);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800282E4);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdReadyCallback);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800282FC);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdReadCallback);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028314);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdControl);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028450);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdControlF);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028580);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdControlB);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800286C8);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdMix);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800286EC);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdGetSector);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028710);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdDataCallback);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028734);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdDataSync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028754);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdReadSync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028774);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdRead);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800287F4);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdRead2);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028A14);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdIntToPos);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028B18);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CdPosToInt);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028B98);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", getintr);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80028FC0);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_sync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800291E4);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_ready);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800293F4);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_cw);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_800297AC);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_vol);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_8002985C);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_init);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80029A00);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_shell);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80029A9C);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_flush);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80029CAC);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", cd_read_retry);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80029E30);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", cb_read);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_80029F68);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_readm);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_8002A048);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_readsync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_8002A124);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_datasync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_8002A25C);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_getsector);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_8002A438);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", CD_set_test_parmnum);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", func_8002A448);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", callback);
 
 INCLUDE_ASM("asm/main/nonmatchings/libcd", CdInit);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", cbsync);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", def_cbsync);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", cbready);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", def_cbready);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", cbread);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", def_cbread);
 
 INCLUDE_ASM("asm/main/nonmatchings/libcd", k_DeliverEvent);
 

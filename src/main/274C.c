@@ -1,8 +1,10 @@
 #include "common.h"
 
+void cd_ready_callback(s32 status, u32 *result);
+
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019FB8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdControl);
 
@@ -18,12 +20,18 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdMix);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_get_status);
 
-void func_8001A370(void) {
+void cd_read_callback(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A378);
+int func_8001A378(void) {
+    return 0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A380);
+void func_8001A380(void) {
+    CdReadyCallback(cd_ready_callback);
+    CdReadCallback(cd_read_callback);
+}
+
 
 // jmptable setter 0x100-0x140
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A3B8);
@@ -475,10 +483,9 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadClut);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadTPage);
 
-// these two also just call something
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CB0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetVideoMode);       // call_SetVideoMode
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CD0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetVideoMode);       // call_GetVideoMode
 
 // jmptable setter 0x180-0x19d
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CF0); 
