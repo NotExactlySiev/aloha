@@ -4,19 +4,19 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019FB8);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A16C);   // try_CdControl
+INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdControl);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A1CC);   // try_CdControlB
+INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdControlB);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A22C);   // try_CdGetSector
+INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdGetSector);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A270);   // try_CdRead
+INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdRead);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A2C8);   
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A318);   // try_CdMix
+INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdMix);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A348);   // cd_get_status
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_get_status);
 
 void func_8001A370(void) {
 }
@@ -457,24 +457,25 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawSync);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_ResetGraph);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B54);   // call_wait_one
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_wait_one);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B74);   // call_VSync
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_VSync);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022B94);   // get_tim3_counter
+INCLUDE_ASM("asm/main/nonmatchings/274C", get_tim3_counter);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BA4);   // wait_one
+INCLUDE_ASM("asm/main/nonmatchings/274C", wait_one);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022BD8);   // call_SetGraphDebug
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetGraphDebug);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDispMask);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C3C);   // call_DrawPrim
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawPrim);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C5C);   // call_LoadClut
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadClut);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022C7C);   // call_LoadTPage
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadTPage);
 
+// these two also just call something
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CB0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CD0);
@@ -490,21 +491,21 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strcat);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", strnchr);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022F9C);   // strupper
+INCLUDE_ASM("asm/main/nonmatchings/274C", strupper);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022FDC);   // strlen
+INCLUDE_ASM("asm/main/nonmatchings/274C", strlen);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023004);   // get_path_leaf
+INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_leaf);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023060);   // strncmp
+INCLUDE_ASM("asm/main/nonmatchings/274C", strncmp);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230A0);   // memcpy
+INCLUDE_ASM("asm/main/nonmatchings/274C", memcpy);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", memset);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800230E8);   // strlen again
+INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023110);   // card_write
+INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 
 // 5 task queue functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023144);   

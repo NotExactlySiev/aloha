@@ -16,16 +16,17 @@ INCLUDE_ASM("asm/main/nonmatchings/libetc", GetIntrMask);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", SetIntrMask);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002B858);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", startIntr);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002B918);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", trapIntr);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002BB0C);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", setIntr);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002BC34);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", stopIntr);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr1);
 
+// 5 kernel calls all in one file
 INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002BCC8);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", startIntrDMA);
@@ -38,17 +39,18 @@ INCLUDE_ASM("asm/main/nonmatchings/libetc", setIntrDMA);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", memclr2);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002C05C);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", PadInit);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002C0BC);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", PadRead);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002C0EC);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", PadStop);
 
+// 3 pad kernel calls are clumped together in one file for some reason
 INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002C10C);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002C13C);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", SetVideoMode);
 
-INCLUDE_ASM("asm/main/nonmatchings/libetc", func_8002C154);
+INCLUDE_ASM("asm/main/nonmatchings/libetc", GetVideoMode);
 
 INCLUDE_ASM("asm/main/nonmatchings/libetc", startIntrVSync);
 

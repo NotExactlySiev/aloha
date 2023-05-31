@@ -31,6 +31,13 @@ getNextFile = 0x80019DE8;
 getGameConfig = 0x80019DF8;
 main   = 0x80019E04;
 
+try_CdControl = 0x8001A16C;
+try_CdControlB = 0x8001A1CC;
+try_CdGetSector = 0x8001A22C;
+try_CdRead = 0x8001A270;
+try_CdMix = 0x8001A318;
+cd_get_status = 0x8001A348;
+
 execute_compressed = 0x80021808;
 
 call_StoreImage 	= 0x80022854;
@@ -53,12 +60,33 @@ call_PutDispEnv 	= 0x80022AA0;
 call_PutDrawEnv 	= 0x80022AC0;
 call_DrawSync 	= 0x80022AE0;
 call_ResetGraph 	= 0x80022B00;
+
+call_wait_one = 0x80022B54;
+call_VSync = 0x80022B74;
+get_tim3_counter = 0x80022B94;
+wait_one = 0x80022BA4;
+call_SetGraphDebug = 0x80022BD8;
+
 call_SetDispMask    = 0x80022c1c;
+
+call_DrawPrim = 0x80022C3C;
+call_LoadClut = 0x80022C5C;
+call_LoadTPage = 0x80022C7C;
 
 strcpy	= 0x80022EE8;
 strcat	= 0x80022F14;
 strnchr	= 0x80022F64;
+
+strupper = 0x80022F9C;
+strlen = 0x80022FDC;
+get_path_leaf = 0x80023004;
+strncmp = 0x80023060;
+memcpy = 0x800230A0;
+
 memset  = 0x800230C8;
+
+strlen2 = 0x800230E8;
+card_write = 0x80023110;
 
 rle_decode = 0x800234B8;
 lz1_decode = 0x8002353C;
@@ -235,12 +263,22 @@ StopCallback	= 0x8002B7E0;
 CheckCallback	= 0x8002B810;
 GetIntrMask	= 0x8002B824;
 SetIntrMask	= 0x8002B83C;
+
+startIntr = 0x8002B858;
+trapIntr = 0x8002B918;
+setIntr = 0x8002BB0C;
+stopIntr = 0x8002BC34;
 memclr1	= 0x8002BC9C;
 startIntrDMA	= 0x8002BD18;
 stopIntrDMA	= 0x8002BD7C;
 trapIntrDMA	= 0x8002BDC4;
 setIntrDMA	= 0x8002BF28;
 memclr2	= 0x8002C030;
+PadInit = 0x8002C05C;
+PadRead = 0x8002C0BC;
+PadStop = 0x8002C0EC;
+SetVideoMode = 0x8002C13C;
+GetVideoMode = 0x8002C154;
 startIntrVSync	= 0x8002C164;
 stopIntrVSync	= 0x8002C1DC;
 trapIntrVSync	= 0x8002C214;
@@ -280,3 +318,5 @@ g_VersionStr = 0x80048048;
 kernelbuf = 0xA000DF00;
 bss  = 0x80047E6C;
 heap = 0x80054928;
+
+
