@@ -1,5 +1,56 @@
 #include "common.h"
 
+#define CdlNop		0x01	
+#define CdlSetloc	0x02	
+#define CdlPlay		0x03	
+#define CdlForward	0x04	
+#define CdlBackward	0x05
+#define CdlReadN	0x06
+#define CdlStandby	0x07
+#define CdlStop		0x08
+#define CdlPause	0x09
+#define CdlReset	0x0a
+#define CdlMute		0x0b
+#define CdlDemute	0x0c
+#define CdlSetfilter	0x0d
+#define CdlSetmode	0x0e
+#define CdlGetparam	0x0f
+#define CdlGetlocL	0x10
+#define CdlGetlocP	0x11
+#define CdlSeekL	0x15
+#define CdlSeekP	0x16
+#define CdlReadS	0x1B
+
+/*
+ *	Location
+ */
+typedef struct {
+	u8 minute;		/* minute (BCD) */
+	u8 second;		/* second (BCD) */
+	u8 sector;		/* sector (BCD) */
+	u8 track;		/* track (void) */
+} CdlLOC;
+
+/*
+ *	ADPCM Filter
+ */
+typedef struct {
+	u8	file;		/* file ID (always 1) */
+	u8	chan;		/* channel ID */
+	u16	pad;
+} CdlFILTER;
+
+/*
+ *	Attenuator
+ */
+typedef struct {
+	u8	val0;		/* volume for CD(L) -> SPU (L) */
+	u8	val1;		/* volume for CD(L) -> SPU (R) */
+	u8	val2;		/* volume for CD(R) -> SPU (L) */
+	u8	val3;		/* volume for CD(R) -> SPU (R) */
+} CdlATV;	
+
+
 typedef struct {                   
     u32 pc0;      
     u32 gp0;      
@@ -16,6 +67,7 @@ typedef struct {
 
 void cd_ready_callback(s32 status, u32 *result);
 
+extern void (*fnptr)(void);
 
 
 
@@ -23,19 +75,37 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdControl);
+s32 try_CdControl(u8 arg0, u8* arg1, u8* arg2) {
+    while (CdControl(arg0, arg1, arg2) != 1);
+    return 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdControlB);
+s32 try_CdControlB(u8 arg0, u8* arg1, u8* arg2) {
+    while (CdControlB(arg0, arg1, arg2) != 1);
+    return 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdGetSector);
+s32 try_CdGetSector(void* madr, s32 size) {
+    while (CdGetSector(madr, size) == 0);
+    return 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdRead);
+s32 try_CdRead(s32 sectors, u32* buf, s32 mode) {
+    while (CdRead(sectors, buf, mode) == 0);
+    return 1;
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A2C8);   
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", try_CdMix);
+s32 try_CdMix(CdlATV* vol) {
+    while (CdMix(vol) == 0);
+    return 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_get_status);
+s32 cd_get_status(u8* result) {
+    return CdControl(CdlNop, 0, result);
+}
 
 void cd_read_callback(void) {
 }
@@ -472,10 +542,7 @@ void execute_compressed(u32* addr, u32 stack) {
     k_Exec(&header, 1, 0);
 }
 
-// 6 memory card functions
-
-extern void (*fnptr)(void);
-
+// MATCHING
 void func_800218A0(void (*fn)(void)) {
     fnptr = fn;
 }
@@ -487,7 +554,7 @@ void func_800218B0(void) {
     }
 }
 
-
+// 6 memory card functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
