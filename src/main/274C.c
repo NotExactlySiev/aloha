@@ -164,6 +164,7 @@ s32 execute_uncompressed(char* file, s32 param) {
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
 
+// 9 more trivial functions related to 12array
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD30);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD68);
@@ -182,6 +183,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CE58);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CEA0);
 
+// 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CEC8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
@@ -200,11 +202,12 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D29C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D398);
+// cache handling functions (i think) and more cd stuff
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D398);   // update
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D414);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D414);   // clear
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D440);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D440);   // load from cache
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D67C);
 
@@ -214,7 +217,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D740);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D780);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D840);
+INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_root);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D8B0);
 
@@ -222,13 +225,14 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DA00);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DB04);
 
+// trivial and caller sound functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DD7C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DE98);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DE98);   // snd_mute
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DED0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DED0);   // call_SpuSetCommonAttr
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DEF0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DEF0);   // call_***
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF14);
 
@@ -252,12 +256,13 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E06C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E08C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E0AC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E0AC);   // call_SpuSetVoiceAttr
 
+// these 2 are bigger memcpy functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E0CC);
-
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17C);
 
+// the rest are trivial again
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E22C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E250);
@@ -277,10 +282,12 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E2FC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E31C);
 
+// 2 trivial pad functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E33C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E36C);
 
+// 4 font and type functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E38C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E3D4);
@@ -289,6 +296,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E438);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E5BC);
 
+// 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E608);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E654);
@@ -297,8 +305,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E744);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E790);
 
+// jmptable setter 0x306-0x320 (overlap with the other one)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E7B0);
 
+// complex and trivial functions jumbled together
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E998);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001EEA4);
@@ -341,20 +351,24 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FBE4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FC34);
 
+// 3 event test functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FC5C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FCF4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FD8C);
 
+// 1 big function related to memory card
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FDF4);
 
+// 3 trivial functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FFC4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FFD4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020000);
 
+// 15 memory card file system functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020020);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800200C8);
@@ -385,16 +399,21 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020610);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020630);
 
+// 2 big almost identical functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
 
+// init memory card (events and jmptable)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002092C);
 
+// close memory card events
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020C8C);
 
+// play audio?
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020D5C);
 
+// trivial or easy functions related to audio
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DC4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DE8);
@@ -415,6 +434,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F48);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F9C);
 
+// 4 functions related to some sort of list
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FC0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FD0);
@@ -423,6 +443,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021028);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210D4);
 
+//
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210E4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800211F0);
@@ -442,9 +463,20 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021740);
 INCLUDE_ASM("asm/main/nonmatchings/274C", execute_compressed);
 
 // 6 memory card functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218A0);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218B0);
+extern void (*fnptr)(void);
+
+void func_800218A0(void (*fn)(void)) {
+    fnptr = fn;
+}
+
+// matching with 4.3 -O2
+void func_800218B0(void) {
+    if (fnptr != 0) {
+        (*fnptr)();
+    }
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
 

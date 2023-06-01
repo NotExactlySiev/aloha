@@ -43,6 +43,8 @@ cd_get_status = 0x8001A348;
 
 execute_uncompressed = 0x8001CCC0;
 
+get_path_root = 0x8001D840;
+
 execute_compressed = 0x80021808;
 
 call_StoreImage 	= 0x80022854;
@@ -355,6 +357,8 @@ g_CurrFile = 0x80047d60;
 D_80047D64 = 0x80047d64;
 g_GameRegion = 0x80047d68;
 EXACT01_str = 0x80047d6c;
+
+fnptr = 0x80047E58;
 
 D_80047E6C = 0x80047e6c;
 tim3event = 0x80047e74;
