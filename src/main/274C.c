@@ -27,6 +27,8 @@ int func_8001A378(void) {
     return 0;
 }
 
+
+// matching on 4.3 with -O1 and -fPIC
 void func_8001A380(void) {
     CdReadyCallback(cd_ready_callback);
     CdReadCallback(cd_read_callback);
@@ -36,6 +38,7 @@ void func_8001A380(void) {
 // jmptable setter 0x100-0x140
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A3B8);
 
+// clears all cd callbacks
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A74C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
@@ -44,14 +47,17 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A8A0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A934);
 
+// these 2 are almost identical, only vars are different
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A978);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AA80);
 
+// same for these 2
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AB88);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AD0C);
 
+// and then we just have 12array stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AED8);
@@ -66,9 +72,11 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B8DC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B94C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B9D8);
+INCLUDE_ASM("asm/main/no+nmatchings/274C", func_8001B9D8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BA50);
+
+#define    BCD(x)    (((x / 10) << 4) + (x % 10))
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BB50);
 
