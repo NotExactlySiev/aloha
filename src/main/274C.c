@@ -65,9 +65,15 @@ typedef struct {
 	u32 sp,fp,gp,ret,base;
 } EXEC;
 
-void cd_ready_callback(s32 status, u32 *result);
-
+// data
+// but .data is not integrated into this file yet, so they're extern
+extern CdlLOC ww_global_loc;
 extern void (*fnptr)(void);
+
+
+void cd_ready_callback(s32 status, u32 *result);
+void ww_try_add(u8, void*, s32);
+
 
 
 
@@ -153,14 +159,14 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AD0C);
 // and then we just have 12array stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 
-// 4 functions for actually accessing 12array
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AED8);   // reset
+// 4 functions for actually accessing 12array (prefix with ww_)
+INCLUDE_ASM("asm/main/nonmatchings/274C", ww_reset);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AF28);   // add
+INCLUDE_ASM("asm/main/nonmatchings/274C", ww_add);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B020);   // try_add
+INCLUDE_ASM("asm/main/nonmatchings/274C", ww_try_add);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B0A0);   // process
+INCLUDE_ASM("asm/main/nonmatchings/274C", ww_process);
 
 // and then these functinos actually use those 4 to do stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B8DC);
@@ -172,8 +178,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B9D8);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BA50);
 
 // 2 functions for converting between frame number and byte offset in videos
-#define    BCD(x)    (((x / 10) << 4) + (x % 10))
-
+// I have no idea why but these actually use div for dividing by constants
+// and do some other weird stuff that doesn't make any sense
+#define     BCD(x)    (((x / 10) << 4) + (x % 10))
+#define     UNBCD(x)    ((x >> 4)*10 + x&0xF)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BB50);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
@@ -181,7 +189,31 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C20C);
+extern s32 D_80047D78;
+extern u8 D_80047D8C;
+extern u8 D_80047E9C;
+extern s32 D_80047EAC;
+extern s32 D_80047F24;
+
+// ALMOST MATCHING with 4.3 -O1, only issue is double zero
+void func_8001C20C(CdlLOC* loc) {
+    D_80047D78 = 0;
+    D_80047F24 = 0;
+    ww_global_loc.minute = loc->minute;
+    ww_global_loc.second = loc->second;
+    ww_global_loc.sector = loc->sector;
+    D_80047EAC = CdPosToInt(loc);
+    ww_try_add(0xFCU, &D_80047D8C, 0);
+    ww_try_add(0xFEU, NULL, 0);
+    func_8001C374();
+    ww_try_add(0x16U, loc, 0);
+    ww_try_add(3U, NULL, 0);
+    ww_try_add(0xFBU, NULL, 0);
+    ww_try_add(0xFDU, &D_80047E9C, 0);
+    func_8001B9D8();
+}
+
+
 
 // 4 simple array12 caller functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C2F4);

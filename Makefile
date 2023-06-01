@@ -1,7 +1,7 @@
 
 CPP_FLAGS	+= -Iinclude
 #CC_FLAGS	+= -O1 -quiet -mcpu=3000 -G8 -fverbose-asm -fgnu-linker -fcommon -mgas -msoft-float
-CC_FLAGS	+= -w -O2 -G0 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fcommon -fverbose-asm -msoft-float
+CC_FLAGS	+= -w -O2 -G0 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fverbose-asm -msoft-float
 
 AS_FLAGS	+= -Iinclude -mno-shared -msoft-float -march=r3000 -mtune=r3000 -no-pad-sections
 ARCH_FLAGS	= -march=mips1 -mabi=32 -EL -fno-pic -mno-shared -mno-abicalls

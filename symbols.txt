@@ -41,7 +41,15 @@ try_CdRead = 0x8001A270;
 try_CdMix = 0x8001A318;
 cd_get_status = 0x8001A348;
 
+ww_reset = 0x8001AED8; 
+ww_add = 0x8001AF28;
+ww_try_add = 0x8001B020; 
+ww_process = 0x8001B0A0; 
+
+
 execute_uncompressed = 0x8001CCC0;
+
+
 
 get_path_root = 0x8001D840;
 
@@ -364,8 +372,14 @@ D_80047E6C = 0x80047e6c;
 tim3event = 0x80047e74;
 excpevent = 0x80047e7c;
 g_VersionStr = 0x80048048;
-kernelbuf = 0xA000DF00;
-bss  = 0x80047E6C;
+
+
+
+ww_global_loc = 0x80048085;
+ww_minute = 0x80048085;
+ww_second = 0x80048086;
+ww_sector = 0x80048087;
+
 heap = 0x80054928;
 
 

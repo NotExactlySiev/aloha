@@ -60,9 +60,6 @@ void func_80018A8C(s32 arg0) {
         D_80047D4C = 0;
 }
 
-s32 D_80047D48;
-const u8 D_80033000; // builtin logo data, const
-
 // NON MATCHING
 void func_80018AB4(void) {
     DRAWENV drawenv;

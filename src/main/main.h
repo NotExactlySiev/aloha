@@ -123,6 +123,7 @@ char g_SysSeFile[11] = "SYS_SE.VAB"; // 80031a08
 
 // These are probably extern:
 extern u8 D_80032FFC;          // builtin intro prs image
+extern u8 D_80033000;          // builtin logo data, const
 extern s32 D_80034344;         // 80034344
 
 extern u32 g_GameNP;           // 80047d44
@@ -136,9 +137,15 @@ extern s32 D_80047D64;         // 80047d64
 extern s32 g_GameRegion;       // 80047d68
 extern u8 EXACT01_str[8];   // 80047d6c (should be "EXACT01")
 
-extern s32 D_80047E6C;         // 80047e6c
-extern s32 tim3event;          // 80047e74
-extern s32 excpevent;          // 80047e7c
+extern s32 D_80047D48;
+
+// These are bss
+s32 D_80047E6C;         // 80047e6c
+s32 D_80047E70;         // 80047e70
+s32 tim3event;          // 80047e74
+s32 excpevent;          // 80047e7c
+
+
 extern u8 g_VersionStr[20];    // 80048048
 
 extern u32 tmpfilebuf;          // 80100000

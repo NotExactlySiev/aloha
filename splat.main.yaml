@@ -14,6 +14,7 @@ options:
     - ".rodata"
     - ".text"
     - ".data"
+    - ".bss"
 segments:
   - [0x0, header]
   - name: main
@@ -46,4 +47,6 @@ segments:
       - [0x1A214, data]
       - [0x1D4B4, .data, boot]
       - [0x1D530, data]
+      - [0x3066C, .bss, main]
+      - [0x30684, bss]
   - [0x30800]
