@@ -1,6 +1,23 @@
 #include "common.h"
 
+typedef struct {                   
+    u32 pc0;      
+    u32 gp0;      
+    u32 t_addr;   
+    u32 t_size;   
+    u32 d_addr;   
+    u32 d_size;   
+    u32 b_addr;   
+    u32 b_size;   
+	u32 s_addr;
+	u32 s_size;
+	u32 sp,fp,gp,ret,base;
+} EXEC;
+
 void cd_ready_callback(s32 status, u32 *result);
+
+
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
@@ -48,6 +65,7 @@ void func_8001A74C(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
 
+// sound related functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A8A0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A934);
@@ -65,14 +83,16 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AD0C);
 // and then we just have 12array stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AED8);
+// 4 functions for actually accessing 12array
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AED8);   // reset
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AF28);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AF28);   // add
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B020);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B020);   // try_add
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B0A0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B0A0);   // process
 
+// and then these functinos actually use those 4 to do stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B8DC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B94C);
@@ -81,16 +101,19 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B9D8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BA50);
 
+// 2 functions for converting between frame number and byte offset in videos
 #define    BCD(x)    (((x / 10) << 4) + (x % 10))
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BB50);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
 
+
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C20C);
 
+// 4 simple array12 caller functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C2F4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C31C);
@@ -99,8 +122,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C34C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C374);
 
+// sets audio mode
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C39C);
 
+// cd file management functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C418);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C4F0);
@@ -113,17 +138,29 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C5F4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C670);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C734);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C734);   // pause
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C780);
+// cd filesystem io
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C780);   // read
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7B4);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7B4);   // write
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7E8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7E8);   // command
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CA84);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CA84);   // load exe
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CCC0);
+s32 execute_uncompressed(char* file, s32 param) {
+    EXEC header;
+    
+    if (func_8001CA84(file, param, &header) != 0)
+        return -1;
+
+    flush_cache_safe();
+    setNextFile(0);
+    k_Exec(&header, 1, 0);
+    return 0;
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
 

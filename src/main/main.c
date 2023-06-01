@@ -29,7 +29,7 @@ void func_800188C8(void) {
             execute_compressed(addr, 0);
         } else {
             // otherwise it's uncompressed and execute it normally
-            func_8001CCC0(g_Files[g_CurrFile].addr, 0);
+            execute_uncompressed(g_Files[g_CurrFile].addr, 0);
         }
         g_CurrFile = getNextFile();
     }

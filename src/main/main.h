@@ -25,15 +25,15 @@
             rght += w; left += w; tex_x += td; }
 
 
-typedef struct {                   
-    u32 pc0;      
-    u32 gp0;      
-    u32 t_addr;   
-    u32 t_size;   
-    u32 d_addr;   
-    u32 d_size;   
-    u32 b_addr;   
-    u32 b_size;   
+typedef struct {
+    u32 pc0;
+    u32 gp0;
+    u32 t_addr;
+    u32 t_size;
+    u32 d_addr;
+    u32 d_size;
+    u32 b_addr;
+    u32 b_size;
 	u32 s_addr;
 	u32 s_size;
 	u32 sp,fp,gp,ret,base;
