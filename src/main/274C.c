@@ -67,6 +67,7 @@ typedef struct {
 
 // data
 // but .data is not integrated into this file yet, so they're extern
+extern s32 is_mono;             // 80047D88
 extern CdlLOC ww_global_loc;
 extern void (*fnptr)(void);
 
@@ -213,19 +214,49 @@ void func_8001C20C(CdlLOC* loc) {
     func_8001B9D8();
 }
 
+// these 4 are NON MATCHING
+// but only double zero
+void func_8001C2F4(void) {
+    ww_try_add(9, 0, 0);
+}
 
+void func_8001C31C(void) {
+    ww_try_add(3, 0, 0);
+    func_8001C374();
+}
 
-// 4 simple array12 caller functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C2F4);
+void func_8001C34C(void) {
+    ww_try_add(0xB, 0, 0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C31C);
+void func_8001C374(void) {
+    ww_try_add(0xC, 0, 0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C34C);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C374);
-
-// sets audio mode
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C39C);
+s32 set_mono(s32 arg0) {
+    CdlATV vol;
+    s32 ret;
+    
+    ret = is_mono;
+    is_mono = arg0;
+    
+    func_8001B8DC();
+    
+    if (arg0 == 0) {
+        vol.val0 = 0x80;
+        vol.val1 = 0;
+        vol.val2 = 0x80;
+        vol.val3 = 0;
+    } else {
+        vol.val0 = 0x5B;
+        vol.val1 = 0x5B;
+        vol.val2 = 0x5B;
+        vol.val3 = 0x5B;
+    }
+    
+    try_CdMix(&vol);
+    return ret;
+}
 
 // cd file management functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C418);

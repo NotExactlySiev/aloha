@@ -46,6 +46,7 @@ ww_add = 0x8001AF28;
 ww_try_add = 0x8001B020; 
 ww_process = 0x8001B0A0; 
 
+set_mono = 0x8001C39C;
 
 execute_uncompressed = 0x8001CCC0;
 
@@ -365,6 +366,8 @@ g_CurrFile = 0x80047d60;
 D_80047D64 = 0x80047d64;
 g_GameRegion = 0x80047d68;
 EXACT01_str = 0x80047d6c;
+
+is_mono = 0x80047d88;
 
 fnptr = 0x80047E58;
 
