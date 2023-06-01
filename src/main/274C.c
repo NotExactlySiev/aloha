@@ -102,8 +102,26 @@ s32 try_CdRead(s32 sectors, u32* buf, s32 mode) {
     return 1;
 }
 
+extern s32 D_80047EE4;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A2C8);   
+// MATCHING with 4.3 -O1   
+s32 func_8001A2C8(void) {
+    s32 rc;
+    s32 ret;
+    
+    rc = CdReadSync();
+    ret = -1;
+    if (rc == -1) {
+        D_80047EE4 = 0;
+        ret = func_8001D414();
+    }
+    
+    if (rc >= 0) {
+        ret = func_80019990();
+    }
+    return ret;
+}
+
 
 s32 try_CdMix(CdlATV* vol) {
     while (CdMix(vol) == 0);
@@ -233,6 +251,8 @@ void func_8001C374(void) {
     ww_try_add(0xC, 0, 0);
 }
 
+
+// NON MATCHING only 1 instruction swapped
 s32 set_mono(s32 arg0) {
     CdlATV vol;
     s32 ret;
@@ -271,7 +291,17 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C5F4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C670);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C734);   // pause
+// NON MATCHING but it's only one instruction swap
+s32 func_8001C734(void) {   // pause
+    s32 ret;
+
+    ret = func_8001A2C8();
+    if (ret == 2) {
+        try_CdControl(CdlPause, 0, 0);
+        flush_cache_safe();
+    }
+    return ret;
+}
 
 // cd filesystem io
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C780);   // read
