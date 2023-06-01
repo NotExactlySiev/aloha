@@ -374,6 +374,10 @@ fnptr = 0x80047E58;
 D_80047E6C = 0x80047e6c;
 tim3event = 0x80047e74;
 excpevent = 0x80047e7c;
+
+font_ptr8 = 0x80047F5C;
+font_ptr16 = 0x80047F64;
+
 g_VersionStr = 0x80048048;
 
 
