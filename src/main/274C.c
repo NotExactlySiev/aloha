@@ -460,7 +460,17 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021600);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021740);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", execute_compressed);
+// ALMOST MATCHING, regallock on 4.3 -O1, return delay slot in 4.0 -O1 
+void execute_compressed(u32* addr, u32 stack) {
+    EXEC header;
+    EXEC* p;
+    
+    __builtin_memcpy(&header, addr+4, 0x3c);
+    lz1_decode((u8* ) (addr + 0x201), header.t_addr);
+    header.s_addr = stack;
+    flush_cache_safe();
+    k_Exec(&header, 1, 0);
+}
 
 // 6 memory card functions
 
