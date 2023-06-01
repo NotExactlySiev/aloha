@@ -75,9 +75,6 @@ extern void (*fnptr)(void);
 void cd_ready_callback(s32 status, u32 *result);
 void ww_try_add(u8, void*, s32);
 
-
-
-
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
@@ -327,24 +324,59 @@ s32 execute_uncompressed(char* file, s32 param) {
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
 
-// 9 more trivial functions related to 12array
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD30);
+extern s32 D_80047DEC;
+extern s32 D_80047EA4;
+extern s32 D_80047F1C;
+extern s32 D_80047F54;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD68);
+s32 func_8001CD30(s32 arg0) {
+    s32 temp_s0;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD90);
+    temp_s0 = D_80047EA4;
+    ww_try_add(0xF9, arg0, 0);
+    return temp_s0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CDC8);
+void func_8001CD68(void) {
+    ww_try_add(8, 0, 0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CDF0);
+s32 func_8001CD90(void) {
+    s32 temp_s0;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CE18);
+    temp_s0 = D_80047F1C;
+    ww_try_add(0xFE, 5, 0);
+    return temp_s0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CE28);
+void func_8001CDC8(s32 arg0) {
+    ww_try_add(0xFE, arg0, 0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CE58);
+void func_8001CDF0(void) {
+    ww_try_add(0xF8, 0, 0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CEA0);
+s32 func_8001CE18(void) {
+    return D_80047F54;
+}
+
+void func_8001CE28(void) {
+    func_8001C2F4();
+    ww_try_add(0xF6, 1, 0);
+}
+
+void func_8001CE58(void) {
+    if (D_80047DEC == 1) {
+        ww_try_add(0x1B, 0, 0);
+        ww_try_add(0xF6, 0, 0);
+    }
+}
+
+void func_8001CEA0(void) {
+    ww_try_add(0xF6, 0, 0);
+}
+
 
 // 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CEC8);
