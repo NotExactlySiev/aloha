@@ -1,2 +1,17 @@
 I think the standard libraries are compiled using PSYQ-3.5 but the game code
 itself is compiled using gcc 2.8.1 from PSYQ-4.3
+
+
+Memory map of data sections:
+
+80047d04    libspu vars
+80047d44    main.c vars
+80047d74    274C.c vars
+80047e6c    main.c vars (but could belong to 274C too maybe)
+80047e84    274C.c vars
+uninitialized
+80048000    274C.c vars
+80048044    main.c vars
+(big buffers in this part for 274C.c)
+80052248    libgpu data
+...         other standard lib data
