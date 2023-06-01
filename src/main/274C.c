@@ -39,7 +39,12 @@ void func_8001A380(void) {
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A3B8);
 
 // clears all cd callbacks
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A74C);
+// matching on 4.3 with -O1
+void func_8001A74C(void) {
+    CdReadyCallback(0);
+    CdReadCallback(0);
+    CdSyncCallback(0);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
 
@@ -72,7 +77,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B8DC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B94C);
 
-INCLUDE_ASM("asm/main/no+nmatchings/274C", func_8001B9D8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B9D8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BA50);
 
