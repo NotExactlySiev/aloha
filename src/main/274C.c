@@ -65,6 +65,43 @@ typedef struct {
 	u32 sp,fp,gp,ret,base;
 } EXEC;
 
+typedef struct {
+    short left;	       /* Lch */
+    short right;       /* Rch */
+} SpuVolume;
+
+typedef struct {
+    unsigned short left;	/* Lch */
+    unsigned short right;       /* Rch */
+} SpuVolume16;
+
+typedef struct {
+    unsigned long	voice;		/* Ýè{CX:
+					   SpuSetVoiceAttr: e{CXÍ bit ñ
+					   SpuGetVoiceAttr: {CXÍ bit l
+					   */
+    unsigned long	mask;		/* Ýè®«rbg (Get ÅÍ³ø)	*/
+    SpuVolume		volume;		/* ¹Ê					*/
+    SpuVolume		volmode;	/* ¹Ê[h				*/
+    SpuVolume		volumex;	/* »ÝÌ¹Ê (Set ÅÍ³ø)		*/
+    unsigned short	pitch;		/* ¹ö (sb`wè)			*/
+    unsigned short	note;		/* ¹ö (m[gwè)			*/
+    unsigned short	sample_note;	/* ¹ö (m[gwè)			*/
+    short		envx;		/* »ÝÌGx[vl (Set ÅÍ³ø)  */
+    unsigned long	addr;		/* g`f[^æªAhX		*/
+    unsigned long	loop_addr;	/* [vJnAhX			*/
+    long		a_mode;		/* Attack rate mode			*/
+    long		s_mode;		/* Sustain rate mode			*/
+    long		r_mode;		/* Release rate mode			*/
+    unsigned short	ar;		/* Attack rate				*/
+    unsigned short	dr;		/* Decay rate				*/
+    unsigned short	sr;		/* Sustain rate				*/
+    unsigned short	rr;		/* Release rate				*/
+    unsigned short	sl;		/* Sustain level			*/
+    unsigned short	adsr1;		/* adsr1 for `VagAtr' */
+    unsigned short	adsr2;		/* adsr2 for `VagAtr' */
+} SpuVoiceAttr;
+
 // data
 // but .data is not integrated into this file yet, so they're extern
 extern s32 is_mono;             // 80047D88
@@ -74,6 +111,10 @@ extern void (*fnptr)(void);
 
 void cd_ready_callback(s32 status, u32 *result);
 void ww_try_add(u8, void*, s32);
+
+
+
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
@@ -451,10 +492,46 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E06C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E08C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E0AC);   // call_SpuSetVoiceAttr
+void call_SpuSetVoiceAttr(SpuVoiceAttr* attr) {
+    func_8002C4A8(attr);
+}
 
-// these 2 are bigger memcpy functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E0CC);
+extern int D_80047E08;
+
+// NON MATCHING, but pretty close with 4.3 -O1
+// probably can be matched
+void func_8001E0CC(SpuVoiceAttr* arg0) {
+    SpuVoiceAttr attr;
+    s32 left;
+    s32 right;
+    u32 val;
+
+    if (D_80047E08 == 1) {
+        __builtin_memcpy(&attr, arg0, sizeof(SpuVoiceAttr));
+        left = attr.volume.left;
+        right = attr.volume.right;
+        if (left < 0) {
+            left = -left;
+        }
+        if (right < 0) {
+            right = -right;
+        }
+        val = left + right;
+        // what is this doing?
+        val = (val + (val >> 0x1F)) >> 1;
+        attr.volume.right = val;
+        attr.volume.left = val;
+        call_SpuSetVoiceAttr(&attr);
+        return;
+    }
+    else
+    {
+        call_SpuSetVoiceAttr(arg0);
+    }
+    
+}
+
+// this is almost exactly the same as the previous one
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17C);
 
 // the rest are trivial again
@@ -717,7 +794,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // load frame?
 
 // indirect calls
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_StoreImage);
@@ -766,7 +843,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", call_VSync);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", get_tim3_counter);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", wait_one);
+INCLUDE_ASM("asm/main/nonmatchings/274C", wait_one);                // TODO: rename this to wait_frame
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetGraphDebug);
 
@@ -809,7 +886,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 
-// 5 task queue functions
+// 5 task queue functions, has data right after it somehow
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023144);   
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023188);
