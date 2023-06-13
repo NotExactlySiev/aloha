@@ -110,6 +110,14 @@ memset  = 0x800230C8;
 strlen2 = 0x800230E8;
 card_write = 0x80023110;
 
+regular_add = 0x80023144;  
+regular_add_tmp = 0x80023188;  
+regular_remove = 0x800231CC;  
+regular_clear_tmps = 0x80023260;  
+regular_active = 0x800232C4;  
+regular_run_tasks = 0x800232D4;  
+
+
 rle_decode = 0x800234B8;
 lz1_decode = 0x8002353C;
 __main = 0x8002373C;

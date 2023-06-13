@@ -317,7 +317,7 @@ void func_80019948(void) {
 // NON MATCHING
 void func_80019990(void) {
     if (D_80047D64 != 0) {
-        tim3event = enable_timer3_event(func_800232D4);
+        tim3event = enable_timer3_event(regular_run_tasks);
         D_80047D64 = 0;
     }
 }
@@ -385,13 +385,13 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     StopRCnt(0xF2000002);
     StopRCnt(0xF2000003);
     VSyncCallbacks(0, 0);
-    tim3event = enable_timer3_event(func_800232D4);
-    func_800232C4(1);
+    tim3event = enable_timer3_event(regular_run_tasks);
+    regular_active(1);
     func_80019680();
     k_ChangeClearPAD(0);
     jt_set(jt_set, 1);
-    jt_set(func_80023144, 224);
-    jt_set(func_800231CC, 225);
+    jt_set(regular_add, 224);
+    jt_set(regular_remove, 225);
     jt_set(rle_decode, 192);
     jt_set(lz1_decode, 193);
     jt_set(setNextFile, 3);

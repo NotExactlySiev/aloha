@@ -40,9 +40,9 @@ typedef struct {
 } file_t;
 
 
-void func_80023144(void);
-void func_800231CC(void);
-void func_800232D4(void);
+void regular_add(void);
+void regular_remove(void);
+void regular_run_tasks(void);
 void rle_decode(s32, u8*, u8*);
 void lz1_decode(const u8*, u8*);
 

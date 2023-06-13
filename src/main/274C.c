@@ -123,6 +123,10 @@ extern s32 D_80047EF4;
 extern u16 _sndqueue_size;
 
 // 4 functions for actually accessing 12array (prefix with ww_)
+
+#define SNQ_FINISHED    -1
+#define SNQ_SET_REVERB  -7
+
 typedef struct {
     u8    com;
     u32    arg0;
@@ -248,20 +252,20 @@ void func_8001C20C(CdlLOC* loc) {
 // these 4 are NON MATCHING
 // but only double zero
 void func_8001C2F4(void) {
-    sndqueue_add_try(9, 0, 0);
+    sndqueue_add_try(CdlPause, 0, 0);
 }
 
 void func_8001C31C(void) {
-    sndqueue_add_try(3, 0, 0);
+    sndqueue_add_try(CdlPlay, 0, 0);
     func_8001C374();
 }
 
 void func_8001C34C(void) {
-    sndqueue_add_try(0xB, 0, 0);
+    sndqueue_add_try(CdlMute, 0, 0);
 }
 
 void func_8001C374(void) {
-    sndqueue_add_try(0xC, 0, 0);
+    sndqueue_add_try(CdlDemute, 0, 0);
 }
 
 
@@ -349,28 +353,28 @@ s32 func_8001CD30(s32 arg0) {
     s32 temp_s0;
 
     temp_s0 = D_80047EA4;
-    sndqueue_add_try(0xF9, arg0, 0);
+    sndqueue_add_try(SNQ_SET_REVERB, arg0, 0);
     return temp_s0;
 }
 
 void func_8001CD68(void) {
-    sndqueue_add_try(8, 0, 0);
+    sndqueue_add_try(CdlStop, 0, 0);
 }
 
 s32 func_8001CD90(void) {
     s32 temp_s0;
 
     temp_s0 = D_80047F1C;
-    sndqueue_add_try(0xFE, 5, 0);
+    sndqueue_add_try(-2, 5, 0);
     return temp_s0;
 }
 
 void func_8001CDC8(s32 arg0) {
-    sndqueue_add_try(0xFE, arg0, 0);
+    sndqueue_add_try(-2, arg0, 0);
 }
 
 void func_8001CDF0(void) {
-    sndqueue_add_try(0xF8, 0, 0);
+    sndqueue_add_try(-8, 0, 0);
 }
 
 s32 func_8001CE18(void) {
@@ -379,12 +383,12 @@ s32 func_8001CE18(void) {
 
 void func_8001CE28(void) {
     func_8001C2F4();
-    sndqueue_add_try(0xF6, 1, 0);
+    sndqueue_add_try(-0xA, 1, 0);
 }
 
 void func_8001CE58(void) {
     if (D_80047DEC == 1) {
-        sndqueue_add_try(0x1B, 0, 0);
+        sndqueue_add_try(CdlReadS, 0, 0);
         sndqueue_add_try(0xF6, 0, 0);
     }
 }
@@ -861,14 +865,20 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 
 // 5 task queue functions, has data right after it somehow
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023144);   
+// the variables for this one are all in the assembly file for the final one
+extern s32 D_800234B4;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023188);
+INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800231CC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add_tmp);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80023260);
+INCLUDE_ASM("asm/main/nonmatchings/274C", regular_remove);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800232C4);
+INCLUDE_ASM("asm/main/nonmatchings/274C", regular_clear_tmps);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800232D4);
+void regular_active(s32 val) {
+    D_800234B4 = val;
+}
+
+// this one is handwritten in assembly
+INCLUDE_ASM("asm/main/nonmatchings/274C", regular_run_tasks);
