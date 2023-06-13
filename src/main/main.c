@@ -232,7 +232,7 @@ void func_80019680(void) { // game_bootup
     call_SetGraphDebug(0);
     call_SetDispMask(0);
     func_8001DD7C();
-    func_80022CF0();
+    jt_series_gpu();
     func_80018AB4();
     func_8001E33C();
     func_8002092C();

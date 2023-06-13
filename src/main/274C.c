@@ -125,8 +125,6 @@ extern s32 _sndqueue_empty;
 extern s32 D_80047EF4;
 extern u16 _sndqueue_size;
 
-// 4 functions for actually accessing 12array (prefix with ww_)
-
 #define SNQ_FINISHED    -1
 #define SNQ_SET_REVERB  -7
 
@@ -625,35 +623,35 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FFD4);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020000);
 
 // 15 memory card file system functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020020);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020020);   // mc_addr_prefix
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800200C8);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800200C8);   // mc_
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002011C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002011C);   // mc_file_create
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800201A0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800201A0);   // mc_file_open
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020208);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020208);   // mc_file_close
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020228);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020228);   // mc_file_delete
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002026C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002026C);   // mc_write
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202A0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202A0);   // mc_write_try
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);   //
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800203AC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800203AC);   // mc_read_try
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020414);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020414);   // mc_seek
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020434);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020434);   // 
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800205C4);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800205C4);   // mc_file_find
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020610);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020610);   // mc_file_next
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020630);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020630);   // mc_format
 
 // 2 big almost identical functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
@@ -769,6 +767,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // load frame?
 
+// these jt ones all should be matching as they're very simple
 int call_StoreImage(RECT *rect, u_long *p) {
     return StoreImage(rect, p);
 }
@@ -891,7 +890,7 @@ long call_GetVideoMode(void) {
     return GetVideoMode();
 }
 
-void func_80022CF0(void) {  // jt_series_gpu
+void jt_series_gpu(void) {
     jt_set(call_ResetGraph, 0x180);
     jt_set(call_wait_frame, 0x181);
     jt_set(call_SetGraphDebug, 0x182);
