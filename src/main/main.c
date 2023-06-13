@@ -18,12 +18,12 @@ void func_800188C8(void) {
             // if addr isn't NULL, it's compressed
             if ((s32) addr & 1) {
                 addr = (s32) addr & ~0xF;
-                while (func_8001C780(g_Files[g_CurrFile].addr, addr, 0) < 0) {
+                while (cd_fs_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
                     k_printf("Exec File Read Error\n");
                 }
 
                 while (addr[0] != 0x582D5350 || addr[1] != 0x45584520) {
-                    func_8001C780(g_Files[g_CurrFile].addr, addr, 0);
+                    cd_fs_read(g_Files[g_CurrFile].addr, addr, 0);
                     k_printf("Exec File Read Error\n");
                 }    
             }
@@ -101,7 +101,7 @@ void func_80018AB4(void) {
     DrawSync(0);
     
     do {
-        tmp = func_8001C780("WARNING.PRS", (u32* )0x80100000, 0); //read file
+        tmp = cd_fs_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
     } while (tmp == -1);
 
     if (tmp >= 0) {        
@@ -127,7 +127,7 @@ void func_80018AB4(void) {
     call_SetDispMask(0);
     
     do {
-        D_80047D48 = func_8001C780("TITLE.PRS", (u32* )0x80100000, 0);  // read file
+        D_80047D48 = cd_fs_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
     } while (D_80047D48 == -1);
 
     if (D_80047D48 == -2) {
@@ -335,7 +335,7 @@ void read_version(void) {
     u8 *p;
 
     do {
-        tmp = func_8001C780("COUNTRY.TXT", (u32*) buf, 0x400);
+        tmp = cd_fs_read("COUNTRY.TXT", (u32*) buf, 0x400);
     } while (tmp == -1);
     
     g_GameRegion = 0;
@@ -496,10 +496,10 @@ int main(int argc, char** argv) {
     excpevent = enable_exception_event(func_80019D64);
     func_80020FC0(&D_80034344);
 
-    tmp = func_8001C780(g_SysSeFile, &tmpfilebuf, 0);
+    tmp = cd_fs_read(g_SysSeFile, &tmpfilebuf, 0);
     while (tmp < 0 || tmpfilebuf != 0x56414270)
     {
-        tmp = func_8001C780(g_SysSeFile, &tmpfilebuf, 0);
+        tmp = cd_fs_read(g_SysSeFile, &tmpfilebuf, 0);
         k_printf("VAB file Reload\n");
     }
 

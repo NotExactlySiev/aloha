@@ -48,7 +48,17 @@ ww_process = 0x8001B0A0;
 sndqueue_exec_all = 0x8001B8DC;
 
 set_mono = 0x8001C39C;
+cd_fs_get_file = 0x8001C418;
+cd_fs_get_file_safe = 0x8001C4F0;
+cd_fs_get_file_size = 0x8001C564;
+cd_seek_safe = 0x8001C5BC;
+cd_seek_file = 0x8001C5F4;
+cd_read_full = 0x8001C670;
 
+cd_fs_read = 0x8001C780;
+cd_fs_write = 0x8001C7B4;
+cd_fs_io = 0x8001C7E8;
+cd_fs_load_exe = 0x8001CA84;
 execute_uncompressed = 0x8001CCC0;
 
 

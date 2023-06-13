@@ -3,8 +3,6 @@
 #include <libspu.h>
 #include <libcd.h>
 
-//typedef struct EXEC EXEC;
-
 // data
 // but .data is not integrated into this file yet, so they're extern
 extern s32 is_mono;             // 80047D88
@@ -296,17 +294,12 @@ s32 set_mono(s32 arg0) {
 }
 
 // cd file management functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C418);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C4F0);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C564);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C5BC);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C5F4);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C670);
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file);   // cd_fs_get_file
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // cd_fs_get_file_safe
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_size);   // cd_fs_get_file_size
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_file);   // cd_seek_file
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
 
 // NON MATCHING but it's only one instruction swap
 s32 func_8001C734(s32 mode, u8* result) {   // pause
@@ -321,18 +314,15 @@ s32 func_8001C734(s32 mode, u8* result) {   // pause
 }
 
 // cd filesystem io
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C780);   // read
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7B4);   // write
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C7E8);   // command
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CA84);   // load exe
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_read);   // cd_fs_read
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_write);   // cd_fs_write
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_io);   // cd_fs_io
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);   // cd_fs_load_exe
 
 s32 execute_uncompressed(char* file, s32 param) {
     EXEC header;
     
-    if (func_8001CA84(file, param, &header) != 0)
+    if (cd_fs_load_exe(file, param, &header) != 0)
         return -1;
 
     flush_cache_safe();
@@ -819,7 +809,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", call_wait_one);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_VSync);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", get_tim3_counter);
+INCLUDE_ASM("asm/main/nonmatchings/274C", get_tim3_counter);        // get_vsync_event_ctr
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", wait_one);                // TODO: rename this to wait_frame
 
@@ -864,7 +854,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 
-// 5 task queue functions, has data right after it somehow
 // the variables for this one are all in the assembly file for the final one
 extern s32 D_800234B4;
 

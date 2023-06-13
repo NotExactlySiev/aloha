@@ -47,7 +47,7 @@ void rle_decode(s32, u8*, u8*);
 void lz1_decode(const u8*, u8*);
 
 //void func_80019D64(void);
-//s32 func_8001C780(char*, void*, s32);
+//s32 cd_fs_read(char*, void*, s32);
 
 
 void reboot(char*, char*);
