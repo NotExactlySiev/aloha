@@ -11,9 +11,11 @@ extern s32 is_mono;             // 80047D88
 extern CdlLOC ww_global_loc;
 extern void (*fnptr)(void);
 
-
 void cd_ready_callback(s32 status, u32 *result);
-void ww_try_add(u8, void*, s32);
+void sndqueue_add_try(u8, s32, s32);
+
+
+// functions
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
@@ -115,18 +117,92 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AD0C);
 // and then we just have 12array stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 
+// these belong to the sndqueue functions and might not be extern
+extern s32 _sndqueue_empty;
+extern s32 D_80047EF4;
+extern u16 _sndqueue_size;
+
 // 4 functions for actually accessing 12array (prefix with ww_)
-INCLUDE_ASM("asm/main/nonmatchings/274C", ww_reset);
+typedef struct {
+    u8    com;
+    u32    arg0;
+    u32    arg1;
+} snd_task_t;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", ww_add);
+extern s32 D_80047DD8;  // this is still a mystery. probably enum. gets set in the first function here
+extern s32 _sndqueue_empty;
+extern s32 D_80047DE0;  // step? no idea. maybe a state machine
+extern s32 _sndqueue_busy;
+extern s32 D_80047E94;  // this one just gets 0 written to it
+extern u16 _sndqueue_next;
+extern u16 D_80047F34;  // index of the task being executed
+extern u16 _sndqueue_size;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", ww_try_add);
+extern snd_task_t D_8004D0F8[160];  // _sndqueue
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", ww_process);
+// MATCHING with 4.3 -O1, which means these can't be -O2, unlike the next function :(
+void sndqueue_reset(void) {
+    _sndqueue_next = 0;
+    D_80047F34 = 0;
+    D_80047E94 = 0;
+    D_80047DD8 = 1;
+    _sndqueue_empty = 1;
+    D_80047DE0 = 0;
+    D_8004D0F8[0].com = -1;
+    _sndqueue_size = 0;
+}
+
+
+// NONMATCHING, but at 80% with 4.3 -O2. It has really weird assembly
+s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2) {
+    u8 tmp;
+    snd_task_t* task;
+
+    task = &D_8004D0F8[_sndqueue_next];
+
+    if (_sndqueue_busy == 1 || _sndqueue_size > 192) return 0;
+
+    _sndqueue_busy = 1;
+    D_8004D0F8[(_sndqueue_next+1)%256].com = -1;
+    task->com = arg0;
+    task->arg0 = arg1;
+    task->arg1 = arg2;
+
+    _sndqueue_size++;
+    _sndqueue_next++;
+    _sndqueue_next = (u8) _sndqueue_next;
+    _sndqueue_empty = 0;
+    _sndqueue_busy = 0;
+    return 1;
+}
+
+// MATCHING with 4.3 -O1
+void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2) {
+    if (D_80047EF4 == 0) {
+        while (_sndqueue_size > 192)
+            ww_process();
+    }
+    sndqueue_add(arg0, arg1, arg2);
+}
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", ww_process);    // sndqueue_exec
+
+
+// ALMOST MATCHING with 4.3 -O1
+int sndqueue_exec_all(void) {
+    s32 ret;
+
+    ret = 0;
+    if (_sndqueue_empty == 0) do {
+        ret = ww_process();
+    } while (_sndqueue_empty == 0 && ret != -1);
+    
+    CdSync(0, 0);
+    return ret;
+}
+
 
 // and then these functinos actually use those 4 to do stuff
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B8DC);
-
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B94C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B9D8);
@@ -159,33 +235,33 @@ void func_8001C20C(CdlLOC* loc) {
     ww_global_loc.second = loc->second;
     ww_global_loc.sector = loc->sector;
     D_80047EAC = CdPosToInt(loc);
-    ww_try_add(0xFCU, &D_80047D8C, 0);
-    ww_try_add(0xFEU, NULL, 0);
+    sndqueue_add_try(0xFCU, &D_80047D8C, 0);
+    sndqueue_add_try(0xFEU, NULL, 0);
     func_8001C374();
-    ww_try_add(0x16U, loc, 0);
-    ww_try_add(3U, NULL, 0);
-    ww_try_add(0xFBU, NULL, 0);
-    ww_try_add(0xFDU, &D_80047E9C, 0);
+    sndqueue_add_try(0x16U, loc, 0);
+    sndqueue_add_try(3U, NULL, 0);
+    sndqueue_add_try(0xFBU, NULL, 0);
+    sndqueue_add_try(0xFDU, &D_80047E9C, 0);
     func_8001B9D8();
 }
 
 // these 4 are NON MATCHING
 // but only double zero
 void func_8001C2F4(void) {
-    ww_try_add(9, 0, 0);
+    sndqueue_add_try(9, 0, 0);
 }
 
 void func_8001C31C(void) {
-    ww_try_add(3, 0, 0);
+    sndqueue_add_try(3, 0, 0);
     func_8001C374();
 }
 
 void func_8001C34C(void) {
-    ww_try_add(0xB, 0, 0);
+    sndqueue_add_try(0xB, 0, 0);
 }
 
 void func_8001C374(void) {
-    ww_try_add(0xC, 0, 0);
+    sndqueue_add_try(0xC, 0, 0);
 }
 
 
@@ -197,7 +273,7 @@ s32 set_mono(s32 arg0) {
     ret = is_mono;
     is_mono = arg0;
     
-    func_8001B8DC();
+    sndqueue_exec_all();
     
     if (arg0 == 0) {
         vol.val0 = 0x80;
@@ -273,28 +349,28 @@ s32 func_8001CD30(s32 arg0) {
     s32 temp_s0;
 
     temp_s0 = D_80047EA4;
-    ww_try_add(0xF9, arg0, 0);
+    sndqueue_add_try(0xF9, arg0, 0);
     return temp_s0;
 }
 
 void func_8001CD68(void) {
-    ww_try_add(8, 0, 0);
+    sndqueue_add_try(8, 0, 0);
 }
 
 s32 func_8001CD90(void) {
     s32 temp_s0;
 
     temp_s0 = D_80047F1C;
-    ww_try_add(0xFE, 5, 0);
+    sndqueue_add_try(0xFE, 5, 0);
     return temp_s0;
 }
 
 void func_8001CDC8(s32 arg0) {
-    ww_try_add(0xFE, arg0, 0);
+    sndqueue_add_try(0xFE, arg0, 0);
 }
 
 void func_8001CDF0(void) {
-    ww_try_add(0xF8, 0, 0);
+    sndqueue_add_try(0xF8, 0, 0);
 }
 
 s32 func_8001CE18(void) {
@@ -303,18 +379,18 @@ s32 func_8001CE18(void) {
 
 void func_8001CE28(void) {
     func_8001C2F4();
-    ww_try_add(0xF6, 1, 0);
+    sndqueue_add_try(0xF6, 1, 0);
 }
 
 void func_8001CE58(void) {
     if (D_80047DEC == 1) {
-        ww_try_add(0x1B, 0, 0);
-        ww_try_add(0xF6, 0, 0);
+        sndqueue_add_try(0x1B, 0, 0);
+        sndqueue_add_try(0xF6, 0, 0);
     }
 }
 
 void func_8001CEA0(void) {
-    ww_try_add(0xF6, 0, 0);
+    sndqueue_add_try(0xF6, 0, 0);
 }
 
 
@@ -753,9 +829,9 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadClut);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadTPage);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetVideoMode);       // call_SetVideoMode
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetVideoMode);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetVideoMode);       // call_GetVideoMode
+INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetVideoMode);
 
 // jmptable setter 0x180-0x19d
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CF0); 

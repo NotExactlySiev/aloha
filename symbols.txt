@@ -41,10 +41,11 @@ try_CdRead = 0x8001A270;
 try_CdMix = 0x8001A318;
 cd_get_status = 0x8001A348;
 
-ww_reset = 0x8001AED8; 
-ww_add = 0x8001AF28;
-ww_try_add = 0x8001B020; 
+sndqueue_reset = 0x8001AED8; 
+sndqueue_add = 0x8001AF28;
+sndqueue_add_try = 0x8001B020; 
 ww_process = 0x8001B0A0; 
+sndqueue_exec_all = 0x8001B8DC;
 
 set_mono = 0x8001C39C;
 
@@ -370,6 +371,11 @@ g_GameRegion = 0x80047d68;
 EXACT01_str = 0x80047d6c;
 
 is_mono = 0x80047d88;
+
+_sndqueue_empty = 0x80047DDC;
+_sndqueue_busy = 0x80047DF4;
+_sndqueue_next = 0x80047F2C;
+_sndqueue_size = 0x80047F3C;
 
 fnptr = 0x80047E58;
 

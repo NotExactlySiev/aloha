@@ -244,7 +244,7 @@ void func_80019680(void) { // game_bootup
 // MATCHING with psyq4.3/aspsx and -O1
 void func_8001972C(void) { // game_shutdown
     func_8001CD68();
-    func_8001B8DC();
+    sndqueue_exec_all();
     func_8001A74C();
     func_80020C8C();
     func_8001DE98();
@@ -502,7 +502,6 @@ int main(int argc, char** argv) {
         tmp = func_8001C780(g_SysSeFile, &tmpfilebuf, 0);
         k_printf("VAB file Reload\n");
     }
-
 
     func_80020D5C(0, &tmpfilebuf, 0);
     func_8001926C();
