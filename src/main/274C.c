@@ -1,106 +1,9 @@
 #include "common.h"
+#include <kernel.h>
+#include <libspu.h>
+#include <libcd.h>
 
-#define CdlNop		0x01	
-#define CdlSetloc	0x02	
-#define CdlPlay		0x03	
-#define CdlForward	0x04	
-#define CdlBackward	0x05
-#define CdlReadN	0x06
-#define CdlStandby	0x07
-#define CdlStop		0x08
-#define CdlPause	0x09
-#define CdlReset	0x0a
-#define CdlMute		0x0b
-#define CdlDemute	0x0c
-#define CdlSetfilter	0x0d
-#define CdlSetmode	0x0e
-#define CdlGetparam	0x0f
-#define CdlGetlocL	0x10
-#define CdlGetlocP	0x11
-#define CdlSeekL	0x15
-#define CdlSeekP	0x16
-#define CdlReadS	0x1B
-
-/*
- *	Location
- */
-typedef struct {
-	u8 minute;		/* minute (BCD) */
-	u8 second;		/* second (BCD) */
-	u8 sector;		/* sector (BCD) */
-	u8 track;		/* track (void) */
-} CdlLOC;
-
-/*
- *	ADPCM Filter
- */
-typedef struct {
-	u8	file;		/* file ID (always 1) */
-	u8	chan;		/* channel ID */
-	u16	pad;
-} CdlFILTER;
-
-/*
- *	Attenuator
- */
-typedef struct {
-	u8	val0;		/* volume for CD(L) -> SPU (L) */
-	u8	val1;		/* volume for CD(L) -> SPU (R) */
-	u8	val2;		/* volume for CD(R) -> SPU (L) */
-	u8	val3;		/* volume for CD(R) -> SPU (R) */
-} CdlATV;	
-
-
-typedef struct {                   
-    u32 pc0;      
-    u32 gp0;      
-    u32 t_addr;   
-    u32 t_size;   
-    u32 d_addr;   
-    u32 d_size;   
-    u32 b_addr;   
-    u32 b_size;   
-	u32 s_addr;
-	u32 s_size;
-	u32 sp,fp,gp,ret,base;
-} EXEC;
-
-typedef struct {
-    short left;	       /* Lch */
-    short right;       /* Rch */
-} SpuVolume;
-
-typedef struct {
-    unsigned short left;	/* Lch */
-    unsigned short right;       /* Rch */
-} SpuVolume16;
-
-typedef struct {
-    unsigned long	voice;		/* Ýè{CX:
-					   SpuSetVoiceAttr: e{CXÍ bit ñ
-					   SpuGetVoiceAttr: {CXÍ bit l
-					   */
-    unsigned long	mask;		/* Ýè®«rbg (Get ÅÍ³ø)	*/
-    SpuVolume		volume;		/* ¹Ê					*/
-    SpuVolume		volmode;	/* ¹Ê[h				*/
-    SpuVolume		volumex;	/* »ÝÌ¹Ê (Set ÅÍ³ø)		*/
-    unsigned short	pitch;		/* ¹ö (sb`wè)			*/
-    unsigned short	note;		/* ¹ö (m[gwè)			*/
-    unsigned short	sample_note;	/* ¹ö (m[gwè)			*/
-    short		envx;		/* »ÝÌGx[vl (Set ÅÍ³ø)  */
-    unsigned long	addr;		/* g`f[^æªAhX		*/
-    unsigned long	loop_addr;	/* [vJnAhX			*/
-    long		a_mode;		/* Attack rate mode			*/
-    long		s_mode;		/* Sustain rate mode			*/
-    long		r_mode;		/* Release rate mode			*/
-    unsigned short	ar;		/* Attack rate				*/
-    unsigned short	dr;		/* Decay rate				*/
-    unsigned short	sr;		/* Sustain rate				*/
-    unsigned short	rr;		/* Release rate				*/
-    unsigned short	sl;		/* Sustain level			*/
-    unsigned short	adsr1;		/* adsr1 for `VagAtr' */
-    unsigned short	adsr2;		/* adsr2 for `VagAtr' */
-} SpuVoiceAttr;
+//typedef struct EXEC EXEC;
 
 // data
 // but .data is not integrated into this file yet, so they're extern
@@ -111,10 +14,6 @@ extern void (*fnptr)(void);
 
 void cd_ready_callback(s32 status, u32 *result);
 void ww_try_add(u8, void*, s32);
-
-
-
-
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
@@ -143,11 +42,11 @@ s32 try_CdRead(s32 sectors, u32* buf, s32 mode) {
 extern s32 D_80047EE4;
 
 // MATCHING with 4.3 -O1   
-s32 func_8001A2C8(void) {
+s32 func_8001A2C8(s32 mode, u8* result) {
     s32 rc;
     s32 ret;
     
-    rc = CdReadSync();
+    rc = CdReadSync(mode, result);
     ret = -1;
     if (rc == -1) {
         D_80047EE4 = 0;
@@ -330,10 +229,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C5F4);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C670);
 
 // NON MATCHING but it's only one instruction swap
-s32 func_8001C734(void) {   // pause
+s32 func_8001C734(s32 mode, u8* result) {   // pause
     s32 ret;
 
-    ret = func_8001A2C8();
+    ret = func_8001A2C8(mode, result);
     if (ret == 2) {
         try_CdControl(CdlPause, 0, 0);
         flush_cache_safe();
@@ -528,7 +427,6 @@ void func_8001E0CC(SpuVoiceAttr* arg0) {
     {
         call_SpuSetVoiceAttr(arg0);
     }
-    
 }
 
 // this is almost exactly the same as the previous one

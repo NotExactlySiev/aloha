@@ -1,5 +1,5 @@
 
-CPP_FLAGS	+= -Iinclude
+CPP_FLAGS	+= -Iinclude -Ipsyq
 #CC_FLAGS	+= -O1 -quiet -mcpu=3000 -G8 -fverbose-asm -fgnu-linker -fcommon -mgas -msoft-float
 CC_FLAGS	+= -w -O2 -G0 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fverbose-asm -msoft-float
 

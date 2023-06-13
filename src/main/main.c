@@ -1,6 +1,7 @@
 #include "common.h"
 #include "main.h"
-#include "libgpu.h"
+#include <kernel.h>
+#include <libgpu.h>
 
 // file execute loop
 void func_800188C8(void) {

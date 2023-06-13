@@ -4,6 +4,7 @@
 #include "include_asm.h"
 #include "macros.h"
 #include "types.h"
+#include <sys/types.h>
 
 #define LEN(x) ((s32)(sizeof(x) / sizeof(*(x))))
 #define LENU(x) ((u32)(sizeof(x) / sizeof(*(x))))
@@ -20,6 +21,11 @@
 #define NOP
 #endif
 
+#define LANGUAGE_C
+
 int sprintf(char* dst, const char* fmt, ...);
+
+
+typedef struct EXEC EXEC;
 
 #endif

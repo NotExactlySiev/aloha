@@ -1,4 +1,5 @@
 #include "common.h"
+#include <kernel.h>
 
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
 
@@ -23,21 +24,6 @@
             polys[i].x0 = left; polys[i].y0 = y; polys[i].x1 = rght; polys[i].y1 = y;                        \
             polys[i].x2 = left; polys[i].y2 = y+h; polys[i].x3 = rght; polys[i].y3 = y+h;                \
             rght += w; left += w; tex_x += td; }
-
-
-typedef struct {
-    u32 pc0;
-    u32 gp0;
-    u32 t_addr;
-    u32 t_size;
-    u32 d_addr;
-    u32 d_size;
-    u32 b_addr;
-    u32 b_size;
-	u32 s_addr;
-	u32 s_size;
-	u32 sp,fp,gp,ret,base;
-} EXEC;
 
 typedef struct {
     char magic[16];     // 0x10 0x00
