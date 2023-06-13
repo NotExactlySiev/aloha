@@ -3,8 +3,8 @@
 
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
 
-#define    SLEEP_FRAMES(f)    for (i = 0; i < f; i++) wait_one(0);
-#define    SET_POLYS_COL(c)    { DrawSync(0); wait_one(0); for (i = 0; i < 4; i += 1)                     \
+#define    SLEEP_FRAMES(f)    for (i = 0; i < f; i++) wait_frame(0);
+#define    SET_POLYS_COL(c)    { DrawSync(0); wait_frame(0); for (i = 0; i < 4; i += 1)                     \
             { polys[i].r0 = c; polys[i].g0 = c; polys[i].b0 = c;           \
             DrawPrim(&polys[i]); } }
 // maybe this one should add 4 itself?
@@ -55,6 +55,8 @@ void reboot(char*, char*);
 
 
 void* jmptable[1024];   // 80010000
+
+
 u8 g_GameConfig[1280];  // 80014000
 
 #define DFILE(ptr, name)    { (void*) (ptr | 1), name }

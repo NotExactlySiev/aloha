@@ -2,12 +2,17 @@
 #include <kernel.h>
 #include <libspu.h>
 #include <libcd.h>
+#include <libgpu.h>
 
 // data
 // but .data is not integrated into this file yet, so they're extern
 extern s32 is_mono;             // 80047D88
 extern CdlLOC ww_global_loc;
 extern void (*fnptr)(void);
+
+// regular task vars, they're in the assembly
+extern s32 D_800234B0;
+extern s32 D_800234B4;
 
 void cd_ready_callback(s32 status, u32 *result);
 void sndqueue_add_try(u8, s32, s32);
@@ -764,71 +769,160 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // load frame?
 
-// indirect calls
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_StoreImage);
+int call_StoreImage(RECT *rect, u_long *p) {
+    return StoreImage(rect, p);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_MoveImage);
+int call_MoveImage(RECT *rect, int x, int y) {
+    return MoveImage(rect, x, y);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetDispEnv);
+DISPENV *call_GetDispEnv(DISPENV *env) {
+    return GetDispEnv(env);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetDrawEnv);
+DRAWENV *call_GetDrawEnv(DRAWENV *env) {
+    return GetDrawEnv(env);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawEnv);
+void call_SetDrawEnv(DR_ENV *dr_env, DRAWENV *env) {
+    SetDrawEnv(dr_env, env);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawOffset);
+void call_SetDrawOffset(DR_OFFSET *p, u_short *ofs) {
+    SetDrawOffset(p, ofs);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawArea);
+void call_SetDrawArea(DR_AREA *p, RECT *r) {
+    SetDrawArea(p, r);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetGraphType);
+int call_GetGraphType(void) {
+    return GetGraphType();
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDefDispEnv);
+DISPENV *call_SetDefDispEnv(DISPENV *env, int x, int y, int w, int h) {
+    return SetDefDispEnv(env, x, y, w, h);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDefDrawEnv);
+DRAWENV *call_SetDefDrawEnv(DRAWENV *env, int x, int y, int w, int h) {
+    return SetDefDrawEnv(env, x, y, w, h);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDrawMode);
+void call_SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw) {
+    SetDrawMode(p, dfe, dtd, tpage, tw);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_ClearImage);
+int call_ClearImage(RECT *rect, u_char r, u_char g, u_char b) {
+    return ClearImage(rect, r, g, b);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadImage);
+int call_LoadImage(RECT *rect, u_long *p) {
+    return LoadImage(rect, p);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_CleaOTag);
+u_long *call_CleaOTag(u_long *ot, int n) {
+    return ClearOTag(ot, n);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_ClearOTagR);
+u_long *call_ClearOTagR(u_long *ot, int n) {
+    return ClearOTagR(ot, n);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawOTag);
+void call_DrawOTag(u_long *p) {
+    DrawOTag(p);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_PutDispEnv);
+DISPENV *call_PutDispEnv(DISPENV *env) {
+    return PutDispEnv(env);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_PutDrawEnv);
+DRAWENV *call_PutDrawEnv(DRAWENV *env) {
+    return PutDrawEnv(env);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawSync);
+int call_DrawSync(int mode) {
+    return DrawSync(mode);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_ResetGraph);
+int call_ResetGraph(int mode) {
+    return ResetGraph(mode);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_wait_one);
+void call_wait_frame(void) {
+    wait_frame();
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_VSync);
+int call_VSync(int mode) {
+    return VSync(mode);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", get_tim3_counter);        // get_vsync_event_ctr
+int get_vsync_event_cnt(void) {
+    return D_800234B0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", wait_one);                // TODO: rename this to wait_frame
+INCLUDE_ASM("asm/main/nonmatchings/274C", wait_frame);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetGraphDebug);
+int call_SetGraphDebug(int level) {
+    return SetGraphDebug(level);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetDispMask);
+void call_SetDispMask(int mask) {
+    SetDispMask(mask);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_DrawPrim);
+void call_DrawPrim(void *p) {
+    DrawPrim(p);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadClut);
+u_short call_LoadClut(u_long *clut, int x, int y) {
+    return LoadClut(clut, x, y);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_LoadTPage);
+u_short call_LoadTPage(u_long *pix, int tp, int abr, int x, int y, int w, int h) {
+    return LoadTPage(pix, tp, abr, x, y, w, h);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_SetVideoMode);
+long call_SetVideoMode(long mode) {
+    return SetVideoMode(mode);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", call_GetVideoMode);
+long call_GetVideoMode(void) {
+    return GetVideoMode();
+}
 
-// jmptable setter 0x180-0x19d
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022CF0); 
+void func_80022CF0(void) {  // jt_series_gpu
+    jt_set(call_ResetGraph, 0x180);
+    jt_set(call_wait_frame, 0x181);
+    jt_set(call_SetGraphDebug, 0x182);
+    jt_set(call_SetDispMask, 0x183);
+    jt_set(get_vsync_event_cnt, 0x184);
+    jt_set(call_PutDispEnv, 0x185);
+    jt_set(call_PutDrawEnv, 0x186);
+    jt_set(call_CleaOTag, 0x187);
+    jt_set(call_ClearOTagR, 0x188);
+    jt_set(call_DrawOTag, 0x189);
+    jt_set(call_LoadImage, 0x18A);
+    jt_set(call_ClearImage, 0x18B);
+    jt_set(call_DrawSync, 0x18C);
+    jt_set(call_SetDrawMode, 0x18D);
+    jt_set(call_SetDefDispEnv, 0x18E);
+    jt_set(call_SetDefDrawEnv, 0x18F);
+    jt_set(call_GetGraphType, 0x190);
+    jt_set(call_VSync, 0x191);
+    jt_set(call_GetDispEnv, 0x192);
+    jt_set(call_GetDrawEnv, 0x193);
+    jt_set(call_SetDrawEnv, 0x194);
+    jt_set(call_SetDrawOffset, 0x195);
+    jt_set(call_SetDrawArea, 0x196);
+    jt_set(call_StoreImage, 0x197);
+    jt_set(call_MoveImage, 0x198);
+    jt_set(call_DrawPrim, 0x199);
+    jt_set(call_LoadTPage, 0x19A);
+    jt_set(call_LoadClut, 0x19B);
+    jt_set(call_SetVideoMode, 0x19C);
+    jt_set(call_GetVideoMode, 0x19D);
+}
 
 
 // standard str functions
@@ -855,8 +949,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 
 // the variables for this one are all in the assembly file for the final one
-extern s32 D_800234B4;
-
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add_tmp);

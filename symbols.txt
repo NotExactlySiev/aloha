@@ -90,10 +90,10 @@ call_PutDrawEnv 	= 0x80022AC0;
 call_DrawSync 	= 0x80022AE0;
 call_ResetGraph 	= 0x80022B00;
 
-call_wait_one = 0x80022B54;
+call_wait_frame = 0x80022B54;
 call_VSync = 0x80022B74;
-get_tim3_counter = 0x80022B94;
-wait_one = 0x80022BA4;
+get_vsync_event_cnt = 0x80022B94;
+wait_frame = 0x80022BA4;
 call_SetGraphDebug = 0x80022BD8;
 
 call_SetDispMask    = 0x80022c1c;

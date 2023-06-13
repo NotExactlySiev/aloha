@@ -109,13 +109,13 @@ void func_80018AB4(void) {
         LOAD_PRS(&tmpfilebuf, 256, 240);
         SLEEP_FRAMES(10);
         
-        wait_one(0);
+        wait_frame(0);
         call_SetDispMask(1); // set disp mask to show it
         
         FADE_IN(4);
         
         DrawSync(0);
-        wait_one(0);
+        wait_frame(0);
         
         SET_POLYS_COL(128);
         SLEEP_FRAMES(300);
@@ -123,7 +123,7 @@ void func_80018AB4(void) {
         FADE_OUT(4);
     }
     
-    wait_one(0);
+    wait_frame(0);
     call_SetDispMask(0);
     
     do {
@@ -135,7 +135,7 @@ void func_80018AB4(void) {
         LOAD_PRS(&D_80032FFC, 256, 96);
         SLEEP_FRAMES(10);
         
-        wait_one(0);
+        wait_frame(0);
         call_SetDispMask(1);
         
         FADE_IN(4);
@@ -147,7 +147,7 @@ void func_80018AB4(void) {
         LOAD_PRS(&tmpfilebuf, 320, 240);
         SLEEP_FRAMES(10);
         
-        wait_one(0);
+        wait_frame(0);
         call_SetDispMask(1);
         
         FADE_IN(4);
@@ -155,7 +155,7 @@ void func_80018AB4(void) {
 }
 
 #define DrawSync        call_DrawSync
-#define wait_one   call_wait_one
+#define wait_frame   call_wait_frame
 void func_8001926C(void) {
     DRAWENV drawenv;
     DISPENV dispenv;
@@ -189,7 +189,7 @@ void func_8001926C(void) {
         FADE_OUT(4);
     }
     
-    call_wait_one(0);
+    call_wait_frame(0);
     call_SetDispMask(0);
     call_SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
     call_SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
@@ -204,17 +204,17 @@ void func_8001926C(void) {
     drawenv.b0 = 0;
     
     call_DrawSync(0);
-    call_wait_one(0);
+    call_wait_frame(0);
     call_PutDrawEnv(&drawenv);
     call_PutDispEnv(&dispenv);
     
     call_DrawSync(0);
-    call_wait_one(0);
+    call_wait_frame(0);
     call_PutDrawEnv(&drawenv);
     call_PutDispEnv(&dispenv);
 }
 #undef DrawSync
-#undef wait_one
+#undef wait_frame
 
 
 // NON MATCHING but mostly close 
@@ -225,9 +225,9 @@ void func_80019680(void) { // game_bootup
     read_version();
     tmp = get_GameNP();
     if (tmp != 0) tmp = 1;
-    wait_one(0);
+    wait_frame(0);
     SetVideoMode(tmp);
-    wait_one(0);
+    wait_frame(0);
     call_ResetGraph(0);
     call_SetGraphDebug(0);
     call_SetDispMask(0);
@@ -510,7 +510,7 @@ int main(int argc, char** argv) {
     }
     setNextFile(0);
     func_800188C8();
-    call_wait_one(0);
+    call_wait_frame(0);
     call_SetDispMask(0);
     func_80021600();
     func_8001972C();
