@@ -223,7 +223,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BB50);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
 
-
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
 extern s32 D_80047D78;
@@ -688,13 +687,14 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F48);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F9C);
 
-// 4 functions related to some sort of list
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FC0);
+// 3 audio_list functions
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FC0);   // audio_list_set_ptr
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FD0);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FD0);   // audio_list_find
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021028);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021028);   // audio_list_play
 
+//
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210D4);
 
 //
@@ -751,21 +751,21 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
 
 // 8 loading and playing video
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);       // vid_setup_mdec
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021F7C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021FD0);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);       // 
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022260);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022260);       // vid_load_frame
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // vid_decode_frame
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // vid_wait_for_img
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // load frame?
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // vid_play_file
 
 // these jt ones all should be matching as they're very simple
 int call_StoreImage(RECT *rect, u_long *p) {
