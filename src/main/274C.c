@@ -409,12 +409,73 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D29C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
 
+
+#define     CD_SECTOR_SIZE      0x800
+
+#define     CACHE_ENTRIES       10
+#define     CACHE_DATA_SIZE     CD_SECTOR_SIZE
+
+typedef struct {
+    u32    expire;
+    CdlLOC loc;
+    u8     data[CACHE_DATA_SIZE];
+} cache_entry_t;
+
+cache_entry_t cache_entries[10];
+
 // cache handling functions (i think) and more cd stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D398);   // update
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D414);   // clear
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D440);   // load from cache
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D440);   // load from cache
+// NOT MATCHING whatsoever
+s32 func_8001D440(CdlLOC* loc, u8* data) {
+    s32 i;  
+    u32 minidx;
+    u32 minexp;
+
+    for (i = 0; i < CACHE_ENTRIES; i++) {
+        if (cache_entries[i].expire == 0) continue;
+        if (strncmp(3, loc, &cache_entries[i].loc) == 0) continue;
+        // found it!
+        memcpy(0x800, &cache_entries[i].data, data);
+        return 1;
+    }
+
+    // it's not cached, load from disc
+    CdSync(0, 0);
+    do {
+            try_CdControl(2, &loc->minute, 0);
+            try_CdRead(1, data, 0x80);
+    } while (func_8001A2C8(0, 0) == -1);
+    try_CdControl(9, 0, 0); //pause
+
+    // and then try to cache it. first look for an empty entry
+    for (i = 0; i < CACHE_ENTRIES; i++) {
+        if (cache_entries[i].expire == 0) {
+            memcpy(0x800, data, cache_entries[i].data);
+            func_8001D398(&cache_entries[i].expire);
+            cache_entries[i].loc = *loc;
+            return 1;
+        }
+    }
+    
+    // if not found, find the one with the closest expiry
+    minexp = -1;
+    
+    for (i = 0; i < CACHE_ENTRIES; i++) {
+        if (cache_entries[i].expire < minexp) {
+            minexp = cache_entries[i].expire;
+            minidx = i;
+        }
+    }
+    memcpy(0x800, data, cache_entries[minidx].data);
+    cache_entries[i].loc = *loc;
+    func_8001D398(&cache_entries[i].expire);
+    return 1;
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D67C);
 

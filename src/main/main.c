@@ -220,7 +220,7 @@ void func_8001926C(void) {
 // NON MATCHING but mostly close 
 void func_80019680(void) { // game_bootup
     s32 tmp;
-
+    // sound functions here have been commented temporarilly. TODO
     func_8001A3B8();
     read_version();
     tmp = get_GameNP();
@@ -233,7 +233,7 @@ void func_80019680(void) { // game_bootup
     call_SetDispMask(0);
     func_8001DD7C();
     jt_series_gpu();
-    func_80018AB4();
+    //func_80018AB4();
     func_8001E33C();
     func_8002092C();
     func_80021D54();
