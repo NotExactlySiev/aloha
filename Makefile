@@ -49,6 +49,16 @@ $(BUILD_DIR)/src/main/%.c.o: $(BUILD_DIR)/src/main/%.s $(BUILD_DIR)/src/main
 	#psyq-obj-parser $@bj -o $@
 	#rm $@bj
 
+
+
+$(BUILD_DIR)/src/gameover/%.s: src/gameover/%.c $(BUILD_DIR)/src/gameover
+	$(CPP) $(CPP_FLAGS) $< | $(CC) $(CC_FLAGS) $(ARCH_FLAGS) -o $@ -S -xc -
+
+$(BUILD_DIR)/src/gameover/%.c.o: $(BUILD_DIR)/src/gameover/%.s $(BUILD_DIR)/src/gameover
+	$(AS) $(AS_FLAGS) -o $@ $<
+
+
+
 split:
 	tools/n64splat/split.py splat.main.yaml
 

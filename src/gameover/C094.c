@@ -40,4 +40,4 @@ INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC318);
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC358);
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC3A4);
+INCLUDE_ASM("asm/gameover/nonmatchings/C094", main);
