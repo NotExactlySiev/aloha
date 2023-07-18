@@ -3,6 +3,8 @@
 #include <kernel.h>
 #include <libgpu.h>
 
+#define EXTRA_FEATURES
+
 // file execute loop
 void func_800188C8(void) {
     s32 *addr;
@@ -14,6 +16,9 @@ void func_800188C8(void) {
             g_CurrFile = 0;
         }
         addr = g_Files[g_CurrFile].header;
+#ifdef  EXTRA_FEATURES
+        k_printf("now executing: %s\n", g_Files[g_CurrFile].addr);
+#endif
         if (addr != NULL) {
             // if addr isn't NULL, it's compressed
             if ((s32) addr & 1) {
@@ -233,7 +238,7 @@ void func_80019680(void) { // game_bootup
     call_SetDispMask(0);
     func_8001DD7C();
     jt_series_gpu();
-    //func_80018AB4();
+    func_80018AB4();
     func_8001E33C();
     func_8002092C();
     func_80021D54();
@@ -304,6 +309,9 @@ void jt_set(void* func, s32 idx) {
     void** jmptable = (void**) 0x80010000;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();
+#ifdef  EXTRA_FEATURES
+    k_printf("JT: Set %03X to 0x%X\n", idx, func);
+#endif
 }
 
 // NON MATCHING
