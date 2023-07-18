@@ -3,12 +3,12 @@ options:
   basename: title
   base_path:  .
   build_path: build
-  target_path: disc/deTITLE.PEX
-  asm_path:   asm/title
-  asset_path: assets/title
-  src_path:   src/title
+  target_path: disc/deGAMEOVER.PEX
+  asm_path:   asm/gameover
+  asset_path: assets/gameover
+  src_path:   src/gameover
   compiler: GCC
-  symbol_addrs_path: symbols.title.txt
+  symbol_addrs_path: symbols.gameover.txt
   use_legacy_include_asm: no
   migrate_rodata_to_functions: no
   section_order:
@@ -23,7 +23,6 @@ segments:
     vram: 0x800e0000
     subsegments:
       - [0x800, rodata]
-      - [0x1120, c]
-      - [0xA1F0, c]
-      - [0xB804, data]
-  - [0x15800]
+      - [0xC094, c]
+      - [0xDAB0, data]
+  - [0xE000]
