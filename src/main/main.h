@@ -146,7 +146,7 @@ typedef struct {
     TCB* current_tcb;
 } PCB;
 
-void func_800188C8(void);               
+void file_execute_loop(void);               
 char* get_file_addr(s32 idx);
 s32 func_80018A6C(void);
 s32 func_80018A7C(void);

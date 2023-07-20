@@ -3,15 +3,14 @@
 #include <kernel.h>
 #include <libgpu.h>
 
-// file execute loop
-void func_800188C8(void) {
+void file_execute_loop(void)
+{
     s32 *addr;
     s32 tmp;
 
     while (1) {
-        if (g_CurrFile == -1) {
-            g_CurrFile = 0;
-        }
+        if (g_CurrFile == -1) g_CurrFile = 0;
+
         addr = g_Files[g_CurrFile].header;
 #ifdef  EXTRA_FEATURES
         k_printf("now executing: %s\n", g_Files[g_CurrFile].addr);
@@ -38,27 +37,32 @@ void func_800188C8(void) {
     }
 }
 
-char* get_file_addr(s32 idx) {
+char* get_file_addr(s32 idx)
+{
     if (idx > 42) return 0;
     return g_Files[idx].addr;
 }
 
-s32 func_80018A6C(void) {
+s32 func_80018A6C(void)
+{
     return D_80047D50;
 }
 
-s32 func_80018A7C(void) {
+s32 func_80018A7C(void)
+{
     return D_80047D4C;
 }
 
-void func_80018A8C(s32 arg0) {
+void func_80018A8C(s32 arg0)
+{
     if (arg0 != 0)
         D_80047D4C = 1;
     else
         D_80047D4C = 0;
 }
 
-void func_80018AB4(void) {
+void func_80018AB4(void)
+{
     DRAWENV drawenv;
     DISPENV dispenv;
     POLY_FT4 polys[5];
@@ -152,7 +156,8 @@ void func_80018AB4(void) {
 
 #define DrawSync        call_DrawSync
 #define wait_frame   call_wait_frame
-void func_8001926C(void) {
+void func_8001926C(void)
+{
     DRAWENV drawenv;
     DISPENV dispenv;
     POLY_FT4 polys[5];
@@ -212,7 +217,8 @@ void func_8001926C(void) {
 #undef DrawSync
 #undef wait_frame
 
-void func_80019680(void) {
+void func_80019680(void)
+{
     func_8001A3B8();
     read_version();
     wait_frame(0);
@@ -231,7 +237,8 @@ void func_80019680(void) {
     func_8001E38C();
 }
 
-void game_shutdown(void) { // game_shutdown
+void game_shutdown(void)
+{
     func_8001CD68();
     sndqueue_exec_all();
     func_8001A74C();
@@ -247,7 +254,8 @@ void game_shutdown(void) { // game_shutdown
     StopRCnt(0xF2000003);
 }
 
-s32 enable_timer3_event(void* handler) {
+s32 enable_timer3_event(void* handler)
+{
     s32 event;
     k_EnterCriticalSection();
     event = k_OpenEvent(0xF2000003, 2, 0x1000, handler);
@@ -258,7 +266,8 @@ s32 enable_timer3_event(void* handler) {
     return event;
 }
 
-void disable_timer3_event(s32 arg0) {
+void disable_timer3_event(s32 arg0)
+{
     k_EnterCriticalSection();
     StopRCnt(0xF2000003);
     k_CloseEvent(arg0);
@@ -267,13 +276,15 @@ void disable_timer3_event(s32 arg0) {
 
 void nop(void) {}
 
-void flush_cache_safe(void) {
+void flush_cache_safe(void)
+{
     k_EnterCriticalSection();
     k_FlushCache();
     k_ExitCriticalSection();
 }
 
-void jt_clear(void) {
+void jt_clear(void)
+{
     void** jmptable = (void**) 0x80010000;
     int i;
 
@@ -290,25 +301,29 @@ void jt_set(void* func, s32 idx)
     flush_cache_safe();
 }
 
-void func_80019948(void) {
+void func_80019948(void)
+{
     if (D_80047D64 != 1) {
         disable_timer3_event(tim3event);
         D_80047D64 = 1;
     }
 }
 
-void func_80019990(void) {
+void func_80019990(void)
+{
     if (D_80047D64 != 0) {
         tim3event = enable_timer3_event(regular_run_tasks);
         D_80047D64 = 0;
     }
 }
 
-s32 get_GameNP(void) {
+s32 get_GameNP(void)
+{
     return g_GameNP;
 }
 
-void read_version(void) {
+void read_version(void)
+{
     u8 buf[1024];
     s32 i;
     s32 tmp;
@@ -345,17 +360,20 @@ void read_version(void) {
     }
 }
 
-s32 get_GameRegion(void) {
+s32 get_GameRegion(void)
+{
     return g_GameRegion;
 }
 
-u8* get_VersionStr(void) {
+u8* get_VersionStr(void)
+{
     if (g_GameIsZ == 0)
         return 0;    
     return g_VersionStr;
 }
 
-void jt_series1(void) { // TODO: this is probably game_bootup
+void jt_series1(void)
+{ // TODO: this is probably game_bootup
     ResetCallback();
     StopRCnt(0xF2000000);
     StopRCnt(0xF2000001);
@@ -385,11 +403,13 @@ void jt_series1(void) { // TODO: this is probably game_bootup
     func_80020000(0);
 }
 
-s32 get_D_80047E6C(void) {
+s32 get_D_80047E6C(void)
+{
     return D_80047E6C;
 }
 
-void* jt_reset(void) {
+void* jt_reset(void)
+{
     jt_clear();
     jt_set(func_80019DCC, 0xFF);
     jt_set(get_D_80047E6C, 0x2);
@@ -417,7 +437,8 @@ void func_80019D0C(void)
     }
 }
 
-void func_80019D64(void) {
+void func_80019D64(void)
+{
     struct {
         ExCB* excb[2];
         PCB* pcb;
@@ -427,7 +448,8 @@ void func_80019D64(void) {
     bios_tables->pcb->current_tcb->regs[2] = 0;
 }
 
-s32 enable_exception_event(void* handler) {
+s32 enable_exception_event(void* handler)
+{
     s32 event;
 
     k_EnterCriticalSection();
@@ -437,23 +459,28 @@ s32 enable_exception_event(void* handler) {
     return event;
 }
 
-u32 func_80019DCC(void) {
+u32 func_80019DCC(void)
+{
   return 0x10002;
 }
 
-void setNextFile(s32 id) {
+void setNextFile(s32 id)
+{
     g_NextFile = id;    
 }
 
-s32 getNextFile() {
+s32 getNextFile()
+{
     return g_NextFile;
 }
 
-u8* getGameConfig() {
+u8* getGameConfig()
+{
     return 0x80014000;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
     s32 pad[22];
     s32 rc;
     
@@ -476,7 +503,7 @@ int main(int argc, char** argv) {
         D_80047D50 = 1;
     }
     setNextFile(0);
-    func_800188C8();
+    file_execute_loop();
     call_wait_frame(0);
     call_SetDispMask(0);
     func_80021600();
