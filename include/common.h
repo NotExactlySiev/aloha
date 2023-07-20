@@ -9,23 +9,11 @@
 #define LEN(x) ((s32)(sizeof(x) / sizeof(*(x))))
 #define LENU(x) ((u32)(sizeof(x) / sizeof(*(x))))
 #define STRCPY(dst, src) __builtin_memcpy(dst, src, sizeof(src))
-
-#define LOH(x) (*(s16*)&(x))
-#if defined(HACKS) && !defined(PERMUTER)
-// The following hacks are required to get a matching decompilation. If removed
-// they will still logically match the original function.
-#define ALIGNED4 __attribute__((aligned(4)))
-#define NOP asm volatile("nop")
-#else
-#define ALIGNED4
-#define NOP
-#endif
-
-#define LANGUAGE_C
-
-int sprintf(char* dst, const char* fmt, ...);
-
+// TODO: figure out how to use this and if it works
+#define CALLER(func, ...)    call_## func(__VA_ARGS__) { return func(__VA_ARGS__); }
 
 typedef struct EXEC EXEC;
+
+int sprintf(char* dst, const char* fmt, ...);
 
 #endif
