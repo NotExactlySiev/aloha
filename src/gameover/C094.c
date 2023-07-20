@@ -79,7 +79,25 @@ void func_800EC23C(s32 arg)
     func_800EBF58(arg);
 }
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC268);
+//INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC268);
+void func_800EC95C(int, int, s32, s32, s32, s32);          /* extern */
+extern s32 D_800ED394;
+extern s32 D_800ED3CC;
+
+// not sure about this one. might be wrong, but doesn't seem really broken.
+// seems to repeat and action for diagonal lines 128 pixels apart in both directions
+void func_800EC268(void) {
+    int i,j;
+
+    D_800ED394 = (D_800ED394 + 1) & 0x7F;
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            func_800EC95C(0, 0x30, 
+                ((i << 7) - D_800ED394) - 0x40, 
+                ((j << 7) + D_800ED394) - 0x40, 
+                D_800ED3CC / 2, 2);
+}
+
 
 void func_800EC318(void)
 {
