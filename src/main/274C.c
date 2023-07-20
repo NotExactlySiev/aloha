@@ -6,13 +6,10 @@
 
 // data
 // but .data is not integrated into this file yet, so they're extern
-extern s32 is_mono;             // 80047D88
-extern CdlLOC ww_global_loc;
-extern void (*fnptr)(void);
-
+int (*fnptr)() = 0;
+s32 is_mono = 0;
 CdlFILE D_80048068;
 CdlLOC ww_global_loc;
-
 
 // regular task vars, they're in the assembly
 extern s32 D_800234B0;
@@ -522,8 +519,6 @@ void call_SpuSetVoiceAttr(SpuVoiceAttr* attr) {
 
 extern int D_80047E08;
 
-// NON MATCHING, but pretty close with 4.3 -O1
-// probably can be matched
 void func_8001E0CC(SpuVoiceAttr* arg0) {
     SpuVoiceAttr attr;
     s32 left;
@@ -767,8 +762,8 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021600);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021740);
 
-// ALMOST MATCHING, regallock on 4.3 -O1, return delay slot in 4.0 -O1 
-void execute_compressed(u32* addr, u32 stack) {
+void execute_compressed(u32* addr, u32 stack)
+{
     EXEC header;
     EXEC* p;
     
@@ -779,13 +774,13 @@ void execute_compressed(u32* addr, u32 stack) {
     k_Exec(&header, 1, 0);
 }
 
-// MATCHING
-void func_800218A0(void (*fn)(void)) {
+void func_800218A0(void (*fn)(void))
+{
     fnptr = fn;
 }
 
-// matching with 4.3 -O2
-void func_800218B0(void) {
+void func_800218B0(void)
+{
     if (fnptr != 0) {
         (*fnptr)();
     }

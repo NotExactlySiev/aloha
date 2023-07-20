@@ -38839,9 +38839,6 @@ glabel D_80047D80
 glabel D_80047D84
 /* 30584 80047D84 */ .word 0x00000001
 
-glabel is_mono
-/* 30588 80047D88 */ .word 0x00000000
-
 glabel D_80047D8C
 /* 3058C 80047D8C */ .word 0x00000000
 
@@ -38985,9 +38982,6 @@ glabel D_80047E50
 
 glabel D_80047E54
 /* 30654 80047E54 */ .word 0x00000000
-
-glabel fnptr
-/* 30658 80047E58 */ .word 0x00000000
 
 glabel D_80047E5C
 /* 3065C 80047E5C */ .word 0x00000000
