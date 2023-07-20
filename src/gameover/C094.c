@@ -28,6 +28,7 @@ typedef union {
 extern jt_t jmptable;
 
 
+
 // data from here
 typedef struct {
     DISPENV dispenv;
@@ -46,6 +47,15 @@ typedef struct {
 } unk_struct;
 
 
+// these might be not s32 but paired as structs?
+s32* intarrs[3] = {
+    { 13, 1, -1, 0 },
+    { 0, 4, 1, 4, 2, 4, 3, 4, 8, 10, 9, 10, 10, 10, 11, 10, 12, 10, 13, 10, -1, 18 },
+    { 16, 8, 17, 8, -1, 0},
+};
+s32* seq = 0;
+s32 seq_val = 0;
+s32 seq_wait = 0;
 
 int D_800ED354[7] = { 32, 33, 34, 35, 36, 37, 32 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
@@ -66,8 +76,8 @@ s32 D_800ED3DC = 0;     // selected
 s32 D_800ED3E4 = 0;
 s32 D_800ED3EC = 0;
 s32 D_800ED3F4 = 0;
-s32 D_800ED3FC = 0;
-s32 D_800ED404 = 0;
+s32 seq_idx = 0;
+s32 seq_timer = 0;
 jt_t *jtptr = &jmptable;
 
 s32 D_800ED340[5] = { 40, 42, 41, 42, -1 };
@@ -126,10 +136,49 @@ void func_800EBCF0(void)
     func_800EBD10(0);
 }
 
-// relatively simple
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBD10);
+void func_800EBD10(int idx)
+{
+    seq = intarrs[idx];
+    seq_idx = 0;
+    seq_timer = 0;
+    seq_val = seq[0];
+    seq_wait = seq[1];
+}
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBD5C);
+// TODO: make sequence steps into a struct
+void func_800EBD5C(void)
+{
+    s32 temp_v1_2;
+
+    // sequence mode
+    if (D_800ED3F4 == 0) {
+        // update timer, go to next step if this one is over
+        seq_timer += 1;
+        if (seq_wait < seq_timer) {
+            // increment index
+            seq_idx += 2;
+            seq_timer = 0;
+            // if the sequence is over, roll over to step idx determined by the last value
+            if (seq[seq_idx] == -1) {
+                seq_idx = seq[seq_idx+1] * 2;
+            }
+            // and get the new values
+            seq_val = seq[seq_idx];
+            seq_wait = seq[seq_idx+1];
+        }
+        func_800EC95C(1, seq_val, 0x78, 0x78, D_800ED3CC, 0);
+        return;
+    }
+
+    // don't know what this part does
+    temp_v1_2 = (s32) D_800ED374 >> 8;
+    if (temp_v1_2 > 0x77) {
+        D_800ED3F4 = -1;
+        return;
+    }
+
+    func_800ECBB4(0x60, temp_v1_2 + 0x10, 0x30, 0x77 - temp_v1_2, D_800ED3CC);
+}
 
 void func_800EBEA8(void)
 {
@@ -244,7 +293,6 @@ int main(void)
     u8* temp_s2;
     int choice;
     
-    func_800ED298();
     func_800ED268();
     func_800ECDA8();
     func_800EC098();
@@ -292,7 +340,6 @@ int main(void)
 }
 
 void func_800EC608(void) {}
-
 /* // TODO: the structure of these pointers and structs is weird
 // at 82% or so, but with 3.6 -O2 :/
 void func_800EC608(void)
