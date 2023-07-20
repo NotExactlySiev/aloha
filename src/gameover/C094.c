@@ -29,15 +29,20 @@ extern jt_t jmptable;
 
 
 
-// data from here
 
+// data from here
 int D_800ED354[6] = { 32, 33, 34, 35, 36, 37 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
+s32 D_800ED394;
+s32 D_800ED3CC;
 s32 D_800ED3D4;    // remove these externs later, they break decomp fsr
 s32 D_800ED3DC;
 jt_t *jtptr = &jmptable;
 
 #define JTFUNC(id)  (*jtptr->list[id])
+
+
+void func_800EC95C(int, int, s32, s32, s32, s32);
 
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB894);
@@ -78,11 +83,6 @@ void func_800EC23C(s32 arg)
     func_800EB8F8();
     func_800EBF58(arg);
 }
-
-//INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC268);
-void func_800EC95C(int, int, s32, s32, s32, s32);          /* extern */
-extern s32 D_800ED394;
-extern s32 D_800ED3CC;
 
 // not sure about this one. might be wrong, but doesn't seem really broken.
 // seems to repeat and action for diagonal lines 128 pixels apart in both directions
