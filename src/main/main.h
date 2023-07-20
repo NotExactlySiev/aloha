@@ -41,26 +41,33 @@ typedef struct {
     char* addr;
 } file_t;
 
-
+// TODO: these should be in headers for their own files
 void regular_add(void);
 void regular_remove(void);
 void regular_run_tasks(void);
 void rle_decode(s32, u8*, u8*);
 void lz1_decode(const u8*, u8*);
-
-//void func_80019D64(void);
-//s32 cd_fs_read(char*, void*, s32);
-
-
 void reboot(char*, char*);
 
+extern u32 tmpfilebuf;
+extern u8 kernelbuf[8];
+extern void* jmptable[1024];
+extern u8 g_GameConfig[1280];
 
+// These are probably extern:
+extern u8 D_80032FFC;          // builtin intro prs image
+extern u8 D_80033000;          // builtin logo data, const
+extern s32 D_80034344;         // 80034344
+extern s32 D_80047D4C;         // 80047d4c
+extern s32 D_80047D50;         // 80047d50
+extern s32 D_80047D58;         // 80047d58
+extern s32 D_80047D64;
+extern s32 D_80047D48;
 
-extern void* jmptable[1024];   // 80010000
-extern u8 g_GameConfig[1280];  // 80014000
+// .data
 
 #define DFILE(ptr, name)    { (void*) (ptr | 1), name }
-file_t g_Files[42] = {  // 800318b8
+file_t g_Files[42] = {
     DFILE(0x80060000, "TITLE.PEX"),
     DFILE(0x80060000, "SELECT.PEX"),
     DFILE(0x80080000, "JM1\\MAIN.PEX"),
@@ -105,40 +112,21 @@ file_t g_Files[42] = {  // 800318b8
     DFILE(0x80080000, "JM6B\\MAIN.PEX"),
 };
 
+s32 g_NextFile = 0;
+s32 g_CurrFile = 0;
+s32 g_GameRegion = 0;
+u32 g_GameNP = 0;
+s32 g_GameIsZ = 0;
 
-
-char g_SysSeFile[11] = "SYS_SE.VAB"; // 80031a08
-char g_VersionStr[20];
-
-void* D_80048044; // hold return for _start
-
-// These are probably extern:
-extern u8 D_80032FFC;          // builtin intro prs image
-extern u8 D_80033000;          // builtin logo data, const
-extern s32 D_80034344;         // 80034344
-
-extern u32 g_GameNP;           // 80047d44
-extern s32 D_80047D4C;         // 80047d4c
-extern s32 D_80047D50;         // 80047d50
-extern s32 g_GameIsZ;          // 80047d54
-extern s32 D_80047D58;         // 80047d58
-extern s32 g_NextFile;         // 80047d5c
-extern s32 g_CurrFile;         // 80047d60
-extern s32 D_80047D64;         // 80047d64
-extern s32 g_GameRegion;       // 80047d68
-extern u8 EXACT01_str[8];   // 80047d6c (should be "EXACT01")
-
-extern s32 D_80047D48;
-
-// These are bss
+// .bss
+void* D_80048044;       // hold return for _start
 s32 D_80047E6C;         // 80047e6c
 s32 D_80047E70;         // 80047e70
 s32 tim3event;          // 80047e74
 s32 excpevent;          // 80047e7c
+char g_VersionStr[20];
 
 
-extern u32 tmpfilebuf;          // 80100000
-extern u8 kernelbuf[8];        // A000DF00
 
 typedef struct {
     int* elements;
@@ -160,57 +148,40 @@ typedef struct {
     TCB* current_tcb;
 } PCB;
 
-// What comes in the delay slot after jr $ra for each function
-
-void func_800188C8(void);               //  add stack
-char* get_file_addr(s32 idx);           //  nop             NO STACK
-s32 func_80018A6C(void);                //  nop             NO STACK
-s32 func_80018A7C(void);                //  nop             NO STACK
-void func_80018A8C(s32 arg0);           //  nop             NO STACK
-void func_80018AB4(void);               //  add stack
-void func_8001926C(void);               //  add stack
-void func_80019680(void);               //  add stack
-void func_8001972C(void);               //  add stack
-s32 enable_timer3_event(void*);         //  add stack
-void disable_timer3_event(s32);         //  add stack       
-void nop(void);                         //  nop             NO STACK
-void flush_cache_safe(void);            //  add stack
-void jt_clear(void);                    //  add stack
+void func_800188C8(void);               
+char* get_file_addr(s32 idx);
+s32 func_80018A6C(void);
+s32 func_80018A7C(void);
+void func_80018A8C(s32 arg0);
+void func_80018AB4(void);
+void func_8001926C(void);
+void func_80019680(void);
+void func_8001972C(void);
+s32 enable_timer3_event(void*);
+void disable_timer3_event(s32);
+void nop(void);
+void flush_cache_safe(void);
+void jt_clear(void);
 #ifdef  EXTRA_FEATURES
 void jt_set(void*, s32, char*);
 #define   jt_set(func, idx)   jt_set(func, idx, #func)
 #else
-void jt_set(void*, s32);                //  add stack
+void jt_set(void*, s32);
 #endif
-void func_80019948(void);               //  add stack
-void func_80019990(void);               //  add stack
-s32 get_GameNP(void);                   //  nop             NO STACK
-void read_version(void);                //  add stack
-s32 get_GameRegion(void);               //  nop             NO STACK
-u8* get_VersionStr(void);               //  nop             NO STACK
-void jt_series1(void);                  //  add stack
-s32 get_D_80047E6C(void);               //  nop             NO STACK
-void* jt_reset(void);                   //  add stack
-void func_80019D0C(void);               //  add stack
-void func_80019D64(void);               //  sw (in ptr)     NO STACK    X
-s32 enable_exception_event(void*);      //  add stack
-u32 func_80019DCC(void);                //  imm ori         NO STACK    X
-void setNextFile(s32);                  //  nop             NO STACK
-s32 getNextFile();                      //  nop             NO STACK
-u8* getGameConfig();                    //  imm ori         NO STACK    X
-int main(int, char**);                  //  add stack
-
-// as with -O2 does the stack ones correctly but puts sw in the slot even if not ptr
-// as with -O1 doesn't do the stack ones but does the sw correctly
-// they both do imm and get correctly
-
-// on 4.3 with full psyq stuff and with -O1, all of them match. It's probably the
-// closest one I have managed to find for now.
-
-// So nop after return always means there's no stack
-// i.e. having a stack always means we have something to put in the slot
-
-// What's interesting is the occasions where there's no stack, but we still have
-// something to put in the delay slot (marked with X)
-// I have to figure out what assembler has this behaviour (between as and aspsx,
-// and different settings like reorder, noat, -O etc)
+void func_80019948(void);
+void func_80019990(void);
+s32 get_GameNP(void);
+void read_version(void);
+s32 get_GameRegion(void);
+u8* get_VersionStr(void);
+void jt_series1(void);
+s32 get_D_80047E6C(void);
+void* jt_reset(void);
+void func_80019D0C(void);
+void func_80019D64(void);
+s32 enable_exception_event(void*);
+u32 func_80019DCC(void);
+void setNextFile(s32);
+s32 getNextFile();
+u8* getGameConfig();
+int main(int, char**);

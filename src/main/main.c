@@ -7,7 +7,6 @@
 void func_800188C8(void) {
     s32 *addr;
     s32 tmp;
-    file_t *p = (file_t*) g_Files->addr;
 
     while (1) {
         if (g_CurrFile == -1) {
@@ -39,24 +38,19 @@ void func_800188C8(void) {
     }
 }
 
-
-//INCLUDE_ASM("asm/main/nonmatchings/main", get_file_addr);   
 char* get_file_addr(s32 idx) {
     if (idx > 42) return 0;
     return g_Files[idx].addr;
 }
 
-// MATCHING trivial
 s32 func_80018A6C(void) {
     return D_80047D50;
 }
 
-// MATCHING trivial
 s32 func_80018A7C(void) {
     return D_80047D4C;
 }
 
-// NON MATCHING but I think can be fixed
 void func_80018A8C(s32 arg0) {
     if (arg0 != 0)
         D_80047D4C = 1;
@@ -64,7 +58,6 @@ void func_80018A8C(s32 arg0) {
         D_80047D4C = 0;
 }
 
-// NON MATCHING
 void func_80018AB4(void) {
     DRAWENV drawenv;
     DISPENV dispenv;
@@ -219,8 +212,6 @@ void func_8001926C(void) {
 #undef DrawSync
 #undef wait_frame
 
-
-// NON MATCHING but mostly close 
 void func_80019680(void) { // game_bootup
     s32 tmp;
     // sound functions here have been commented temporarilly. TODO
@@ -244,7 +235,6 @@ void func_80019680(void) { // game_bootup
     func_8001E38C();
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 void func_8001972C(void) { // game_shutdown
     func_8001CD68();
     sndqueue_exec_all();
@@ -261,8 +251,6 @@ void func_8001972C(void) { // game_shutdown
     StopRCnt(0xF2000003);
 }
 
-
-// NON MATCHING but with -O2 only two instruction are swapped
 s32 enable_timer3_event(void* handler) {
     s32 event;
     k_EnterCriticalSection();
@@ -274,7 +262,6 @@ s32 enable_timer3_event(void* handler) {
     return event;
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 void disable_timer3_event(s32 arg0) {
     k_EnterCriticalSection();
     StopRCnt(0xF2000003);
@@ -282,17 +269,14 @@ void disable_timer3_event(s32 arg0) {
     k_ExitCriticalSection();
 }
 
-// MATCHING trivial
 void nop(void) {}
 
-// MATCHING with psyq4.3/aspsx and -O1
 void flush_cache_safe(void) {
     k_EnterCriticalSection();
     k_FlushCache();
     k_ExitCriticalSection();
 }
 
-// NON MATCHING but matches with -O2
 void jt_clear(void) {
     void** jmptable = (void**) 0x80010000;
     int i;
@@ -303,22 +287,6 @@ void jt_clear(void) {
     flush_cache_safe();
 }
 
-// NON MATCHING but only regalloc
-/*
-#ifdef  EXTRA_FEATURES
-#undef jt_set
-void jt_set(void* func, s32 idx, char* func_name)
-{
-    k_printf("JT: Set %X (%d) to %08X (%s)\n", idx, idx, func, func_name);
-    _jt_set(func, idx);
-}
-#define   jt_set(func, idx)   jt_set(func, idx, #func)
-
-void _jt_set(void* func, s32 idx)
-#else   
-void jt_set(void* func, s32 idx)
-#endif
-*/
 void jt_set(void* func, s32 idx)
 {
     void** jmptable = (void**) 0x80010000;
@@ -326,7 +294,6 @@ void jt_set(void* func, s32 idx)
     flush_cache_safe();
 }
 
-// NON MATCHING
 void func_80019948(void) {
     if (D_80047D64 != 1) {
         disable_timer3_event(tim3event);
@@ -334,7 +301,6 @@ void func_80019948(void) {
     }
 }
 
-// NON MATCHING
 void func_80019990(void) {
     if (D_80047D64 != 0) {
         tim3event = enable_timer3_event(regular_run_tasks);
@@ -342,12 +308,10 @@ void func_80019990(void) {
     }
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 s32 get_GameNP(void) {
     return g_GameNP;
 }
 
-// NON MATCHING, much closer on 3.5
 void read_version(void) {
     u8 buf[1024];
     s32 i;
@@ -380,24 +344,21 @@ void read_version(void) {
             i += 1;
             p += 1;
         } while (i < 12);
-        strcpy(EXACT01_str, &g_VersionStr[12]); // TODO: this string is actually extern
+        strcpy("EXACT01", &g_VersionStr[12]);
         g_GameIsZ = 1;
     }
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 s32 get_GameRegion(void) {
     return g_GameRegion;
 }
 
-// NON MATCHING but the same size
 u8* get_VersionStr(void) {
     if (g_GameIsZ == 0)
         return 0;    
     return g_VersionStr;
 }
 
-// NON MATCHING but almost perfect with 3.5
 void jt_series1(void) { // TODO: better name TODO: symbol
     ResetCallback();
     StopRCnt(0xF2000000);
@@ -428,12 +389,10 @@ void jt_series1(void) { // TODO: better name TODO: symbol
     func_80020000(0);
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 s32 get_D_80047E6C(void) {
     return D_80047E6C;
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 void* jt_reset(void) {
     jt_clear();
     jt_set(func_80019DCC, 0xFF);
@@ -442,7 +401,6 @@ void* jt_reset(void) {
     return jt_series1;
 }
 
-// NON MATCHING, but very close with -O2, and even closer with 4.5
 void func_80019D0C(void)
 {
     struct {
@@ -463,7 +421,6 @@ void func_80019D0C(void)
     }
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 void func_80019D64(void) {
     struct {
         ExCB* excb[2];
@@ -474,7 +431,6 @@ void func_80019D64(void) {
     bios_tables->pcb->current_tcb->regs[2] = 0;
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 s32 enable_exception_event(void* handler) {
     s32 event;
 
@@ -485,24 +441,19 @@ s32 enable_exception_event(void* handler) {
     return event;
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 u32 func_80019DCC(void) {
   return 0x10002;
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 void setNextFile(s32 id) {
     g_NextFile = id;    
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 s32 getNextFile() {
     return g_NextFile;
 }
 
-// MATCHING with psyq4.3/aspsx and -O1
 u8* getGameConfig() {
-    //return &g_GameConfig;
     return 0x80014000;
 }
 
@@ -516,10 +467,10 @@ int main(int argc, char** argv) {
     excpevent = enable_exception_event(func_80019D64);
     func_80020FC0(&D_80034344);
 
-    tmp = cd_fs_read(g_SysSeFile, &tmpfilebuf, 0);
+    tmp = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
     while (tmp < 0 || tmpfilebuf != 0x56414270)
     {
-        tmp = cd_fs_read(g_SysSeFile, &tmpfilebuf, 0);
+        tmp = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
         k_printf("VAB file Reload\n");
     }
 

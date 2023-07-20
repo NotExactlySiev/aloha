@@ -38809,9 +38809,6 @@ glabel D_80047D3C
 glabel D_80047D40
 /* 30540 80047D40 */ .word 0x1F801C00
 
-glabel g_GameNP
-/* 30544 80047D44 */ .word 0x00000000
-
 glabel D_80047D48
 /* 30548 80047D48 */ .word 0xFFFFFFFE
 
@@ -38821,27 +38818,11 @@ glabel D_80047D4C
 glabel D_80047D50
 /* 30550 80047D50 */ .word 0x00000000
 
-glabel g_GameIsZ
-/* 30554 80047D54 */ .word 0x00000000
-
 glabel D_80047D58
 /* 30558 80047D58 */ .word 0x00000000
 
-glabel g_NextFile
-/* 3055C 80047D5C */ .word 0x00000000
-
-glabel g_CurrFile
-/* 30560 80047D60 */ .word 0x00000000
-
 glabel D_80047D64
 /* 30564 80047D64 */ .word 0x00000000
-
-glabel g_GameRegion
-/* 30568 80047D68 */ .word 0x00000000
-
-glabel EXACT01_str
-/* 3056C 80047D6C */ .word 0x43415845
-/* 30570 80047D70 */ .word 0x00313054
 
 glabel D_80047D74
 /* 30574 80047D74 */ .word 0x00000000
