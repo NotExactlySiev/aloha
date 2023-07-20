@@ -53,7 +53,7 @@ typedef struct {
     sprt_t sprts[];
 } sprt_group_t;
 
-extern sprt_group_t* sprt_data[64];
+sprt_group_t* sprt_data[64];
 
 // these might be not s32 but paired as structs?
 s32* intarrs[3] = {
@@ -78,9 +78,9 @@ s32 D_800ED394 = 0;
 s32 D_800ED3B4 = 0;
 s32 D_800ED3BC = 0;
 s32 D_800ED3C4 = 0;
-s32 D_800ED3CC = 0;
+s32 D_800ED3CC = 0;     // color for something (screen fading?)
 s32 D_800ED3D4 = 0;
-s32 D_800ED3DC = 0;     // selected
+s32 selected = 0;       // selected
 s32 D_800ED3E4 = 0;
 s32 D_800ED3EC = 0;
 s32 D_800ED3F4 = 0;
@@ -105,7 +105,7 @@ u16 D_8012DF64[6];      // global cluts for this file
 
 // decls
 
-u32 func_800ED09C(void);
+u32 input_das_read(void);
 
 
 // functions
@@ -118,6 +118,7 @@ void func_800EB894(void)
     D_800ED3F4 = 0;
 }
 
+// plays some sound effect
 void func_800EB8C0(s32 arg)
 {
     JTFUNC(0x311)(arg, 0x3e, 100);
@@ -197,14 +198,19 @@ void func_800EBD5C(void)
 
 void func_800EBEA8(void)
 {
-    D_800ED3DC = 0;
+    selected = 0;
 }
 
+#define LAYER_BG    0
+#define LAYER_SEQ   1 // don't know what this one is
+#define LAYER_MENU  2
+
+// This probably draw the menu options? With the color of the buttons changing based on the selection
 void func_800EBEB8(void)
 {
-    load_gbuffer(2, 0x20, 0x44, 0x90, D_800ED3CC, 0);
-    load_gbuffer(2, 0x21, 0x44, 0xA0, D_800ED3CC, D_800ED3DC == 0);
-    load_gbuffer(2, 0x22, 0x44, 0xB0, D_800ED3CC, D_800ED3DC == 1);
+    load_gbuffer(2, 32, 68, 144, D_800ED3CC, 0);
+    load_gbuffer(2, 33, 68, 160, D_800ED3CC, selected == 0);
+    load_gbuffer(2, 34, 68, 176, D_800ED3CC, selected == 1);
 }
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBF58);
@@ -246,7 +252,7 @@ void func_800EC14C(void)
         D_800ED390 = D_800ED340[D_800ED38C];
     }
 
-    tmp = D_800ED3DC == 1 ? 0xAB : 0x9B;
+    tmp = selected == 1 ? 0xAB : 0x9B;
     load_gbuffer(2, D_800ED390, 0x44, tmp, D_800ED3CC, 0);
 }
 
@@ -258,6 +264,7 @@ void func_800EC23C(s32 arg)
 
 // not sure about this one. might be wrong, but doesn't seem really broken.
 // seems to repeat and action for diagonal lines 128 pixels apart in both directions
+// I think this does the background scroll
 void func_800EC268(void)
 {
     int i,j;
@@ -277,7 +284,7 @@ void func_800EC318(void)
     func_800EBA40();
     func_800EBEB8();
     func_800EBD5C();
-    func_800EC268();
+    func_800EC268();    // background scroll
     func_800EC14C();
 }
 
@@ -311,7 +318,7 @@ int main(void)
     
     JTFUNC(0x30F)();
     
-    func_800ED01C();
+    input_das_setup();
     temp_s2 = JTFUNC(0x14)();   // get shared data
     JTFUNC(0x129)(&D_800ED370); // set global vol void(SpuVolume*)
     JTFUNC(0x305)(0x3000);
@@ -332,7 +339,7 @@ int main(void)
     func_800EBD10(1);
     
     do {
-        temp_s0 = func_800ED09C();  // read input
+        temp_s0 = input_das_read();  // read input
         func_800EC608();            // swap and clear
         func_800EC23C(temp_s0);     // logic i'm guessing?
         func_800EC318();            // 
@@ -343,7 +350,7 @@ int main(void)
 
     choice = 0;
     
-    if (D_800ED3DC == 0) {
+    if (selected == 0) {
         temp_s2[0x515] = 0;
         func_800EC358();
         choice = 1;
@@ -351,7 +358,7 @@ int main(void)
     JTFUNC(0xC)(choice);
 }
 
-
+// ### GRAPHICS FUNCTIONS
 void func_800EC608(void)
 {
     // swap buffer
@@ -390,14 +397,14 @@ void load_sprites(u32* raw)
 }
 
 // put loaded sprite data into ots
-void _load_gbuffer(u16 *cluts, s32 arg, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
+// rather, put a specific metasprite into ots, using its metadata
+void _load_gbuffer(u16 *cluts, s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
 {
     SPRT_8 *p;
     sprt_group_t *group;
     sprt_t *s;
     s32 i;
     s16 x,y;
-    //u32 count;
 
     if (idx > D_800ED42C) return;
     
@@ -413,17 +420,17 @@ void _load_gbuffer(u16 *cluts, s32 arg, s32 idx, s32 offx, s32 offy, u8 col, s32
         setUV0(p, U(*s), V(*s));
         setRGB0(p, col, col, col);
         setXY0(p, x, y);
-        p->clut = cluts[clutidx];       
-        addPrim(current_buffer->ot[arg], p);
+        p->clut = cluts[clutidx];    
+        addPrim(current_buffer->ot[z], p);
         current_buffer->next += 1;
     }
 
     // rest of it remains??? what about draw env
 }
 
-void load_gbuffer(s32 arg, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
+void load_gbuffer(s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
 {
-    _load_gbuffer(D_8012DF64, arg, idx, offx, offy, col, clutidx);
+    _load_gbuffer(D_8012DF64, z, idx, offx, offy, col, clutidx);
 }
 
 // cluts
@@ -483,7 +490,7 @@ void func_800EC9AC(u32 raw, s16 x, s16 y)
     JTFUNC(0x18C)(0);
 }
 
-extern RECT D_800ED398;
+RECT D_800ED398 = { .w = 0xFF, .h = 0xFF };
 
 void func_800ECBB4(s16 x, s16 y, s16 w, s16 h, u8 col)
 {
@@ -552,13 +559,15 @@ void func_800ECDA8(void)
         tv_standard = JTFUNC(7)();
 
         disp->screen.x = 4;
-        disp->screen.y = tv_standard == 1 ? 12 : 36;
+        disp->screen.y = tv_standard == TV_PAL ? 12 : 36;
         disp->screen.w = 248;
         disp->screen.h = 216;
-        disp->pad0 = tv_standard == 1 ? 0 : 1;
+        disp->pad0 = tv_standard == TV_PAL ? 0 : 1;
     }
 }
 
+
+// ### DAS INPUT FUNCTIONS
 s32 initial_delay = 0;
 s32 repeat_delay = 0;
 s32 face_wait = 0;
@@ -572,8 +581,7 @@ u32 nav_prev = 0;
 s32 das_state = -1;
 
 // set up DAS times based on framerate
-// input_das_setup
-void func_800ED01C(void)
+void input_das_setup(void)
 {
     if (JTFUNC(7)() == TV_PAL) {
         initial_delay = 8;
@@ -586,8 +594,7 @@ void func_800ED01C(void)
     nav_wait = initial_delay;
 }
 
-// input_das_read
-u32 func_800ED09C(void)
+u32 input_das_read(void)
 {
     u32 raw;
     u32 face_raw;
@@ -647,5 +654,5 @@ u32 func_800ED09C(void)
 
 // TODO: put das stuff in a seperate file, make variables static
 
-// This has more functions in it, and I have removed main, that's why it's still here
+// ASSEMBLY FUNCTIONS (_start and the weird syscall one)
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", misc);

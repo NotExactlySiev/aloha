@@ -625,6 +625,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F4F0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F578);
 
+// vab functions (I'm guessing for the sound effects)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F5DC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F610);
