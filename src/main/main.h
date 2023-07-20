@@ -1,7 +1,7 @@
 #include "common.h"
 #include <kernel.h>
 
-#define EXTRA_FEATURES
+//#define EXTRA_FEATURES
 
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
 
@@ -105,9 +105,12 @@ file_t g_Files[42] = {  // 800318b8
     DFILE(0x80080000, "JM6B\\MAIN.PEX"),
 };
 
+
+
 char g_SysSeFile[11] = "SYS_SE.VAB"; // 80031a08
+char g_VersionStr[20];
 
-
+void* D_80048044; // hold return for _start
 
 // These are probably extern:
 extern u8 D_80032FFC;          // builtin intro prs image
@@ -134,10 +137,7 @@ s32 tim3event;          // 80047e74
 s32 excpevent;          // 80047e7c
 
 
-extern u8 g_VersionStr[20];    // 80048048
-
 extern u32 tmpfilebuf;          // 80100000
-
 extern u8 kernelbuf[8];        // A000DF00
 
 typedef struct {

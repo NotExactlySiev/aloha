@@ -304,6 +304,7 @@ void jt_clear(void) {
 }
 
 // NON MATCHING but only regalloc
+/*
 #ifdef  EXTRA_FEATURES
 #undef jt_set
 void jt_set(void* func, s32 idx, char* func_name)
@@ -317,6 +318,8 @@ void _jt_set(void* func, s32 idx)
 #else   
 void jt_set(void* func, s32 idx)
 #endif
+*/
+void jt_set(void* func, s32 idx)
 {
     void** jmptable = (void**) 0x80010000;
     jmptable[idx] = KSEG0(func);
@@ -499,7 +502,7 @@ s32 getNextFile() {
 
 // MATCHING with psyq4.3/aspsx and -O1
 u8* getGameConfig() {
-    //return g_GameConfig;
+    //return &g_GameConfig;
     return 0x80014000;
 }
 

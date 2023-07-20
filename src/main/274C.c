@@ -10,6 +10,10 @@ extern s32 is_mono;             // 80047D88
 extern CdlLOC ww_global_loc;
 extern void (*fnptr)(void);
 
+CdlFILE D_80048068;
+CdlLOC ww_global_loc;
+
+
 // regular task vars, they're in the assembly
 extern s32 D_800234B0;
 extern s32 D_800234B4;

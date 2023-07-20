@@ -68,10 +68,11 @@ $(BUILD_DIR)/main.elf: $(MAIN_O_FILES)
 	-Map=$(BUILD_DIR).map \
 	-T main.ld \
 	-T symbols.ld \
-	-T undefined_syms_auto.txt \
 	--no-check-sections \
 	-nostdlib \
 	-s
+
+#	-T undefined_syms_auto.txt \
 
 #-T undefined_funcs_auto.txt \
 
