@@ -9,13 +9,11 @@
 #define    SET_POLYS_COL(c)    { DrawSync(0); wait_frame(0); for (i = 0; i < 4; i += 1)                     \
             { polys[i].r0 = c; polys[i].g0 = c; polys[i].b0 = c;           \
             DrawPrim(&polys[i]); } }
-// maybe this one should add 4 itself?
 #define    LOAD_PRS(p,W,H)    lz1_decode(p+4, (u8* )0x80060000);    \
             rect.x = 640; rect.y = 256; rect.w = 256; rect.h = 1;                 \
             LoadImage(&rect, (void*) 0x80060014);  DrawSync(0);                   \
             rect.x = 640; rect.y = 0; rect.w = W; rect.h = H;                 \
             LoadImage(&rect, (void*) 0x80060220);  DrawSync(0)
-
 #define    FADE_IN(step)   for (col = 0; col < 128; col += step) SET_POLYS_COL(col);
 #define    FADE_OUT(step)   for (col = 128; col > 0; col -= step) SET_POLYS_COL(col);
 #define    MAKE_QUADS(x, y, w, h, u, v, tw, th, td, n)    left = x; rght = x + w; tex_x = 0x280;                   \
@@ -156,7 +154,7 @@ void func_80018A8C(s32 arg0);
 void func_80018AB4(void);
 void func_8001926C(void);
 void func_80019680(void);
-void func_8001972C(void);
+void game_shutdown(void);
 s32 enable_timer3_event(void*);
 void disable_timer3_event(s32);
 void nop(void);

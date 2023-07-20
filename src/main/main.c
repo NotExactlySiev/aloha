@@ -212,15 +212,11 @@ void func_8001926C(void) {
 #undef DrawSync
 #undef wait_frame
 
-void func_80019680(void) { // game_bootup
-    s32 tmp;
-    // sound functions here have been commented temporarilly. TODO
+void func_80019680(void) {
     func_8001A3B8();
     read_version();
-    tmp = get_GameNP();
-    if (tmp != 0) tmp = 1;
     wait_frame(0);
-    SetVideoMode(tmp);
+    SetVideoMode(get_GameNP() != 0);
     wait_frame(0);
     call_ResetGraph(0);
     call_SetGraphDebug(0);
@@ -235,7 +231,7 @@ void func_80019680(void) { // game_bootup
     func_8001E38C();
 }
 
-void func_8001972C(void) { // game_shutdown
+void game_shutdown(void) { // game_shutdown
     func_8001CD68();
     sndqueue_exec_all();
     func_8001A74C();
@@ -359,7 +355,7 @@ u8* get_VersionStr(void) {
     return g_VersionStr;
 }
 
-void jt_series1(void) { // TODO: better name TODO: symbol
+void jt_series1(void) { // TODO: this is probably game_bootup
     ResetCallback();
     StopRCnt(0xF2000000);
     StopRCnt(0xF2000001);
@@ -459,7 +455,8 @@ u8* getGameConfig() {
 
 int main(int argc, char** argv) {
     s32 pad[22];
-    s32 tmp;
+    s32 rc;
+    
     k_printf("MAX ADR:%x\n", k_malloc(4));
     D_80047E6C = 1;
     jt_reset();
@@ -467,10 +464,9 @@ int main(int argc, char** argv) {
     excpevent = enable_exception_event(func_80019D64);
     func_80020FC0(&D_80034344);
 
-    tmp = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
-    while (tmp < 0 || tmpfilebuf != 0x56414270)
-    {
-        tmp = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
+    rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
+    while (rc < 0 || tmpfilebuf != 0x56414270) {
+        rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
         k_printf("VAB file Reload\n");
     }
 
@@ -484,7 +480,7 @@ int main(int argc, char** argv) {
     call_wait_frame(0);
     call_SetDispMask(0);
     func_80021600();
-    func_8001972C();
+    game_shutdown();
     call_ResetGraph(3);
     reset();
     return;
