@@ -47,12 +47,12 @@ typedef struct {
 
 
 
-int D_800ED354[6] = { 32, 33, 34, 35, 36, 37 };
+int D_800ED354[7] = { 32, 33, 34, 35, 36, 37, 32 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
-s32 D_800ED394;
-s32 D_800ED3CC;
-s32 D_800ED3D4;    // remove these externs later, they break decomp fsr
-s32 D_800ED3DC;
+s32 D_800ED394 = 0;
+s32 D_800ED3CC = 0;
+s32 D_800ED3D4 = 0;    // remove these externs later, they break decomp fsr
+s32 D_800ED3DC = 0;
 jt_t *jtptr = &jmptable;
 
 s32 D_800EDE54;               // current buffer id
@@ -202,7 +202,9 @@ int main(void)
     JTFUNC(0xC)(choice);
 }
 
-/*  TODO: the structure of these pointers and structs is weird
+void func_800EC608(void) {}
+
+/* // TODO: the structure of these pointers and structs is weird
 // at 82% or so, but with 3.6 -O2 :/
 void func_800EC608(void)
 {
@@ -228,4 +230,4 @@ void func_800EC684(void)
 */
 
 // This has more functions in it, and I have removed main, that's why it's still here
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", main);
+INCLUDE_ASM("asm/gameover/nonmatchings/C094", misc);

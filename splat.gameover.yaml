@@ -1,6 +1,6 @@
 options:
   platform: psx
-  basename: title
+  basename: gameover
   base_path:  .
   build_path: build
   target_path: disc/deGAMEOVER.PEX
