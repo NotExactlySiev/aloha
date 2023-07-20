@@ -103,6 +103,13 @@ u16 D_8012DF64[6];      // global cluts for this file
 
 #define JTFUNC(id)  (*jtptr->list[id])
 
+// decls
+
+u32 func_800ED09C(void);
+
+
+// functions
+
 void func_800EB894(void)
 {
     D_800ED3CC = 0;
@@ -291,7 +298,7 @@ void func_800EC358(void)
 
 int main(void)
 {
-    s32 temp_s0;
+    u32 temp_s0;
     s32 var_a0;
     s32 var_v0;
     u8 temp_v0;
@@ -552,28 +559,93 @@ void func_800ECDA8(void)
     }
 }
 
-s32 press_delay = 0;
-s32 release_delay = 0;
-s32 face_delay = 0;
-s32 nav_delay = 0;
+s32 initial_delay = 0;
+s32 repeat_delay = 0;
+s32 face_wait = 0;
+s32 nav_wait = 0;
+s32 face_timer = 0;
+s32 nav_timer = 0;
 
-// set up button delays based on framerate
+u32 face_prev = 0;
+u32 nav_prev = 0;
+
+s32 das_state = -1;
+
+// set up DAS times based on framerate
+// input_das_setup
 void func_800ED01C(void)
 {
     if (JTFUNC(7)() == TV_PAL) {
-        press_delay = 8;
-        release_delay = 3;
+        initial_delay = 8;
+        repeat_delay = 3;
     } else {
-        press_delay = 12;
-        release_delay = 5;
+        initial_delay = 12;
+        repeat_delay = 5;
     }
-    // button register delay becomes shorter if pressed, but when
-    // released it's longer
-    face_delay = press_delay;
-    nav_delay = press_delay;
+    face_wait = initial_delay;
+    nav_wait = initial_delay;
 }
 
+// input_das_read
+u32 func_800ED09C(void)
+{
+    u32 raw;
+    u32 face_raw;
+    u32 nav_raw;
 
+    u32 face;
+    u32 nav;
+
+    raw = JTFUNC(0xF0)();
+    face_raw = raw & 0xF000;
+    nav_raw  = raw & 0x08E0;
+    face = 0;
+    nav = 0;
+
+    // state -1, no button is pressed
+    if ((face_raw | nav_raw) == 0) das_state = -1;
+
+    // positive edge, trigger input and start initial delay timer
+    if (das_state == -1) {
+        if (face_raw) {
+            face_timer = 0;
+            face_wait = initial_delay;
+            face = face_raw;
+            das_state = 0;
+        }
+        if (nav_raw) {
+            nav_timer = 0;
+            nav_wait = initial_delay;
+            das_state = 1;
+        }
+    }
+
+    // now we can decide if input should be triggered
+    //   I changed the syntax a bit, I feel like this is more readable
+    //   even if not as pretty
+    // trigger if enough time has passed, and switch to the shorter interval
+    if (das_state == 0) {
+        if ((face_raw & face_prev) && (++face_timer > face_wait)) {
+            face = face_raw;
+            face_timer = 0;
+            face_wait = repeat_delay;
+        }
+    } else
+    if (das_state == 1) {
+        if ((nav_raw & nav_prev) && (++nav_timer > nav_wait)) {
+            nav = nav_raw;
+            nav_timer = 0;
+            nav_wait = repeat_delay;
+        }
+    }
+
+    face_prev = face_raw;
+    nav_prev = nav_raw;
+
+    return face | nav;
+}
+
+// TODO: put das stuff in a seperate file, make variables static
 
 // This has more functions in it, and I have removed main, that's why it's still here
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", misc);
