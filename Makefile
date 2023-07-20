@@ -17,11 +17,11 @@ COPY	:= $(CROSS)objcopy
 BUILD_DIR	:= build
 
 MAIN_S_FILES	:=	$(wildcard asm/main/data/*.s) \
-			$(wildcard src/main/*.s)	\
-			$(wildcard src/main/libapi/*.s) 
-MAIN_C_FILES	:= $(wildcard src/main/*.c) $(wildcard src/main/**/*.c)
-MAIN_O_FILES	:= $(foreach file,$(MAIN_C_FILES),$(BUILD_DIR)/$(file).o) \
-			$(foreach file,$(MAIN_S_FILES),$(BUILD_DIR)/$(file).o)
+					$(wildcard src/main/*.s)	\
+					$(wildcard src/main/libapi/*.s) 
+MAIN_C_FILES	:=  $(wildcard src/main/*.c) $(wildcard src/main/**/*.c)
+MAIN_O_FILES	:=  $(foreach file,$(MAIN_C_FILES),$(BUILD_DIR)/$(file).o) \
+					$(foreach file,$(MAIN_S_FILES),$(BUILD_DIR)/$(file).o)
 
 $(BUILD_DIR)/asm/main:
 	mkdir -p $(BUILD_DIR)/asm/main

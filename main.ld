@@ -4,7 +4,7 @@ SECTIONS
     header_ROM_START = __romPos;
     .header : AT(header_ROM_START) SUBALIGN(16)
     {
-        build/asm/main/header.s.o(.data);
+        build/src/main/header.s.o(.data);
     }
     __romPos += SIZEOF(.header);
 
@@ -24,6 +24,10 @@ SECTIONS
         build/asm/main/data/1A214.data.s.o(.data);
         build/asm/main/data/1D530.data.s.o(.data);
     }
+    __romPos += SIZEOF(.main);
+
+    /* the size that gets put in the header */
+    __size = (__romPos & 0xFFFFF800) + 0x800;
 
     .bss (NOLOAD) : SUBALIGN(4)
     {

@@ -112,8 +112,8 @@ file_t g_Files[42] = {
     DFILE(0x80080000, "JM6B\\MAIN.PEX"),
 };
 
-s32 g_NextFile = 0;
 s32 g_CurrFile = 0;
+s32 g_NextFile = 0;
 s32 g_GameRegion = 0;
 u32 g_GameNP = 0;
 s32 g_GameIsZ = 0;
