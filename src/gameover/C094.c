@@ -31,16 +31,17 @@ extern jt_t jmptable;
 
 // data from here
 typedef struct {
-    DISPENV dispenv;
-    DRAWENV drawenv;
+    DISPENV disp;
+    DRAWENV draw;
     u32    ot[4];
-    u32*   unk;
-    u32    rest[0x8000];
-} big_struct;
+    u32*   next;
+    u32    prims[0x8000];
+} graph_buffer_t;
 
+// I think this thing is entirely nonsense:
 typedef struct {
-    DISPENV *disp;
-    DRAWENV *draw;
+    graph_buffer_t* big;
+    DRAWENV* draw;
 
     u32     _unk[0x1A];  // 0x68 bytes unknown
     u32     ot[4];
@@ -85,17 +86,15 @@ s32 D_800ED340[5] = { 40, 42, 41, 42, -1 };
 // these change with tv standard
 s32 D_800ED384 = 1200;
 s32 D_800ED424 = 0;
+s32 D_800ED42C = 0; // max sprite index (sprite count)
 
-s32 D_800EDE54;               // current buffer id
-big_struct  D_800EDE5C[2];    // buffers
-//big_struct* D_8012DF74;     // current
-unk_struct D_8012DF74;
+s32 current_buffer_idx;               // current buffer id
+graph_buffer_t  graph_buffers[2];    // buffers
+graph_buffer_t *current_buffer;       // current
 
+u16 D_8012DF64[6];      // global cluts for this file
 
 #define JTFUNC(id)  (*jtptr->list[id])
-
-
-void func_800EC95C(int, int, s32, s32, s32, s32);
 
 void func_800EB894(void)
 {
@@ -168,7 +167,7 @@ void func_800EBD5C(void)
         }
 
         // whether the values have changed or not, call the function
-        func_800EC95C(1, seq_val, 0x78, 0x78, D_800ED3CC, 0);
+        load_gbuffer(1, seq_val, 0x78, 0x78, D_800ED3CC, 0);
         return;
     }
 
@@ -189,9 +188,9 @@ void func_800EBEA8(void)
 
 void func_800EBEB8(void)
 {
-    func_800EC95C(2, 0x20, 0x44, 0x90, D_800ED3CC, 0);
-    func_800EC95C(2, 0x21, 0x44, 0xA0, D_800ED3CC, D_800ED3DC == 0);
-    func_800EC95C(2, 0x22, 0x44, 0xB0, D_800ED3CC, D_800ED3DC == 1);
+    load_gbuffer(2, 0x20, 0x44, 0x90, D_800ED3CC, 0);
+    load_gbuffer(2, 0x21, 0x44, 0xA0, D_800ED3CC, D_800ED3DC == 0);
+    load_gbuffer(2, 0x22, 0x44, 0xB0, D_800ED3CC, D_800ED3DC == 1);
 }
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBF58);
@@ -237,7 +236,7 @@ void func_800EC14C(void)
     }
 
     tmp = D_800ED3DC == 1 ? 0xAB : 0x9B;
-    func_800EC95C(2, D_800ED390, 0x44, tmp, D_800ED3CC, 0);
+    load_gbuffer(2, D_800ED390, 0x44, tmp, D_800ED3CC, 0);
 }
 
 void func_800EC23C(s32 arg)
@@ -255,7 +254,7 @@ void func_800EC268(void)
     D_800ED394 = (D_800ED394 + 1) & 0x7F;
     for (i = 0; i < 4; i++)
         for (j = 0; j < 4; j++)
-            func_800EC95C(0, 0x30, 
+            load_gbuffer(0, 0x30, 
                 ((i << 7) - D_800ED394) - 0x40, 
                 ((j << 7) + D_800ED394) - 0x40, 
                 D_800ED3CC / 2, 2);
@@ -311,21 +310,21 @@ int main(void)
     temp_v0 = temp_s2[0x514];
     if (temp_v0 > 5) temp_v0 = 5;
     JTFUNC(0xCC4)(D_800ED354[temp_v0]); // int(int)
-    
-    func_800EC608();
-    func_800EC684();
-    func_800EC608();
-    func_800EC684();
+    // cycle through both buffers once
+    func_800EC608();    // clear
+    func_800EC684();    // draw
+    func_800EC608();    // clear
+    func_800EC684();    // draw
     JTFUNC(0x604)(0);    // call_wait_frame
     JTFUNC(0x60C)(1);    // call_SetDispMask
     
     func_800EBD10(1);
     
     do {
-        temp_s0 = func_800ED09C();
-        func_800EC608();
-        func_800EC23C(temp_s0);
-        func_800EC318();
+        temp_s0 = func_800ED09C();  // read input
+        func_800EC608();            // swap and clear
+        func_800EC23C(temp_s0);     // logic i'm guessing?
+        func_800EC318();            // 
         func_800EC684();
     } while (D_800ED3D4 != 4);
     
@@ -341,18 +340,15 @@ int main(void)
     JTFUNC(0xC)(choice);
 }
 
-void func_800EC608(void) {}
-/* // TODO: the structure of these pointers and structs is weird
-// at 82% or so, but with 3.6 -O2 :/
+
 void func_800EC608(void)
 {
-    big_struct* current;
-
-    D_800EDE54 = !D_800EDE54;
-    current = &D_800EDE5C[D_800EDE54];
-    D_8012DF74.disp = &current->dispenv;
-    JTFUNC(0x61C)(current->ot, 4);
-    D_8012DF74->unk = current->rest;
+    // swap buffer
+    current_buffer_idx = !current_buffer_idx;
+    current_buffer = &graph_buffers[current_buffer_idx];
+    // clear ot and reset prim buffer
+    JTFUNC(0x187)(current_buffer->ot, 4);
+    current_buffer->next = current_buffer->prims;
 }
 
 void func_800EC684(void)
@@ -361,11 +357,80 @@ void func_800EC684(void)
     JTFUNC(0x18C)(0);
     JTFUNC(0x191)(0);
     // put env and draw
-    JTFUNC(0x185)(D_8012DF74.disp);
-    JTFUNC(0x186)(D_8012DF74.draw);
-    JTFUNC(0x189)(D_8012DF74.ot);
+    JTFUNC(0x185)(current_buffer->disp);
+    JTFUNC(0x186)(current_buffer->draw);
+    // draw ot
+    JTFUNC(0x189)(current_buffer->ot);
 }
-*/
+
+
+// the uv field is encoded in 16 bits and needs to be unwrapped
+// u has 5 sigbits, v has 7
+#define U(s)   (((s).uv & 0x1F) << 3)
+#define V(s)   ((((s).uv & 0x0FFF) >> 5) << 3)
+typedef struct {
+    s8  dx;
+    s8  dy;
+    u16 uv;
+} sprt_t;
+
+typedef struct {
+    u32    count;
+    sprt_t sprts[];
+} sprt_group_t;
+
+extern sprt_group_t* sprt_data[64];
+
+
+// load sprite data
+void func_800EC74C(u32* raw)
+{
+    s32 i;
+    sprt_group_t** gp;
+    // first byte is the number of groups
+    D_800ED42C = *raw++;
+    gp = sprt_data;
+    for (i = 0; i < D_800ED42C; i++) {
+        *gp++ = raw;
+        // skip past to the next group (count entries and 1 size byte)
+        raw += (*gp)->count + 1;
+    }
+}
+
+// put loaded sprite data into ots
+void _load_gbuffer(u16 *cluts, s32 arg, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
+{
+    SPRT_8 *p;
+    sprt_group_t *group;
+    sprt_t *s;
+    s32 i;
+    s16 x,y;
+    //u32 count;
+
+    if (idx > D_800ED42C) return;
+    
+    p = current_buffer->next;
+    group = sprt_data[idx];
+    for (i = 0; i <= group->count; i++) {
+        s = &group->sprts[i];
+        x = offx + s->dx;
+        y = offy + s->dy;
+        // TODO: take out the magic numbers
+        if (!((x < 0xfd) && (x > -9) && (y < 0xe5) && (y > -9))) continue;
+        setSprt8(p);
+        setUV0(p, U(*s), V(*s));
+        setRGB0(p, col, col, col);
+        setXY0(p, x, y);
+        p->clut = cluts[clutidx];       
+        addPrim(current_buffer->ot[arg], p);
+        current_buffer->next += 1;
+    }    
+}
+
+void load_gbuffer(s32 arg, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
+{
+    _load_gbuffer(D_8012DF64, arg, idx, offx, offy, col, clutidx);
+}
 
 // This has more functions in it, and I have removed main, that's why it's still here
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", misc);
