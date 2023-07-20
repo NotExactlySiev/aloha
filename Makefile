@@ -1,22 +1,16 @@
 
 CPP_FLAGS	+= -Iinclude -Ipsyq
-#CC_FLAGS	+= -O1 -quiet -mcpu=3000 -G8 -fverbose-asm -fgnu-linker -fcommon -mgas -msoft-float
-CC_FLAGS	+= -w -O2 -G0 -funsigned-char -fpeephole -ffunction-cse -fpcc-struct-return -fverbose-asm -msoft-float
-
+CC_FLAGS	+= -w -O2 -G0 -fpeephole -ffunction-cse -fpcc-struct-return -msoft-float
 AS_FLAGS	+= -Iinclude -mno-shared -msoft-float -march=r3000 -mtune=r3000 -no-pad-sections
-ARCH_FLAGS	= -march=mips1 -mabi=32 -EL -fno-pic -mno-shared -mno-abicalls
+ARCH_FLAGS	+= -march=mips1 -mabi=32 -EL -fno-pic -mno-shared -mno-abicalls
 ARCH_FLAGS	+= -mfp32 -fno-stack-protector -nostdlib -ffreestanding
 
 CROSS	:= mipsel-linux-gnu-
 
-CPP	:= $(CROSS)cpp 
-#CC	:= ./cc1-psx-26
-#CC	:= wine CC1PSX.EXE
-#CC	:= dosemu -quiet -dumb -K . -E "CC1PSX.EXE ${CC_FLAGS}"
-CC	:= $(CROSS)gcc
-AS	:= mipsel-linux-gnu-as 
-#AS	:= wine ASPSX.EXE
-LD	:= $(CROSS)ld
+CPP		:= $(CROSS)cpp 
+CC		:= $(CROSS)gcc
+AS		:= $(CROSS)as 
+LD		:= $(CROSS)ld
 COPY	:= $(CROSS)objcopy
 
 
@@ -40,8 +34,6 @@ $(BUILD_DIR)/src/main/%.s: src/main/%.c $(BUILD_DIR)/src/main
 
 $(BUILD_DIR)/asm/main/%.s.o: asm/main/%.s $(BUILD_DIR)/asm/main
 	$(AS) $(AS_FLAGS) -o $@ $<
-#	psyq-obj-parser $@bj -o $@
-#	rm $@bj
 
 $(BUILD_DIR)/src/main/%.c.o: $(BUILD_DIR)/src/main/%.s $(BUILD_DIR)/src/main
 	$(AS) $(AS_FLAGS) -o $@ $<
@@ -49,19 +41,11 @@ $(BUILD_DIR)/src/main/%.c.o: $(BUILD_DIR)/src/main/%.s $(BUILD_DIR)/src/main
 	#psyq-obj-parser $@bj -o $@
 	#rm $@bj
 
-
-
 $(BUILD_DIR)/src/gameover/%.s: src/gameover/%.c $(BUILD_DIR)/src/gameover
 	$(CPP) $(CPP_FLAGS) $< | $(CC) $(CC_FLAGS) $(ARCH_FLAGS) -o $@ -S -xc -
 
 $(BUILD_DIR)/src/gameover/%.c.o: $(BUILD_DIR)/src/gameover/%.s $(BUILD_DIR)/src/gameover
 	$(AS) $(AS_FLAGS) -o $@ $<
-
-
-
-split:
-	tools/n64splat/split.py splat.main.yaml
-
 
 $(BUILD_DIR)/main.elf: $(MAIN_O_FILES)
 	$(LD) -o $@ \
@@ -71,10 +55,6 @@ $(BUILD_DIR)/main.elf: $(MAIN_O_FILES)
 	--no-check-sections \
 	-nostdlib \
 	-s
-
-#	-T undefined_syms_auto.txt \
-
-#-T undefined_funcs_auto.txt \
 
 $(BUILD_DIR)/main.exe: $(BUILD_DIR)/main.elf
 	$(COPY) -O binary $< $@	
