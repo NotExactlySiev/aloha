@@ -23,6 +23,7 @@ SECTIONS
         main_RODATA_START = .;
         build/src/main/main.c.o(.rodata*);
         build/src/main/274C.c.o(.rodata*);
+        build/src/main/boot.c.o(.rodata*);
         build/asm/main/data/libpress.rodata.s.o(.rodata);
         build/asm/main/data/libgpu.rodata.s.o(.rodata);
         build/asm/main/data/libcd.rodata.s.o(.rodata);

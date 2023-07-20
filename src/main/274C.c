@@ -413,6 +413,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D29C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
 
+// TODO: put cache stuff in a seperate file
 
 #define     CD_SECTOR_SIZE      0x800
 
@@ -432,8 +433,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D398);   // update
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D414);   // clear
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D440);   // load from cache
-// NOT MATCHING whatsoever
 s32 func_8001D440(CdlLOC* loc, u8* data) {
     s32 i;  
     u32 minidx;
