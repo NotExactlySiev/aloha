@@ -37,6 +37,16 @@ typedef struct {
     u32    rest[0x8000];
 } big_struct;
 
+typedef struct {
+    DISPENV *disp;
+    DRAWENV *draw;
+
+    u32     _unk[0x1A];  // 0x68 bytes unknown
+    u32     ot[4];
+} unk_struct;
+
+
+
 int D_800ED354[6] = { 32, 33, 34, 35, 36, 37 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
 s32 D_800ED394;
@@ -47,7 +57,9 @@ jt_t *jtptr = &jmptable;
 
 s32 D_800EDE54;               // current buffer id
 big_struct  D_800EDE5C[2];    // buffers
-big_struct* D_8012DF74;       // current
+//big_struct* D_8012DF74;       // current
+unk_struct D_8012DF74;
+
 
 #define JTFUNC(id)  (*jtptr->list[id])
 
@@ -96,7 +108,8 @@ void func_800EC23C(s32 arg)
 
 // not sure about this one. might be wrong, but doesn't seem really broken.
 // seems to repeat and action for diagonal lines 128 pixels apart in both directions
-void func_800EC268(void) {
+void func_800EC268(void)
+{
     int i,j;
 
     D_800ED394 = (D_800ED394 + 1) & 0x7F;
@@ -119,7 +132,8 @@ void func_800EC318(void)
 }
 
 // closely matching with 4.1 -O1
-void func_800EC358(void) {
+void func_800EC358(void)
+{
     config_t* conf;
     conf = JTFUNC(0x14)();
     
@@ -132,7 +146,8 @@ void func_800EC358(void) {
 }
 
 
-int main(void) {
+int main(void)
+{
     s32 temp_s0;
     s32 var_a0;
     s32 var_v0;
@@ -187,14 +202,30 @@ int main(void) {
     JTFUNC(0xC)(choice);
 }
 
+/*  TODO: the structure of these pointers and structs is weird
 // at 82% or so, but with 3.6 -O2 :/
-void func_800EC608(void) {
+void func_800EC608(void)
+{
+    big_struct* current;
+
     D_800EDE54 = !D_800EDE54;
-    D_8012DF74 = &D_800EDE5C[D_800EDE54];
-    JTFUNC(0x61C)(D_8012DF74->ot, 4);
-    D_8012DF74->unk = D_8012DF74->rest;
+    current = &D_800EDE5C[D_800EDE54];
+    D_8012DF74.disp = &current->dispenv;
+    JTFUNC(0x61C)(current->ot, 4);
+    D_8012DF74->unk = current->rest;
 }
 
+void func_800EC684(void)
+{
+    JTFUNC(0x102)();
+    JTFUNC(0x18C)(0);
+    JTFUNC(0x191)(0);
+    // put env and draw
+    JTFUNC(0x185)(D_8012DF74.disp);
+    JTFUNC(0x186)(D_8012DF74.draw);
+    JTFUNC(0x189)(D_8012DF74.ot);
+}
+*/
 
 // This has more functions in it, and I have removed main, that's why it's still here
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", main);
