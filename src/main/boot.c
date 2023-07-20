@@ -33,6 +33,7 @@ void reboot(char* exec, char* conf)
     if (conf[0] == 0) {
         conf = "SYSTEM.CNF";
     }
+    
     k_strcpy(execAddr, "cdrom:");
     k_strcat(execAddr, exec);
     k_strcat(execAddr, ";1");
@@ -41,6 +42,7 @@ void reboot(char* exec, char* conf)
     k_strcat(confAddr, ";1");
     k_printf("def = %s conf = %s serial = %08x %08x\n", execAddr, confAddr, k_KER_DATE, k_CONSOLE_TYPE);
     k_EnterCriticalSection();
+
     if ((k_CONSOLE_TYPE == 0x2000) && (k_KER_DATE == 0x19940728)) {
         (*((boot_f) 0xbfc0e228))(confAddr, execAddr);
     } else {
