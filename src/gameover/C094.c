@@ -47,6 +47,22 @@ typedef struct {
     u32     ot[4];
 } unk_struct;
 
+// the uv field is encoded in 16 bits and needs to be unwrapped
+// u has 5 sigbits, v has 7
+#define U(s)   (((s).uv & 0x1F) << 3)
+#define V(s)   ((((s).uv & 0x0FFF) >> 5) << 3)
+typedef struct {
+    s8  dx;
+    s8  dy;
+    u16 uv;
+} sprt_t;
+
+typedef struct {
+    u32    count;
+    sprt_t sprts[];
+} sprt_group_t;
+
+extern sprt_group_t* sprt_data[64];
 
 // these might be not s32 but paired as structs?
 s32* intarrs[3] = {
@@ -294,29 +310,29 @@ int main(void)
     u8* temp_s2;
     int choice;
     
-    func_800ED268();
-    func_800ECDA8();
-    func_800EC098();
+    func_800ED268();    // deliver events
+    func_800ECDA8();    // set up graphics env
+    func_800EC098();    // set up some constants
     
-    JTFUNC(0xC3C)();
+    JTFUNC(0x30F)();
     
     func_800ED01C();
-    temp_s2 = JTFUNC(0x14)();
-    JTFUNC(0x4A4)(&D_800ED370); // set global vol void(SpuVolume*)
-    JTFUNC(0xC14)(0x3000);
-    JTFUNC(0xCC8)(0);    // mc_set_some_var
+    temp_s2 = JTFUNC(0x14)();   // get shared data
+    JTFUNC(0x129)(&D_800ED370); // set global vol void(SpuVolume*)
+    JTFUNC(0x305)(0x3000);
+    JTFUNC(0x332)(0);    // mc_set_some_var
 
     // play some audio thing
     temp_v0 = temp_s2[0x514];
     if (temp_v0 > 5) temp_v0 = 5;
-    JTFUNC(0xCC4)(D_800ED354[temp_v0]); // int(int)
+    JTFUNC(0x331)(D_800ED354[temp_v0]); // int(int)
     // cycle through both buffers once
     func_800EC608();    // clear
     func_800EC684();    // draw
     func_800EC608();    // clear
     func_800EC684();    // draw
-    JTFUNC(0x604)(0);    // call_wait_frame
-    JTFUNC(0x60C)(1);    // call_SetDispMask
+    JTFUNC(0x181)(0);    // call_wait_frame
+    JTFUNC(0x183)(1);    // call_SetDispMask
     
     func_800EBD10(1);
     
@@ -363,27 +379,8 @@ void func_800EC684(void)
     JTFUNC(0x189)(current_buffer->ot);
 }
 
-
-// the uv field is encoded in 16 bits and needs to be unwrapped
-// u has 5 sigbits, v has 7
-#define U(s)   (((s).uv & 0x1F) << 3)
-#define V(s)   ((((s).uv & 0x0FFF) >> 5) << 3)
-typedef struct {
-    s8  dx;
-    s8  dy;
-    u16 uv;
-} sprt_t;
-
-typedef struct {
-    u32    count;
-    sprt_t sprts[];
-} sprt_group_t;
-
-extern sprt_group_t* sprt_data[64];
-
-
 // load sprite data
-void func_800EC74C(u32* raw)
+void load_sprites(u32* raw)
 {
     s32 i;
     sprt_group_t** gp;
@@ -424,12 +421,109 @@ void _load_gbuffer(u16 *cluts, s32 arg, s32 idx, s32 offx, s32 offy, u8 col, s32
         p->clut = cluts[clutidx];       
         addPrim(current_buffer->ot[arg], p);
         current_buffer->next += 1;
-    }    
+    }
+
+    // rest of it remains??? what about draw env
 }
 
 void load_gbuffer(s32 arg, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
 {
     _load_gbuffer(D_8012DF64, arg, idx, offx, offy, col, clutidx);
+}
+
+// cluts
+extern u16 D_800EA96C[256];
+extern u16 D_800EAB6C[256];
+extern u16 D_800EAD6C[256];
+// image (background?)
+extern u16 D_800EAF74[1152];
+
+// or maybe this load the background?
+void func_800EC9AC(u32 raw, s16 x, s16 y)
+{
+    s32 i,j;
+    RECT rect = {
+        .w = 4,
+        .h = 8,
+        .x = x,
+        .y = y,
+    };
+
+    // I'm not sure what this part is loading, but the cluts are after this
+    for (i = 0; i < 32; i++) {
+        for (j = 0; j < 32; j++) {
+            JTFUNC(0x18A)(&rect, raw);  // LoadImage
+            JTFUNC(0x18C)(0);           // DrawSync
+            raw += 16;
+            rect.x += rect.w;
+            
+        }
+        rect.x = x;
+        rect.y += rect.h;
+    }
+
+    // load the three cluts
+    rect.x = 0;
+    rect.w = 256;
+    rect.h = 1;
+
+    rect.y = 240;
+    JTFUNC(0x18A)(&rect, D_800EA96C);
+    JTFUNC(0x18C)(0);
+
+    rect.y = 240;
+    JTFUNC(0x18A)(&rect, D_800EAB6C);
+    JTFUNC(0x18C)(0);
+
+    rect.y = 240;
+    JTFUNC(0x18A)(&rect, D_800EAD6C);
+    JTFUNC(0x18C)(0);
+
+    // load the bunny image
+    rect.x = 256;
+    rect.y = 256;
+    rect.w = 24;
+    rect.h = 48;
+    JTFUNC(0x18A)(&rect, D_800EAD6C);
+    JTFUNC(0x18C)(0);
+}
+
+extern RECT D_800ED398;
+
+void func_800ECBB4(s16 x, s16 y, s16 w, s16 h, u8 col)
+{
+    POLY_FT4 *p;
+    DR_MODE *q;
+    u32 tpage;
+
+    p = current_buffer->next;
+    setPolyFT4(p);
+    setRGB0(p, col, col, col);
+    setUV4(p, 0, 0, 0, 0, 0, 24, 0, 24);
+    setXY4(p, x, y, x+w, y, x, y+h, x+w, y+h);
+    p->tpage = JTFUNC(400)() ? 0x224 : 0x94;    // GetGraphType
+    p->clut  = 0x3c00;
+    addPrim(current_buffer->ot[1], p);
+
+    tpage = JTFUNC(400)() ? 0x224 : 0x94;
+    q = nextPrim(p);
+    JTFUNC(0x18D)(q, 0, 0, tpage, &D_800ED398); // SetDrawEnv
+    addPrim(current_buffer->ot[1], q);
+
+    current_buffer->next = nextPrim(q);
+}
+
+extern u32 D_800E0000[];    // sprite metadata (pos and uv)
+extern u32 D_800E0AEC[];    // background? please be background
+
+void func_800ECD18(void)
+{
+    load_sprites(D_800E0000);
+    D_8012DF64[2] = JTFUNC(400)() ? 0x204 : 0x84;
+    D_8012DF64[3] = 0x3c00; 
+    D_8012DF64[4] = 0x3c40;
+    D_8012DF64[5] = 0x3c80;
+    func_800EC9AC(D_800E0AEC, 256, 0);
 }
 
 // This has more functions in it, and I have removed main, that's why it's still here
