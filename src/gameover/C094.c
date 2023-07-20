@@ -166,6 +166,8 @@ void func_800EBD5C(void)
             seq_val = seq[seq_idx];
             seq_wait = seq[seq_idx+1];
         }
+
+        // whether the values have changed or not, call the function
         func_800EC95C(1, seq_val, 0x78, 0x78, D_800ED3CC, 0);
         return;
     }

@@ -137,7 +137,8 @@ s32 D_80047E94;      // this one just gets 0 written to it
 s32 D_80047EF4;
 u16 D_80047F34;      // index of the task being executed
 
-snd_task_t _sndqueue[160];
+//snd_task_t _sndqueue[160];
+snd_task_t _sndqueue[192];
 
 void sndqueue_reset(void) {
     _sndqueue_next = 0;
