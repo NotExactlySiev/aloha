@@ -38,15 +38,6 @@ typedef struct {
     u32    prims[0x8000];
 } graph_buffer_t;
 
-// I think this thing is entirely nonsense:
-typedef struct {
-    graph_buffer_t* big;
-    DRAWENV* draw;
-
-    u32     _unk[0x1A];  // 0x68 bytes unknown
-    u32     ot[4];
-} unk_struct;
-
 // the uv field is encoded in 16 bits and needs to be unwrapped
 // u has 5 sigbits, v has 7
 #define U(s)   (((s).uv & 0x1F) << 3)
@@ -213,16 +204,13 @@ INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBF58);
 
 void func_800EC098(void)
 {
-    s32 tv_standard;
-
     func_800EBA08();
     func_800EBCE0();
     func_800EB894();
     func_800EBEA8();
     D_800ED3E4 = 0x2D;
 
-    tv_standard = JTFUNC(7)();
-    if (tv_standard == 1) {
+    if (JTFUNC(7)() == TV_PAL) {
         D_800ED424 = 9;
         D_800ED384 = 1000;
     } else {
@@ -525,6 +513,67 @@ void func_800ECD18(void)
     D_8012DF64[5] = 0x3c80;
     func_800EC9AC(D_800E0AEC, 256, 0);
 }
+
+// set up graphics env
+void func_800ECDA8(void)
+{
+    int i;
+    int tv_standard;
+    DRAWENV *draw;
+    DISPENV *disp;
+
+    JTFUNC(0x181)();    // wait_frame
+    JTFUNC(0x183)(0);   // SetDispMask
+    current_buffer_idx = 0;
+    func_800EC608();    // clear
+    func_800ECD18();
+    JTFUNC(0x18E)(graph_buffers[0].disp, 0, 0, 256, 240);
+    JTFUNC(0x18E)(graph_buffers[1].disp, 0, 256, 256, 240);
+    JTFUNC(0x18F)(graph_buffers[0].draw, 0, 256, 256, 240);
+    JTFUNC(0x18F)(graph_buffers[1].draw, 0, 0, 256, 240);
+    
+    for (i = 0; i < 2; i++) {
+        draw = &graph_buffers[i].draw;
+        disp = &graph_buffers[i].disp;
+        draw->r0 = 0;
+        draw->g0 = 0;
+        draw->b0 = 0;
+        draw->tw = D_800ED398;
+        draw->dtd = 0;
+        draw->dfe = 0;
+
+        tv_standard = JTFUNC(7)();
+
+        disp->screen.x = 4;
+        disp->screen.y = tv_standard == 1 ? 12 : 36;
+        disp->screen.w = 248;
+        disp->screen.h = 216;
+        disp->pad0 = tv_standard == 1 ? 0 : 1;
+    }
+}
+
+s32 press_delay = 0;
+s32 release_delay = 0;
+s32 face_delay = 0;
+s32 nav_delay = 0;
+
+// set up button delays based on framerate
+void func_800ED01C(void)
+{
+    if (JTFUNC(7)() == TV_PAL) {
+        press_delay = 8;
+        release_delay = 3;
+    } else {
+        press_delay = 12;
+        release_delay = 5;
+    }
+    // button register delay becomes shorter if pressed, but when
+    // released it's longer
+    face_delay = press_delay;
+    nav_delay = press_delay;
+}
+
+
 
 // This has more functions in it, and I have removed main, that's why it's still here
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", misc);

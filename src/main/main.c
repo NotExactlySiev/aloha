@@ -335,10 +335,10 @@ void read_version(void)
     } while (tmp == -1);
     
     g_GameRegion = 0;
-    g_GameNP = 0;
+    g_GameNP = TV_NTSC;
     if (tmp == -2) return; 
     
-    if (buf[0] == 'P') g_GameNP = 1;
+    if (buf[0] == 'P') g_GameNP = TV_PAL;
     
     if (buf[1] == 'U') {
         g_GameRegion = 1;

@@ -18,4 +18,8 @@ typedef struct EXEC EXEC;
 
 int sprintf(char* dst, const char* fmt, ...);
 
+// these need somewhere else to exist
+#define TV_NTSC 0
+#define TV_PAL  1
+
 #endif
