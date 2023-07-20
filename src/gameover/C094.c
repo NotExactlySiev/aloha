@@ -1,6 +1,6 @@
 #include "common.h"
 #include <libspu.h>
-
+#include <libgpu.h>
 
 // stuff from main executable. TODO move these to a header, all execs need them
 #define RANGE(a,b)    char _## a ##_## b [b-a+1]
@@ -28,9 +28,15 @@ typedef union {
 extern jt_t jmptable;
 
 
-
-
 // data from here
+typedef struct {
+    DISPENV dispenv;
+    DRAWENV drawenv;
+    u32    ot[4];
+    u32*   unk;
+    u32    rest[0x8000];
+} big_struct;
+
 int D_800ED354[6] = { 32, 33, 34, 35, 36, 37 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
 s32 D_800ED394;
@@ -38,6 +44,10 @@ s32 D_800ED3CC;
 s32 D_800ED3D4;    // remove these externs later, they break decomp fsr
 s32 D_800ED3DC;
 jt_t *jtptr = &jmptable;
+
+s32 D_800EDE54;               // current buffer id
+big_struct  D_800EDE5C[2];    // buffers
+big_struct* D_8012DF74;       // current
 
 #define JTFUNC(id)  (*jtptr->list[id])
 
@@ -176,6 +186,15 @@ int main(void) {
     }
     JTFUNC(0xC)(choice);
 }
+
+// at 82% or so, but with 3.6 -O2 :/
+void func_800EC608(void) {
+    D_800EDE54 = !D_800EDE54;
+    D_8012DF74 = &D_800EDE5C[D_800EDE54];
+    JTFUNC(0x61C)(D_8012DF74->ot, 4);
+    D_8012DF74->unk = D_8012DF74->rest;
+}
+
 
 // This has more functions in it, and I have removed main, that's why it's still here
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", main);
