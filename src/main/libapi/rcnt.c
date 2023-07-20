@@ -15,8 +15,6 @@ extern cntregs_t *g_TimerRegs;// = TIMER_REGS; // TODO
 
 INCLUDE_ASM("asm/main/nonmatchings/libapi/rcnt", SetRCnt);
 
-//INCLUDE_ASM("asm/main/nonmatchings/libapi/rcnt", GetRCnt);
-// NON MATCHING
 u16 GetRCnt(s32 arg0) {
     arg0 = arg0 & 0xFFFF;
     if (arg0 >= 3) {
@@ -25,13 +23,10 @@ u16 GetRCnt(s32 arg0) {
     return g_TimerRegs[arg0].val;
 }
 
-
 INCLUDE_ASM("asm/main/nonmatchings/libapi/rcnt", StartRCnt);
 
 INCLUDE_ASM("asm/main/nonmatchings/libapi/rcnt", StopRCnt);
 
-//INCLUDE_ASM("asm/main/nonmatchings/libapi/rcnt", ResetRCnt);
-// NON MATCHING but matches in decomp.me for some reason
 s32 ResetRCnt(s32 arg0) {
     arg0 = arg0 & 0xFFFF;
     if (arg0 >= 3) return 0;
