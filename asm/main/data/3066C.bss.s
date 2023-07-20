@@ -10,9 +10,6 @@ glabel D_80047E84
 glabel D_80047E8C
 /* 30674 80047E8C */ .space 0x08
 
-glabel D_80047E94
-/* 3067C 80047E94 */ .space 0x08
-
 glabel D_80047E9C
 /* 30684 80047E9C */ .space 0x02
 
@@ -55,9 +52,6 @@ glabel D_80047EE4
 glabel D_80047EEC
 /* 306D4 80047EEC */ .space 0x08
 
-glabel D_80047EF4
-/* 306DC 80047EF4 */ .space 0x08
-
 glabel D_80047EFC
 /* 306E4 80047EFC */ .space 0x08
 
@@ -75,15 +69,6 @@ glabel D_80047F1C
 
 glabel D_80047F24
 /* 3070C 80047F24 */ .space 0x08
-
-glabel _sndqueue_next
-/* 30714 80047F2C */ .space 0x08
-
-glabel D_80047F34
-/* 3071C 80047F34 */ .space 0x08
-
-glabel _sndqueue_size
-/* 30724 80047F3C */ .space 0x08
 
 glabel D_80047F44
 /* 3072C 80047F44 */ .space 0x08

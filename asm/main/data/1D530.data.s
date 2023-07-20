@@ -38903,15 +38903,6 @@ glabel D_80047DD0
 glabel D_80047DD4
 /* 305D4 80047DD4 */ .word 0x00000400
 
-glabel D_80047DD8
-/* 305D8 80047DD8 */ .word 0x00000001
-
-glabel _sndqueue_empty
-/* 305DC 80047DDC */ .word 0x00000000
-
-glabel D_80047DE0
-/* 305E0 80047DE0 */ .word 0x00000000
-
 glabel D_80047DE4
 /* 305E4 80047DE4 */ .word 0x00000001
 
@@ -38923,9 +38914,6 @@ glabel D_80047DEC
 
 glabel D_80047DF0
 /* 305F0 80047DF0 */ .word 0x00000000
-
-glabel _sndqueue_busy
-/* 305F4 80047DF4 */ .word 0x00000000
 /* 305F8 80047DF8 */ .word 0x6F726463
 /* 305FC 80047DFC */ .word 0x005C3A6D
 

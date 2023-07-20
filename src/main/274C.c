@@ -85,8 +85,6 @@ int func_8001A378(void) {
     return 0;
 }
 
-
-// matching on 4.3 with -O1 and -fPIC
 void func_8001A380(void) {
     CdReadyCallback(cd_ready_callback);
     CdReadCallback(cd_read_callback);
@@ -97,7 +95,6 @@ void func_8001A380(void) {
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A3B8);
 
 // clears all cd callbacks
-// matching on 4.3 with -O1
 void func_8001A74C(void) {
     CdReadyCallback(0);
     CdReadCallback(0);
@@ -124,32 +121,27 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AD0C);
 // and then we just have 12array stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 
-// these belong to the sndqueue functions and might not be extern
-extern s32 _sndqueue_empty;
-extern s32 D_80047EF4;
-extern u16 _sndqueue_size;
-
 #define SNQ_FINISHED    -1
 #define SNQ_SET_REVERB  -7
 
 typedef struct {
-    u8    com;
+    u8     com;
     u32    arg0;
     u32    arg1;
 } snd_task_t;
 
-extern s32 D_80047DD8;  // this is still a mystery. probably enum. gets set in the first function here
-extern s32 _sndqueue_empty;
-extern s32 D_80047DE0;  // step? no idea. maybe a state machine
-extern s32 _sndqueue_busy;
-extern s32 D_80047E94;  // this one just gets 0 written to it
-extern u16 _sndqueue_next;
-extern u16 D_80047F34;  // index of the task being executed
-extern u16 _sndqueue_size;
+s32 D_80047DD8 = 1;  // this is still a mystery. probably enum. gets set in the first function here
+s32 D_80047DE0 = 0;  // step? no idea. maybe a state machine
+s32 _sndqueue_empty = 0;
+s32 _sndqueue_busy = 0;
+u16 _sndqueue_next;
+u16 _sndqueue_size;
+s32 D_80047E94;      // this one just gets 0 written to it
+s32 D_80047EF4;
+u16 D_80047F34;      // index of the task being executed
 
-extern snd_task_t D_8004D0F8[160];  // _sndqueue
+snd_task_t _sndqueue[160];
 
-// MATCHING with 4.3 -O1, which means these can't be -O2, unlike the next function :(
 void sndqueue_reset(void) {
     _sndqueue_next = 0;
     D_80047F34 = 0;
@@ -157,22 +149,21 @@ void sndqueue_reset(void) {
     D_80047DD8 = 1;
     _sndqueue_empty = 1;
     D_80047DE0 = 0;
-    D_8004D0F8[0].com = -1;
+    _sndqueue[0].com = -1;
     _sndqueue_size = 0;
 }
 
-
-// NONMATCHING, but at 80% with 4.3 -O2. It has really weird assembly
-s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2) {
+s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2)
+{
     u8 tmp;
     snd_task_t* task;
 
-    task = &D_8004D0F8[_sndqueue_next];
+    task = &_sndqueue[_sndqueue_next];
 
     if (_sndqueue_busy == 1 || _sndqueue_size > 192) return 0;
 
     _sndqueue_busy = 1;
-    D_8004D0F8[(_sndqueue_next+1)%256].com = -1;
+    _sndqueue[(_sndqueue_next+1)%256].com = -1;
     task->com = arg0;
     task->arg0 = arg1;
     task->arg1 = arg2;
@@ -185,25 +176,23 @@ s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-// MATCHING with 4.3 -O1
-void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2) {
+void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
+{
     if (D_80047EF4 == 0) {
         while (_sndqueue_size > 192)
-            ww_process();
+            sndqueue_exec();
     }
     sndqueue_add(arg0, arg1, arg2);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", ww_process);    // sndqueue_exec
+INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 
-
-// ALMOST MATCHING with 4.3 -O1
 int sndqueue_exec_all(void) {
     s32 ret;
 
     ret = 0;
     if (_sndqueue_empty == 0) do {
-        ret = ww_process();
+        ret = sndqueue_exec();
     } while (_sndqueue_empty == 0 && ret != -1);
     
     CdSync(0, 0);
