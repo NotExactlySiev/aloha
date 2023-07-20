@@ -23,7 +23,7 @@ MAIN_S_FILES	:=	$(wildcard asm/main/data/*.s) \
 MAIN_C_FILES	:=  $(wildcard src/main/*.c) $(wildcard src/main/**/*.c)
 MAIN_O_FILES	:=  $(foreach file,$(MAIN_C_FILES),$(BUILD_DIR)/$(file).o) \
 					$(foreach file,$(MAIN_S_FILES),$(BUILD_DIR)/$(file).o) \
-					$(BUILD_DIR)/header.o
+					$(BUILD_DIR)/src/header.o
 
 GAMEOVER_S_FILES :=	$(wildcard asm/gameover/data/*.s) \
 					$(wildcard src/gameover/*.s)

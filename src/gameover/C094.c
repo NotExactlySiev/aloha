@@ -49,15 +49,36 @@ typedef struct {
 
 int D_800ED354[7] = { 32, 33, 34, 35, 36, 37, 32 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
+s32 D_800ED374 = 0xFFFFDC00;
+
+// this might be a struct
+s32 D_800ED388 = 0;
+s32 D_800ED38C = 0;
+s32 D_800ED390 = 40;
+
 s32 D_800ED394 = 0;
+s32 D_800ED3B4 = 0;
+s32 D_800ED3BC = 0;
+s32 D_800ED3C4 = 0;
 s32 D_800ED3CC = 0;
-s32 D_800ED3D4 = 0;    // remove these externs later, they break decomp fsr
-s32 D_800ED3DC = 0;
+s32 D_800ED3D4 = 0;
+s32 D_800ED3DC = 0;     // selected
+s32 D_800ED3E4 = 0;
+s32 D_800ED3EC = 0;
+s32 D_800ED3F4 = 0;
+s32 D_800ED3FC = 0;
+s32 D_800ED404 = 0;
 jt_t *jtptr = &jmptable;
+
+s32 D_800ED340[5] = { 40, 42, 41, 42, -1 };
+
+// these change with tv standard
+s32 D_800ED384 = 1200;
+s32 D_800ED424 = 0;
 
 s32 D_800EDE54;               // current buffer id
 big_struct  D_800EDE5C[2];    // buffers
-//big_struct* D_8012DF74;       // current
+//big_struct* D_8012DF74;     // current
 unk_struct D_8012DF74;
 
 
@@ -66,40 +87,108 @@ unk_struct D_8012DF74;
 
 void func_800EC95C(int, int, s32, s32, s32, s32);
 
+void func_800EB894(void)
+{
+    D_800ED3CC = 0;
+    D_800ED3D4 = 0;
+    D_800ED3EC = 0;
+    D_800ED3F4 = 0;
+}
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB894);
-
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8C0);
+void func_800EB8C0(s32 arg)
+{
+    JTFUNC(0x311)(arg, 0x3e, 100);
+}
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8F8);
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBA08);
+void func_800EBA08(void)
+{
+    D_800ED3B4 = 0x00005F00;
+    D_800ED3BC = 0;
+}
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBA20);
+void func_800EBA20(void)
+{
+    D_800ED374 = 0x00005F00;
+    D_800ED3BC = 0;
+}
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBA40);
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBCE0);
+void func_800EBCE0(void)
+{
+    D_800ED3C4 = 0;
+}
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBCF0);
+void func_800EBCF0(void)
+{
+    func_800EBD10(0);
+}
 
+// relatively simple
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBD10);
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBD5C);
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBEA8);
+void func_800EBEA8(void)
+{
+    D_800ED3DC = 0;
+}
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBEB8);
+void func_800EBEB8(void)
+{
+    func_800EC95C(2, 0x20, 0x44, 0x90, D_800ED3CC, 0);
+    func_800EC95C(2, 0x21, 0x44, 0xA0, D_800ED3CC, D_800ED3DC == 0);
+    func_800EC95C(2, 0x22, 0x44, 0xB0, D_800ED3CC, D_800ED3DC == 1);
+}
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBF58);
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC098);
+void func_800EC098(void)
+{
+    s32 tv_standard;
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC128);
+    func_800EBA08();
+    func_800EBCE0();
+    func_800EB894();
+    func_800EBEA8();
+    D_800ED3E4 = 0x2D;
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC14C);
+    tv_standard = JTFUNC(7)();
+    if (tv_standard == 1) {
+        D_800ED424 = 9;
+        D_800ED384 = 1000;
+    } else {
+        D_800ED424 = 11;
+    }
+}
 
-//INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC23C);
+void func_800EC128(void)
+{
+    D_800ED388 = 0;
+    D_800ED38C = 0;
+    D_800ED390 = 40;
+}
+
+void func_800EC14C(void)
+{
+    s32 tmp;
+
+    D_800ED388 += 1;
+    if (D_800ED388 >= D_800ED424) {
+        D_800ED38C += 1;
+        D_800ED388 = 0;
+        if (D_800ED340[D_800ED38C] == -1) {
+            D_800ED38C = 0;
+        }
+        D_800ED390 = D_800ED340[D_800ED38C];
+    }
+
+    tmp = D_800ED3DC == 1 ? 0xAB : 0x9B;
+    func_800EC95C(2, D_800ED390, 0x44, tmp, D_800ED3CC, 0);
+}
+
 void func_800EC23C(s32 arg)
 {
     func_800EB8F8();
