@@ -1,6 +1,24 @@
 #include "common.h"
 #include <libspu.h>
 
+
+// stuff from main executable. TODO move these to a header, all execs need them
+#define RANGE(a,b)    char _## a ##_## b [b-a+1]
+
+// maybe this isn't just game config, but all vars shared between files?
+typedef struct {
+    //char raw[0x500];
+    RANGE(0, 0x4FF);
+    // game over screen vars
+    s32 unk500;
+    s32 unk504;
+    u8  unk508;
+    u8  unk509;
+    u8  unk50A;
+    u8  unk50B;
+    RANGE(0x50C, 2047);    // TODO: figure out how large this whole thing really is
+} config_t;
+
 typedef int(*fnp)();
 typedef union {
     fnp list[1024];
@@ -8,6 +26,10 @@ typedef union {
 } jt_t;
 
 extern jt_t jmptable;
+
+
+
+// data from here
 
 int D_800ED354[6] = { 32, 33, 34, 35, 36, 37 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
@@ -68,7 +90,19 @@ void func_800EC318(void)
     func_800EC14C();
 }
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC358);
+// closely matching with 4.1 -O1
+void func_800EC358(void) {
+    config_t* conf;
+    conf = JTFUNC(0x14)();
+    
+    conf->unk500 = 0;
+    conf->unk508 = 1;
+    conf->unk509 = 0;
+    conf->unk50A = 0;
+    conf->unk50B = 0;
+    conf->unk504 = 3;
+}
+
 
 int main(void) {
     s32 temp_s0;
