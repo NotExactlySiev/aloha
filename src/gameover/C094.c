@@ -1,4 +1,22 @@
 #include "common.h"
+#include <libspu.h>
+
+typedef int(*fnp)();
+typedef union {
+    fnp list[1024];
+    // TODO: funcs struct (from the decomp file for main)
+} jt_t;
+
+extern jt_t jmptable;
+
+int D_800ED354[6] = { 32, 33, 34, 35, 36, 37 };
+SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
+s32 D_800ED3D4;    // remove these externs later, they break decomp fsr
+s32 D_800ED3DC;
+jt_t *jtptr = &jmptable;
+
+#define JTFUNC(id)  (*jtptr->list[id])
+
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB894);
 
@@ -41,7 +59,6 @@ void func_800EC23C(s32 arg)
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC268);
 
-//INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC318);
 void func_800EC318(void)
 {
     func_800EBA40();
@@ -53,4 +70,60 @@ void func_800EC318(void)
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EC358);
 
+int main(void) {
+    s32 temp_s0;
+    s32 var_a0;
+    s32 var_v0;
+    u8 temp_v0;
+    u8* temp_s2;
+    int choice;
+    
+    func_800ED298();
+    func_800ED268();
+    func_800ECDA8();
+    func_800EC098();
+    
+    JTFUNC(0xC3C)();
+    
+    func_800ED01C();
+    temp_s2 = JTFUNC(0x14)();
+    JTFUNC(0x4A4)(&D_800ED370); // set global vol void(SpuVolume*)
+    JTFUNC(0xC14)(0x3000);
+    JTFUNC(0xCC8)(0);    // mc_set_some_var
+
+    // play some audio thing
+    temp_v0 = temp_s2[0x514];
+    if (temp_v0 > 5) temp_v0 = 5;
+    JTFUNC(0xCC4)(D_800ED354[temp_v0]); // int(int)
+    
+    func_800EC608();
+    func_800EC684();
+    func_800EC608();
+    func_800EC684();
+    JTFUNC(0x604)(0);    // call_wait_frame
+    JTFUNC(0x60C)(1);    // call_SetDispMask
+    
+    func_800EBD10(1);
+    
+    do {
+        temp_s0 = func_800ED09C();
+        func_800EC608();
+        func_800EC23C(temp_s0);
+        func_800EC318();
+        func_800EC684();
+    } while (D_800ED3D4 != 4);
+    
+    JTFUNC(0xC3C)();
+
+    choice = 0;
+    
+    if (D_800ED3DC == 0) {
+        temp_s2[0x515] = 0;
+        func_800EC358();
+        choice = 1;
+    }
+    JTFUNC(0xC)(choice);
+}
+
+// This has more functions in it, and I have removed main, that's why it's still here
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", main);

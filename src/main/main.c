@@ -3,8 +3,6 @@
 #include <kernel.h>
 #include <libgpu.h>
 
-#define EXTRA_FEATURES
-
 // file execute loop
 void func_800188C8(void) {
     s32 *addr;
@@ -304,14 +302,25 @@ void jt_clear(void) {
     }
     flush_cache_safe();
 }
+
 // NON MATCHING but only regalloc
-void jt_set(void* func, s32 idx) {
+#ifdef  EXTRA_FEATURES
+#undef jt_set
+void jt_set(void* func, s32 idx, char* func_name)
+{
+    k_printf("JT: Set %X (%d) to %08X (%s)\n", idx, idx, func, func_name);
+    _jt_set(func, idx);
+}
+#define   jt_set(func, idx)   jt_set(func, idx, #func)
+
+void _jt_set(void* func, s32 idx)
+#else   
+void jt_set(void* func, s32 idx)
+#endif
+{
     void** jmptable = (void**) 0x80010000;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();
-#ifdef  EXTRA_FEATURES
-    k_printf("JT: Set %03X to 0x%X\n", idx, func);
-#endif
 }
 
 // NON MATCHING

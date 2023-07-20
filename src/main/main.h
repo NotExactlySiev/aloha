@@ -1,6 +1,8 @@
 #include "common.h"
 #include <kernel.h>
 
+#define EXTRA_FEATURES
+
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
 
 #define    SLEEP_FRAMES(f)    for (i = 0; i < f; i++) wait_frame(0);
@@ -29,7 +31,7 @@ typedef struct {
     char magic[16];     // 0x10 0x00
     EXEC header;        // 0x3C 0x10
     char filler[0x7B4]; // 7B4  0x4C
-    u32 unk;            // 4    0x800
+    u32 expected_size;  // 4    0x800
     u8 data;            // ???  0x804
 } compexec_t;
 
@@ -54,10 +56,8 @@ void reboot(char*, char*);
 
 
 
-void* jmptable[1024];   // 80010000
-
-
-u8 g_GameConfig[1280];  // 80014000
+extern void* jmptable[1024];   // 80010000
+extern u8 g_GameConfig[1280];  // 80014000
 
 #define DFILE(ptr, name)    { (void*) (ptr | 1), name }
 file_t g_Files[42] = {  // 800318b8
@@ -176,7 +176,12 @@ void disable_timer3_event(s32);         //  add stack
 void nop(void);                         //  nop             NO STACK
 void flush_cache_safe(void);            //  add stack
 void jt_clear(void);                    //  add stack
+#ifdef  EXTRA_FEATURES
+void jt_set(void*, s32, char*);
+#define   jt_set(func, idx)   jt_set(func, idx, #func)
+#else
 void jt_set(void*, s32);                //  add stack
+#endif
 void func_80019948(void);               //  add stack
 void func_80019990(void);               //  add stack
 s32 get_GameNP(void);                   //  nop             NO STACK
