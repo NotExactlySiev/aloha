@@ -56,6 +56,7 @@ typedef struct {
 sprt_group_t* sprt_data[64];
 
 // these might be not s32 but paired as structs?
+// these are animations for sprites,
 s32* intarrs[3] = {
     { 13, 1, -1, 0 },
     { 0, 4, 1, 4, 2, 4, 3, 4, 8, 10, 9, 10, 10, 10, 11, 10, 12, 10, 13, 10, -1, 18 },
@@ -67,7 +68,8 @@ s32 seq_wait = 0;
 
 int D_800ED354[7] = { 32, 33, 34, 35, 36, 37, 32 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
-s32 D_800ED374 = 0xFFFFDC00;
+s32 D_800ED374 = -0x2400;       // dy
+s32 D_800ED378 = 0x600;         // ddy
 
 // this might be a struct
 s32 D_800ED388 = 0;
@@ -76,10 +78,10 @@ s32 D_800ED390 = 40;
 
 s32 D_800ED394 = 0;
 s32 D_800ED3B4 = 0;
-s32 D_800ED3BC = 0;
+s32 bounce_stage = 0;     // bounce animation state
 s32 D_800ED3C4 = 0;
 s32 D_800ED3CC = 0;     // color for something (screen fading?)
-s32 D_800ED3D4 = 0;
+s32 stage = 0;          // stage of the entire sequence of this file. from fadein to fadeout
 s32 selected = 0;       // selected
 s32 D_800ED3E4 = 0;
 s32 D_800ED3EC = 0;
@@ -113,13 +115,13 @@ u32 input_das_read(void);
 void func_800EB894(void)
 {
     D_800ED3CC = 0;
-    D_800ED3D4 = 0;
+    stage = 0;
     D_800ED3EC = 0;
     D_800ED3F4 = 0;
 }
 
 // plays some sound effect
-void func_800EB8C0(s32 arg)
+void play_effect(s32 arg)
 {
     JTFUNC(0x311)(arg, 0x3e, 100);
 }
@@ -129,15 +131,16 @@ INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8F8);
 void func_800EBA08(void)
 {
     D_800ED3B4 = 0x00005F00;
-    D_800ED3BC = 0;
+    bounce_stage = 0;
 }
 
 void func_800EBA20(void)
 {
     D_800ED374 = 0x00005F00;
-    D_800ED3BC = 0;
+    bounce_stage = 0;
 }
 
+// bounce animation
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBA40);
 
 void func_800EBCE0(void)
@@ -147,10 +150,10 @@ void func_800EBCE0(void)
 
 void func_800EBCF0(void)
 {
-    func_800EBD10(0);
+    seq_select(0);
 }
 
-void func_800EBD10(int idx)
+void seq_select(int idx)
 {
     seq = intarrs[idx];
     seq_idx = 0;
@@ -213,7 +216,50 @@ void func_800EBEB8(void)
     load_gbuffer(2, 34, 68, 176, D_800ED3CC, selected == 1);
 }
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBF58);
+// TODO: where the fuck is lib pad? :/ I need macros for input
+#define BUTTONS_NAVIGATE    0xF000
+#define BUTTONS_ACCEPT      0x08A0
+#define BUTTON_UP           0x1000
+#define BUTTON_DOWN         0x4000
+
+s32 D_800ED380 = 0; // the shut the fuck up counter
+
+//INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBF58);
+void func_800EBF58(u32 buttons)
+{
+    // stage 1 is when the menu is shown and we receive input
+    if (button == 0 || stage != 1) return;
+
+    if (buttons & (BUTTONS_ACCEPT | BUTTONS_NAVIGATE)) D_800ED380 = 0;
+
+    if (buttons & BUTTONS_ACCEPT) {
+        play_effect(0x2600);
+        stage = 2;
+        JTFUNC(0x127)(12, 0, 0);    // add something to sndqueue idfk
+        if (selected == 0) {
+            // selected YES
+            seq_select(2);
+            bounce_stage = 6;
+            play_effect(0x4A00);
+        } else {
+            // selected NO
+            D_800ED3F4 = 1;
+            D_800ED378 = 0; // no change in speed anymore
+            bounce_stage = 2;
+        }
+    }
+
+    if ((buttons & BUTTON_UP) && selected == 1) {
+        selected = 0;
+        play_effect(0x2c00);
+    }
+
+    if ((buttons & BUTTON_DOWN) && selected == 0) {
+        selected = 1;
+        play_effect(0x2c00);
+    }
+}
+
 
 void func_800EC098(void)
 {
@@ -336,15 +382,15 @@ int main(void)
     JTFUNC(0x181)(0);    // call_wait_frame
     JTFUNC(0x183)(1);    // call_SetDispMask
     
-    func_800EBD10(1);
+    seq_select(1);
     
     do {
         temp_s0 = input_das_read();  // read input
         func_800EC608();            // swap and clear
-        func_800EC23C(temp_s0);     // logic i'm guessing?
-        func_800EC318();            // 
-        func_800EC684();
-    } while (D_800ED3D4 != 4);
+        func_800EC23C(temp_s0);     // process input
+        func_800EC318();            // update graphics
+        func_800EC684();            // render graphics
+    } while (stage != 4);
     
     JTFUNC(0xC3C)();
 
