@@ -15,3 +15,33 @@ uninitialized
 (big buffers in this part for 274C.c)
 80052248    libgpu data
 ...         other standard lib data
+
+
+
+
+JM1/MAIN.PEX
+
+It seems to have libgpu linked into it again. Since it's very likely that it's the same
+version of the library as the one in main, it should be possible to find duplicates.
+It still uses the LoadImage and DrawSync functions that are provided in the jmptable,
+so I don't know what exactly is going on there. There is a good chunk of libgpu included
+in it tho.
+
+In addition to that it has something we haven't dealt with yet: libgte. This file actually
+is going to be doing 3D rendering so things are about to get interesting.
+The file map doesn't seem to be as tidy and organized as main. Gonna have to figure it out.
+
+800B0000    .rodata     loads of switch case tables
+
+800B0A68    game code   .text
+
+800DB018    game code (seperate objects?) (uses jtp)
+            some libgpu again
+800DF1E4    game code (i'm pretty sure)
+800C6BD4    libgpu
+800C98F8    libgte
+800CC338    libetc (yay, the entire gang is back!)
+
+800FD400    .data
+\
+80103000
