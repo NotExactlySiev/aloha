@@ -44,4 +44,10 @@ The file map doesn't seem to be as tidy and organized as main. Gonna have to fig
 
 800FD400    .data
 \
+801383F0    various lists of pointers (to entities, but maybe more)
+
 80103000
+
+
+
+80060000 is where COM_DAT.EAR is loaded by SELECT.PEX
