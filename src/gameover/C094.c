@@ -228,7 +228,7 @@ s32 D_800ED380 = 0; // the shut the fuck up counter
 void func_800EBF58(u32 buttons)
 {
     // stage 1 is when the menu is shown and we receive input
-    if (button == 0 || stage != 1) return;
+    if (buttons == 0 || stage != 1) return;
 
     if (buttons & (BUTTONS_ACCEPT | BUTTONS_NAVIGATE)) D_800ED380 = 0;
 
