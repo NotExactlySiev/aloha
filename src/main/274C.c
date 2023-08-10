@@ -21,6 +21,55 @@ void sndqueue_add_try(u8, s32, s32);
 
 // functions
 
+#define NEXT    \
+    (t = t ? t-1 : 7, c = t == 7 ? *src++ : c, (c >> t) & 1)
+
+char* _lz1_decode(const u8 *src, u8* dst)
+{
+    u8 t, c;    // control bits and their counter
+    s32 off;
+    u32 l;
+    u8* orig = src;
+    u8* od = dst;
+    t = 0;
+    while (1)
+    {
+        // every NEXT macro reads one bit from the control bit
+        // 0 means simply copy a byte
+        while (NEXT == 0)
+            *dst++ = *src++;
+        
+        // 1 means repeated data. we're gonna copy from output
+        // buffer.
+        // next bit sets if the offset is gonna be 12 bit (the
+        // next 4 control bits being the lower bits of the
+        // offset)
+        if (NEXT == 0) {
+            off = *src++ - 256;
+            if (off == -0x100) return dst;  // denotes EOS
+        } else {
+            off = *src++ - 256;
+            off = (off << 1) | NEXT;
+            off = (off << 1) | NEXT;
+            off = (off << 1) | NEXT;
+            off = (off << 1) | NEXT;
+            off -= 255;
+        }
+    
+        // now length
+        l = 1;
+        while (NEXT == 1)
+            l = (l << 1) | NEXT;
+        l += 1;
+
+        //__builtin_memcpy(dst, dst+off, l);
+        while (l--) {
+            *dst = *(dst+off);
+            dst += 1;
+        }
+    }
+}
+
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
