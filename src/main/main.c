@@ -3,6 +3,70 @@
 #include <kernel.h>
 #include <libgpu.h>
 
+
+#define DFILE(ptr, name)    { (void*) (ptr | 1), name }
+
+file_t g_Files[42] = {
+    DFILE(0x80060000, "TITLE.PEX"),
+    DFILE(0x80060000, "SELECT.PEX"),
+    DFILE(0x80080000, "JM1\\MAIN.PEX"),
+    DFILE(0x80080000, "JM1\\MAIN.PEX"),
+    DFILE(0x80080000, "JM1\\MAIN.PEX"),
+    DFILE(0x80080000, "JM2\\MAIN.PEX"),
+    DFILE(0x80080000, "JM2\\MAIN.PEX"),
+    DFILE(0x80080000, "JM2\\MAIN.PEX"),
+    DFILE(0x80080000, "JM3\\MAIN.PEX"),
+    DFILE(0x80080000, "JM3\\MAIN.PEX"),
+    DFILE(0x80080000, "JM3\\MAIN.PEX"),
+    DFILE(0x80080000, "JM4\\MAIN.PEX"),
+    DFILE(0x80080000, "JM4\\MAIN.PEX"),
+    DFILE(0x80080000, "JM4\\MAIN.PEX"),
+    DFILE(0x80080000, "JM5\\MAIN.PEX"),
+    DFILE(0x80080000, "JM5\\MAIN.PEX"),
+    DFILE(0x80080000, "JM5\\MAIN.PEX"),
+    DFILE(0x80080000, "JM6\\MAIN.PEX"),
+    DFILE(0x80080000, "JM6\\MAIN.PEX"),
+    DFILE(0x80080000, "JM6\\MAIN.PEX"),
+    DFILE(0x80080000, "JM1\\MAIN.PEX"),
+    DFILE(0x80080000, "JM2\\MAIN.PEX"),
+    DFILE(0x80080000, "JM3\\MAIN.PEX"),
+    DFILE(0x80080000, "GAMEOVER.PEX"),
+    DFILE(0x80080000, "JM1B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM1B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM1B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM2B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM2B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM2B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM3B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM3B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM3B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM4B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM4B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM4B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM5B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM5B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM5B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM6B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM6B\\MAIN.PEX"),
+    DFILE(0x80080000, "JM6B\\MAIN.PEX"),
+};
+
+s32 g_CurrFile = 0;
+s32 g_NextFile = 0;
+s32 g_GameRegion = 0;
+u32 g_GameNP = TV_NTSC;
+s32 g_GameIsZ = 0;
+
+// .bss
+void* D_80048044;       // hold return for _start
+s32 D_80047E6C;         // 80047e6c
+s32 D_80047E70;         // 80047e70
+s32 tim3event;          // 80047e74
+s32 excpevent;          // 80047e7c
+char g_VersionStr[20];
+
+
+
 void file_execute_loop(void)
 {
     s32 *addr;
@@ -12,9 +76,7 @@ void file_execute_loop(void)
         if (g_CurrFile == -1) g_CurrFile = 0;
 
         addr = g_Files[g_CurrFile].header;
-#ifdef  EXTRA_FEATURES
         k_printf("now executing: %s\n", g_Files[g_CurrFile].addr);
-#endif
         if (addr != NULL) {
             // if addr isn't NULL, it's compressed
             if ((s32) addr & 1) {
