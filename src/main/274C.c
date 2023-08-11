@@ -4,6 +4,7 @@
 #include <libcd.h>
 #include <libgpu.h>
 #include <libetc.h>
+#include <sys/file.h>
 
 // data
 // but .data is not integrated into this file yet, so they're extern
@@ -918,6 +919,8 @@ u32 func_8001E36C(s32 id)
     return PadRead(id);
 }
 
+// FILE font.c
+
 void func_8001E438();
 void func_8001E5BC();
 extern u8* font_ptr8;
@@ -1012,17 +1015,61 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FFD4);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020000);
 
 // 15 memory card file system functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020020);   // mc_addr_prefix
+
+extern char D_800521F8[32];
+
+s32 mc_addr_prefix(s32 mtidx, char* src, char* dst)
+{
+    s32 rc;
+    char c;
+    rc = func_80020000(mtidx);
+    if (1 != rc) return rc;
+    dst[0] = 'b';
+    dst[1] = 'u';
+    dst[2] = '0' + ((mtidx >> 8) & 1);
+    c &= 0xf;
+    c += c > 9 ? 'W' : '0';
+    dst[3] = c;
+    dst[4] = ':';
+    strcpy(src, dst+5);
+    return 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800200C8);   // mc_
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002011C);   // mc_file_create
+s32 mc_file_create(s32 mtidx, char* file, u32 size)
+{
+    s32 fd;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800201A0);   // mc_file_open
+    if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
+        return 0;
+    size += 0x2000 - 1;
+    if (size < 0) size += 0x2000 - 1 + 0x2000 - 1;
+    size >>= 13;
+    fd = k_open(D_800521F8, (size << 16) | O_CREAT);
+    if (fd == -1) return 0;
+    k_close(fd);
+    return 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020208);   // mc_file_close
+s32 mc_file_open(s32 mtidx, char* file, u32 mode)
+{
+    if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
+        return -1;
+    return k_open(D_800521F8, mode);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020228);   // mc_file_delete
+s32 mc_file_close(s32 fd)
+{
+    return k_close(fd);
+}
+
+s32 mc_file_delete(u32 mtidx, char* file)
+{
+    if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
+        return 0;
+    return k_erase(D_800521F8);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002026C);   // mc_write
 
