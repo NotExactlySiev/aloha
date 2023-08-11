@@ -86,7 +86,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80030A44);
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80030A98);
 
-INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80030B00);
+INCLUDE_ASM("asm/main/nonmatchings/libsnd", SpuSetCommonAttr);
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80030E94);
 

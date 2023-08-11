@@ -11,12 +11,24 @@ s32 is_mono = 0;
 CdlFILE D_80048068;
 CdlLOC ww_global_loc;
 
+s32 fe_value;
+
+
 // regular task vars, they're in the assembly
 extern s32 D_800234B0;
 extern s32 D_800234B4;
+extern s32 D_80047D78;
+extern SpuVolume D_80047D8C;
+extern s32 D_80047EAC;
+extern s32 D_80047F24;
+extern s32 D_80047DEC;
+extern s32 D_80047EA4;
+extern s32 D_80047F54;
+extern SpuVolume vol_full;
+
 
 void cd_ready_callback(s32 status, u32 *result);
-void sndqueue_add_try(u8, s32, s32);
+s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2);
 
 
 // functions
@@ -149,23 +161,7 @@ void func_8001A74C(void) {
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
 
-// sound related functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A8A0);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A934);
-
-// these 2 are almost identical, only vars are different
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A978);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AA80);
-
-// same for these 2
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AB88);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AD0C);
-
-// and then we just have 12array stuff
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
+#define VOL_FULL    1024
 
 #define SNQ_FINISHED    -1
 #define SNQ_SET_FE       -2  //  arg0
@@ -178,11 +174,131 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 #define SNQ_FUNC9       -9
 #define SNQ_FUNC10      -10
 
+#define CLAMP(a,b,x)    { if (x < a) x = a; if (x > b) x = b; }
+
 typedef struct {
     u8     com;
     u32    arg0;
     u32    arg1;
 } snd_task_t;
+
+// TODO: the multiplications here have the weird if statements
+void set_vol_scaled(SpuVolume* vol, s32 scale)
+{
+    SpuCommonAttr attr;
+    CLAMP(0, VOL_FULL, scale);
+    attr.mask = SPU_COMMON_CDVOLL | SPU_COMMON_CDVOLR;
+    attr.cd.volume.left = (vol->left * scale) >> 10;
+    attr.cd.volume.right = (vol->right * scale) >> 10;
+    SpuSetCommonAttr(&attr);
+}
+
+void set_vol_full(SpuVolume* vol) {
+    set_vol_scaled(vol, VOL_FULL);
+    vol_full = *vol;
+}
+
+extern s32 D_800548EC;
+extern s32 fade_out_active;
+extern s32 fading_out;
+extern s32 fade_in_active;
+extern s32 fading_in;
+extern s32 fade_in_step;
+extern s32 fade_out_step;
+extern s32 fade_out_dest;
+extern s32 fade_in_dest;
+
+s32 vol_scale = VOL_FULL;
+s32 fade_paused = 0;
+s32 fade_out_task = 0;
+s32 fade_in_task = 0;
+int (*fade_out_callback)() = 0;
+int (*fade_in_callback)() = 0;
+
+void fade_out_routine(void)
+{
+    if (fade_paused || !fading_out) return;
+    if (vol_scale > fade_out_dest) {
+        set_vol_scaled(&vol_full, vol_scale);
+        vol_scale -= fade_out_step;
+    } else {
+        regular_clear_tmps(fade_out_task);
+        vol_scale = fade_out_dest;
+        fading_out = 0;
+        fade_in_active = 0;
+        fade_out_active = 0;
+        if (fade_out_callback != 0) (*fade_out_callback)();
+        set_vol_scaled(&vol_full, vol_scale);
+    }
+}
+
+void fade_in_routine(void)
+{
+    if (fade_paused || !fading_in) return;
+    if (vol_scale < fade_in_dest) {
+        set_vol_scaled(&vol_full, vol_scale);
+        vol_scale += fade_in_step;
+    } else {
+        regular_clear_tmps(fade_in_task);
+        vol_scale = fade_in_dest;
+        fading_in = 0;
+        fade_in_active = 0;
+        fade_out_active = 0;
+        if (fade_in_callback != 0) (*fade_in_callback)();
+        set_vol_scaled(&vol_full, vol_scale);
+    }
+}
+
+s32 fade_out(s32 duration, s32 dstvol, void* callback)
+{
+    if (fade_out_active == 1) return 0;
+
+    if (TV_PAL == get_GameNP()) {
+        duration = (duration * 5) / 6 - 1;
+    }
+    fade_out_active = 1;
+    CLAMP(1, 1024, duration);
+    CLAMP(0, VOL_FULL, dstvol);
+    fade_out_step = VOL_FULL / duration;
+    fade_in_dest = dstvol;
+    fade_out_callback = callback;
+    fade_out_task = regular_add_tmp(fade_out_routine, 1);
+    if (fade_out_task < 0) {
+        fade_out_active = 0;
+        fade_in_active = 0;
+        return 0;
+    }
+
+    sndqueue_add_try(SNQ_FADE_OUT, 1, 0);
+    return 1;
+}
+
+s32 fade_in(s32 duration, s32 dstvol, void* callback)
+{
+    if (fade_in_active == 1) return 0;
+
+    if (TV_PAL == get_GameNP()) {
+        duration = (duration * 5) / 6 - 1;
+        //if (duration < 1) duration = 1;
+    }
+    fade_in_active = 1;
+    CLAMP(1, 1024, duration);
+    CLAMP(0, VOL_FULL, dstvol);
+    fade_in_step = VOL_FULL / duration;
+    fade_in_dest = dstvol;
+    fade_in_callback = callback;
+    fade_in_task = regular_add_tmp(fade_in_routine, 1);
+    if (fade_in_task < 0) {
+        fade_out_active = 0;
+        fade_in_active = 0;
+        return 0;
+    }
+
+    sndqueue_add_try(SNQ_FADE_IN, 1, 0);
+    return 1;
+}
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 
 s8 sndqueue_com = SNQ_FINISHED;
 s8 D_80047D94 = SNQ_FINISHED;
@@ -197,7 +313,6 @@ s32 D_80047E94;      // this one just gets 0 written to it
 s32 sndqueue_is_running;      // execution is in process
 u16 D_80047F34;      // index of the task being executed
 
-s32 fade_paused; // audio_fade_paused
 
 s32 cd_busy = 0;   // step1
 void* cd_arg;     // param
@@ -207,9 +322,6 @@ u8 D_80047EDC = 0;
 snd_task_t _sndqueue[192];
 
 // execute one block of command
-extern s32 D_800548EC;
-extern s32 D_80047DB4;
-extern s32 D_80047DBC;
 s32 TEMP_sndqueue_exec()
 {
     s32 rc;
@@ -234,7 +346,7 @@ s32 TEMP_sndqueue_exec()
     func_80019F4C(rc, 0);   // rc doesn't exist yet lolololol
     if (2 == fe_value && func_8001CE18()) {
         fe_value = 0;
-        func_8001A8A0(&D_80047D8C, 0x400);
+        set_vol_scaled(&D_80047D8C, 0x400);
         if (1 == D_80047D78) {
             sndqueue_add(CdlPause, 0, 0);   // TODO: arguments
             sndqueue_add(CdlSetmode, 0, 0);
@@ -253,6 +365,8 @@ s32 TEMP_sndqueue_exec()
     // ... more shit
     // and then the actual queue
 flush_and_flee: // is not exactly here
+    if (1);
+
     snd_task_t* t;
     u32 next;
 
@@ -300,7 +414,7 @@ flush_and_flee: // is not exactly here
             next = D_80047F34 + 1;
         } else
         if (sndqueue_com == SNQ_FUNC8) {    // done
-            if (D_80047DB4 == 1 || D_80047DBC == 1) break;
+            if (fade_out_active == 1 || fade_in_active == 1) break;
             next = D_80047F34 + 1;
         } else
         if (sndqueue_com == SNQ_FUNC9) {    // done
@@ -414,12 +528,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
-extern s32 D_80047D78;
-extern SpuVolume D_80047D8C;
-extern u8 D_80047E9C;
-extern s32 D_80047EAC;
-extern s32 D_80047F24;
-
 // ALMOST MATCHING with 4.3 -O1, only issue is double zero
 void func_8001C20C(CdlLOC* loc) {
     D_80047D78 = 0;
@@ -434,7 +542,7 @@ void func_8001C20C(CdlLOC* loc) {
     sndqueue_add_try(CdlSeekP, loc, 0);
     sndqueue_add_try(CdlPlay, 0, 0);
     sndqueue_add_try(SNQ_FADE_OUT, 0, 0);
-    sndqueue_add_try(SNQ_FUNC3, &D_80047E9C, 0);
+    sndqueue_add_try(SNQ_FUNC3, &vol_full, 0);
     func_8001B9D8();
 }
 
@@ -525,10 +633,7 @@ s32 execute_uncompressed(char* file, s32 param) {
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
 
-extern s32 D_80047DEC;
-extern s32 D_80047EA4;
-s32 fe_value;
-extern s32 D_80047F54;
+
 
 s32 func_8001CD30(s32 arg0) {
     s32 temp_s0;

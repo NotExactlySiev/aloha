@@ -38861,32 +38861,29 @@ glabel D_80047DAC
 glabel D_80047DB0
 /* 305B0 80047DB0 */ .word 0x00000000
 
-glabel D_80047DB4
+glabel fade_out_active
 /* 305B4 80047DB4 */ .word 0x00000000
 
-glabel D_80047DB8
+glabel fading_out
 /* 305B8 80047DB8 */ .word 0x00000000
 
-glabel D_80047DBC
+glabel fade_in_active
 /* 305BC 80047DBC */ .word 0x00000000
 
-glabel D_80047DC0
+glabel fading_in
 /* 305C0 80047DC0 */ .word 0x00000000
 
-glabel D_80047DC4
+glabel fade_in_step
 /* 305C4 80047DC4 */ .word 0x00000000
 
-glabel D_80047DC8
+glabel fade_out_step
 /* 305C8 80047DC8 */ .word 0x00000000
 
-glabel D_80047DCC
+glabel fade_out_dest
 /* 305CC 80047DCC */ .word 0x00000000
 
-glabel D_80047DD0
+glabel fade_in_dest
 /* 305D0 80047DD0 */ .word 0x00000400
-
-glabel D_80047DD4
-/* 305D4 80047DD4 */ .word 0x00000400
 
 glabel D_80047DE4
 /* 305E4 80047DE4 */ .word 0x00000001

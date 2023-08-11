@@ -10,7 +10,7 @@ glabel D_80047E84
 glabel D_80047E8C
 /* 30674 80047E8C */ .space 0x08
 
-glabel D_80047E9C
+glabel vol_full
 /* 30684 80047E9C */ .space 0x02
 
 glabel D_80047E9E
@@ -39,18 +39,6 @@ glabel D_80047EE4
 
 glabel D_80047EEC
 /* 306D4 80047EEC */ .space 0x08
-
-glabel D_80047EFC
-/* 306E4 80047EFC */ .space 0x08
-
-glabel D_80047F04
-/* 306EC 80047F04 */ .space 0x08
-
-glabel D_80047F0C
-/* 306F4 80047F0C */ .space 0x08
-
-glabel D_80047F14
-/* 306FC 80047F14 */ .space 0x08
 
 glabel D_80047F24
 /* 3070C 80047F24 */ .space 0x08
