@@ -358,7 +358,7 @@ void jt_clear(void)
 
 void jt_set(void* func, s32 idx)
 {
-    k_printf("Set %X (%d) to %08X\n", idx, idx, func);
+    //k_printf("Set %X (%d) to %08X\n", idx, idx, func);
     void** jmptable = (void**) 0x80010000;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();

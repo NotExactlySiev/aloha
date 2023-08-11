@@ -554,8 +554,17 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 int sndqueue_exec_all(void)
 {
     s32 ret;
-
-    k_printf("sndqueue_exec_all: %d items\n", _sndqueue_size);
+#if 0
+    s32 com;
+    s32 val;
+    k_printf("sndqueue_exec_all: %d items: \n", _sndqueue_size);
+    for (int i = 0; i < _sndqueue_size; i++) {
+        com = _sndqueue[i].com;
+        val = _sndqueue[i].arg0;
+        if (com == CdlSetmode) val = *(u8*)val;
+        k_printf("\t%X\t%X\n", com, val);
+    }
+#endif
     ret = 0;
     if (_sndqueue_empty == 0) do {
         ret = sndqueue_exec();
@@ -1367,7 +1376,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add);
 
 int regular_add(void* fn, u16 wait)
 {
-    k_printf("adding routine %p every %d", fn, wait);
+    k_printf("adding routine %p every %d\n", fn, wait);
     _regular_add(fn, wait);
 }
 
