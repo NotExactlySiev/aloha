@@ -3,6 +3,7 @@
 #include <libspu.h>
 #include <libcd.h>
 #include <libgpu.h>
+#include <libetc.h>
 
 // data
 // but .data is not integrated into this file yet, so they're extern
@@ -904,10 +905,18 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E2FC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E31C);
 
-// 2 trivial pad functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E33C);
+u32 func_8001E36C(s32 id);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E36C);
+void func_8001E33C(void)
+{
+    PadInit(0);
+    jt_set(func_8001E36C, 0xf0);
+}
+
+u32 func_8001E36C(s32 id)
+{
+    return PadRead(id);
+}
 
 void func_8001E438();
 void func_8001E5BC();
