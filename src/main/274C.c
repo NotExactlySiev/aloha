@@ -33,55 +33,7 @@ s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2);
 
 // functions
 
-#define NEXT    \
-    (t = t ? t-1 : 7, c = t == 7 ? *src++ : c, (c >> t) & 1)
-
-char* _lz1_decode(const u8 *src, u8* dst)
-{
-    u8 t, c;    // control bits and their counter
-    s32 off;
-    u32 l;
-    u8* orig = src;
-    u8* od = dst;
-    t = 0;
-    while (1)
-    {
-        // every NEXT macro reads one bit from the control bit
-        // 0 means simply copy a byte
-        while (NEXT == 0)
-            *dst++ = *src++;
-        
-        // 1 means repeated data. we're gonna copy from output
-        // buffer.
-        // next bit sets if the offset is gonna be 12 bit (the
-        // next 4 control bits being the lower bits of the
-        // offset)
-        if (NEXT == 0) {
-            off = *src++ - 256;
-            if (off == -0x100) return dst;  // denotes EOS
-        } else {
-            off = *src++ - 256;
-            off = (off << 1) | NEXT;
-            off = (off << 1) | NEXT;
-            off = (off << 1) | NEXT;
-            off = (off << 1) | NEXT;
-            off -= 255;
-        }
-    
-        // now length
-        l = 1;
-        while (NEXT == 1)
-            l = (l << 1) | NEXT;
-        l += 1;
-
-        //__builtin_memcpy(dst, dst+off, l);
-        while (l--) {
-            *dst = *(dst+off);
-            dst += 1;
-        }
-    }
-}
-
+// FILE disc.c
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
@@ -160,6 +112,9 @@ void func_8001A74C(void) {
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
+// ENDOF disc.c
+
+// FILE audio.c
 
 #define VOL_FULL    1024
 
@@ -582,6 +537,8 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B9D8);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BA50);
 
+// ENDOF audio.c
+
 // 2 functions for converting between frame number and byte offset in videos
 // I have no idea why but these actually use div for dividing by constants
 // and do some other weird stuff that doesn't make any sense
@@ -657,6 +614,8 @@ s32 set_mono(s32 arg0) {
     return ret;
 }
 
+// FILE fs.c
+
 // cd file management functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file);   // cd_fs_get_file
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // cd_fs_get_file_safe
@@ -694,11 +653,9 @@ s32 execute_uncompressed(char* file, s32 param) {
     k_Exec(&header, 1, 0);
     return 0;
 }
-
+// ENDOF fs.c
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
-
-
 
 s32 func_8001CD30(s32 arg0) {
     s32 temp_s0;
@@ -773,7 +730,7 @@ void fade_unpause(void) {
 // play movie
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
 
-// TODO: put cache stuff in a seperate file
+// FILE cache.c
 
 #define     CD_SECTOR_SIZE      0x800
 
@@ -839,6 +796,7 @@ s32 func_8001D440(CdlLOC* loc, u8* data) {
     return 1;
 }
 
+// ENDOF cache.c
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D67C);
 
@@ -1173,6 +1131,8 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);
 // jmptable setter 0x300-0x344
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
 
+// FILE vid.c
+
 // 8 loading and playing video
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);       // vid_setup_mdec
 
@@ -1189,6 +1149,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // vid_decode_fr
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // vid_wait_for_img
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // vid_play_file
+
+// ENDOF vid.c
+
+// FILE gpu.c
 
 // these jt ones all should be matching as they're very simple
 int call_StoreImage(RECT *rect, u_long *p) {
@@ -1369,6 +1333,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", memset);
 INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
+
+// ENDOF gpu.c
+
+// FILE routine.c
 
 // the variables for this one are all in the assembly file for the final one
 
