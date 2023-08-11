@@ -34,9 +34,6 @@ glabel D_80047ECC
 glabel D_80047ECD
 /* 306B5 80047ECD */ .space 0x07
 
-glabel D_80047ED4
-/* 306BC 80047ED4 */ .space 0x08
-
 glabel D_80047EE4
 /* 306CC 80047EE4 */ .space 0x08
 
@@ -54,9 +51,6 @@ glabel D_80047F0C
 
 glabel D_80047F14
 /* 306FC 80047F14 */ .space 0x08
-
-glabel D_80047F1C
-/* 30704 80047F1C */ .space 0x08
 
 glabel D_80047F24
 /* 3070C 80047F24 */ .space 0x08

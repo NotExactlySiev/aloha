@@ -171,8 +171,8 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 #define SNQ_SET_FE       -2  //  arg0
 #define SNQ_FUNC3       -3
 #define SNQ_FUNC4       -4
-#define SNQ_FUNC5       -5
-#define SNQ_FUNC6       -6
+#define SNQ_FADE_OUT       -5
+#define SNQ_FADE_IN       -6
 #define SNQ_SET_REVERB  -7
 #define SNQ_FUNC8       -8
 #define SNQ_FUNC9       -9
@@ -184,27 +184,50 @@ typedef struct {
     u32    arg1;
 } snd_task_t;
 
-s8 D_80047D93 = SNQ_FINISHED;
+s8 sndqueue_com = SNQ_FINISHED;
+s8 D_80047D94 = SNQ_FINISHED;
 s32 D_80047DD8 = 1;  // this is still a mystery. probably enum. gets set in the first function here
 s32 D_80047DE0 = 0;  // step? no idea. maybe a state machine
+s32 D_80047DEC = 0;
 s32 _sndqueue_empty = 0;
 s32 _sndqueue_busy = 0;
 u16 _sndqueue_next;
 u16 _sndqueue_size;
 s32 D_80047E94;      // this one just gets 0 written to it
-s32 D_80047EF4;
+s32 sndqueue_is_running;      // execution is in process
 u16 D_80047F34;      // index of the task being executed
 
-void* D_80047EB4;     // param
-void* D_80047EBC;     // result
+s32 fade_paused; // audio_fade_paused
+
+s32 cd_busy = 0;   // step1
+void* cd_arg;     // param
+void* cd_result;     // result
 u8 D_80047EDC = 0;
 
 snd_task_t _sndqueue[192];
 
+// execute one block of command
 extern s32 D_800548EC;
-int TEMP_sndqueue_exec()
+extern s32 D_80047DB4;
+extern s32 D_80047DBC;
+s32 TEMP_sndqueue_exec()
 {
     s32 rc;
+
+    if (sndqueue_is_running == 1) return 0;
+    sndqueue_is_running = 1;
+
+    if (cd_busy == 1) {
+        rc = CdControl(sndqueue_com, cd_arg, cd_result);
+        if (rc == 1) {
+            cd_busy = 1;
+            sndqueue_is_running = 0;
+            return 0;
+        }
+        cd_busy = 0;
+        D_80047DE0 = 1;
+        goto flush_and_flee;
+    }
     // ...
     // check_fe:
     CdSync(1, 0);
@@ -225,25 +248,91 @@ int TEMP_sndqueue_exec()
         } else {
             sndqueue_add(CdlPause, 0, 0);
             D_800548EC = 0;
-            D_80047EB4 = 0;
-            D_80047EBC = &D_80047EDC;
-            cd_get_status(&D_80047EDC);
-            
         }
     }
     // ... more shit
     // and then the actual queue
+flush_and_flee: // is not exactly here
     snd_task_t* t;
+    u32 next;
 
-    while (1) {
+    while (1) { // i think I can break instead of return
         t = &_sndqueue[D_80047F34];
         if (t->com == SNQ_FINISHED) {
             D_80047DD8 = 0;
-            D_80047D93 = CdlNop;
-            
+            sndqueue_com = CdlNop;
+            cd_arg = 0;
+            cd_result = &D_80047EDC;
+            cd_busy = 1 != cd_get_status(&D_80047EDC);
+            _sndqueue_empty = 1;
+            break;
         }
+
+        sndqueue_com = t->com;
+        D_80047D94 = t->com;
+        if (sndqueue_com == SNQ_SET_FE) {   // done
+            s32 newval = t->arg0;
+            if (fe_value == 5 && newval != 5)
+                func_8001A380(); // activate ready and read callbacks
+            if (newval != 2)
+                func_8001D104();
+            fe_value = newval;
+            next = D_80047F34 + 1;
+        } else
+        if (sndqueue_com == SNQ_FUNC3) {
+            next = D_80047F34 + 1;
+        } else
+        if (sndqueue_com == SNQ_FUNC4) {
+            next = D_80047F34 + 1;
+        } else
+        if (sndqueue_com == SNQ_FADE_OUT) {
+            
+        } else
+        if (sndqueue_com == SNQ_FADE_IN) {
+        } else
+        if (sndqueue_com == SNQ_SET_REVERB) {   // done
+            SpuCommonAttr attr;
+            attr.mask = 0x100;
+            attr.cd.reverb = t->arg0;
+            SpuSetCommonAttr(&attr);
+            D_80047EA4 = t->arg0;
+            func_8001FBE4();
+            next = D_80047F34 + 1;
+        } else
+        if (sndqueue_com == SNQ_FUNC8) {    // done
+            if (D_80047DB4 == 1 || D_80047DBC == 1) break;
+            next = D_80047F34 + 1;
+        } else
+        if (sndqueue_com == SNQ_FUNC9) {    // done
+            func_8001D0AC(t->arg0);
+            next = D_80047F34 + 1;
+        } else      
+        if (sndqueue_com == SNQ_FUNC10) {   // done
+            D_80047DEC = t->arg0;
+            next = D_80047F34 + 1;
+        } else {   // done
+            // normal cd control functions
+            D_80047DD8 = 0;
+
+            cd_arg = t->arg0;
+            cd_result = t->arg1;
+            rc = CdControl(sndqueue_com, cd_arg, cd_result);
+            if (rc == 1) {
+                cd_busy = 0;
+                D_80047E94 = 0;
+                D_80047F34 = (D_80047F34 + 1) & 0xff;
+                _sndqueue_size -= 1;
+            } else {
+                cd_busy = 1;
+            }
+            break;
+        }
+        _sndqueue_size -= 1;
+        D_80047F34 = next & 0xff;
     }
-    
+
+    sndqueue_is_running = 0;
+    return 0;
 }
 
 
@@ -284,7 +373,7 @@ s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2)
 
 void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
 {
-    if (D_80047EF4 == 0) {
+    if (sndqueue_is_running == 0) {
         while (_sndqueue_size > 192)
             sndqueue_exec();
     }
@@ -344,7 +433,7 @@ void func_8001C20C(CdlLOC* loc) {
     func_8001C374();
     sndqueue_add_try(CdlSeekP, loc, 0);
     sndqueue_add_try(CdlPlay, 0, 0);
-    sndqueue_add_try(SNQ_FUNC5, 0, 0);
+    sndqueue_add_try(SNQ_FADE_OUT, 0, 0);
     sndqueue_add_try(SNQ_FUNC3, &D_80047E9C, 0);
     func_8001B9D8();
 }
@@ -438,7 +527,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
 
 extern s32 D_80047DEC;
 extern s32 D_80047EA4;
-extern s32 fe_value;
+s32 fe_value;
 extern s32 D_80047F54;
 
 s32 func_8001CD30(s32 arg0) {
@@ -503,10 +592,15 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D13C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D248);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D288);
+void fade_pause(void) {
+    fade_paused = 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D29C);
+void fade_unpause(void) {
+    fade_paused = 0;
+}
 
+// play movie
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
 
 // TODO: put cache stuff in a seperate file
