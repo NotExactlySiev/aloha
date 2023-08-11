@@ -1362,7 +1362,14 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 
 // the variables for this one are all in the assembly file for the final one
+
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add);
+
+int regular_add(void* fn, u16 wait)
+{
+    k_printf("adding routine %p every %d", fn, wait);
+    _regular_add(fn, wait);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add_tmp);
 
