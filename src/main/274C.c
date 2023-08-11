@@ -554,7 +554,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 int sndqueue_exec_all(void)
 {
     s32 ret;
-#if 0
+#if 1
     s32 com;
     s32 val;
     k_printf("sndqueue_exec_all: %d items: \n", _sndqueue_size);
