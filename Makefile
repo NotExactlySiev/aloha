@@ -13,6 +13,7 @@ AS		:= $(CROSS)as
 LD		:= $(CROSS)ld
 COPY	:= $(CROSS)objcopy
 
+COMP	:= tools/jfcomp
 
 BUILD_DIR	:= build
 
@@ -61,6 +62,9 @@ $(BUILD_DIR)/gameover.elf: $(GAMEOVER_O_FILES)
 
 %.exe: %.elf
 	$(COPY) -O binary $< $@	
+
+%.pex: %.exe
+	$(COMP) comp $< $@
 
 clean:
 	git clean -fdx asm/
