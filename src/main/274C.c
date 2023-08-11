@@ -168,7 +168,15 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AD0C);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
 
 #define SNQ_FINISHED    -1
+#define SNQ_SET_FE       -2  //  arg0
+#define SNQ_FUNC3       -3
+#define SNQ_FUNC4       -4
+#define SNQ_FUNC5       -5
+#define SNQ_FUNC6       -6
 #define SNQ_SET_REVERB  -7
+#define SNQ_FUNC8       -8
+#define SNQ_FUNC9       -9
+#define SNQ_FUNC10      -10
 
 typedef struct {
     u8     com;
@@ -176,6 +184,7 @@ typedef struct {
     u32    arg1;
 } snd_task_t;
 
+s8 D_80047D93 = SNQ_FINISHED;
 s32 D_80047DD8 = 1;  // this is still a mystery. probably enum. gets set in the first function here
 s32 D_80047DE0 = 0;  // step? no idea. maybe a state machine
 s32 _sndqueue_empty = 0;
@@ -186,8 +195,57 @@ s32 D_80047E94;      // this one just gets 0 written to it
 s32 D_80047EF4;
 u16 D_80047F34;      // index of the task being executed
 
-//snd_task_t _sndqueue[160];
+void* D_80047EB4;     // param
+void* D_80047EBC;     // result
+u8 D_80047EDC = 0;
+
 snd_task_t _sndqueue[192];
+
+extern s32 D_800548EC;
+int TEMP_sndqueue_exec()
+{
+    s32 rc;
+    // ...
+    // check_fe:
+    CdSync(1, 0);
+    func_80019F4C(rc, 0);   // rc doesn't exist yet lolololol
+    if (2 == fe_value && func_8001CE18()) {
+        fe_value = 0;
+        func_8001A8A0(&D_80047D8C, 0x400);
+        if (1 == D_80047D78) {
+            sndqueue_add(CdlPause, 0, 0);   // TODO: arguments
+            sndqueue_add(CdlSetmode, 0, 0);
+            sndqueue_add(CdlSetfilter, 0, 0);
+            sndqueue_add(CdlSeekL, 0, 0);
+            sndqueue_add(CdlPause, 0, 0);
+            sndqueue_add(CdlReadS, 0, 0);
+            sndqueue_add(SNQ_FUNC4, 0, 0);
+            sndqueue_add(SNQ_FUNC9, 0, 0);
+            sndqueue_add(SNQ_SET_FE, 2, 0);
+        } else {
+            sndqueue_add(CdlPause, 0, 0);
+            D_800548EC = 0;
+            D_80047EB4 = 0;
+            D_80047EBC = &D_80047EDC;
+            cd_get_status(&D_80047EDC);
+            
+        }
+    }
+    // ... more shit
+    // and then the actual queue
+    snd_task_t* t;
+
+    while (1) {
+        t = &_sndqueue[D_80047F34];
+        if (t->com == SNQ_FINISHED) {
+            D_80047DD8 = 0;
+            D_80047D93 = CdlNop;
+            
+        }
+    }
+    
+}
+
 
 void sndqueue_reset(void) {
     _sndqueue_next = 0;
@@ -218,6 +276,7 @@ s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2)
     _sndqueue_size++;
     _sndqueue_next++;
     _sndqueue_next = (u8) _sndqueue_next;
+    //_sndqueue_next = _sndqueue_next & 0xff;
     _sndqueue_empty = 0;
     _sndqueue_busy = 0;
     return 1;
@@ -234,11 +293,9 @@ void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 
-int sndqueue_exec_all(void) {
+int sndqueue_exec_all(void)
+{
     s32 ret;
-
-    //_sndqueue_empty = 1; // TODO: this is added to disable sound functions. remove later
-
 
     ret = 0;
     if (_sndqueue_empty == 0) do {
@@ -269,7 +326,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
 extern s32 D_80047D78;
-extern u8 D_80047D8C;
+extern SpuVolume D_80047D8C;
 extern u8 D_80047E9C;
 extern s32 D_80047EAC;
 extern s32 D_80047F24;
@@ -282,13 +339,13 @@ void func_8001C20C(CdlLOC* loc) {
     ww_global_loc.second = loc->second;
     ww_global_loc.sector = loc->sector;
     D_80047EAC = CdPosToInt(loc);
-    sndqueue_add_try(0xFCU, &D_80047D8C, 0);
-    sndqueue_add_try(0xFEU, NULL, 0);
+    sndqueue_add_try(SNQ_FUNC4, &D_80047D8C, 0);
+    sndqueue_add_try(SNQ_SET_FE, 0, 0);
     func_8001C374();
-    sndqueue_add_try(0x16U, loc, 0);
-    sndqueue_add_try(3U, NULL, 0);
-    sndqueue_add_try(0xFBU, NULL, 0);
-    sndqueue_add_try(0xFDU, &D_80047E9C, 0);
+    sndqueue_add_try(CdlSeekP, loc, 0);
+    sndqueue_add_try(CdlPlay, 0, 0);
+    sndqueue_add_try(SNQ_FUNC5, 0, 0);
+    sndqueue_add_try(SNQ_FUNC3, &D_80047E9C, 0);
     func_8001B9D8();
 }
 
@@ -381,7 +438,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
 
 extern s32 D_80047DEC;
 extern s32 D_80047EA4;
-extern s32 D_80047F1C;
+extern s32 fe_value;
 extern s32 D_80047F54;
 
 s32 func_8001CD30(s32 arg0) {
@@ -399,17 +456,17 @@ void func_8001CD68(void) {
 s32 func_8001CD90(void) {
     s32 temp_s0;
 
-    temp_s0 = D_80047F1C;
-    sndqueue_add_try(-2, 5, 0);
+    temp_s0 = fe_value;
+    sndqueue_add_try(SNQ_SET_FE, 5, 0);
     return temp_s0;
 }
 
 void func_8001CDC8(s32 arg0) {
-    sndqueue_add_try(-2, arg0, 0);
+    sndqueue_add_try(SNQ_SET_FE, arg0, 0);
 }
 
 void func_8001CDF0(void) {
-    sndqueue_add_try(-8, 0, 0);
+    sndqueue_add_try(SNQ_FUNC8, 0, 0);
 }
 
 s32 func_8001CE18(void) {
@@ -418,18 +475,18 @@ s32 func_8001CE18(void) {
 
 void func_8001CE28(void) {
     func_8001C2F4();
-    sndqueue_add_try(-0xA, 1, 0);
+    sndqueue_add_try(SNQ_FUNC10, 1, 0);
 }
 
 void func_8001CE58(void) {
     if (D_80047DEC == 1) {
         sndqueue_add_try(CdlReadS, 0, 0);
-        sndqueue_add_try(0xF6, 0, 0);
+        sndqueue_add_try(SNQ_FUNC10, 0, 0);
     }
 }
 
 void func_8001CEA0(void) {
-    sndqueue_add_try(0xF6, 0, 0);
+    sndqueue_add_try(SNQ_FUNC10, 0, 0);
 }
 
 

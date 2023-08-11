@@ -22,6 +22,7 @@ src_dir = root_dir + "src/"
 
 # Project-specific
 CPP_FLAGS = [
+    "-Ipsyq",
     "-Iinclude",
     "-Isrc",
     "-Iver/current/build/include",

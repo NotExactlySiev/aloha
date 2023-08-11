@@ -565,6 +565,10 @@ int main(int argc, char** argv)
     if (func_8001E36C(0) == 6) {
         D_80047D50 = 1;
     }
+
+    // debug mode
+    getGameConfig()[0x517] = 1;
+
     setNextFile(0);
     file_execute_loop();
     call_wait_frame(0);
