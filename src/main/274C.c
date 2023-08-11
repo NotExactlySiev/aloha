@@ -165,8 +165,8 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
 
 #define SNQ_FINISHED    -1
 #define SNQ_SET_FE       -2  //  arg0
-#define SNQ_FUNC3       -3
-#define SNQ_FUNC4       -4
+#define SNQ_SET_FULL       -3
+#define SNQ_SET_SCALED       -4
 #define SNQ_FADE_OUT       -5
 #define SNQ_FADE_IN       -6
 #define SNQ_SET_REVERB  -7
@@ -193,6 +193,7 @@ void set_vol_scaled(SpuVolume* vol, s32 scale)
     SpuSetCommonAttr(&attr);
 }
 
+// this one ignores fading effects
 void set_vol_full(SpuVolume* vol) {
     set_vol_scaled(vol, VOL_FULL);
     vol_full = *vol;
@@ -354,7 +355,7 @@ s32 TEMP_sndqueue_exec()
             sndqueue_add(CdlSeekL, 0, 0);
             sndqueue_add(CdlPause, 0, 0);
             sndqueue_add(CdlReadS, 0, 0);
-            sndqueue_add(SNQ_FUNC4, 0, 0);
+            sndqueue_add(SNQ_SET_SCALED, 0, 0);
             sndqueue_add(SNQ_FUNC9, 0, 0);
             sndqueue_add(SNQ_SET_FE, 2, 0);
         } else {
@@ -393,16 +394,53 @@ flush_and_flee: // is not exactly here
             fe_value = newval;
             next = D_80047F34 + 1;
         } else
-        if (sndqueue_com == SNQ_FUNC3) {
+        if (sndqueue_com == SNQ_SET_FULL) {
+            set_vol_full(t->arg0);
             next = D_80047F34 + 1;
         } else
-        if (sndqueue_com == SNQ_FUNC4) {
+        if (sndqueue_com == SNQ_SET_SCALED) {
+            set_vol_scaled(t->arg0, vol_scale);
             next = D_80047F34 + 1;
         } else
-        if (sndqueue_com == SNQ_FADE_OUT) {
-            
+        if (sndqueue_com == SNQ_FADE_OUT) {     // done
+            fade_out_active = t->arg0;
+            fading_out = t->arg0;
+            if (fade_out_active == 1) {
+                // turn fadeout on
+                if (fade_in_active == 1) {
+                    regular_clear_tmps(fade_in_task);
+                    fade_in_active = 0;
+                    fading_in = 0;
+                    if (fade_in_callback != 0) (*fade_in_callback)();
+                    fade_in_callback = 0;
+                }
+            } else {
+                // turn fadeout off
+                if (-1 < fade_out_task) regular_clear_tmps(fade_out_task);
+                vol_scale = VOL_FULL;
+                fade_paused = 0;
+            }
+            next = D_80047F34 + 1;
         } else
-        if (sndqueue_com == SNQ_FADE_IN) {
+        if (sndqueue_com == SNQ_FADE_IN) {      // done
+            fade_in_active = t->arg0;
+            fading_in = t->arg0;
+            if (fade_in_active == 1) {
+                // turn fadein on
+                if (fade_out_active == 1) {
+                    regular_clear_tmps(fade_out_task);
+                    fade_out_active = 0;
+                    fading_out = 0;
+                    if (fade_out_callback != 0) (*fade_out_callback)();
+                    fade_out_callback = 0;
+                }
+            } else {
+                // turn fadein off
+                if (-1 < fade_in_task) regular_clear_tmps(fade_in_task);
+                vol_scale = VOL_FULL;
+                fade_paused = 0;
+            }
+            next = D_80047F34 + 1;
         } else
         if (sndqueue_com == SNQ_SET_REVERB) {   // done
             SpuCommonAttr attr;
@@ -536,13 +574,13 @@ void func_8001C20C(CdlLOC* loc) {
     ww_global_loc.second = loc->second;
     ww_global_loc.sector = loc->sector;
     D_80047EAC = CdPosToInt(loc);
-    sndqueue_add_try(SNQ_FUNC4, &D_80047D8C, 0);
+    sndqueue_add_try(SNQ_SET_SCALED, &D_80047D8C, 0);
     sndqueue_add_try(SNQ_SET_FE, 0, 0);
     func_8001C374();
     sndqueue_add_try(CdlSeekP, loc, 0);
     sndqueue_add_try(CdlPlay, 0, 0);
     sndqueue_add_try(SNQ_FADE_OUT, 0, 0);
-    sndqueue_add_try(SNQ_FUNC3, &vol_full, 0);
+    sndqueue_add_try(SNQ_SET_FULL, &vol_full, 0);
     func_8001B9D8();
 }
 
