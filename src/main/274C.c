@@ -322,6 +322,8 @@ u8 D_80047EDC = 0;
 
 snd_task_t _sndqueue[192];
 
+s8 D_80047EC4[8];
+
 // execute one block of command
 s32 TEMP_sndqueue_exec()
 {
@@ -341,6 +343,7 @@ s32 TEMP_sndqueue_exec()
         D_80047DE0 = 1;
         goto flush_and_flee;
     }
+
     // ...
     // check_fe:
     CdSync(1, 0);
@@ -350,7 +353,7 @@ s32 TEMP_sndqueue_exec()
         set_vol_scaled(&D_80047D8C, 0x400);
         if (1 == D_80047D78) {
             sndqueue_add(CdlPause, 0, 0);   // TODO: arguments
-            sndqueue_add(CdlSetmode, 0, 0);
+            sndqueue_add(CdlSetmode, D_80047EC4, 0);
             sndqueue_add(CdlSetfilter, 0, 0);
             sndqueue_add(CdlSeekL, 0, 0);
             sndqueue_add(CdlPause, 0, 0);
@@ -364,10 +367,24 @@ s32 TEMP_sndqueue_exec()
         }
     }
     // ... more shit
-    // and then the actual queue
-flush_and_flee: // is not exactly here
-    if (1);
+    CdSync(0, 0);
+    rc = cd_get_status(&D_80047EDC);
+    if (rc == 1) {
+        if (D_80047EDC & 0x10) {
+            cd_busy = 1;
+flush_and_flee:
+            D_80047EE4 = 0;
+            func_8001D414();
+            sndqueue_is_running = 0;
+            return 0;
+        }
+        if (D_80047EDC & 0x40) {
+            sndqueue_is_running = 0;
+            return 0;
+        }
+    }
 
+    // and then the actual queue
     snd_task_t* t;
     u32 next;
 
@@ -538,6 +555,7 @@ int sndqueue_exec_all(void)
 {
     s32 ret;
 
+    k_printf("sndqueue_exec_all: %d items\n", _sndqueue_size);
     ret = 0;
     if (_sndqueue_empty == 0) do {
         ret = sndqueue_exec();
