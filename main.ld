@@ -1,3 +1,5 @@
+__addr = 0x80018000;
+
 SECTIONS
 {
     __romPos = 0;

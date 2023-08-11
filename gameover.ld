@@ -1,3 +1,5 @@
+__addr  = 0x800E0000;
+
 SECTIONS
 {
     __romPos = 0;
@@ -39,7 +41,7 @@ SECTIONS
     __romPos = ALIGN(__romPos, 16);
 
     /* the size that gets put in the header */
-    __size = (__romPos & 0xFFFFF800) + 0x800;
+    __size = ((__romPos - None_ROM_START) & 0xFFFFF800) + 0x800;
 
     None_ROM_END = __romPos;
     None_VRAM_END = .;

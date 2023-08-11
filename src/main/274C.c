@@ -237,6 +237,9 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 int sndqueue_exec_all(void) {
     s32 ret;
 
+    //_sndqueue_empty = 1; // TODO: this is added to disable sound functions. remove later
+
+
     ret = 0;
     if (_sndqueue_empty == 0) do {
         ret = sndqueue_exec();

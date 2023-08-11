@@ -57,7 +57,8 @@ sprt_group_t* sprt_data[64];
 
 // these might be not s32 but paired as structs?
 // these are animations for sprites,
-s32* intarrs[3] = {
+//s32* intarrs[3] = {
+s32 intarrs[3][22] = {
     { 13, 1, -1, 0 },
     { 0, 4, 1, 4, 2, 4, 3, 4, 8, 10, 9, 10, 10, 10, 11, 10, 12, 10, 13, 10, -1, 18 },
     { 16, 8, 17, 8, -1, 0},
@@ -421,8 +422,8 @@ void func_800EC684(void)
     JTFUNC(0x18C)(0);
     JTFUNC(0x191)(0);
     // put env and draw
-    JTFUNC(0x185)(current_buffer->disp);
-    JTFUNC(0x186)(current_buffer->draw);
+    JTFUNC(0x185)(&current_buffer->disp);
+    JTFUNC(0x186)(&current_buffer->draw);
     // draw ot
     JTFUNC(0x189)(current_buffer->ot);
 }
@@ -436,9 +437,10 @@ void load_sprites(u32* raw)
     D_800ED42C = *raw++;
     gp = sprt_data;
     for (i = 0; i < D_800ED42C; i++) {
-        *gp++ = raw;
+        *gp = raw;
         // skip past to the next group (count entries and 1 size byte)
         raw += (*gp)->count + 1;
+        gp++;
     }
 }
 
@@ -587,10 +589,10 @@ void func_800ECDA8(void)
     current_buffer_idx = 0;
     func_800EC608();    // clear
     func_800ECD18();
-    JTFUNC(0x18E)(graph_buffers[0].disp, 0, 0, 256, 240);
-    JTFUNC(0x18E)(graph_buffers[1].disp, 0, 256, 256, 240);
-    JTFUNC(0x18F)(graph_buffers[0].draw, 0, 256, 256, 240);
-    JTFUNC(0x18F)(graph_buffers[1].draw, 0, 0, 256, 240);
+    JTFUNC(0x18E)(&graph_buffers[0].disp, 0, 0, 256, 240);
+    JTFUNC(0x18E)(&graph_buffers[1].disp, 0, 256, 256, 240);
+    JTFUNC(0x18F)(&graph_buffers[0].draw, 0, 256, 256, 240);
+    JTFUNC(0x18F)(&graph_buffers[1].draw, 0, 0, 256, 240);
     
     for (i = 0; i < 2; i++) {
         draw = &graph_buffers[i].draw;

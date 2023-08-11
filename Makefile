@@ -1,6 +1,6 @@
 
 CPP_FLAGS	+= -Iinclude -Ipsyq
-CC_FLAGS	+= -w -O2 -G0 -fpeephole -ffunction-cse -fpcc-struct-return -msoft-float
+CC_FLAGS	+= -w -O1 -G0 -fno-zero-initialized-in-bss -fpeephole -ffunction-cse -fpcc-struct-return -msoft-float
 AS_FLAGS	+= -Iinclude -mno-shared -msoft-float -march=r3000 -mtune=r3000 -no-pad-sections
 ARCH_FLAGS	+= -march=mips1 -mabi=32 -EL -fno-pic -mno-shared -mno-abicalls
 ARCH_FLAGS	+= -mfp32 -fno-stack-protector -nostdlib -ffreestanding
@@ -32,11 +32,8 @@ GAMEOVER_O_FILES := $(foreach file,$(GAMEOVER_C_FILES),$(BUILD_DIR)/$(file).o) \
 					$(foreach file,$(GAMEOVER_S_FILES),$(BUILD_DIR)/$(file).o) \
 					$(BUILD_DIR)/src/header.o
 
-#$(BUILD_DIR)/asm/main/%.s.o:	asm/main/%.s
-#	$(AS) $(AS_FLAGS) -o $@ $<
-
-#$(BUILD_DIR)/src/main/%.s.o:	src/main/%.s
-#	$(AS) $(AS_FLAGS) -o $@ $<
+$(BUILD_DIR)/src/header.o:	src/header.s
+	$(AS) $(AS_FLAGS) -o $@ $<
 
 $(BUILD_DIR)/%.s.o:	%.s
 	$(AS) $(AS_FLAGS) -o $@ $<
