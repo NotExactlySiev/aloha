@@ -10,7 +10,7 @@ SECTIONS
     {
         header_DATA_START = .;
         header_s = .;
-        build/src/header.o(.data);
+        build/header.o(.data);
         header_DATA_END = .;
         header_DATA_SIZE = ABSOLUTE(header_DATA_END - header_DATA_START);
     }
@@ -23,17 +23,17 @@ SECTIONS
     .None 0x800E0000 : AT(None_ROM_START) SUBALIGN(16)
     {
         None_RODATA_START = .;
-        build/asm/gameover/data/800.rodata.s.o(.rodata);
+        build/gameover/800.rodata.o(.rodata);
         None_RODATA_END = .;
         None_RODATA_SIZE = ABSOLUTE(None_RODATA_END - None_RODATA_START);
         None_TEXT_START = .;
-        build/src/gameover/C094.c.o(.text*);
+        build/gameover/C094.o(.text*);
         None_TEXT_END = .;
         None_TEXT_SIZE = ABSOLUTE(None_TEXT_END - None_TEXT_START);
         None_DATA_START = .;
         DAB0_data__s = .;
-        build/src/gameover/C094.c.o(.data*);
-        build/asm/gameover/data/DAB0.data.s.o(.data);
+        build/gameover/C094.o(.data*);
+        build/gameover/DAB0.data.o(.data);
         None_DATA_END = .;
         None_DATA_SIZE = ABSOLUTE(None_DATA_END - None_DATA_START);
     }

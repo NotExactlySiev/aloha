@@ -1,0 +1,198 @@
+<iso_project image_name="mkpsxiso.bin" cue_sheet="mkpsxiso.cue">
+    <track type="data">
+        <identifiers system="PLAYSTATION" application="PLAYSTATION" creation_date="1995071922595900+36"/>
+        <license file="original/us/license_data.dat"/>
+        <default_attributes gmt_offs="36" xa_attrib="16" xa_perm="1365" xa_gid="0" xa_uid="0"/>
+        <directory_tree>
+            <file name="SYSTEM.CNF" source="original/us/SYSTEM.CNF" type="data"/>
+            <file name="SCUS_941.03" source="original/us/SCUS_941.03" type="data"/>
+            <file name="COUNTRY.TXT" source="original/us/COUNTRY.TXT" type="data"/>
+            <file name="TITLE.PRS" source="original/us/TITLE.PRS" type="data"/>
+            <file name="SYS_SE.VAB" source="original/us/SYS_SE.VAB" type="data"/>
+            <dir name="MOVIE" source="original/us/MOVIE">
+                <file name="OPEN.STR" source="original/us/MOVIE/OPEN.STR" type="mixed"/>
+            </dir>
+            <file name="MUSICSYS.STR" source="original/us/MUSICSYS.STR" type="mixed"/>
+            <file name="TITLE.PEX" source="original/us/TITLE.PEX" type="data"/>
+            <file name="SELECT.PEX" source="original/us/SELECT.PEX" type="data"/>
+            <file name="GAMEOVER.PEX" source="original/us/GAMEOVER.PEX" type="data"/>
+            <dir name="VAB" source="original/us/VAB">
+                <file name="W1_1.VAB" source="original/us/VAB/W1_1.VAB" type="data"/>
+                <file name="W1_2.VAB" source="original/us/VAB/W1_2.VAB" type="data"/>
+                <file name="W1_3.VAB" source="original/us/VAB/W1_3.VAB" type="data"/>
+                <file name="W2_1.VAB" source="original/us/VAB/W2_1.VAB" type="data"/>
+                <file name="W2_2.VAB" source="original/us/VAB/W2_2.VAB" type="data"/>
+                <file name="W2_3.VAB" source="original/us/VAB/W2_3.VAB" type="data"/>
+                <file name="W3_1.VAB" source="original/us/VAB/W3_1.VAB" type="data"/>
+                <file name="W3_2.VAB" source="original/us/VAB/W3_2.VAB" type="data"/>
+                <file name="W3_3.VAB" source="original/us/VAB/W3_3.VAB" type="data"/>
+                <file name="W4_1.VAB" source="original/us/VAB/W4_1.VAB" type="data"/>
+                <file name="W4_2.VAB" source="original/us/VAB/W4_2.VAB" type="data"/>
+                <file name="W4_3.VAB" source="original/us/VAB/W4_3.VAB" type="data"/>
+                <file name="W5_1.VAB" source="original/us/VAB/W5_1.VAB" type="data"/>
+                <file name="W5_2.VAB" source="original/us/VAB/W5_2.VAB" type="data"/>
+                <file name="W5_3.VAB" source="original/us/VAB/W5_3.VAB" type="data"/>
+                <file name="W6_1.VAB" source="original/us/VAB/W6_1.VAB" type="data"/>
+                <file name="W6_2.VAB" source="original/us/VAB/W6_2.VAB" type="data"/>
+                <file name="W6_3.VAB" source="original/us/VAB/W6_3.VAB" type="data"/>
+            </dir>
+            <dir name="JM1" source="original/us/JM1">
+                <file name="MAIN.PEX" source="original/us/JM1/MAIN.PEX" type="data"/>
+                <file name="BOS1_DAT.EAR" source="original/us/JM1/BOS1_DAT.EAR" type="data"/>
+                <file name="BOS1_ENE.EAR" source="original/us/JM1/BOS1_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM1/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM1/GRA_DAT.EAR" type="data"/>
+                <file name="KAZ_DAT.EAR" source="original/us/JM1/KAZ_DAT.EAR" type="data"/>
+                <file name="KAZ_ENE.EAR" source="original/us/JM1/KAZ_ENE.EAR" type="data"/>
+                <file name="SOU_DAT.EAR" source="original/us/JM1/SOU_DAT.EAR" type="data"/>
+                <file name="SOU_ENE.EAR" source="original/us/JM1/SOU_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="JM1B" source="original/us/JM1B">
+                <file name="MAIN.PEX" source="original/us/JM1B/MAIN.PEX" type="data"/>
+                <file name="BOS1_DAT.EAR" source="original/us/JM1B/BOS1_DAT.EAR" type="data"/>
+                <file name="BOS1_ENE.EAR" source="original/us/JM1B/BOS1_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM1B/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM1B/GRA_DAT.EAR" type="data"/>
+                <file name="KAZ_DAT.EAR" source="original/us/JM1B/KAZ_DAT.EAR" type="data"/>
+                <file name="KAZ_ENE.EAR" source="original/us/JM1B/KAZ_ENE.EAR" type="data"/>
+                <file name="SOU_DAT.EAR" source="original/us/JM1B/SOU_DAT.EAR" type="data"/>
+                <file name="SOU_ENE.EAR" source="original/us/JM1B/SOU_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="JM2" source="original/us/JM2">
+                <file name="MAIN.PEX" source="original/us/JM2/MAIN.PEX" type="data"/>
+                <file name="BOS2_DAT.EAR" source="original/us/JM2/BOS2_DAT.EAR" type="data"/>
+                <file name="BOS2_ENE.EAR" source="original/us/JM2/BOS2_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM2/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM2/GRA_DAT.EAR" type="data"/>
+                <file name="ISE_DAT.EAR" source="original/us/JM2/ISE_DAT.EAR" type="data"/>
+                <file name="ISE_ENE.EAR" source="original/us/JM2/ISE_ENE.EAR" type="data"/>
+                <file name="PIRA_DAT.EAR" source="original/us/JM2/PIRA_DAT.EAR" type="data"/>
+                <file name="PIRA_ENE.EAR" source="original/us/JM2/PIRA_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="JM2B" source="original/us/JM2B">
+                <file name="MAIN.PEX" source="original/us/JM2B/MAIN.PEX" type="data"/>
+                <file name="BOS2_DAT.EAR" source="original/us/JM2B/BOS2_DAT.EAR" type="data"/>
+                <file name="BOS2_ENE.EAR" source="original/us/JM2B/BOS2_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM2B/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM2B/GRA_DAT.EAR" type="data"/>
+                <file name="ISE_DAT.EAR" source="original/us/JM2B/ISE_DAT.EAR" type="data"/>
+                <file name="ISE_ENE.EAR" source="original/us/JM2B/ISE_ENE.EAR" type="data"/>
+                <file name="PIRA_DAT.EAR" source="original/us/JM2B/PIRA_DAT.EAR" type="data"/>
+                <file name="PIRA_ENE.EAR" source="original/us/JM2B/PIRA_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="JM3" source="original/us/JM3">
+                <file name="MAIN.PEX" source="original/us/JM3/MAIN.PEX" type="data"/>
+                <file name="AM1_DAT.EAR" source="original/us/JM3/AM1_DAT.EAR" type="data"/>
+                <file name="AM1_ENE.EAR" source="original/us/JM3/AM1_ENE.EAR" type="data"/>
+                <file name="AM2_DAT.EAR" source="original/us/JM3/AM2_DAT.EAR" type="data"/>
+                <file name="AM2_ENE.EAR" source="original/us/JM3/AM2_ENE.EAR" type="data"/>
+                <file name="BOS3_DAT.EAR" source="original/us/JM3/BOS3_DAT.EAR" type="data"/>
+                <file name="BOS3_ENE.EAR" source="original/us/JM3/BOS3_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM3/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM3/GRA_DAT.EAR" type="data"/>
+            </dir>
+            <dir name="JM3B" source="original/us/JM3B">
+                <file name="MAIN.PEX" source="original/us/JM3B/MAIN.PEX" type="data"/>
+                <file name="AM1_DAT.EAR" source="original/us/JM3B/AM1_DAT.EAR" type="data"/>
+                <file name="AM1_ENE.EAR" source="original/us/JM3B/AM1_ENE.EAR" type="data"/>
+                <file name="AM2_DAT.EAR" source="original/us/JM3B/AM2_DAT.EAR" type="data"/>
+                <file name="AM2_ENE.EAR" source="original/us/JM3B/AM2_ENE.EAR" type="data"/>
+                <file name="BOS3_DAT.EAR" source="original/us/JM3B/BOS3_DAT.EAR" type="data"/>
+                <file name="BOS3_ENE.EAR" source="original/us/JM3B/BOS3_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM3B/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM3B/GRA_DAT.EAR" type="data"/>
+            </dir>
+            <dir name="JM4" source="original/us/JM4">
+                <file name="MAIN.PEX" source="original/us/JM4/MAIN.PEX" type="data"/>
+                <file name="BOS4_DAT.EAR" source="original/us/JM4/BOS4_DAT.EAR" type="data"/>
+                <file name="BOS4_ENE.EAR" source="original/us/JM4/BOS4_ENE.EAR" type="data"/>
+                <file name="COLD_DAT.EAR" source="original/us/JM4/COLD_DAT.EAR" type="data"/>
+                <file name="COLD_ENE.EAR" source="original/us/JM4/COLD_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM4/COM_DAT.EAR" type="data"/>
+                <file name="DDW_DAT.EAR" source="original/us/JM4/DDW_DAT.EAR" type="data"/>
+                <file name="DDW_ENE.EAR" source="original/us/JM4/DDW_ENE.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM4/GRA_DAT.EAR" type="data"/>
+            </dir>
+            <dir name="JM4B" source="original/us/JM4B">
+                <file name="MAIN.PEX" source="original/us/JM4B/MAIN.PEX" type="data"/>
+                <file name="BOS4_DAT.EAR" source="original/us/JM4B/BOS4_DAT.EAR" type="data"/>
+                <file name="BOS4_ENE.EAR" source="original/us/JM4B/BOS4_ENE.EAR" type="data"/>
+                <file name="COLD_DAT.EAR" source="original/us/JM4B/COLD_DAT.EAR" type="data"/>
+                <file name="COLD_ENE.EAR" source="original/us/JM4B/COLD_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM4B/COM_DAT.EAR" type="data"/>
+                <file name="DDW_DAT.EAR" source="original/us/JM4B/DDW_DAT.EAR" type="data"/>
+                <file name="DDW_ENE.EAR" source="original/us/JM4B/DDW_ENE.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM4B/GRA_DAT.EAR" type="data"/>
+            </dir>
+            <dir name="JM5" source="original/us/JM5">
+                <file name="MAIN.PEX" source="original/us/JM5/MAIN.PEX" type="data"/>
+                <file name="BOS5_DAT.EAR" source="original/us/JM5/BOS5_DAT.EAR" type="data"/>
+                <file name="BOS5_ENE.EAR" source="original/us/JM5/BOS5_ENE.EAR" type="data"/>
+                <file name="CITY_DAT.EAR" source="original/us/JM5/CITY_DAT.EAR" type="data"/>
+                <file name="CITY_ENE.EAR" source="original/us/JM5/CITY_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM5/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM5/GRA_DAT.EAR" type="data"/>
+                <file name="KURO_DAT.EAR" source="original/us/JM5/KURO_DAT.EAR" type="data"/>
+                <file name="KURO_ENE.EAR" source="original/us/JM5/KURO_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="JM5B" source="original/us/JM5B">
+                <file name="MAIN.PEX" source="original/us/JM5B/MAIN.PEX" type="data"/>
+                <file name="BOS5_DAT.EAR" source="original/us/JM5B/BOS5_DAT.EAR" type="data"/>
+                <file name="BOS5_ENE.EAR" source="original/us/JM5B/BOS5_ENE.EAR" type="data"/>
+                <file name="CITY_DAT.EAR" source="original/us/JM5B/CITY_DAT.EAR" type="data"/>
+                <file name="CITY_ENE.EAR" source="original/us/JM5B/CITY_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM5B/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM5B/GRA_DAT.EAR" type="data"/>
+                <file name="KURO_DAT.EAR" source="original/us/JM5B/KURO_DAT.EAR" type="data"/>
+                <file name="KURO_ENE.EAR" source="original/us/JM5B/KURO_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="JM6" source="original/us/JM6">
+                <file name="MAIN.PEX" source="original/us/JM6/MAIN.PEX" type="data"/>
+                <file name="BOS6_DAT.EAR" source="original/us/JM6/BOS6_DAT.EAR" type="data"/>
+                <file name="BOS6_ENE.EAR" source="original/us/JM6/BOS6_ENE.EAR" type="data"/>
+                <file name="BOS7_DAT.EAR" source="original/us/JM6/BOS7_DAT.EAR" type="data"/>
+                <file name="BOS7_ENE.EAR" source="original/us/JM6/BOS7_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM6/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM6/GRA_DAT.EAR" type="data"/>
+                <file name="SPA_DAT.EAR" source="original/us/JM6/SPA_DAT.EAR" type="data"/>
+                <file name="SPA_ENE.EAR" source="original/us/JM6/SPA_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="JM6B" source="original/us/JM6B">
+                <file name="MAIN.PEX" source="original/us/JM6B/MAIN.PEX" type="data"/>
+                <file name="BOS6_DAT.EAR" source="original/us/JM6B/BOS6_DAT.EAR" type="data"/>
+                <file name="BOS6_ENE.EAR" source="original/us/JM6B/BOS6_ENE.EAR" type="data"/>
+                <file name="BOS7_DAT.EAR" source="original/us/JM6B/BOS7_DAT.EAR" type="data"/>
+                <file name="BOS7_ENE.EAR" source="original/us/JM6B/BOS7_ENE.EAR" type="data"/>
+                <file name="COM_DAT.EAR" source="original/us/JM6B/COM_DAT.EAR" type="data"/>
+                <file name="GRA_DAT.EAR" source="original/us/JM6B/GRA_DAT.EAR" type="data"/>
+                <file name="SPA_DAT.EAR" source="original/us/JM6B/SPA_DAT.EAR" type="data"/>
+                <file name="SPA_ENE.EAR" source="original/us/JM6B/SPA_ENE.EAR" type="data"/>
+            </dir>
+            <dir name="MOVIE">
+                <file name="W1ED.STR" source="original/us/MOVIE/W1ED.STR" type="mixed"/>
+                <file name="W1ST.STR" source="original/us/MOVIE/W1ST.STR" type="mixed"/>
+                <file name="W2ED.STR" source="original/us/MOVIE/W2ED.STR" type="mixed"/>
+                <file name="W2ST.STR" source="original/us/MOVIE/W2ST.STR" type="mixed"/>
+                <file name="W3ED.STR" source="original/us/MOVIE/W3ED.STR" type="mixed"/>
+                <file name="W3ST.STR" source="original/us/MOVIE/W3ST.STR" type="mixed"/>
+                <file name="W4ED.STR" source="original/us/MOVIE/W4ED.STR" type="mixed"/>
+                <file name="W4ST.STR" source="original/us/MOVIE/W4ST.STR" type="mixed"/>
+                <file name="W5ED.STR" source="original/us/MOVIE/W5ED.STR" type="mixed"/>
+                <file name="W5ST.STR" source="original/us/MOVIE/W5ST.STR" type="mixed"/>
+                <file name="W6ST1.STR" source="original/us/MOVIE/W6ST1.STR" type="mixed"/>
+                <file name="W6ST2.STR" source="original/us/MOVIE/W6ST2.STR" type="mixed"/>
+                <file name="EX_END1.STR" source="original/us/MOVIE/EX_END1.STR" type="mixed"/>
+                <file name="EX_END2.STR" source="original/us/MOVIE/EX_END2.STR" type="mixed"/>
+                <file name="EX_END3.STR" source="original/us/MOVIE/EX_END3.STR" type="mixed"/>
+                <file name="NL_END1.STR" source="original/us/MOVIE/NL_END1.STR" type="mixed"/>
+                <file name="NL_END2.STR" source="original/us/MOVIE/NL_END2.STR" type="mixed"/>
+            </dir>
+            <file name="MUSIC_W1.STR" source="original/us/MUSIC_W1.STR" type="mixed"/>
+            <file name="MUSIC_W2.STR" source="original/us/MUSIC_W2.STR" type="mixed"/>
+            <file name="MUSIC_W3.STR" source="original/us/MUSIC_W3.STR" type="mixed"/>
+            <file name="MUSIC_W4.STR" source="original/us/MUSIC_W4.STR" type="mixed"/>
+            <file name="MUSIC_W5.STR" source="original/us/MUSIC_W5.STR" type="mixed"/>
+            <file name="MUSIC_W6.STR" source="original/us/MUSIC_W6.STR" type="mixed"/>
+        </directory_tree>
+    </track>
+</iso_project>
