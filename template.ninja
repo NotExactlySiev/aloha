@@ -15,9 +15,7 @@ ldflags = --no-check-sections -nostdlib -s
 cflagsnat   = -O2
 
 
-
 # TODO: using the included standard libraries or a nugget one
-# TODO: make a script to generate this file automatically
 
 rule ccnat
     command = gcc $cflagsnative $in -o $out
@@ -52,19 +50,15 @@ build tools: phony $jfcomp
 build $jfcomp: ccnat $jfdir/main.c $jfdir/comp.c $jfdir/decomp.c
 
 ### building the objects
+build build/header.o: cc src/header.s
+
 $decode_block
 
 ### generating the disc
-build aloha.bin: mkiso us.xml | build/GAMEOVER.PEX
+# TODO: this doesn't even work
+default build/disc/SCUS_941.03 build/disc/GAMEOVER.PEX
 
 ### extra: rules for extracting the data from the original disc
 # TODO: maybe these should just be a shell script?
 # TODO: the xml points to the original
-rule chdman
-    command = chdman extractcd -i $in -o $out
-
-d   = original
-build $d/us/ | us.xml: dumpiso $d/us.bin
-build extract: phony $d/us/
-
-default aloha.bin
+# default aloha.bin

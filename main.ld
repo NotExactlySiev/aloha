@@ -6,7 +6,7 @@ SECTIONS
     header_ROM_START = __romPos;
     .header : AT(header_ROM_START) SUBALIGN(16)
     {
-        build/src/main/header.s.o(.data);
+        build/header.o(.data);
     }
     __romPos += SIZEOF(.header);
 
@@ -14,17 +14,17 @@ SECTIONS
     .main 0x80018000 : AT(main_ROM_START) SUBALIGN(4)
     {
         *(.rodata*);
-        build/asm/main/data/libpress.rodata.s.o(.rodata);
-        build/asm/main/data/libcd.rodata.s.o(.rodata);
-        build/asm/main/data/libetc.rodata.s.o(.rodata);
-        build/asm/main/data/libsnd.rodata.s.o(.rodata);
-        build/asm/main/data/libgpu.rodata.s.o(.rodata);
+        build/main/libpress.rodata.o(.rodata);
+        build/main/libcd.rodata.o(.rodata);
+        build/main/libetc.rodata.o(.rodata);
+        build/main/libsnd.rodata.o(.rodata);
+        build/main/libgpu.rodata.o(.rodata);
         
         *(.text*);
         
         *(.data*);
-        build/asm/main/data/1A214.data.s.o(.data);
-        build/asm/main/data/1D530.data.s.o(.data);
+        build/main/1A214.data.o(.data);
+        build/main/1D530.data.o(.data);
     }
     __romPos += SIZEOF(.main);
 
@@ -34,7 +34,7 @@ SECTIONS
     .bss (NOLOAD) : SUBALIGN(4)
     {
         *(.bss);
-        build/asm/main/data/3066C.bss.s.o(.bss);
+        build/main/3066C.bss.o(.bss);
     }
 
     /DISCARD/ :

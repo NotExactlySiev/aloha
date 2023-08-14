@@ -1,9 +1,16 @@
 import os
+import sys
 from string import Template
 
-TEMPLATE = "template.ninja"
+NINJA_TEMPLATE = "template.ninja"
+NINJA_BUILD = "build.ninja"
 
 # TODO: now we can have a parameter for using nugget or included
+
+# 1- read the original disc to find out all the files we need
+# 2- read the source dir to figure out which ones we can make
+# 3- subtract the two to figure out which ones we just copy
+
 
 # everything not in this just gets capitalized
 finalNames = {
@@ -28,9 +35,18 @@ for ent in os.scandir("./src"):
         # is a module. add it to the map
         proc[ent.name] = {}
         proc[ent.name]["src"] = []
-        for f in os.scandir(ent.path):
-            if f.name[-2:] == ".c":
-                proc[ent.name]["src"].append(f.name)
+        src = os.walk(ent.path)
+        for i,f in enumerate(src):
+            base = ""
+            if i == 0:
+                dirs = f[1]
+            else:
+                base = dirs[i-1] + "/"
+            
+            for file in f[2]:
+                ext = file[-2:]
+                if ext in [".c", ".s"]:
+                    proc[ent.name]["src"].append(base+file)
 
 for ent in os.scandir("./asm"):
     if ent.is_dir():
@@ -39,7 +55,8 @@ for ent in os.scandir("./asm"):
         for dat in os.scandir(ent.path + "/data"):
             proc[ent.name]["data"].append(dat.name)
 
-
+#oprint(proc)
+#sys.exit(0)
 # executable files
 for mod, files in proc.items():
     print(f"## {mod}")
@@ -72,12 +89,12 @@ for mod, files in proc.items():
         continue
     
     print(f"build build/{mod}.exe: objcopy build/{mod}.elf")
-    print(f"build build/disc/{cname}: comp build/{mod}.exe")
+    print(f"build build/disc/{cname}: comp build/{mod}.exe | $jfcomp")
     print()
     print()
 
-with open(TEMPLATE, "r") as inf:
+with open(NINJA_TEMPLATE, "r") as inf:
     templ = Template(inf.read())
     ninja = templ.safe_substitute(decode_block=o)
-    with open("build.ninja", "w") as outf:
+    with open(NINJA_BUILD, "w") as outf:
         outf.write(ninja)
