@@ -12,9 +12,11 @@ NINJA_BUILD = "build.ninja"
 # 3- subtract the two to figure out which ones we just copy
 
 
-# everything not in this just gets capitalized
-finalNames = {
-    "main": "SCUS_941.03",
+# final name and compression of non-default files
+# everything not in this just gets capitalized and compressed
+specialFiles = {
+    "main": ["SCUS_941.03", False],
+    "jm1": ["JM1/MAIN.PEX", True],
 }
 
 
@@ -97,15 +99,20 @@ for mod, files in proc.items():
     
 
     ## compress and finalize
-    cname = mod.upper() + ".PEX"
-    # TODO: the main files are also a special case
-    # main file is a special case
-    if mod == "main":
-        cname = "SCUS_941.03"
-        build("objcopy", f"build/disc/{cname}", elf)
+    cname = ext(mod, "pex").upper()
+    isComped = True
+    
+    if mod in specialFiles:
+        cname = specialFiles[mod][0]
+        isComped = specialFiles[mod][1]
+
+    cname = "build/disc/" + cname
+
+    if isComped:
+        build("objcopy", exe, elf)
+        build("comp", cname, f"{exe} | $jfcomp")
     else:
-        build("objcopy", exe, elf)  # copy
-        build("comp", f"build/disc/{cname}", f"{exe} | $jfcomp")
+        build("objcopy", cname, elf)
     nl()
 
 with open(NINJA_TEMPLATE, "r") as inf:
