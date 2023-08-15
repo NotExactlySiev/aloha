@@ -17,14 +17,15 @@ finalNames = {
     "main": "SCUS_941.03",
 }
 
+
 o = ""
 
-oprint = print
-
-def print(x="", end="\n"):
+def put(x):
     global o
-    #oprint(x, end=end)
-    o += x + end
+    o += x
+
+nl = lambda : put("\n")
+
 
 
 # parse the file structure
@@ -55,46 +56,61 @@ for ent in os.scandir("./asm"):
         for dat in os.scandir(ent.path + "/data"):
             proc[ent.name]["data"].append(dat.name)
 
-#oprint(proc)
-#sys.exit(0)
+
+# give the file an extension or change the existing extension
+def ext(x, e):
+    e = "." + e
+    i = x.rfind(".")
+    if i > -1:
+        return x[:i] + e
+    else:
+        return x + e
+lext = lambda e: lambda x: ext(x, e)
+
+build = lambda r,d,s : put(f"build {d}: {r} {s}\n")
+objf = lambda m,o : (f"build/{m}/{ext(o, 'o')}")
+
+
 # executable files
 for mod, files in proc.items():
-    print(f"## {mod}")
-    # compile objs
+    ## compile objs
+    # TODO: each source file can have a type (c, data etc.) so these
+    #       can all be combined:
     for file in files["src"]:
-        obj = file[:-2] + ".o"
-        print(f"build build/{mod}/{obj}: cc src/{mod}/{file}")
+        build("cc", objf(mod, file), f"src/{mod}/{file}")
     for file in files["data"]:
-        obj = file[:-2] + ".o"
-        print(f"build build/{mod}/{obj}: cc asm/{mod}/data/{file}")
+        build("cc", objf(mod, file), f"asm/{mod}/data/{file}")
 
-    print()
+    nl()
 
-    # link
-    print(f"build build/{mod}.elf: link build/header.o ", end="")
-
-    for file in files["src"] + files["data"]:
-        obj = file[:-2] + ".o"
-        print(f"build/{mod}/{obj} ", end="")
-    print()
-    print(f"    modid = {mod}")
+    ## link
+    allDeps = (files["src"] + files["data"])
+    allObjs = [f"build/{mod}/{x}" for x in allDeps]
+    allObjs = " ".join(map(lext("o"), allObjs))
+    allObjs += " build/header.o"
     
+    elf = "build/" + ext(mod, "elf")
+    exe = "build/" + ext(mod, "exe")
+
+    build("link", elf, allObjs)
+    put(f"    modid = {mod}\n")   # TODO: this could be a function too
     
+
+    ## compress and finalize
     cname = mod.upper() + ".PEX"
-
+    # TODO: the main files are also a special case
     # main file is a special case
     if mod == "main":
         cname = "SCUS_941.03"
-        print(f"build build/disc/{cname}: objcopy build/{mod}.elf")
-        continue
-    
-    print(f"build build/{mod}.exe: objcopy build/{mod}.elf")
-    print(f"build build/disc/{cname}: comp build/{mod}.exe | $jfcomp")
-    print()
-    print()
+        build("objcopy", f"build/disc/{cname}", elf)
+    else:
+        build("objcopy", exe, elf)  # copy
+        build("comp", f"build/disc/{cname}", f"{exe} | $jfcomp")
+    nl()
 
 with open(NINJA_TEMPLATE, "r") as inf:
     templ = Template(inf.read())
     ninja = templ.safe_substitute(decode_block=o)
     with open(NINJA_BUILD, "w") as outf:
         outf.write(ninja)
+
