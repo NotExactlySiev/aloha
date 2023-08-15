@@ -74,6 +74,7 @@ objf = lambda m,o : (f"build/{m}/{ext(o, 'o')}")
 
 
 # executable files
+exes = []
 for mod, files in proc.items():
     ## compile objs
     # TODO: each source file can have a type (c, data etc.) so these
@@ -101,12 +102,13 @@ for mod, files in proc.items():
     ## compress and finalize
     cname = ext(mod, "pex").upper()
     isComped = True
-    
+
     if mod in specialFiles:
         cname = specialFiles[mod][0]
         isComped = specialFiles[mod][1]
 
     cname = "build/disc/" + cname
+    exes.append(cname)
 
     if isComped:
         build("objcopy", exe, elf)
@@ -114,6 +116,9 @@ for mod, files in proc.items():
     else:
         build("objcopy", cname, elf)
     nl()
+
+build("mkiso", "build/aloha.bin", f"us.xml | {' '.join(exes)}")
+
 
 with open(NINJA_TEMPLATE, "r") as inf:
     templ = Template(inf.read())

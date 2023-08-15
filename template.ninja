@@ -40,9 +40,6 @@ rule comp
 
 rule mkiso
     command = $makeiso -y $in -o $out
-# todo: this is ugly: 
-rule dumpiso
-    command = $dumpiso -s us.xml $in -x $out
 
 ### building the tools (jfcomp, mkpsxiso etc.)
 build tools: phony $jfcomp
@@ -55,10 +52,4 @@ build build/header.o: cc src/header.s
 $decode_block
 
 ### generating the disc
-# TODO: this doesn't even work
-default build/disc/SCUS_941.03 build/disc/GAMEOVER.PEX
-
-### extra: rules for extracting the data from the original disc
-# TODO: maybe these should just be a shell script?
-# TODO: the xml points to the original
-# default aloha.bin
+default build/aloha.bin
