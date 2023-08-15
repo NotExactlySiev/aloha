@@ -15,6 +15,7 @@ COPY	:= $(CROSS)objcopy
 
 COMP	:= tools/jfcomp
 
+SRC_DIR		:= src
 BUILD_DIR	:= build
 
 MAIN_S_FILES	:=	$(wildcard asm/main/data/*.s) \
