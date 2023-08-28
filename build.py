@@ -21,14 +21,9 @@ specialFiles = {
 
 
 o = ""
-
 def put(x):
     global o
     o += x
-
-nl = lambda : put("\n")
-
-
 
 # parse the file structure
 proc = {}
@@ -68,23 +63,21 @@ def ext(x, e):
     else:
         return x + e
 lext = lambda e: lambda x: ext(x, e)
-
-build = lambda r,d,s : put(f"build {d}: {r} {s}\n")
 objf = lambda m,o : (f"build/{m}/{ext(o, 'o')}")
 
+build = lambda r,d,s : put(f"build {d}: {r} {s}\n")
+var = lambda n,v : put(f"    {n} = {v}\n")
 
 # executable files
 exes = []
 for mod, files in proc.items():
     ## compile objs
-    # TODO: each source file can have a type (c, data etc.) so these
-    #       can all be combined:
+    # TODO: each source file can have a type (c, data etc.) so
+    #       these can all be combined:
     for file in files["src"]:
         build("cc", objf(mod, file), f"src/{mod}/{file}")
     for file in files["data"]:
         build("cc", objf(mod, file), f"asm/{mod}/data/{file}")
-
-    nl()
 
     ## link
     allDeps = (files["src"] + files["data"])
@@ -96,8 +89,7 @@ for mod, files in proc.items():
     exe = "build/" + ext(mod, "exe")
 
     build("link", elf, allObjs)
-    put(f"    modid = {mod}\n")   # TODO: this could be a function too
-    
+    var("modid", mod)
 
     ## compress and finalize
     cname = ext(mod, "pex").upper()
@@ -115,7 +107,6 @@ for mod, files in proc.items():
         build("comp", cname, f"{exe} | $jfcomp")
     else:
         build("objcopy", cname, elf)
-    nl()
 
 build("mkiso", "build/aloha.bin", f"us.xml | {' '.join(exes)}")
 
