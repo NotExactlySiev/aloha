@@ -1,6 +1,26 @@
-I think the standard libraries are compiled using PSYQ-3.5 but the game code
-itself is compiled using gcc 2.8.1 from PSYQ-4.3
+## Overall Direction of this Decompilation
+Splat is a flexible tool capable of many different things.
+I aim to use only a limited subset of its features. I think I'm
+just gonna leave the nonmatching inside the repository, I'm not
+worried about the legallity of that. The asset files should be
+ripped from the original image anyway. So I think leaving the
+original code is fine.
+Splat therefore is good for generating the initial set of those
+along with the initial C files. But after that I can't think
+of much else it can be used for. It assumes your project to be
+a matching decompilation (at least as far as I can tell), which
+Aloha is not. And I don't see much upside to maintaining two
+sets of symbol files, one for the linker and one for Splat. I'm
+already trying to merge all of the linker scripts into a single
+shared one anyway.
 
+
+## Compiler
+*this part related to matching the binaries is no longer relevant*
+I think the standard libraries are compiled using PSYQ-3.5 but the game code itself is compiled using gcc 2.8.1 from PSYQ-4.3
+
+
+## 274C.c
 
 Memory map of data sections:
 
@@ -19,7 +39,7 @@ uninitialized
 
 
 
-JM1/MAIN.PEX
+## JM1/MAIN.PEX
 
 It seems to have libgpu linked into it again. Since it's very likely that it's the same
 version of the library as the one in main, it should be possible to find duplicates.
@@ -47,7 +67,5 @@ The file map doesn't seem to be as tidy and organized as main. Gonna have to fig
 801383F0    various lists of pointers (to entities, but maybe more)
 
 80103000
-
-
 
 80060000 is where COM_DAT.EAR is loaded by SELECT.PEX
