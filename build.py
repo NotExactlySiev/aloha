@@ -25,34 +25,17 @@ def put(x):
     global o
     o += x
 
-# parse the file structure
-proc = {}
+def for_dirs(addr, cb):
+    for ent in os.scandir(addr):
+        if ent.is_dir():
+            cb(ent)
 
-for ent in os.scandir("./src"):
-    if ent.is_dir():
-        # is a module. add it to the map
-        proc[ent.name] = {}
-        proc[ent.name]["src"] = []
-        src = os.walk(ent.path)
-        for i,f in enumerate(src):
-            base = ""
-            if i == 0:
-                dirs = f[1]
-            else:
-                base = dirs[i-1] + "/"
-            
-            for file in f[2]:
-                ext = file[-2:]
-                if ext in [".c", ".s"]:
-                    proc[ent.name]["src"].append(base+file)
-
-for ent in os.scandir("./asm"):
-    if ent.is_dir():
-        # also add its data files
-        proc[ent.name]["data"] = []
-        for dat in os.scandir(ent.path + "/data"):
-            proc[ent.name]["data"].append(dat.name)
-
+def get_ext(x):
+    i = x.rfind(".")
+    if i > -1:
+        return x[i+1:]
+    else:
+        return ""
 
 # give the file an extension or change the existing extension
 def ext(x, e):
@@ -62,11 +45,43 @@ def ext(x, e):
         return x[:i] + e
     else:
         return x + e
+
 lext = lambda e: lambda x: ext(x, e)
 objf = lambda m,o : (f"build/{m}/{ext(o, 'o')}")
 
 build = lambda r,d,s : put(f"build {d}: {r} {s}\n")
 var = lambda n,v : put(f"    {n} = {v}\n")
+
+
+# parse the file structure
+proc = {}
+
+def src_add(ent):
+    global proc
+    proc[ent.name] = {}
+    proc[ent.name]["src"] = []
+    src = os.walk(ent.path)
+    for i,f in enumerate(src):
+        base = ""
+        if i == 0:
+            dirs = f[1]
+        else:
+            base = dirs[i-1] + "/"
+        
+        for file in f[2]:
+            if get_ext(file) in ["c", "s"]:
+                proc[ent.name]["src"].append(base+file)
+
+def asm_add(ent):
+    global proc
+    # also add its data files
+    proc[ent.name]["data"] = []
+    for dat in os.scandir(ent.path + "/data"):
+        proc[ent.name]["data"].append(dat.name)
+
+
+for_dirs("./src", src_add)
+for_dirs("./asm", asm_add)
 
 # executable files
 exes = []
