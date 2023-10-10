@@ -20,7 +20,7 @@ SECTIONS
 
     None_ROM_START = __romPos;
     None_VRAM = ADDR(.None);
-    .None 0x800B0000 : AT(None_ROM_START) SUBALIGN(16)
+    .None 0x800B0000 : AT(None_ROM_START) SUBALIGN(4)
     {
         None_RODATA_START = .;
         build/jm1/800.rodata.o(.rodata);
@@ -28,6 +28,10 @@ SECTIONS
         None_RODATA_SIZE = ABSOLUTE(None_RODATA_END - None_RODATA_START);
         None_TEXT_START = .;
         build/jm1/1268.o(.text);
+        build/jm1/start.o(.text);
+        build/jm1/173B4.o(.text);
+        build/jm1/weird.o(.text);
+        build/jm1/38F38.o(.text);
         None_TEXT_END = .;
         None_TEXT_SIZE = ABSOLUTE(None_TEXT_END - None_TEXT_START);
         None_DATA_START = .;
@@ -36,12 +40,12 @@ SECTIONS
         None_DATA_END = .;
         None_DATA_SIZE = ABSOLUTE(None_DATA_END - None_DATA_START);
     }
+
     __romPos += SIZEOF(.None);
     __romPos = ALIGN(__romPos, 16);
-
-    /* the size that gets put in the header */
-    __size = ((__romPos - None_ROM_START) & 0xFFFFF800) + 0x800;
-
+    
+    __size = ((__romPos - None_ROM_START) & 0xFFFFF800);
+    
     None_ROM_END = __romPos;
     None_VRAM_END = .;
 
