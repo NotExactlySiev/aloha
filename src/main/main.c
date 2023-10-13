@@ -166,7 +166,9 @@ void func_80018AB4(void)
         tmp = cd_fs_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
     } while (tmp == -1);
 
-    if (tmp >= 0) {        
+    if (tmp >= 0) {       
+        // TODO: maybe a #define POLYCOUNT 4 so I don't have to 
+        // repeat 4? just put POLYCOUNT in the macros 
         MAKE_QUADS(64, 0, 128, 480, 0, 0, 128, 480, 64, 4);
         LOAD_PRS(&tmpfilebuf, 256, 240);
         SLEEP_FRAMES(10);
@@ -174,15 +176,15 @@ void func_80018AB4(void)
         wait_frame(0);
         call_SetDispMask(1); // set disp mask to show it
         
-        FADE_IN(4);
+        FADE_IN(4,4);
         
         DrawSync(0);
         wait_frame(0);
         
-        SET_POLYS_COL(128);
+        SET_POLYS_COL(128,4);
         SLEEP_FRAMES(300);
         
-        FADE_OUT(4);
+        FADE_OUT(4,4);
     }
     
     wait_frame(0);
@@ -200,11 +202,10 @@ void func_80018AB4(void)
         wait_frame(0);
         call_SetDispMask(1);
         
-        FADE_IN(4);
+        FADE_IN(4,4);
     } else {
         if (get_GameRegion() == 1) { y = 120; h = 240; } 
         else { y = 0; h = 480; }
-        
         MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
         LOAD_PRS(&tmpfilebuf, 320, 240);
         SLEEP_FRAMES(10);
@@ -212,12 +213,12 @@ void func_80018AB4(void)
         wait_frame(0);
         call_SetDispMask(1);
         
-        FADE_IN(4);
+        FADE_IN(4,5);
     }
 }
 
-#define DrawSync        call_DrawSync
-#define wait_frame   call_wait_frame
+//#define DrawSync        call_DrawSync
+//#define wait_frame   call_wait_frame
 void func_8001926C(void)
 {
     DRAWENV drawenv;
@@ -243,13 +244,13 @@ void func_8001926C(void)
 
     if (D_80047D48 == -2) {
         MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
-        FADE_OUT(4);
+        FADE_OUT(4,4);
     } else {
         if (get_GameRegion() == 1) { y = 120; h = 240; } 
         else { y = 0; h = 480; }
         
         MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
-        FADE_OUT(4);
+        FADE_OUT(4,5);
     }
     
     call_wait_frame(0);
@@ -276,8 +277,8 @@ void func_8001926C(void)
     call_PutDrawEnv(&drawenv);
     call_PutDispEnv(&dispenv);
 }
-#undef DrawSync
-#undef wait_frame
+//#undef DrawSync
+//#undef wait_frame
 
 void func_80019680(void)
 {
@@ -567,7 +568,7 @@ int main(int argc, char** argv)
     }
 
     // debug mode
-    //getGameConfig()[0x517] = 1;
+    getGameConfig()[0x517] = 1;
 
     setNextFile(0);
     file_execute_loop();
