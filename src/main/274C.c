@@ -511,7 +511,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 int sndqueue_exec_all(void)
 {
     s32 ret;
-#if 1
+#if 0
     s32 com;
     s32 val;
     k_printf("sndqueue_exec_all: %d items: \n", _sndqueue_size);
@@ -1397,12 +1397,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 // the variables for this one are all in the assembly file for the final one
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add);
-
-int regular_add(void* fn, u16 wait)
-{
-    k_printf("adding routine %p every %d\n", fn, wait);
-    _regular_add(fn, wait);
-}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add_tmp);
 
