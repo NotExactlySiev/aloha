@@ -72,9 +72,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9728);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9758);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9788);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", DrawSync);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E97B8);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", LoadImage);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E97E8);
 

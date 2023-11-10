@@ -1,4 +1,86 @@
 #include "common.h"
+#include <libgpu.h>
+
+typedef struct {
+    u16 param;
+    u16 disabled;
+    u32 unk0;
+    u32 unk1;
+    void* func; // this probably has a specific type
+} Component;
+
+typedef struct LinkedList LinkedList;
+typedef struct Entity Entity;
+
+
+struct LinkedList {
+    LinkedList* next;
+    LinkedList* prev;
+};
+
+struct Entity {
+    Entity* next;
+    Entity* prev;
+    Component comp0;
+    Component comp1;
+    Component render_comp;
+    Component comp3;
+    u32 model[4]; // model_t
+    u16 unk0;
+    u8 unk1;
+    u8 unk2;
+    u16 health;
+    u16 unk3;
+    u32 unk4;
+    u32 unk5;
+    s32 pos_x;
+    s32 pos_y;
+    s32 pos_z;
+    s32 vel_x;
+    s32 vel_y;
+    s32 vel_z;
+    u32 unk6;
+    u32 unk7;
+    u32 unk8;
+    s32 angle_y;
+    s32 angle_x;
+    s32 angle_z;
+    s32 dangle_y;
+    s32 dangle_x;
+    s32 dangle_z;
+};
+
+typedef struct {
+    s16     count;
+    u32     lastprim;    // entrypoint
+    u32     firstprim;    // terminator
+    SPRT_8*    nextfree;
+    u32     ot[2048];
+    DR_MODE    draw_mode;
+} TextOT;
+
+typedef struct {
+    u8 u, v;
+    short pad;
+} TextUV;
+
+extern Entity player_entity;
+
+// entity lists
+Entity* D_8010295C = 0;   // entity_list_0
+Entity* D_80102960 = 0;
+Entity* D_80102964 = 0;
+Entity* D_80102968 = 0;
+
+Entity* D_8010296C = 0;
+Entity* D_80102970 = 0;
+Entity* D_80102974 = 0;
+Entity* D_80102978 = 0;
+
+Entity* D_8010297C = 0;
+Entity* D_80102980 = 0;
+Entity* D_80102984 = 0;
+Entity* D_80102988 = 0;
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
 
@@ -1042,31 +1124,88 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDC6C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDDE4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDEC0);
+void debug_print_decimal(s32 num)
+{
+    char sign = ' ';
+    if (num < 0) {
+        sign = '-';
+        num = -num;
+    }
+    debug_print_char(sign);
+    debug_print_decimal_unsigned(num, 5);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDF04);
+
+u32 D_80102794 = 0;
+
+void func_800DDF04(void)
+{
+    // print debug info
+    if (D_80102794) {
+        // TODO: player position here
+
+        //
+        debug_set_pos(1, 14);
+        debug_print_str("RENDERING IS FUCKING OFF");
+        debug_set_pos(1, 15);
+        debug_print_str("NO MODEL RENDERING");
+        
+        debug_set_pos(1, 23);
+        debug_print_str("X=");
+        debug_print_decimal(player_entity.pos_x >> 12);
+        debug_set_pos(1, 24);
+        debug_print_str("Y=");
+        debug_print_decimal(player_entity.pos_y >> 12);
+        debug_set_pos(1, 25);
+        debug_print_str("Z=");
+        debug_print_decimal(player_entity.pos_z >> 12);
+        debug_set_pos(10, 22);
+        //
+        debug_set_pos(10, 23);
+        debug_print_str("ZX=");
+        debug_print_hex16(player_entity.angle_y);   // wait what
+        debug_set_pos(10, 24);
+        debug_print_str("AREA=");
+        //
+        debug_set_pos(10, 25);
+        debug_print_str("LAND=");
+        //
+
+    }
+    // THEN PLAYER ENTITY STUFF
+
+    // if something something
+    s16 x,y,z;
+    if (0) {
+        x = player_entity.pos_x >> 12;
+        //y = player_entity.max_y;
+        z = player_entity.pos_z >> 12;
+        func_800E5E60(); // TODO TODO!
+    }
+    
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE244);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE384);
+u16 debug_font_color[4] = { 1, 1, 0x7FFF, 0 };
 
-#include <libgpu.h>
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", debug_print_char);
-typedef struct {
-    s16     count;
-    u32     lastprim;    // entrypoint
-    u32     firstprim;    // terminator
-    SPRT_8*    nextfree;
-    u32     ot[2048];
-    DR_MODE    draw_mode;
-} TextOT;
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE384);
+//load debug font clut
+void func_800DE384(u16 x, u16 y)
+{
+    RECT rect = {
+        .x = x,
+        .y = y,
+        .w = 4,
+        .h = 1,
+    };
+    LoadImage(&rect, debug_font_color);
+    DrawSync(0);
+}
 
-typedef struct {
-    u8 u, v;
-    short pad;
-} TextUV;
 
-extern void func_800DED4C(void* p, s32 v);   // SetSemiTrans                   /* extern */
+
+//extern void func_800DED4C(void* p, s32 v);   // SetSemiTrans                   /* extern */
 
 s32 debug_char_x = 0;
 s32 debug_char_y = 0;
@@ -1097,9 +1236,7 @@ void debug_print_char(char c)
         p->u0 = debug_char_uvs[c].u;
         p->v0 = debug_char_uvs[c].v;
         last = &debug_text_ot[debug_ot_index].lastprim;
-        //p->tag = (s32) ((p->tag & 0xFF000000) | (*last & 0xFFFFFF));
         debug_char_x += 1;
-        //*last = (*last & 0xFF000000) | ((s32) p & 0xFFFFFF);
         addPrim(last, p);
     }
 }
@@ -1109,7 +1246,7 @@ void debug_print_str(char* str)
     while (*str) debug_print_char(*str++);
 }
 
-void debug_print_decimal(u32 num, u32 pad)
+void debug_print_decimal_unsigned(u32 num, u32 pad)
 {
     u32 digit;
     u32 place = 1000000000;
@@ -1180,17 +1317,33 @@ void debug_text_draw(void)
     func_800E8B5C(&debug_text_ot[debug_ot_index].lastprim, 2);
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE8B0);
+void func_800DE8B0(u32 x, u32 y)
+{
+    debug_font_x = x & 0x3c0;
+    debug_font_y = y & 0x100;
+    D_80102788 = y & 0xff;
+    
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE8DC);
+void func_800DE8DC(u16 r, u16 g, u16 b)
+{
+    debug_text_transparent = ((r | g | b) & 0x8000) != 0;
+    debug_font_color[0] = r;
+    debug_font_color[1] = g;
+    debug_font_color[2] = b;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE920);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE930);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE920);   // Set index
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEAD4);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE930);   // debug_text_init
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEB6C);
+
+// this is all libgpu stuff, probably all for debug.c
+
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEAD4);   // GetTPage
+
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEB6C);   // GetClut
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEB84);
 
@@ -1261,6 +1414,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEF84);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEFB8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF108);
+
+
+// more real functions
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1B4);
 

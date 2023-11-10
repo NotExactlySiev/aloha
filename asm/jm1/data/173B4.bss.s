@@ -1093,7 +1093,7 @@ glabel D_801380A8
 glabel D_801380B0
 	.space 0x8
 
-glabel D_801380B8
+glabel player_entity
 	.space 0x18
 
 glabel D_801380D0
