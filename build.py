@@ -96,7 +96,9 @@ for mod, files in proc.items():
 
     ## link
     allDeps = (files["src"] + files["data"])
+    print(f"all deps is {allDeps}")
     allObjs = [f"build/{mod}/{x}" for x in allDeps]
+    print(f"all objs is {allObjs}")
     allObjs = " ".join(map(lext("o"), allObjs))
     allObjs += " build/header.o"
     

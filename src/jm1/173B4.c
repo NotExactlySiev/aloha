@@ -784,7 +784,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6E74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6EEC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D71A4);
 
@@ -1050,21 +1050,135 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE244);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE384);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE3CC);
+#include <libgpu.h>
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", debug_print_char);
+typedef struct {
+    s16     count;
+    u32     lastprim;    // entrypoint
+    u32     firstprim;    // terminator
+    SPRT_8*    nextfree;
+    u32     ot[2048];
+    DR_MODE    draw_mode;
+} TextOT;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE544);
+typedef struct {
+    u8 u, v;
+    short pad;
+} TextUV;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE580);
+extern void func_800DED4C(void* p, s32 v);   // SetSemiTrans                   /* extern */
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE650);
+s32 debug_char_x = 0;
+s32 debug_char_y = 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE6AC);
+u32 debug_text_transparent = 0;    // debug_font_trans
+u32 debug_font_index = 0;
+RECT debug_text_texture = { 0, 0, 255, 255 };
+u32 debug_font_x = 960;
+u32 debug_font_y = 256;
+u32 D_80102788 = 224;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE6F4);
+s16 debug_ot_index = 0;
+extern TextOT debug_text_ot[3];
+extern TextUV debug_char_uvs[128];
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE728);
+void debug_print_char(char c)
+{
+    s32* last;
+    SPRT_8* p;
+    
+    if (debug_text_ot[debug_ot_index].count < 512) {
+        debug_text_ot[debug_ot_index].count += 1;
+        p = debug_text_ot[debug_ot_index].nextfree;
+        debug_text_ot[debug_ot_index].nextfree = p + 1;
+        func_800DED4C(p, debug_text_transparent);
+        p->x0 = debug_char_x * 8;
+        p->y0 = debug_char_y * 8;
+        p->u0 = debug_char_uvs[c].u;
+        p->v0 = debug_char_uvs[c].v;
+        last = &debug_text_ot[debug_ot_index].lastprim;
+        //p->tag = (s32) ((p->tag & 0xFF000000) | (*last & 0xFFFFFF));
+        debug_char_x += 1;
+        //*last = (*last & 0xFF000000) | ((s32) p & 0xFFFFFF);
+        addPrim(last, p);
+    }
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE740);
+void debug_print_str(char* str)
+{
+    while (*str) debug_print_char(*str++);
+}
+
+void debug_print_decimal(u32 num, u32 pad)
+{
+    u32 digit;
+    u32 place = 1000000000;
+    u32 skip = 10;
+    if (pad < 10) skip = 10 - pad;
+
+    while (place) {
+        digit = num/place;
+        num -= digit*place;
+        // skip leading zeros
+        if (!(skip > 0 && digit == 0 && place != 1))
+            debug_print_char(digit + '0');
+        place /= 10;
+        skip -= 1;
+    }
+}
+
+void debug_print_hex8(u8 byte)
+{
+    u8 nybble;
+
+    nybble = byte >> 4;
+    if (nybble > 9) nybble += 7;
+    debug_print_char('0' + nybble);
+
+    nybble = byte & 0xF;
+    if (nybble > 9) nybble += 7;
+    debug_print_char('0' + nybble);
+}
+
+void debug_print_hex32(u32 word)
+{
+    debug_print_hex8(word >> 24);
+    debug_print_hex8(word >> 16);
+    debug_print_hex8(word >> 8);
+    debug_print_hex8(word);
+}
+
+void debug_print_hex16(u16 half)
+{
+    debug_print_hex8(half >> 8);
+    debug_print_hex8(half);
+}
+
+void debug_set_pos(u32 x, u32 y)
+{
+    debug_char_x = x;
+    debug_char_y = y;
+}
+
+void debug_text_draw(void)
+{
+    DR_MODE* p;
+    void* last;
+    u16 tpage;
+
+    p = &debug_text_ot[debug_ot_index].draw_mode;
+    tpage = func_800DEAD4(0,debug_font_index, debug_font_x, debug_font_y);
+    func_800C7D90(p, 0, 0, tpage, &debug_text_texture);
+    last = &debug_text_ot[debug_ot_index].lastprim;
+    addPrim(last, p);
+    func_800E9818(last);
+    debug_ot_index += 1;
+    if (debug_ot_index > 2) debug_ot_index = 0;
+    debug_text_ot[debug_ot_index].nextfree = &debug_text_ot[debug_ot_index].ot;
+    debug_text_ot[debug_ot_index].count = 0;
+    // re-initialize an empty one
+    func_800E8B5C(&debug_text_ot[debug_ot_index].lastprim, 2);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE8B0);
 
@@ -1440,7 +1554,22 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DA0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
+
+// main function called for rendering models. disabled for now
+// because the model rendering code is a nightmare and has to
+// be fully disassembled and understood otherwise everything
+// breaks. because spimdasm is dumb and loads of symbols are
+// lost.
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
+void func_800E5E60() {}
+
+// this is also disabled for now :/ TODO
+void func_800D6F14() {}
+
+// ground collision is also lost and you just fall.
+// but the ground texture bug is gone too. so that one's also
+// somewhere in that mess.
+
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E62F0);
 

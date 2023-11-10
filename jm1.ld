@@ -36,9 +36,12 @@ SECTIONS
         None_TEXT_SIZE = ABSOLUTE(None_TEXT_END - None_TEXT_START);
         None_DATA_START = .;
         _4DC00_data__s = .;
-        build/jm1/4DC00.data.o(.data);
+        /*build/jm1/4DC00.data.o(.data);*/
+        *(.data*);
         None_DATA_END = .;
         None_DATA_SIZE = ABSOLUTE(None_DATA_END - None_DATA_START);
+
+        *(.bss)
     }
 
     __romPos += SIZEOF(.None);
