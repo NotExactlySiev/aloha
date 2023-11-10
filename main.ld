@@ -25,11 +25,17 @@ SECTIONS
         *(.data*);
         build/main/1A214.data.o(.data);
         build/main/1D530.data.o(.data);
+
+        . = ALIGN(0x800);
     }
+
+
     __romPos += SIZEOF(.main);
 
     /* the size that gets put in the header */
-    __size = (__romPos & 0xFFFFF800) + 0x800;
+    /*__size = (__romPos & 0xFFFFF800) + 0x800;*/
+    __size = __romPos - main_ROM_START;
+
 
     .bss (NOLOAD) : SUBALIGN(4)
     {
