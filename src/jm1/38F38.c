@@ -1,4 +1,6 @@
 #include "common.h"
+#include <libgpu.h>
+#include "gbuffer.h"
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8738);
 
@@ -97,10 +99,44 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9BFC);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9EF0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9FDC);
+/*POLY_FT4* func_800E9FDC(u32 x, u32 y, u32 id, u32 color, u32 trans, POLY_F4* prims, u32 arg)
+{
+    // let's just send some random shit
+    POLY_FT4* p = prims;
+    setPolyF4(p);
+    //p->clut = (250*64) | (16);
+    p->x0 = x;
+    p->y0 = y;
+    p->x1 = x+8;
+    p->y1 = y;
+    p->x2 = x;
+    p->y2 = y+8;
+    p->x3 = x+8;
+    p->y3 = y+8;
+    p->r0 = 255;
+    p->g0 = 0;
+    p->b0 = 0;
+    return p+1;
+}*/
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA2F4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA37C);
+// draw ui sprites
+// this one draws behind the next one (so behind menu)
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_sprite);
+void ui_draw_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
+{
+    GBuffer* gbuf = gbuffer_get_current();
+    gbuf->nextfree = 
+        func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 563);
+}
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_menu_sprite);
+void ui_draw_menu_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
+{
+    GBuffer* gbuf = gbuffer_get_current();
+    gbuf->nextfree = 
+        func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 564);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA404);
 
@@ -345,7 +381,17 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EFDC8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EFDEC);
 
+extern u32 D_80102F84;
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EFEC4);
+// render_sky
+/*void func_800EFEC4(void)
+{
+    if (D_80102F84 == 0) return;
+
+    GBuffer* gbuf = gbuffer_get_current();
+
+    return;
+}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F0074);
 

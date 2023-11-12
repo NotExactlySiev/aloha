@@ -4293,7 +4293,7 @@ glabel D_801005C4
 /* 50DC4 801005C4 */ .word D_80100584
 
 glabel D_801005C8
-/* 50DC8 801005C8 */ .word func_800C98E8
+/* 50DC8 801005C8 */ .word gprintf
 
 glabel D_801005CC
 /* 50DCC 801005CC */ .word 0x00000000
@@ -6535,7 +6535,7 @@ glabel D_80101974
 /* 52174 80101974 */ .word D_801018DC
 /* 52178 80101978 */ .word 0x00000000
 
-glabel D_8010197C
+glabel menu_item_positions
 /* 5217C 8010197C */ .short 0xFFD3
 
 glabel D_8010197E
@@ -7692,7 +7692,7 @@ glabel D_80101F1C
 /* 52724 80101F24 */ .word 0x00000200
 /* 52728 80101F28 */ .word 0x00000280
 
-glabel D_80101F2C
+glabel gbuffer_draw_pos
 /* 5272C 80101F2C */ .short 0x0000
 
 glabel D_80101F2E
@@ -7702,7 +7702,7 @@ glabel D_80101F2E
 /* 52734 80101F34 */ .short 0x0200
 /* 52736 80101F36 */ .short 0x0000
 
-glabel D_80101F38
+glabel gbuffer_disp_pos
 /* 52738 80101F38 */ .short 0x0200
 
 glabel D_80101F3A
@@ -8537,10 +8537,10 @@ glabel D_801026DC
 glabel D_801026E0
 /* 52EE0 801026E0 */ .word 0x00000000
 
-glabel D_801026E4
+glabel menu_selection
 /* 52EE4 801026E4 */ .word 0x00000000
 
-glabel D_801026E8
+glabel menu_is_visible
 /* 52EE8 801026E8 */ .word 0x00000000
 /* 52EEC 801026EC */ .word 0x00000000
 
@@ -8944,7 +8944,7 @@ glabel D_801029EC
 /* 531EC 801029EC */ .word 0x00000000
 /* 531F0 801029F0 */ .word 0x00000000
 
-glabel D_801029F4
+glabel menu_animation_timer
 /* 531F4 801029F4 */ .word 0x00000000
 /* 531F8 801029F8 */ .word 0x00000000
 
@@ -9436,7 +9436,7 @@ glabel D_80102DBC
 /* 535BC 80102DBC */ .word 0x00000000
 /* 535C0 80102DC0 */ .word 0x00000000
 
-glabel D_80102DC4
+glabel data_buffer_ptr
 /* 535C4 80102DC4 */ .word 0x00000000
 /* 535C8 80102DC8 */ .word 0x00000000
 

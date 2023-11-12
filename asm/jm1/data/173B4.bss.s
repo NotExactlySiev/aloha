@@ -1039,7 +1039,7 @@ glabel D_80137CF0
 glabel D_80137CF8
 	.space 0x8
 
-glabel D_80137D00
+glabel gbuffers
 	.space 0x168
 
 glabel D_80137E68
@@ -1237,7 +1237,7 @@ glabel D_80138618
 glabel D_80138620
 	.space 0x8
 
-glabel D_80138628
+glabel mesh_array
 	.space 0x1
 
 glabel D_80138629
@@ -1378,7 +1378,7 @@ glabel D_80141C8F
 glabel D_80142C88
 	.space 0x40
 
-glabel D_80142CC8
+glabel gbuffer_current_index
 	.space 0x8
 
 glabel D_80142CD0

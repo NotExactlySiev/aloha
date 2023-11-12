@@ -1,17 +1,19 @@
 #include "common.h"
 #include <libgpu.h>
+#include "gbuffer.h"
 
-typedef struct {
+
+typedef struct LinkedList LinkedList;
+typedef struct Entity Entity;
+typedef struct Component Component;
+
+struct Component {
     u16 param;
     u16 disabled;
     u32 unk0;
     u32 unk1;
-    void* func; // this probably has a specific type
-} Component;
-
-typedef struct LinkedList LinkedList;
-typedef struct Entity Entity;
-
+    void (*func)(Entity*, Component*); // this probably has a specific type
+};
 
 struct LinkedList {
     LinkedList* next;
@@ -67,7 +69,14 @@ typedef struct {
 extern Entity player_entity;
 
 // entity lists
-Entity* D_8010295C = 0;   // entity_list_0
+
+struct {
+    struct {
+        LinkedList head;
+        LinkedList tail;
+    } lists[3];
+} D_8010295C = {};
+/*Entity* D_8010295C = 0;   // entity_list_0
 Entity* D_80102960 = 0;
 Entity* D_80102964 = 0;
 Entity* D_80102968 = 0;
@@ -80,7 +89,11 @@ Entity* D_80102978 = 0;
 Entity* D_8010297C = 0;
 Entity* D_80102980 = 0;
 Entity* D_80102984 = 0;
-Entity* D_80102988 = 0;
+Entity* D_80102988 = 0;*/
+
+extern gprintf(char* fmt, ...);
+
+
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
 
@@ -406,7 +419,16 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCF74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD070);
+extern s16 D_8013F448[4096];
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", make_sin_lut);
+// make sin lut
+void make_sin_lut(void)
+{
+    for (int i = 0; i < 4096; i++) {
+        D_8013F448[i] = func_800CBCE4(i);
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD0BC);
 
@@ -617,6 +639,17 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C48);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C5C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0D70);
+/*void func_800D0D70(Entity* e, u32 offset)
+{
+    Component* comp;
+    Entity* p = e->next;
+    offset = (offset-8)/sizeof(Component);
+    while (p->next != 0) {
+        comp = &p->comp0 + offset; // this is dumb but game does it like this
+        if ((comp->disabled == 0) && (comp->func != 0)) comp->func(p, comp);
+        p = p->next;
+    }
+}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0DEC);
 
@@ -782,7 +815,35 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4BD8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4BFC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4CC8);
+extern s16 menu_item_positions[3][4];
+extern u32 menu_selection;
+extern u32 menu_is_visible;
+extern u32 menu_animation_timer;
+// menu_render
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4CC8);
+void func_800D4CC8(void)
+{
+    s16* pos;
+    s32 text_sprite;
+    s32 icon_frame;
+    if (menu_is_visible) {
+        icon_frame = menu_animation_timer >> 3;
+        if (icon_frame == 3) icon_frame = 1;
+        for (int i = 0; i < 3; i++) {
+            pos = menu_item_positions[i];
+            text_sprite = 0x120+i*2;
+            if (i == menu_selection) {
+                ui_draw_menu_sprite(pos[2]+124, pos[1]+116, icon_frame+0x119, 0x808080, 0);
+                text_sprite += 1;
+            }
+            // draw text
+            ui_draw_menu_sprite(pos[0]+124, pos[1]+116, text_sprite, 0x808080, 0);
+        }
+        // draw box
+        ui_draw_menu_sprite(124, 116, 0x118, 0x2808080, 0);
+        ui_draw_menu_sprite(124, 116, 0x118, 0x2808080, 0);
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4E30);
 
@@ -866,7 +927,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6E74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6EEC);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D71A4);
 
@@ -1424,7 +1485,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1C4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1D4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1E4);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1E4);   // level_setup
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF454);
 
@@ -1432,42 +1493,83 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF474);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF690);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF6FC);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF6FC);   // debug stuff
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF884);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
 
+
+// 2 functions, for sale, never called
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0810);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E08FC);   // LoadClut
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E08FC);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDrawEnv);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDispEnv);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0964);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E09F4);
+void* data_buffer_start = 0x80060000;
+extern void* data_buffer_ptr;
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0A30);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0A40);
+void* data_buffer_get_ptr(void)
+{
+    return data_buffer_ptr;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0A50);
+void data_buffer_alloc(u32 n)
+{
+    data_buffer_ptr += (n + 3) & (~3);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0A78);
+void data_buffer_dealloc(u32 n)
+{
+    data_buffer_ptr -= (n + 3) & (~3);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0AA0);
+void data_buffer_reset(void)
+{
+    data_buffer_ptr = data_buffer_start;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0ABC);
+void func_800E0ABC(DISPENV* disp)
+{
+    if (func_800E95A0() != TV_NTSC) {
+        disp->pad0 = 1;
+        disp->screen.y += 24;
+    }
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0AF8);
+extern u16 gbuffer_draw_pos[3][2];
+extern u16 gbuffer_disp_pos[3][2];
+
+void gbuffer_reset(GBuffer* gbuf, int idx)
+{
+    gbuf = &gbuf[idx];
+    SetDefDispEnv(&gbuf->disp, gbuffer_disp_pos[idx][0], gbuffer_disp_pos[idx][1], 256, 240);
+    gbuf->disp.screen.x = 4;
+    gbuf->disp.screen.y = 14;
+    gbuf->disp.screen.w = 250;
+    gbuf->disp.screen.h = 216;
+    // update tv mode
+    func_800E0ABC(&gbuf->disp);
+    SetDefDrawEnv(&gbuf->draw, gbuffer_draw_pos[idx][0], gbuffer_draw_pos[idx][1], 248, 216);
+    gbuf->draw.isbg = 1;
+    gbuf->draw.r0 = 0;
+    gbuf->draw.g0 = 0;
+    gbuf->draw.b0 = 0;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0BD8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0C14);
 
+
+// vram inspector and color stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0D44);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0D54);
@@ -1488,7 +1590,13 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F4C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F84);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F94);
+extern u32 gbuffer_current_index;
+extern GBuffer gbuffers[3];
+
+GBuffer* gbuffer_get_current(void)
+{
+    return &gbuffers[gbuffer_current_index];
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0FBC);
 
@@ -1642,7 +1750,108 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4BC0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4BE0);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
+typedef struct {
+    u8 v0, v1, v2, v3;
+    u16 flags0, flags1;
+    u32 unk0;   // these are color and texture stuff
+    u32 unk1;
+    u16 unk2, unk3, unk4, unk5;
+    u32 command;
+} Face;
+
+// mesh data
+// 32 count-1
+// header: [16 offset 16 something]*count
+
+typedef struct {
+    u32 count;  // one less
+    SVECTOR data[];
+} VertList;
+
+typedef struct {
+    u32 size;  // in bytes
+    Face data[];
+} FaceList;
+
+
+typedef struct {
+    s16 a, b;
+    VertList* verts;
+    struct {
+        u32 count;  // one less
+        u32 data[];
+    } *unk1;
+    void *unk2;
+} Mesh;
+
+extern u32 D_8013CC28; // mesh_array_count
+extern Mesh mesh_array[1024];
+extern u16 D_801381F8[256]; // I think it would be 256? no idea tbh
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
+// load_mesh_from_vo2
+u32 func_800E4C34(u32* data, u32 mesh_palette, u32 texture_palette, u32 texture_id)
+{
+    u32 ret = D_8013CC28;
+    Mesh* m;
+
+    u32 count;
+    u32 fcount, gcount;
+    u32 head;
+    // loads up the mesh palette and sets conversion
+    func_800E3F5C(mesh_palette);
+    count = *data++;
+    //gprintf("LOADING %d MESHES\n", count);
+    for (u32 i = 0; i < count && D_8013CC28 <= 1024; i++) {
+        m = &mesh_array[D_8013CC28++];
+        head = *data++;
+        m->a = head;
+        m->b = head;
+        if (head == 0) continue;
+        m->verts = data;
+        data += 1;
+        // skip this section
+        data = ((SVECTOR*) data) + m->verts->count + 1;
+        //gprintf("\tMESH %d: %d, %d VERTS\n", D_8013CC28-1, head, m->verts->count);
+        m->unk1 = data;
+        data += 1;
+        data += m->unk1->count + 1;
+        m->unk2 = data;
+        // this part gets fucky
+        // at p2
+        fcount = *data + 1;
+        u16* header = data+1;
+
+        // skip header
+        data += fcount + 1;
+        if (fcount > 2) {
+                //gprintf("BIG ONE!\n");
+        }
+        for (int j = 0; j < fcount; j++) {
+            //gprintf("\t\tSET VOFF: %d\tFOFF: %d\n", header[2*j], header[2*j+1]);
+            gcount = *data++ + 1;
+            for (int k = 0; k < gcount; k++) {
+                
+                //skip the bytes
+                data += (*data)/4 + 1;
+                u32 size = *data++;
+                Face* face = data;
+                //gprintf("\t\t\tSUBSET %d FACES\n", size/sizeof(Face));
+                data += size/4;
+                for (size; size > 0; size -= sizeof(Face)) {
+                    //gprintf("FACES %X %X\n", faces->flags0, faces->flags1);
+                    if (face->flags1 & 0x8000 == 0) {
+                        // texture stuff. TODO
+                    }
+                    else if (face->flags0 & 0xFFFC != 0) {
+                        face->flags0 &= 3;
+                        face->flags0 |= D_801381F8[face->flags0 >> 2] << 2;
+                    }
+                    face += 1;
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4FB8);
 
@@ -1717,10 +1926,31 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
 // breaks. because spimdasm is dumb and loads of symbols are
 // lost.
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
-void func_800E5E60() {}
 
-// this is also disabled for now :/ TODO
-void func_800D6F14() {}
+SVECTOR* camera_pos = 0x1F8003C8;
+// draw_model
+void func_800E5E60(SVECTOR* pos, SVECTOR* angle, s32 id)
+{
+    return;
+    if (id < 0) return;
+    SVECTOR* dir = 0x1F800000;
+    SVECTOR* tmp = 0x1F800024;
+    Mesh* mesh = &mesh_array[id & 0x3FF];
+    //gprintf("DRAW %d\n", id);
+    //gprintf("\tat\t%d %d %d\n", pos->vx, pos->vy, pos->vz);
+    //gprintf("\trot\t%d %d %d\n", angle->vx, angle->vy, angle->vz);
+    
+    dir->vx = pos->vx - camera_pos->vx;
+    dir->vy = pos->vy - camera_pos->vy;
+    dir->vz = pos->vz - camera_pos->vz;
+    u32 mag2 = func_800F4354(dir, tmp, mesh);
+    u32 mag  = func_800C9D70(mag2);
+    if (mag2 <= -1) return;
+
+    gprintf("MAG2 = %d\t%d\n", mag2, mag);
+
+    for (;;);
+}
 
 // ground collision is also lost and you just fall.
 // but the ground texture bug is gone too. so that one's also
