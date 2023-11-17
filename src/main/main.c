@@ -6,6 +6,22 @@
 
 #define DFILE(ptr, name)    { (void*) (ptr | 1), name }
 
+extern struct {
+    void    (*nop)(void);
+    void    (*jt_set)(void*, s32);
+    s32     (*is_game_running)(void);
+    void    (*execs_set_next)(s32);
+    s32     (*execs_get_next)(void);
+    void*   (*shared_data_ptr)(void);       // TODO: this should be a struct
+    char*   (*execs_get_path)(s32);
+    s32     (*get_tv_system)(void);
+    s32     (*get_region)(void);
+    void* unk9[2];
+    char*   (*get_version_string)(void);
+    void* unk[1012];
+} jt;
+
+
 file_t g_Files[42] = {
     DFILE(0x80060000, "TITLE.PEX"),
     DFILE(0x80060000, "SELECT.PEX"),
@@ -357,10 +373,25 @@ void jt_clear(void)
     flush_cache_safe();
 }
 
+
+#ifdef LOG_JT
+
+#undef jt_set
 void jt_set(void* func, s32 idx)
 {
-    //k_printf("Set %X (%d) to %08X\n", idx, idx, func);
-    void** jmptable = (void**) 0x80010000;
+    _jt_set(func, idx, "UNK");
+}
+#define jt_set(func, idx)   _jt_set(func, idx, #func)
+
+void _jt_set(void* func, s32 idx, const char* name)
+#else
+void jt_set(void* func, s32 idx)
+#endif
+{
+#ifdef LOG_JT
+    k_printf("Set %X (%d) to %08X: %s\n", idx, idx, func, name);
+#endif
+    void** jmptable = (void**) &jt;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();
 }
@@ -448,7 +479,11 @@ void jt_series1(void)
     regular_active(1);
     func_80019680();
     k_ChangeClearPAD(0);
+#ifdef LOG_JT
+    jt_set(_jt_set, 1);
+#else
     jt_set(jt_set, 1);
+#endif
     jt_set(regular_add, 224);
     jt_set(regular_remove, 225);
     jt_set(rle_decode, 192);

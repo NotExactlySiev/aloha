@@ -1,7 +1,7 @@
 #include "common.h"
 #include <kernel.h>
 
-//#define EXTRA_FEATURES
+//#define LOG_JT
 
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
 
@@ -100,9 +100,9 @@ void disable_timer3_event(s32);
 void nop(void);
 void flush_cache_safe(void);
 void jt_clear(void);
-#ifdef  EXTRA_FEATURES
-void jt_set(void*, s32, char*);
-#define   jt_set(func, idx)   jt_set(func, idx, #func)
+#ifdef  LOG_JT
+void _jt_set(void*, s32, const char*);
+#define     jt_set(func, idx)   _jt_set(func, idx, #func)
 #else
 void jt_set(void*, s32);
 #endif

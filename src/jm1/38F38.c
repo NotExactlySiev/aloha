@@ -587,36 +587,40 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
 
+
+// draw_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F47B8);
+// ## I think the insanity of rendering code is confined to here
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F49A0);
-
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F47B8);   // not disassembled
+// FUCK rendering code
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F49A0);   // not disassembled, LOOOONG
+// smol function. assembly?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C14);
-
+// weird function with two entry points
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C48);
-
+// more stupid assembly shit using $t9
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6D78);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E18);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C);
-
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C);   // not disassembled, short
+// big function, probably C?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6EE0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C);
-
+// stupid shit using weird registers, but very small
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C);   // not disassembled, short
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7130);
 
+// ## Insanity over
+
+// FlushCache
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7154);
 
+// small trivial stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7194);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F71A4);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F71B4);
 
+// level loading function
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F71BC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F73D4);

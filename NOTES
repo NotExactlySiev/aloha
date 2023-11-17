@@ -69,3 +69,16 @@ The file map doesn't seem to be as tidy and organized as main. Gonna have to fig
 80103000
 
 80060000 is where COM_DAT.EAR is loaded by SELECT.PEX
+
+
+
+## SELECT.PEX
+
+800E0000    .rodata
+800E0254    game code
+800E7FC0    libgte
+800EAA04    .data
+8011E6F4    COM_DAT
+8013DEA4    .data (probably no other embedded files)
+8013F000    .bss
+

@@ -7,6 +7,7 @@ TIMER_REGS = 0x1f801100;
 k_KER_DATE = 0xbfc00100;
 k_CONSOLE_TYPE = 0xbfc00104;
 jmptable = 0x80010000;
+jt = jmptable;
 g_GameConfig = 80014000;
 D_80048094 = cache_entries + 4;
 D_80048098 = cache_entries + 8;
