@@ -76,6 +76,7 @@ The file map doesn't seem to be as tidy and organized as main. Gonna have to fig
 
 800E0000    .rodata
 800E0254    game code
+800E7F98    crt0
 800E7FC0    libgte
 800EAA04    .data
 8011E6F4    COM_DAT

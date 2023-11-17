@@ -4,8 +4,9 @@
 #include <libgpu.h>
 
 
-#define DFILE(ptr, name)    { (void*) (ptr | 1), name }
 
+
+#define UNK(a,b)    void* unk##a[b - a + 1]
 extern struct {
     void    (*nop)(void);
     void    (*jt_set)(void*, s32);
@@ -16,12 +17,19 @@ extern struct {
     char*   (*execs_get_path)(s32);
     s32     (*get_tv_system)(void);
     s32     (*get_region)(void);
-    void* unk9[2];
+    UNK(9, 10);
     char*   (*get_version_string)(void);
-    void* unk[1012];
+    UNK(12, 191);
+    void    (*decompress_rle)(u32,void* src,void* dst);
+    void    (*decompress_lz1)(void* src,void* dst);
+    UNK(194, 223);
+    //routine_task_add
+    //routine_task_remove
+    UNK(226, 1023);
 } jt;
 
 
+#define DFILE(ptr, name)    { (void*) (ptr | 1), name }
 file_t g_Files[42] = {
     DFILE(0x80060000, "TITLE.PEX"),
     DFILE(0x80060000, "SELECT.PEX"),
