@@ -78,8 +78,9 @@ The file map doesn't seem to be as tidy and organized as main. Gonna have to fig
 800E0254    game code
 800E7F98    crt0
 800E7FC0    libgte
-800EAA04    .data
-8011E6F4    COM_DAT
-8013DEA4    .data (probably no other embedded files)
+800EAA04    .data (mostly textures)
+8011E6F4    .data (COM_DAT)
+8013DEA4    .data (normal, random seed array)
+8013DEF0    .data (libgte)  just gotta keep this in the same place
 8013F000    .bss
 

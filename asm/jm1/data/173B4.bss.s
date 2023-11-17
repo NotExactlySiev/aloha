@@ -1,7 +1,7 @@
 .include "macro.inc"
 
 .section .bss
-
+glabel D_80103000
 	.space 0x4
 
 glabel D_80103004

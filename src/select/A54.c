@@ -1,4 +1,5 @@
 #include "common.h"
+#include "jmptable.h"
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E0254);
 
@@ -16,11 +17,58 @@ INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E03D0);
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E0400);
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E049C);
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E05B4);
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E06B8);
+// random_range
+u32 func_800E0254(u32, u32);
+
+#define SCREEN_WIDTH    320
+#define SCREEN_HEIGHT   240
+
+// stars.c
+
+#define STARS_COLOR_MIN 32
+#define STARS_COLOR_MAX 128
+#define STARS_ENTRY_OFFSET  128
+#define STARS_SPEED_MIN         1
+#define STARS_SPEED_MAX_NTSC    4
+#define STARS_SPEED_MAX_PAL     5
+
+typedef struct {
+    u32 x, y;
+    u32 speed;
+    u8 r,g,b;
+} Star;
+
+extern Star stars[64];
+
+void stars_init(void)
+{
+    for (int i = 0; i < 64; i++) {
+        stars[i].x = func_800E0254(0 , 2*(SCREEN_WIDTH-1));   // screen width 
+        stars[i].y = func_800E0254(0 , SCREEN_HEIGHT-1);   // height
+        stars[i].r = func_800E0254(STARS_COLOR_MIN, STARS_COLOR_MAX);
+        stars[i].g = func_800E0254(STARS_COLOR_MIN, STARS_COLOR_MAX);
+        stars[i].b = func_800E0254(STARS_COLOR_MIN, STARS_COLOR_MAX);
+        stars[i].speed = func_800E0254(STARS_SPEED_MIN, jt.get_tv_system() == TV_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
+    }
+}
+
+void stars_update(void)
+{
+    for (int i = 0; i < 64; i++) {
+        stars[i].x += stars[i].speed;
+        if (stars[i].x <= 2*(SCREEN_WIDTH-1)) continue;
+        stars[i].x = -func_800E0254(0, STARS_ENTRY_OFFSET);
+        stars[i].y = func_800E0254(0 , SCREEN_HEIGHT-1);
+        stars[i].r = func_800E0254(STARS_COLOR_MIN, STARS_COLOR_MAX);
+        stars[i].g = func_800E0254(STARS_COLOR_MIN, STARS_COLOR_MAX);
+        stars[i].b = func_800E0254(STARS_COLOR_MIN, STARS_COLOR_MAX);
+        stars[i].speed = func_800E0254(STARS_SPEED_MIN, jt.get_tv_system() == TV_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
+    }
+}
+
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E06B8);  // starts_render
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E078C);
 
@@ -158,7 +206,12 @@ INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E56EC);
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E5714);
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E5824);
+extern const u32 common_assets[];
+extern u32 D_80060000[];
+//INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E5824);
+void func_800E5824(void) {
+    __builtin_memcpy(D_80060000, common_assets, 0x20000);
+}
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E58C4);
 

@@ -2018,7 +2018,7 @@ glabel D_8013EF38
 /* 5F738 8013EF38 */ .word 0x00000000
 /* 5F73C 8013EF3C */ .word 0x00000000
 
-glabel D_8013EF40
+glabel stars
 /* 5F740 8013EF40 */ .word 0x00000000
 
 glabel D_8013EF44

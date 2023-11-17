@@ -42,7 +42,7 @@ SECTIONS
         None_DATA_END = .;
         None_DATA_SIZE = ABSOLUTE(None_DATA_END - None_DATA_START);
 
-        *(.bss)
+        *(.bss);
     }
 
     __romPos += SIZEOF(.None);

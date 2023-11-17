@@ -41,6 +41,8 @@ SECTIONS
         build/select/5E6A4.data.o(.data);
         None_DATA_END = .;
         None_DATA_SIZE = ABSOLUTE(None_DATA_END - None_DATA_START);
+
+        *(.bss);
     }
     __romPos += SIZEOF(.None);
     __romPos = ALIGN(__romPos, 16);
