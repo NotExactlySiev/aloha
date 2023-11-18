@@ -24,6 +24,7 @@ SECTIONS
     {
         None_RODATA_START = .;
         build/select/800.rodata.o(.rodata);
+        *(.rodata*);
         None_RODATA_END = .;
         None_RODATA_SIZE = ABSOLUTE(None_RODATA_END - None_RODATA_START);
         None_TEXT_START = .;

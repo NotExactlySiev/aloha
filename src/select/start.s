@@ -15,7 +15,7 @@ glabel _start
 /* 87AC 800E7FAC 35960308 */  j          func_800E58D4
 /* 87B0 800E7FB0 00000000 */   nop
 
-glabel func_800E7FB4
+glabel printf
 /* 87B4 800E7FB4 A0000A24 */  addiu      $t2, $zero, 0xA0
 /* 87B8 800E7FB8 08004001 */  jr         $t2
 /* 87BC 800E7FBC 3F000924 */   addiu     $t1, $zero, 0x3F

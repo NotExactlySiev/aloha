@@ -1,12 +1,10 @@
+//#define LOG_JT
+
 #include "common.h"
 #include "main.h"
 #include <kernel.h>
 #include <libgpu.h>
 #include "jmptable.h"
-
-
-
-
 
 
 #define DFILE(ptr, name)    { (void*) (ptr | 1), name }
@@ -591,7 +589,7 @@ int main(int argc, char** argv)
     }
 
     // debug mode
-    getGameConfig()[0x517] = 1;
+    //getGameConfig()[0x517] = 1;
 
     setNextFile(0);
     file_execute_loop();

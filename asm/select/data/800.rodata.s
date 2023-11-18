@@ -28,14 +28,6 @@ glabel D_800E0080
 /* 894 800E0094 */ .asciz ""
                       .balign 4
 
-.align 3
-glabel jtbl_800E0098
-/* 898 800E0098 D4410E80 */ .word .L800E41D4
-/* 89C 800E009C F0410E80 */ .word .L800E41F0
-/* 8A0 800E00A0 40420E80 */ .word .L800E4240
-/* 8A4 800E00A4 80420E80 */ .word .L800E4280
-/* 8A8 800E00A8 A8420E80 */ .word .L800E42A8
-
 glabel D_800E00AC
 /* 8AC 800E00AC */ .asciz "MOVIE\\NL_END1.STR"
                       .balign 4
@@ -51,46 +43,8 @@ glabel D_800E00D4
 glabel D_800E00E8
 /* 8E8 800E00E8 */ .asciz "MOVIE\\EX_END2.STR"
                       .balign 4
-/* 8FC 800E00FC */ .asciz "VAB\\W6_3.VAB"
-                      .balign 4
-/* 90C 800E010C */ .asciz "VAB\\W6_2.VAB"
-                      .balign 4
-/* 91C 800E011C */ .asciz "VAB\\W6_1.VAB"
-                      .balign 4
-/* 92C 800E012C */ .asciz "VAB\\W5_3.VAB"
-                      .balign 4
-/* 93C 800E013C */ .asciz "VAB\\W5_2.VAB"
-                      .balign 4
-/* 94C 800E014C */ .asciz "VAB\\W5_1.VAB"
-                      .balign 4
-/* 95C 800E015C */ .asciz "VAB\\W4_3.VAB"
-                      .balign 4
-/* 96C 800E016C */ .asciz "VAB\\W4_2.VAB"
-                      .balign 4
-/* 97C 800E017C */ .asciz "VAB\\W4_1.VAB"
-                      .balign 4
-/* 98C 800E018C */ .asciz "VAB\\W3_3.VAB"
-                      .balign 4
-/* 99C 800E019C */ .asciz "VAB\\W3_2.VAB"
-                      .balign 4
-/* 9AC 800E01AC */ .asciz "VAB\\W3_1.VAB"
-                      .balign 4
-/* 9BC 800E01BC */ .asciz "VAB\\W2_3.VAB"
-                      .balign 4
-/* 9CC 800E01CC */ .asciz "VAB\\W2_2.VAB"
-                      .balign 4
-/* 9DC 800E01DC */ .asciz "VAB\\W2_1.VAB"
-                      .balign 4
-/* 9EC 800E01EC */ .asciz "VAB\\W1_3.VAB"
-                      .balign 4
-/* 9FC 800E01FC */ .asciz "VAB\\W1_2.VAB"
-                      .balign 4
-/* A0C 800E020C */ .asciz "VAB\\W1_1.VAB"
-                      .balign 4
 
-glabel D_800E021C
-/* A1C 800E021C */ .asciz "VAB file Reload\n"
-                      .balign 4
+
 .align 2
 glabel jtbl_800E0230
 /* A30 800E0230 40A30E80 */ .word .L800EA340
