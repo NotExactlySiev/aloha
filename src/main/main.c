@@ -589,7 +589,7 @@ int main(int argc, char** argv)
     }
 
     // debug mode
-    //getGameConfig()[0x517] = 1;
+    getGameConfig()[0x517] = 1;
 
     setNextFile(0);
     file_execute_loop();

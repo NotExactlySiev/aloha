@@ -23,9 +23,14 @@ extern struct {
     UNK(194, 223);
     u32         (*routine_task_add)(void* callback, u16 interval);
     void        (*routine_task_remove)(u32 taskid);
-    UNK(226, 272);
+    UNK(226, 239);
+    u32         (*PadRead)(u16);    
+    UNK(241, 272);
     s32         (*cd_fs_read)(const char* addr, void* buf, s32);
-    UNK(274, 319);
+    UNK(274, 294);
+    s32         (*sound_fade_out)(s32 duration, s32, s32);
+    s32         (*sound_fade_in)(s32 duration, s32, s32);
+    UNK(297, 319);
     s32         (*play_movie)(char*, void*, void* callback);
     UNK(321, 383);
     s32         (*ResetGraph)(s32 mode);
@@ -59,8 +64,12 @@ extern struct {
     u32         (*SetVideoMode)(u32);
     u32         (*GetVideoMode)(void);
     UNK(414, 767);
-    void (*play_vab)(s32, void*, s32);
-    UNK(769, 1023);
+    void (*play_vab)(s32, void*, s32);  // audio play by addr? play file?
+    UNK(769, 816);
+    s32         (*audio_play_by_id)(s32);
+    UNK(818, 1023);
 } jt;
+
+
 
 #endif

@@ -161,8 +161,8 @@ glabel D_80170A30
 glabel D_80170A38
     .space 0x18
 
-glabel D_80170A50
+glabel global_data
     .space 0x8
 
-glabel D_80170A58
+glabel stage_text_size
     .space 0x4

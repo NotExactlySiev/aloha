@@ -1553,13 +1553,13 @@ glabel func_800E95F4
 /* 9E34 800E9634 F2A7030C */  jal        func_800E9FC8
 /* 9E38 800E9638 21984000 */   addu      $s3, $v0, $zero
 /* 9E3C 800E963C 00000486 */  lh         $a0, 0x0($s0)
-/* 9E40 800E9640 B0A7030C */  jal        func_800E9EC0
+/* 9E40 800E9640 B0A7030C */  jal        sin
 /* 9E44 800E9644 21884000 */   addu      $s1, $v0, $zero
 /* 9E48 800E9648 02000486 */  lh         $a0, 0x2($s0)
-/* 9E4C 800E964C B0A7030C */  jal        func_800E9EC0
+/* 9E4C 800E964C B0A7030C */  jal        sin
 /* 9E50 800E9650 21904000 */   addu      $s2, $v0, $zero
 /* 9E54 800E9654 04000486 */  lh         $a0, 0x4($s0)
-/* 9E58 800E9658 B0A7030C */  jal        func_800E9EC0
+/* 9E58 800E9658 B0A7030C */  jal        sin
 /* 9E5C 800E965C 21804000 */   addu      $s0, $v0, $zero
 /* 9E60 800E9660 18007102 */  mult       $s3, $s1
 /* 9E64 800E9664 12680000 */  mflo       $t5
@@ -1649,13 +1649,13 @@ glabel func_800E976C
 /* 9FAC 800E97AC F2A7030C */  jal        func_800E9FC8
 /* 9FB0 800E97B0 21A04000 */   addu      $s4, $v0, $zero
 /* 9FB4 800E97B4 00000486 */  lh         $a0, 0x0($s0)
-/* 9FB8 800E97B8 B0A7030C */  jal        func_800E9EC0
+/* 9FB8 800E97B8 B0A7030C */  jal        sin
 /* 9FBC 800E97BC 21904000 */   addu      $s2, $v0, $zero
 /* 9FC0 800E97C0 02000486 */  lh         $a0, 0x2($s0)
-/* 9FC4 800E97C4 B0A7030C */  jal        func_800E9EC0
+/* 9FC4 800E97C4 B0A7030C */  jal        sin
 /* 9FC8 800E97C8 21884000 */   addu      $s1, $v0, $zero
 /* 9FCC 800E97CC 04000486 */  lh         $a0, 0x4($s0)
-/* 9FD0 800E97D0 B0A7030C */  jal        func_800E9EC0
+/* 9FD0 800E97D0 B0A7030C */  jal        sin
 /* 9FD4 800E97D4 21804000 */   addu      $s0, $v0, $zero
 /* 9FD8 800E97D8 18005402 */  mult       $s2, $s4
 /* 9FDC 800E97DC 12600000 */  mflo       $t4
@@ -1747,13 +1747,13 @@ glabel func_800E98EC
 /* A12C 800E992C F2A7030C */  jal        func_800E9FC8
 /* A130 800E9930 21984000 */   addu      $s3, $v0, $zero
 /* A134 800E9934 00000486 */  lh         $a0, 0x0($s0)
-/* A138 800E9938 B0A7030C */  jal        func_800E9EC0
+/* A138 800E9938 B0A7030C */  jal        sin
 /* A13C 800E993C 21884000 */   addu      $s1, $v0, $zero
 /* A140 800E9940 02000486 */  lh         $a0, 0x2($s0)
-/* A144 800E9944 B0A7030C */  jal        func_800E9EC0
+/* A144 800E9944 B0A7030C */  jal        sin
 /* A148 800E9948 21904000 */   addu      $s2, $v0, $zero
 /* A14C 800E994C 04000486 */  lh         $a0, 0x4($s0)
-/* A150 800E9950 B0A7030C */  jal        func_800E9EC0
+/* A150 800E9950 B0A7030C */  jal        sin
 /* A154 800E9954 21804000 */   addu      $s0, $v0, $zero
 /* A158 800E9958 18007102 */  mult       $s3, $s1
 /* A15C 800E995C 12380000 */  mflo       $a3
@@ -1834,7 +1834,7 @@ glabel func_800E9A64
 /* A280 800E9A80 F2A7030C */  jal        func_800E9FC8
 /* A284 800E9A84 21200002 */   addu      $a0, $s0, $zero
 /* A288 800E9A88 21200002 */  addu       $a0, $s0, $zero
-/* A28C 800E9A8C B0A7030C */  jal        func_800E9EC0
+/* A28C 800E9A8C B0A7030C */  jal        sin
 /* A290 800E9A90 21804000 */   addu      $s0, $v0, $zero
 /* A294 800E9A94 06002386 */  lh         $v1, 0x6($s1)
 /* A298 800E9A98 00000000 */  nop
@@ -1929,7 +1929,7 @@ glabel func_800E9BD8
 /* A3F4 800E9BF4 F2A7030C */  jal        func_800E9FC8
 /* A3F8 800E9BF8 21200002 */   addu      $a0, $s0, $zero
 /* A3FC 800E9BFC 21200002 */  addu       $a0, $s0, $zero
-/* A400 800E9C00 B0A7030C */  jal        func_800E9EC0
+/* A400 800E9C00 B0A7030C */  jal        sin
 /* A404 800E9C04 21804000 */   addu      $s0, $v0, $zero
 /* A408 800E9C08 00002386 */  lh         $v1, 0x0($s1)
 /* A40C 800E9C0C 00000000 */  nop
@@ -2024,7 +2024,7 @@ glabel func_800E9D4C
 /* A568 800E9D68 F2A7030C */  jal        func_800E9FC8
 /* A56C 800E9D6C 21200002 */   addu      $a0, $s0, $zero
 /* A570 800E9D70 21200002 */  addu       $a0, $s0, $zero
-/* A574 800E9D74 B0A7030C */  jal        func_800E9EC0
+/* A574 800E9D74 B0A7030C */  jal        sin
 /* A578 800E9D78 21804000 */   addu      $s0, $v0, $zero
 /* A57C 800E9D7C 00002386 */  lh         $v1, 0x0($s1)
 /* A580 800E9D80 00000000 */  nop
@@ -2108,7 +2108,7 @@ glabel func_800E9D4C
 /* A6B8 800E9EB8 0800E003 */  jr         $ra
 /* A6BC 800E9EBC 00000000 */   nop
 
-glabel func_800E9EC0
+glabel sin
 /* A6C0 800E9EC0 E8FFBD27 */  addiu      $sp, $sp, -0x18
 /* A6C4 800E9EC4 21108000 */  addu       $v0, $a0, $zero
 /* A6C8 800E9EC8 0B004104 */  bgez       $v0, .L800E9EF8
