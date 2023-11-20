@@ -2,8 +2,9 @@
 #include "jmptable.h"
 
 #include <libetc.h>
-
 // TODO: freeplay has the bug when going across pages
+
+extern u32 D_80060000[];
 
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
@@ -19,23 +20,13 @@ typedef struct {
 
 extern GlobalData* global_data;
 
-extern u32 D_80060000[];
-
 extern u32 screen_brightness;  // screen brightness (or maybe fade value is better?)
 
 void sprite_draw_by_id(u32 arg0, u32 id, u32 x, u32 y, u8 brightness, s32 size);
 void printf(const char* fmt, ...);
-
-
 s32 random_byte(void);
 
-#define RANDOM_MAX  255
 
-s32 random_range(s32 a, s32 b)
-{
-    s32 width = b - a;
-    return a + ((random_byte() * width) / RANDOM_MAX) % width;
-}
 
 // 2 jt
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E02F8);  // play_effect
@@ -77,55 +68,6 @@ void stage_text_anim_update(void)
     stage_text_size = val + ONE;
 }
 
-#define SCREEN_WIDTH    320
-#define SCREEN_HEIGHT   240
-
-// stars.c
-
-#define STARS_COLOR_MIN 32
-#define STARS_COLOR_MAX 128
-#define STARS_ENTRY_OFFSET  128
-#define STARS_SPEED_MIN         1
-#define STARS_SPEED_MAX_NTSC    4
-#define STARS_SPEED_MAX_PAL     5
-
-typedef struct {
-    u32 x, y;
-    u32 speed;
-    u8 r,g,b;
-    u8 _pad;
-} Star;
-
-Star stars[64];
-
-void stars_init(void)
-{
-    for (int i = 0; i < 64; i++) {
-        stars[i].x = random_range(0 , 2*(SCREEN_WIDTH-1));   // screen width 
-        stars[i].y = random_range(0 , SCREEN_HEIGHT-1);   // height
-        stars[i].r = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].g = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].b = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].speed = random_range(STARS_SPEED_MIN, jt.get_tv_system() == TV_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
-    }
-}
-
-void stars_update(void)
-{
-    for (int i = 0; i < 64; i++) {
-        stars[i].x += stars[i].speed;
-        if (stars[i].x <= 2*(SCREEN_WIDTH-1)) continue;
-        stars[i].x = -random_range(0, STARS_ENTRY_OFFSET);
-        stars[i].y = random_range(0 , SCREEN_HEIGHT-1);
-        stars[i].r = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].g = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].b = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].speed = random_range(STARS_SPEED_MIN, jt.get_tv_system() == TV_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
-    }
-}
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E06B8);  // starts_render
-
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E078C);
 
 extern s32 D_8013ED1C; // state thing. which island is bright (FF none FE all)
@@ -166,7 +108,7 @@ extern s32 world_text_anim0_magnitude;
 extern u32 world_text_anim1_enabled;  // world caption animation. i don't think ever enabled?
 extern u32 world_text_anim1_t;
 
-extern s32 wrong_one;  // wrong one
+extern s32 robbit_anim_playing;  // wrong one
 
 extern s32 scrolling;
 extern s32 scroll_amount;
@@ -284,75 +226,10 @@ void islands_anim_update(void)
     tower_anim_t += 0x3A;
 }
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E0EE4);
+// robbit.c
 
-// an animation is a series of steps
-typedef struct {
-    u32 duration;
-    u32 spriteid;
-    u32 offx;
-    u32 offy;
-} AnimStep;
+// robbit.c OVER
 
-
-// current step
-extern u32 D_8013EED0;  // counter
-extern u32 D_8013EED8;
-extern u32 D_8013EEE0;
-extern u32 D_8013EEE8;
-extern AnimStep* D_8013EEF0;
-
-// animation stuff
-// set first step
-void func_800E0F60(AnimStep* anim)
-{
-    D_8013EED0 = 0;
-    D_8013EED8 = anim[0].spriteid;
-    D_8013EEE0 = anim[0].offx;
-    D_8013EEE8 = anim[0].offy;
-    D_8013EEF0 = anim;
-}
-
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E0F9C);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1124);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1288);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E13EC);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1500);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1514);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E156C);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E16F0);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1704);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E175C);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E18E0);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E198C);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1A38);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1AE4);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1B58);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1C68);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1CA0);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1DDC);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1DF0);
-
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1E48);
 
 typedef struct {
     s32 offx;
@@ -714,28 +591,26 @@ bruh:
     return s3;
 }
 
+#define WAIT_WHILE(x) \
+    do { func_800E6D00(); func_800E3D20();  \
+         func_800E3D70(); func_800E6D94(); } while ((x));
+
 // custom sequence by myself
 s32 sequence_funny(void)
 {
     func_800E0398(0xFE);
     stage_text_anim_set_enabled(0);
-    func_800E1500();    // set robbit on island 1?
+    //func_800E1500();    // set robbit on island 1?
     func_800E4064();
     while (1) {
-    func_800E1124(0x23);    // robbit jump to island 2
-    do {
-        func_800E6D00();
-        func_800E3D20();
-        func_800E3D70();
-        func_800E6D94();
-    } while (wrong_one);
-    func_800E1288(0x23);    // robbit jump to island 3
-    do {
-        func_800E6D00();
-        func_800E3D20();
-        func_800E3D70();
-        func_800E6D94();
-    } while (wrong_one);
+        func_800E0F9C(0x23);    // start robbit and ship animation
+        WAIT_WHILE(robbit_anim_playing);    // DOES NOT WAIT FOR SHIP TO FINISH
+        func_800E1124(0x23);    // robbit jump to island 2
+        WAIT_WHILE(robbit_anim_playing);
+        func_800E1288(0x23);    // robbit jump to island 3
+        WAIT_WHILE(robbit_anim_playing);
+        //func_800E1CA0(0x1E);
+        //WAIT_WHILE(robbit_anim_playing);
     }
     func_800E03D0(1);
     stage_text_anim_set_enabled(1);
@@ -759,7 +634,7 @@ int sequence_enter_world(void) // entrace sequence 1
         func_800E3D20();
         func_800E3D70();
         func_800E6D94();
-    } while (wrong_one);
+    } while (robbit_anim_playing);
     // highlight level text but don't change island highlight (keeps all highlighted?)
     func_800E03D0(0); 
     stage_text_anim_set_enabled(1);
@@ -790,7 +665,7 @@ s32 sequence_finished_1(void)
         func_800E3D20();
         func_800E3D70();
         func_800E6D94();
-    } while (wrong_one);
+    } while (robbit_anim_playing);
     func_800E03D0(1);
     stage_text_anim_set_enabled(1);
     func_800E3CB8();
@@ -817,7 +692,7 @@ s32 sequence_finished_2(void)
         func_800E3D20();
         func_800E3D70();
         func_800E6D94();
-    } while (wrong_one);
+    } while (robbit_anim_playing);
     func_800E03D0(2);
     stage_text_anim_set_enabled(1);
     func_800E3CB8();
@@ -829,8 +704,8 @@ extern s32 D_8013ED9C;
 
 //INCLUDE_ASM("asm/select/nonmatchings/A54", sequence_finished_3);
 // basically two things need to be fixed:
-// TODO: what does wrong_one do and how can I fix it?
-//       basically scrolling (0x8013EDE8) and wrong_one (0x8013EDE0) are mixed
+// TODO: what does robbit_anim_playing do and how can I fix it?
+//       basically scrolling (0x8013EDE8) and robbit_anim_playing (0x8013EDE0) are mixed
 s32 sequence_finished_3(void)
 {
     func_800E0398(0xFE);
@@ -857,7 +732,7 @@ s32 sequence_finished_3(void)
         func_800E3D20();
         func_800E3D70();
         func_800E6D94();
-    } while (wrong_one != 0);
+    } while (robbit_anim_playing != 0);
     D_8013EDD8 = 2; // start fading?
     if (global_data->unkE8 == 0) {
         jt.sound_fade_out(12, 0, 0);
@@ -893,7 +768,7 @@ void func_800E47D8(void) // TODO: this
     if (global_data->stage > 3) goto end;
     jt.audio_play_by_id(2);
     // TESTING:
-    global_data->stage = 3;
+    //global_data->stage = 3;
     switch (global_data->stage) {
     case 0:
         rc = sequence_enter_world();
@@ -906,8 +781,8 @@ void func_800E47D8(void) // TODO: this
         break;
     case 3:
         // TODO: going to 3 is a bit more complicated
-        //rc = sequence_finished_3();
-        sequence_funny();
+        sequence_finished_3();
+        //sequence_funny();
         break;
     }    
     // TODO: the rest of this thing lol
@@ -1040,12 +915,6 @@ const char* const D_800EAC70[6][3] = {
     { "VAB\\W5_1.VAB", "VAB\\W5_2.VAB", "VAB\\W5_3.VAB" },
     { "VAB\\W6_1.VAB", "VAB\\W6_2.VAB", "VAB\\W6_3.VAB" },
 };
-/*
-.word 0x800E011C
-.word 0x800E010C
-.word 0x800E00FC
-.word 0x800E00FC
-*/
 
 // play level effect
 void func_800E5714(void)
@@ -1072,233 +941,6 @@ INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E58D4);
 
 // unused
 //INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E5B68);
-
-// loading textures
-
-typedef struct {
-    u32 unk0;
-    u32 unk1;
-    u32 unk2;
-    u32 unk3;
-    u32 unk4;
-    u16 clut[256];
-    u32 unk5;
-    u32 unk6;
-    u32 unk7;
-    u8  pix[];
-} ImgFormat;    // TODO: is this TIM? what is this
-
-#define TEXTURE_TOWER_WIDTH     106
-#define TEXTURE_TOWER_HEIGHT    104
-#define TEXTURE_ISLAND_WIDTH    70
-#define TEXTURE_ISLAND_HEIGHT   76
-
-// tower and island textures
-void func_800E5B80(
-    void* island1_data,
-    void* island2_data,
-    void* island3_data,
-    void* tower_data,
-    s16 tx, s16 ty,
-    s16 clutx, s16 cluty)
-{
-    RECT rect;
-    ImgFormat* image = &D_80060000;
-
-    // tower
-    jt.decompress_lz1(tower_data+4, image);
-
-    rect.x = tx;
-    rect.y = ty;
-    rect.w = TEXTURE_TOWER_WIDTH/2;
-    rect.h = TEXTURE_TOWER_HEIGHT;
-    jt.LoadImage(&rect, image->pix);
-    jt.DrawSync(0);
-
-    rect.x = clutx;
-    rect.y = cluty;
-    rect.w = 256;
-    rect.h = 1;
-    image->clut[0] = 0;
-    jt.LoadImage(&rect, image->clut);
-    jt.DrawSync(0);
-
-    ty += 128;
-    cluty += 1;
-
-    // island 1
-    jt.decompress_lz1(island1_data+4, image);
-
-    rect.x = tx;
-    rect.y = ty;
-    rect.w = TEXTURE_ISLAND_WIDTH/2;
-    rect.h = TEXTURE_ISLAND_HEIGHT;
-    jt.LoadImage(&rect, image->pix);
-    jt.DrawSync(0);
-
-    rect.x = clutx;
-    rect.y = cluty;
-    rect.w = 256;
-    rect.h = 1;
-    image->clut[0] = 0;
-    jt.LoadImage(&rect, image->clut);
-    jt.DrawSync(0);
-
-
-    tx += 0x28;
-    cluty += 1;
-
-    // island 2
-    jt.decompress_lz1(island2_data+4, image);
-
-    rect.x = tx;
-    rect.y = ty;
-    rect.w = TEXTURE_ISLAND_WIDTH/2;
-    rect.h = TEXTURE_ISLAND_HEIGHT;
-    jt.LoadImage(&rect, image->pix);
-    jt.DrawSync(0);
-
-    rect.x = clutx;
-    rect.y = cluty;
-    rect.w = 256;
-    rect.h = 1;
-    image->clut[0] = 0;
-    jt.LoadImage(&rect, image->clut);
-    jt.DrawSync(0);
-
-
-    tx += 0x28;
-    cluty += 1;
-
-    // island 3
-    jt.decompress_lz1(island3_data+4, image);
-
-    rect.x = tx;
-    rect.y = ty;
-    rect.w = TEXTURE_ISLAND_WIDTH/2;
-    rect.h = TEXTURE_ISLAND_HEIGHT;
-    jt.LoadImage(&rect, image->pix);
-    jt.DrawSync(0);
-
-    rect.x = clutx;
-    rect.y = cluty;
-    rect.w = 256;
-    rect.h = 1;
-    image->clut[0] = 0;
-    jt.LoadImage(&rect, image->clut);
-    jt.DrawSync(0);
-}
-
-// font characters
-void func_800E5EFC(void* data, s16 x, s16 y)
-{
-    RECT rect = {
-        .x = x,
-        .y = y,
-        .w = 4,
-        .h = 8
-    };
-    jt.decompress_lz1(data+4, D_80060000);
-    u16* p = D_80060000;
-    for (int i = 0; i < 32; i++) {
-        for (int j = 0; j < 32; j++) {
-            jt.LoadImage(&rect, p);
-            jt.DrawSync(0);
-            rect.x += rect.w;
-            p += rect.w*rect.h;
-        }
-        rect.x = x;
-        rect.y += rect.h;
-    }    
-}
-
-// load clut
-void func_800E5FE8(void* data, s16 x, s16 y)
-{
-    RECT rect = {
-        .x = x,
-        .y = y,
-        .w = 256,
-        .h = 1
-    };
-
-    jt.LoadImage(&rect, data);
-    jt.DrawSync(0);
-}
-
-// load 256*256
-void func_800E6050(void* data, s16 x, s16 y)
-{
-    RECT rect = {
-        .x = x,
-        .y = y,
-        .w = 128,
-        .h = 256
-    };
-    jt.decompress_lz1(data+4, D_80060000);
-    jt.LoadImage(&rect, D_80060000+2);
-    jt.DrawSync(0);
-}
-
-// TODO: take these assets out of asm and link separately
-// cluts
-extern u16 D_800EC3AC[5][256];
-extern u8 D_800FC9F8[]; // image3
-extern u8 D_800ECDAC[]; // image2
-extern u8 D_800FDA4C[]; // image0
-extern u8 D_800FE478[]; // image1
-
-extern u8 D_800FBABC[]; // tiles
-
-extern u8 texture_isle_1_1[]; // texture_isle_1_1
-extern u8 texture_isle_1_2[]; // texture_isle_1_2
-extern u8 texture_isle_1_3[]; // texture_isle_1_3
-extern u8 texture_isle_2_1[]; // texture_isle_2_1
-extern u8 texture_isle_2_2[]; // texture_isle_2_2
-extern u8 texture_isle_2_3[]; // texture_isle_2_3
-extern u8 texture_isle_3_1[]; // texture_isle_3_1
-extern u8 texture_isle_3_2[]; // texture_isle_3_2
-extern u8 texture_isle_3_3[]; // texture_isle_3_3
-extern u8 texture_isle_4_1[]; // texture_isle_4_1
-extern u8 texture_isle_4_2[]; // texture_isle_4_2
-extern u8 texture_isle_4_3[]; // texture_isle_4_3
-extern u8 texture_isle_5_1[]; // texture_isle_5_1
-extern u8 texture_isle_5_2[]; // texture_isle_5_2
-extern u8 texture_isle_5_3[]; // texture_isle_5_3
-extern u8 texture_isle_6_1[]; // texture_isle_6_1
-extern u8 texture_isle_6_2[]; // texture_isle_6_2
-extern u8 texture_isle_6_3[]; // texture_isle_6_3
-
-
-extern u8 texture_tower_1[]; // texture_tower_1
-extern u8 texture_tower_2[]; // texture_tower_2
-extern u8 texture_tower_3[]; // texture_tower_3
-extern u8 texture_tower_4[]; // texture_tower_4
-extern u8 texture_tower_5[]; // texture_tower_5
-extern u8 texture_tower_6[]; // texture_tower_6
-
-// load everything
-void func_800E60D0(void)
-{
-    func_800E5B80(texture_isle_1_1, texture_isle_1_2, texture_isle_1_3, texture_tower_1, 0x140,   0, 0, 0x1E2);
-    func_800E5B80(texture_isle_2_1, texture_isle_2_2, texture_isle_2_3, texture_tower_2, 0x1C0,   0, 0, 0x1E6);
-    func_800E5B80(texture_isle_3_1, texture_isle_3_2, texture_isle_3_3, texture_tower_3, 0x240,   0, 0, 0x1EA);
-    func_800E5B80(texture_isle_4_1, texture_isle_4_2, texture_isle_4_3, texture_tower_4, 0x140, 256, 0, 0x1EE);
-    func_800E5B80(texture_isle_5_1, texture_isle_5_2, texture_isle_5_3, texture_tower_5, 0x1C0, 256, 0, 0x1F2);
-    func_800E5B80(texture_isle_6_1, texture_isle_6_2, texture_isle_6_3, texture_tower_6, 0x240, 256, 0, 0x1F6);
-
-    func_800E5EFC(D_800FBABC, 704, 0);
-
-    func_800E6050(D_800FC9F8, 704, 256);
-    func_800E6050(func_800E58C4() ? D_800FE478 : D_800FDA4C, 832, 0);
-    func_800E6050(D_800ECDAC, 832, 256);
-
-    func_800E5FE8(D_800EC3AC[0], 0, 509);
-    func_800E5FE8(D_800EC3AC[1], 0, 510);
-    func_800E5FE8(D_800EC3AC[2], 0, 508);
-    func_800E5FE8(D_800EC3AC[3], 0, 507);
-    func_800E5FE8(D_800EC3AC[4], 0, 511);
-}
 
 // sprites.c
 
@@ -1408,27 +1050,7 @@ INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7078);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7358);
 
 
-extern u8 random_array_seed[64];    // seed
-extern u8 random_array[64];         // array
-extern u32 random_counter;
 
-void random_init(void)
-{
-    random_counter = 0;
-    for (int i = 0; i < 64; i++)
-        random_array[i] = random_array_seed[i];
-}
-
-s32 random_byte(void)
-{
-    u8 ret;
-    random_counter = (random_counter + 1) % 64;
-    
-    ret = random_array[(random_counter - 24) % 64]
-        ^ random_array[(random_counter - 55) % 64];
-    random_array[random_counter] = ret;
-    return ret;
-}
 
 // 2 simple functions
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7724);

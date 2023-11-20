@@ -22,4 +22,7 @@ int sprintf(char* dst, const char* fmt, ...);
 #define TV_NTSC 0
 #define TV_PAL  1
 
+#define SCREEN_WIDTH    320
+#define SCREEN_HEIGHT   240
+
 #endif

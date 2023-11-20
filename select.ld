@@ -28,9 +28,10 @@ SECTIONS
         None_RODATA_END = .;
         None_RODATA_SIZE = ABSOLUTE(None_RODATA_END - None_RODATA_START);
         None_TEXT_START = .;
-        build/select/A54.o(.text);
+        *(.text*);
+        /*build/select/A54.o(.text);
         build/select/start.o(.text);
-        build/select/libgte.o(.text);
+        build/select/libgte.o(.text);*/
         None_TEXT_END = .;
         None_TEXT_SIZE = ABSOLUTE(None_TEXT_END - None_TEXT_START);
         None_DATA_START = .;

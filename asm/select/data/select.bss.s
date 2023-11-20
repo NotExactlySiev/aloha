@@ -84,9 +84,6 @@ glabel D_8013F91E
 glabel D_8013FB50
     .space 0x800
 
-glabel random_array
-    .space 0x40
-
 glabel D_80140390
     .space 0x18
 
