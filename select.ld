@@ -40,6 +40,7 @@ SECTIONS
         build/select/comdat.data.o(.data);
         _5E6A4_data__s = .;
         build/select/5E6A4.data.o(.data);
+        *(.data*);
         None_DATA_END = .;
         None_DATA_SIZE = ABSOLUTE(None_DATA_END - None_DATA_START);
 

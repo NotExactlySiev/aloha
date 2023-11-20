@@ -3,6 +3,8 @@
 
 #include <libetc.h>
 
+// TODO: freeplay has the bug when going across pages
+
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
     UNK(0, 0xE7);
@@ -19,18 +21,19 @@ extern GlobalData* global_data;
 
 extern u32 D_80060000[];
 
-extern u32 D_8013EDD0;  // screen brightness (or maybe fade value is better?)
+extern u32 screen_brightness;  // screen brightness (or maybe fade value is better?)
 
 void sprite_draw_by_id(u32 arg0, u32 id, u32 x, u32 y, u8 brightness, s32 size);
+void printf(const char* fmt, ...);
 
 
-u32 random_byte(void);
+s32 random_byte(void);
 
 #define RANDOM_MAX  255
 
-u32 random_range(u32 a, u32 b)
+s32 random_range(s32 a, s32 b)
 {
-    u32 width = b - a;
+    s32 width = b - a;
     return a + ((random_byte() * width) / RANDOM_MAX) % width;
 }
 
@@ -90,9 +93,10 @@ typedef struct {
     u32 x, y;
     u32 speed;
     u8 r,g,b;
+    u8 _pad;
 } Star;
 
-extern Star stars[64];
+Star stars[64];
 
 void stars_init(void)
 {
@@ -128,27 +132,27 @@ extern s32 D_8013ED1C; // state thing. which island is bright (FF none FE all)
 
 void render_island1(s32 world, s32 x, s32 y)
 {
-    s32 brightness = D_8013EDD0 / 2;
+    s32 brightness = screen_brightness / 2;
     if (D_8013ED1C == 0 || D_8013ED1C == 0xFE) {
-        brightness = D_8013EDD0;
+        brightness = screen_brightness;
     }
     sprite_draw_by_id(4, world << 2 | 1, x, y, brightness, 0x1000);
 }
 
 void render_island2(s32 world, s32 x, s32 y)
 {
-    s32 brightness = D_8013EDD0 / 2;
+    s32 brightness = screen_brightness / 2;
     if (D_8013ED1C == 1 || D_8013ED1C == 0xFE) {
-        brightness = D_8013EDD0;
+        brightness = screen_brightness;
     }
     sprite_draw_by_id(4, world << 2 | 2, x, y, brightness, 0x1000);
 }
 
 void render_island3(s32 world, s32 x, s32 y)
 {
-    s32 brightness = D_8013EDD0 / 2;
+    s32 brightness = screen_brightness / 2;
     if (D_8013ED1C == 2 || D_8013ED1C == 0xFE) {
-        brightness = D_8013EDD0;
+        brightness = screen_brightness;
     }
     sprite_draw_by_id(4, world << 2 | 3, x, y, brightness, 0x1000);
 }
@@ -204,7 +208,7 @@ void render_world_text(s32 world, s32 x, s32 y)
 
     if (scrolling) x += scroll_amount;
 
-    sprite_draw_by_id(11, 0x18 + world, x, y, D_8013EDD0 + brightness_offset, ONE + size_offset);
+    sprite_draw_by_id(11, 0x18 + world, x, y, screen_brightness + brightness_offset, ONE + size_offset);
 
 }
 
@@ -218,9 +222,9 @@ extern u32 D_8013ED20;  // selected
 //INCLUDE_ASM("asm/select/nonmatchings/A54", render_stage_text);
 void render_stage_text(void)
 {
-    u32 brightness0 = D_8013EDD0 / 2;
-    u32 brightness1 = D_8013EDD0 / 2;
-    u32 brightness2 = D_8013EDD0 / 2;
+    u32 brightness0 = screen_brightness / 2;
+    u32 brightness1 = screen_brightness / 2;
+    u32 brightness2 = screen_brightness / 2;
     u32 size0 = 4096;
     u32 size1 = 4096;
     u32 size2 = 4096;
@@ -228,15 +232,15 @@ void render_stage_text(void)
     switch (D_8013ED20) {
     case 0:
         size0 = stage_text_size;
-        brightness0 = D_8013EDD0;
+        brightness0 = screen_brightness;
         break;
     case 1:
         size1 = stage_text_size;
-        brightness1 = D_8013EDD0;
+        brightness1 = screen_brightness;
         break;
     case 2:
         size2 = stage_text_size;
-        brightness2 = D_8013EDD0;
+        brightness2 = screen_brightness;
         break;
     }
 
@@ -350,11 +354,94 @@ INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1DF0);
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1E48);
 
+typedef struct {
+    s32 offx;
+    s32 offy;
+    s32 frame;
+    s32 unk3;   // timer
+    s32 size;
+} Explosion;
+
+extern Explosion D_8013F340[4];
+
+extern s32 tower_state;  // tower state
+extern s32 tower_fall_height;
+extern s32 D_8013EF00;
+extern s32 D_8013EF08;
+extern s32 D_8013ED84;  // compared to unk2
+
+#define TOWER_STATE_NORMAL  0
+#define TOWER_STATE_FALLING 1
+#define TOWER_STATE_FALLEN  2
+
+// start tower exploding animation
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1F88);
+void _func_800E1F88(void)
+{
+    printf("SETTING\n");
+    for (int i = 0; i < 4; i++) {
+        Explosion* p = &D_8013F340[i];
+        //printf("%d to %d\n", i, D_8013ED84);
+        p->frame = 2;
+        p->unk3 = D_8013ED84;
+        //p->unk0 = 
+    }
+
+    tower_state = 1;     // start explosion
+
+    tower_fall_height = 0; 
+    D_8013EF00 = 0; 
+    D_8013EF08 = 2; 
+}
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2070);
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2090);
+// render tower
+//INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2090);
+void func_800E2090(s32 x, s32 y)
+{
+    if (tower_state == TOWER_STATE_FALLING) {
+        if (tower_fall_height > 199) {
+            tower_state = TOWER_STATE_FALLEN;
+            return;
+        }
+        D_8013EF00 += 1;    // where the chain is connected?
+
+        s32 delta = 2;
+        if (D_8013EF08 == 2) {
+            delta = -1;
+        }
+        tower_fall_height += delta;
+        D_8013EF08 = delta;
+
+        for (int i = 0; i < 4; i++) {
+            Explosion* p = &D_8013F340[i];
+            sprite_draw_by_id(7, 0x1E + p->frame, x + p->offx, y + D_8013EF00/4 + p->offy, screen_brightness, p->size);
+            if (p->frame == 0 && p->unk3 == D_8013ED84) {
+                // oh this is directional sound????
+                func_800E0330(0x3700, 100, ((x + p->offx) * 0x7F) / 0x140, 0x3A);
+            }
+            if (--(p->unk3) == 0) {   // oh it's the timer
+                p->frame += 1;
+                p->unk3 = D_8013ED84;
+            }
+
+            if (p->frame == 8) {
+                p->offx = -53 + random_range(0, 106);
+                p->offy = -52 + random_range(0, 104);
+                p->size = random_range(0.5*ONE, 1.5*ONE);
+                p->frame = 0;
+                
+            }
+
+        }
+    } else {
+        y += tower_offy;
+    }
+
+    if (tower_state != TOWER_STATE_FALLEN)
+        sprite_draw_by_id(4, shown_world << 2 | 0, x + tower_offx, y + (tower_fall_height / 2), screen_brightness, 0x1000);
+}
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E230C);
 
@@ -416,12 +503,8 @@ void func_800E25E4(void)
     // TODO: draw tower
 }
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E278C);
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2A30);
-
-//INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2B74);
-// balls?
+// chains.c
 
 extern s32 D_8013ED8C;  // mag
 
@@ -448,7 +531,11 @@ s32 meow = sizeof(Chain);
 
 extern Chain D_8013F390[3];
 
-void func_800E2B74(void)
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E278C);
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2A30);
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2B74);
+
+void _func_800E2B74(void)
 {
     s32 val;
 
@@ -469,11 +556,31 @@ void func_800E2B74(void)
     }
 }
 
+
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E32B0);
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E32D8);
 
+typedef struct {
+    s32 unk0;
+    s32 unk1;
+} UnkStruct;
+
+extern UnkStruct D_80170A28[3];
+
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E3308);
+void _func_800E3308(void)
+{
+    static int frame = 0;
+    for (int i = 0; i < 3; i++) {
+        UnkStruct* p = &D_80170A28[i];
+        //printf("%d: %d %d\n", i, p->unk0, p->unk1);
+        
+    }
+    sprite_draw_by_id(12, 0x1E + (frame/4), 0x80, 0x5E, screen_brightness, 0x1800);
+    frame++;
+}
+
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E357C);
 
@@ -512,7 +619,7 @@ extern s32 D_8013ED28;
 
 #define PAD_ACCEPT  (PADstart | PADRleft | PADRright)
 #define PAD_CANCEL  (PADRdown)
-// WORKING!!! this is ccontrols (not for freeplay mode)
+// WORKING!!! this is controls (not for freeplay mode)
 int func_800E413C(void)
 {
     s32 s0;
@@ -544,8 +651,8 @@ bruh:
                 v1 = 3;
                 if (s0 & PAD_CANCEL) goto bruh;    // cancel?
                 if (D_8013ED90 == 1) {
-                    //func_800E6640("PUSH START BUTTON", 0x54, 0xB0, D_8013EDD0);
-                    func_800E6640("PUSH START PLZ UWU", 0x54, 0xB0, D_8013EDD0);
+                    //func_800E6640("PUSH START BUTTON", 0x54, 0xB0, screen_brightness);
+                    func_800E6640("PUSH START PLZ UWU", 0x54, 0xB0, screen_brightness);
                 }
             }
             break;
@@ -607,27 +714,56 @@ bruh:
     return s3;
 }
 
-
-// 4 callers
-// this function plays the jump on island 1 animation and then goes to next
-int func_800E444C(void) // entrace sequence 1
+// custom sequence by myself
+s32 sequence_funny(void)
 {
-    // 0xFE none selected and all light
-    // 0xFF none selected and all dark
     func_800E0398(0xFE);
     stage_text_anim_set_enabled(0);
-    func_800E278C();
+    func_800E1500();    // set robbit on island 1?
     func_800E4064();
-    func_800E0F9C(0x23);
+    while (1) {
+    func_800E1124(0x23);    // robbit jump to island 2
     do {
         func_800E6D00();
         func_800E3D20();
         func_800E3D70();
         func_800E6D94();
     } while (wrong_one);
-    func_800E03D0(0);
+    func_800E1288(0x23);    // robbit jump to island 3
+    do {
+        func_800E6D00();
+        func_800E3D20();
+        func_800E3D70();
+        func_800E6D94();
+    } while (wrong_one);
+    }
+    func_800E03D0(1);
     stage_text_anim_set_enabled(1);
     func_800E3CB8();
+    return func_800E413C();
+}
+
+// 4 callers
+// this function plays the jump on island 1 animation and then goes to loop
+int sequence_enter_world(void) // entrace sequence 1
+{
+    // 0xFE no text highlighted and all light
+    // 0xFF no text highlighted and all dark
+    func_800E0398(0xFE);    // highlight all islands
+    stage_text_anim_set_enabled(0); // don't animate until sequence is over
+    func_800E278C();        // chain_init
+    func_800E4064();        // wait for the screen appearing animation to fully finish
+    func_800E0F9C(0x23);    // start robbit and ship animation
+    do {
+        func_800E6D00();
+        func_800E3D20();
+        func_800E3D70();
+        func_800E6D94();
+    } while (wrong_one);
+    // highlight level text but don't change island highlight (keeps all highlighted?)
+    func_800E03D0(0); 
+    stage_text_anim_set_enabled(1);
+    func_800E3CB8();    // start press start blinking text
     return func_800E413C();
 }
 
@@ -635,20 +771,20 @@ extern s32 D_8013F418;
 extern s32 D_8013F6AC;
 
 // TODO: test this lol
-s32 func_800E44E0(void)
+s32 sequence_finished_1(void)
 {
     func_800E0398(0xFE);
     stage_text_anim_set_enabled(0);
-    func_800E1500();
+    func_800E1500();    // set robbit on island 1?
     func_800E4064();
-    func_800E32D8(0);
+    func_800E32D8(0);   // explode island and chains
     do {
         func_800E6D00();
         func_800E3D20();
         func_800E3D70();
         func_800E6D94();
     } while (D_8013F418 != 2);
-    func_800E1124(0x23);
+    func_800E1124(0x23);    // robbit jump to island 2
     do {
         func_800E6D00();
         func_800E3D20();
@@ -661,14 +797,14 @@ s32 func_800E44E0(void)
     return func_800E413C();
 }
 
-s32 func_800E45B4(void)
+s32 sequence_finished_2(void)
 {    
     func_800E0398(0xFE);
     stage_text_anim_set_enabled(0);
-    func_800E2A30(0, 1, 1);
-    func_800E16F0();
+    func_800E2A30(0, 1, 1); // disable the chain for island 1
+    func_800E16F0();        // set robbit on island 2
     func_800E4064();
-    func_800E32D8(1);
+    func_800E32D8(1);       // explode island 2
     do {
         func_800E6D00();
         func_800E3D20();
@@ -688,8 +824,47 @@ s32 func_800E45B4(void)
     return func_800E413C();
 }
 
+// timer for this seqs first part. why is it a global?
+extern s32 D_8013ED9C;
 
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E4698);
+//INCLUDE_ASM("asm/select/nonmatchings/A54", sequence_finished_3);
+// basically two things need to be fixed:
+// TODO: what does wrong_one do and how can I fix it?
+//       basically scrolling (0x8013EDE8) and wrong_one (0x8013EDE0) are mixed
+s32 sequence_finished_3(void)
+{
+    func_800E0398(0xFE);
+    stage_text_anim_set_enabled(0);
+    func_800E2A30(0, 1, 1);
+    func_800E2A30(1, 1, 1);
+    func_800E1C68();    // show the exit ship?
+    func_800E1DDC();    // set on island 3
+    func_800E4064();    // wait
+    func_800E1F88();  // the whole tower exploding and going down
+    func_800E32D8(2);   // explode 3
+    s32 counter = D_8013ED9C;
+    do {
+        D_8013ED9C = counter;
+        func_800E6D00();
+        func_800E3D20();
+        func_800E3D70();
+        func_800E6D94();
+        counter = D_8013ED9C + 1;
+    } while (D_8013ED9C < 201);
+    func_800E1CA0(0x1E);    // I think is duration?
+    do {
+        func_800E6D00();
+        func_800E3D20();
+        func_800E3D70();
+        func_800E6D94();
+    } while (wrong_one != 0);
+    D_8013EDD8 = 2; // start fading?
+    if (global_data->unkE8 == 0) {
+        jt.sound_fade_out(12, 0, 0);
+    }
+    func_800E40E8();    // wait until fadeout finished
+    func_800E413C();
+}
 
 // movie data
 extern char* D_800EAA04[13];
@@ -711,22 +886,28 @@ void func_800E47D8(void) // TODO: this
     if (global_data->stage < 0) goto end;   // TODO: make this not shit. maybe default in switch?
 
     if (global_data->stage == 0 && global_data->unkE8 == 0) {
-        func_800E7B68(D_800EAA38[global_data->world], 0, D_800EAAA0[global_data->world], 0);
+        // FIXME: turning the movie of for testing
+        //func_800E7B68(D_800EAA38[global_data->world], 0, D_800EAAA0[global_data->world], 0);
         func_800E7358();    // setup scene
     }
     if (global_data->stage > 3) goto end;
     jt.audio_play_by_id(2);
+    // TESTING:
+    global_data->stage = 3;
     switch (global_data->stage) {
     case 0:
-        rc = func_800E444C();
+        rc = sequence_enter_world();
         break;
     case 1:
-        rc = func_800E44E0();
+        rc = sequence_finished_1();
         break;
     case 2:
-        rc = func_800E45B4();
+        rc = sequence_finished_2();
         break;
     case 3:
+        // TODO: going to 3 is a bit more complicated
+        //rc = sequence_finished_3();
+        sequence_funny();
         break;
     }    
     // TODO: the rest of this thing lol
@@ -1238,7 +1419,7 @@ void random_init(void)
         random_array[i] = random_array_seed[i];
 }
 
-u32 random_byte(void)
+s32 random_byte(void)
 {
     u8 ret;
     random_counter = (random_counter + 1) % 64;

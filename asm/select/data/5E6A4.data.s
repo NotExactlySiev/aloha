@@ -1780,7 +1780,7 @@ glabel D_8013ED74
 glabel D_8013ED7C
 /* 5F57C 8013ED7C */ .word 0x00000000
 
-glabel D_8013ED80
+glabel tower_state
 /* 5F580 8013ED80 */ .word 0x00000000
 
 glabel D_8013ED84
@@ -1834,7 +1834,7 @@ glabel D_8013EDC8
 glabel D_8013EDCC
 /* 5F5CC 8013EDCC */ .word 0x00000000
 
-glabel D_8013EDD0
+glabel screen_brightness
 /* 5F5D0 8013EDD0 */ .word 0x00000000
 /* 5F5D4 8013EDD4 */ .word 0x00000000
 
@@ -1982,7 +1982,7 @@ glabel D_8013EEF0
 /* 5F6F0 8013EEF0 */ .word 0x00000000
 /* 5F6F4 8013EEF4 */ .word 0x00000000
 
-glabel D_8013EEF8
+glabel tower_fall_height
 /* 5F6F8 8013EEF8 */ .word 0x00000000
 /* 5F6FC 8013EEFC */ .word 0x00000000
 
@@ -2017,198 +2017,3 @@ glabel D_8013EF30
 glabel D_8013EF38
 /* 5F738 8013EF38 */ .word 0x00000000
 /* 5F73C 8013EF3C */ .word 0x00000000
-
-glabel stars
-/* 5F740 8013EF40 */ .word 0x00000000
-
-glabel D_8013EF44
-/* 5F744 8013EF44 */ .word 0x00000000
-
-glabel D_8013EF48
-/* 5F748 8013EF48 */ .word 0x00000000
-
-glabel D_8013EF4C
-/* 5F74C 8013EF4C */ .byte 0x00
-
-glabel D_8013EF4D
-/* 5F74D 8013EF4D */ .byte 0x00
-
-glabel D_8013EF4E
-/* 5F74E 8013EF4E */ .byte 0x00
-/* 5F74F 8013EF4F */ .byte 0x00
-/* 5F750 8013EF50 */ .byte 0x00
-/* 5F751 8013EF51 */ .byte 0x00
-/* 5F752 8013EF52 */ .byte 0x00
-/* 5F753 8013EF53 */ .byte 0x00
-/* 5F754 8013EF54 */ .byte 0x00
-/* 5F755 8013EF55 */ .byte 0x00
-/* 5F756 8013EF56 */ .byte 0x00
-/* 5F757 8013EF57 */ .byte 0x00
-/* 5F758 8013EF58 */ .byte 0x00
-/* 5F759 8013EF59 */ .byte 0x00
-/* 5F75A 8013EF5A */ .byte 0x00
-/* 5F75B 8013EF5B */ .byte 0x00
-/* 5F75C 8013EF5C */ .byte 0x00
-/* 5F75D 8013EF5D */ .byte 0x00
-/* 5F75E 8013EF5E */ .byte 0x00
-/* 5F75F 8013EF5F */ .byte 0x00
-/* 5F760 8013EF60 */ .byte 0x00
-/* 5F761 8013EF61 */ .byte 0x00
-/* 5F762 8013EF62 */ .byte 0x00
-/* 5F763 8013EF63 */ .byte 0x00
-/* 5F764 8013EF64 */ .byte 0x00
-/* 5F765 8013EF65 */ .byte 0x00
-/* 5F766 8013EF66 */ .byte 0x00
-/* 5F767 8013EF67 */ .byte 0x00
-/* 5F768 8013EF68 */ .byte 0x00
-/* 5F769 8013EF69 */ .byte 0x00
-/* 5F76A 8013EF6A */ .byte 0x00
-/* 5F76B 8013EF6B */ .byte 0x00
-/* 5F76C 8013EF6C */ .byte 0x00
-/* 5F76D 8013EF6D */ .byte 0x00
-/* 5F76E 8013EF6E */ .byte 0x00
-/* 5F76F 8013EF6F */ .byte 0x00
-/* 5F770 8013EF70 */ .byte 0x00
-/* 5F771 8013EF71 */ .byte 0x00
-/* 5F772 8013EF72 */ .byte 0x00
-/* 5F773 8013EF73 */ .byte 0x00
-/* 5F774 8013EF74 */ .byte 0x00
-/* 5F775 8013EF75 */ .byte 0x00
-/* 5F776 8013EF76 */ .byte 0x00
-/* 5F777 8013EF77 */ .byte 0x00
-/* 5F778 8013EF78 */ .byte 0x00
-/* 5F779 8013EF79 */ .byte 0x00
-/* 5F77A 8013EF7A */ .byte 0x00
-/* 5F77B 8013EF7B */ .byte 0x00
-/* 5F77C 8013EF7C */ .byte 0x00
-/* 5F77D 8013EF7D */ .byte 0x00
-/* 5F77E 8013EF7E */ .byte 0x00
-/* 5F77F 8013EF7F */ .byte 0x00
-/* 5F780 8013EF80 */ .byte 0x00
-/* 5F781 8013EF81 */ .byte 0x00
-/* 5F782 8013EF82 */ .byte 0x00
-/* 5F783 8013EF83 */ .byte 0x00
-/* 5F784 8013EF84 */ .byte 0x00
-/* 5F785 8013EF85 */ .byte 0x00
-/* 5F786 8013EF86 */ .byte 0x00
-/* 5F787 8013EF87 */ .byte 0x00
-/* 5F788 8013EF88 */ .byte 0x00
-/* 5F789 8013EF89 */ .byte 0x00
-/* 5F78A 8013EF8A */ .byte 0x00
-/* 5F78B 8013EF8B */ .byte 0x00
-/* 5F78C 8013EF8C */ .byte 0x00
-/* 5F78D 8013EF8D */ .byte 0x00
-/* 5F78E 8013EF8E */ .byte 0x00
-/* 5F78F 8013EF8F */ .byte 0x00
-/* 5F790 8013EF90 */ .byte 0x00
-/* 5F791 8013EF91 */ .byte 0x00
-/* 5F792 8013EF92 */ .byte 0x00
-/* 5F793 8013EF93 */ .byte 0x00
-/* 5F794 8013EF94 */ .byte 0x00
-/* 5F795 8013EF95 */ .byte 0x00
-/* 5F796 8013EF96 */ .byte 0x00
-/* 5F797 8013EF97 */ .byte 0x00
-/* 5F798 8013EF98 */ .byte 0x00
-/* 5F799 8013EF99 */ .byte 0x00
-/* 5F79A 8013EF9A */ .byte 0x00
-/* 5F79B 8013EF9B */ .byte 0x00
-/* 5F79C 8013EF9C */ .byte 0x00
-/* 5F79D 8013EF9D */ .byte 0x00
-/* 5F79E 8013EF9E */ .byte 0x00
-/* 5F79F 8013EF9F */ .byte 0x00
-/* 5F7A0 8013EFA0 */ .byte 0x00
-/* 5F7A1 8013EFA1 */ .byte 0x00
-/* 5F7A2 8013EFA2 */ .byte 0x00
-/* 5F7A3 8013EFA3 */ .byte 0x00
-/* 5F7A4 8013EFA4 */ .byte 0x00
-/* 5F7A5 8013EFA5 */ .byte 0x00
-/* 5F7A6 8013EFA6 */ .byte 0x00
-/* 5F7A7 8013EFA7 */ .byte 0x00
-/* 5F7A8 8013EFA8 */ .byte 0x00
-/* 5F7A9 8013EFA9 */ .byte 0x00
-/* 5F7AA 8013EFAA */ .byte 0x00
-/* 5F7AB 8013EFAB */ .byte 0x00
-/* 5F7AC 8013EFAC */ .byte 0x00
-/* 5F7AD 8013EFAD */ .byte 0x00
-/* 5F7AE 8013EFAE */ .byte 0x00
-/* 5F7AF 8013EFAF */ .byte 0x00
-/* 5F7B0 8013EFB0 */ .byte 0x00
-/* 5F7B1 8013EFB1 */ .byte 0x00
-/* 5F7B2 8013EFB2 */ .byte 0x00
-/* 5F7B3 8013EFB3 */ .byte 0x00
-/* 5F7B4 8013EFB4 */ .byte 0x00
-/* 5F7B5 8013EFB5 */ .byte 0x00
-/* 5F7B6 8013EFB6 */ .byte 0x00
-/* 5F7B7 8013EFB7 */ .byte 0x00
-/* 5F7B8 8013EFB8 */ .byte 0x00
-/* 5F7B9 8013EFB9 */ .byte 0x00
-/* 5F7BA 8013EFBA */ .byte 0x00
-/* 5F7BB 8013EFBB */ .byte 0x00
-/* 5F7BC 8013EFBC */ .byte 0x00
-/* 5F7BD 8013EFBD */ .byte 0x00
-/* 5F7BE 8013EFBE */ .byte 0x00
-/* 5F7BF 8013EFBF */ .byte 0x00
-/* 5F7C0 8013EFC0 */ .byte 0x00
-/* 5F7C1 8013EFC1 */ .byte 0x00
-/* 5F7C2 8013EFC2 */ .byte 0x00
-/* 5F7C3 8013EFC3 */ .byte 0x00
-/* 5F7C4 8013EFC4 */ .byte 0x00
-/* 5F7C5 8013EFC5 */ .byte 0x00
-/* 5F7C6 8013EFC6 */ .byte 0x00
-/* 5F7C7 8013EFC7 */ .byte 0x00
-/* 5F7C8 8013EFC8 */ .byte 0x00
-/* 5F7C9 8013EFC9 */ .byte 0x00
-/* 5F7CA 8013EFCA */ .byte 0x00
-/* 5F7CB 8013EFCB */ .byte 0x00
-/* 5F7CC 8013EFCC */ .byte 0x00
-/* 5F7CD 8013EFCD */ .byte 0x00
-/* 5F7CE 8013EFCE */ .byte 0x00
-/* 5F7CF 8013EFCF */ .byte 0x00
-/* 5F7D0 8013EFD0 */ .byte 0x00
-/* 5F7D1 8013EFD1 */ .byte 0x00
-/* 5F7D2 8013EFD2 */ .byte 0x00
-/* 5F7D3 8013EFD3 */ .byte 0x00
-/* 5F7D4 8013EFD4 */ .byte 0x00
-/* 5F7D5 8013EFD5 */ .byte 0x00
-/* 5F7D6 8013EFD6 */ .byte 0x00
-/* 5F7D7 8013EFD7 */ .byte 0x00
-/* 5F7D8 8013EFD8 */ .byte 0x00
-/* 5F7D9 8013EFD9 */ .byte 0x00
-/* 5F7DA 8013EFDA */ .byte 0x00
-/* 5F7DB 8013EFDB */ .byte 0x00
-/* 5F7DC 8013EFDC */ .byte 0x00
-/* 5F7DD 8013EFDD */ .byte 0x00
-/* 5F7DE 8013EFDE */ .byte 0x00
-/* 5F7DF 8013EFDF */ .byte 0x00
-/* 5F7E0 8013EFE0 */ .byte 0x00
-/* 5F7E1 8013EFE1 */ .byte 0x00
-/* 5F7E2 8013EFE2 */ .byte 0x00
-/* 5F7E3 8013EFE3 */ .byte 0x00
-/* 5F7E4 8013EFE4 */ .byte 0x00
-/* 5F7E5 8013EFE5 */ .byte 0x00
-/* 5F7E6 8013EFE6 */ .byte 0x00
-/* 5F7E7 8013EFE7 */ .byte 0x00
-/* 5F7E8 8013EFE8 */ .byte 0x00
-/* 5F7E9 8013EFE9 */ .byte 0x00
-/* 5F7EA 8013EFEA */ .byte 0x00
-/* 5F7EB 8013EFEB */ .byte 0x00
-/* 5F7EC 8013EFEC */ .byte 0x00
-/* 5F7ED 8013EFED */ .byte 0x00
-/* 5F7EE 8013EFEE */ .byte 0x00
-/* 5F7EF 8013EFEF */ .byte 0x00
-/* 5F7F0 8013EFF0 */ .byte 0x00
-/* 5F7F1 8013EFF1 */ .byte 0x00
-/* 5F7F2 8013EFF2 */ .byte 0x00
-/* 5F7F3 8013EFF3 */ .byte 0x00
-/* 5F7F4 8013EFF4 */ .byte 0x00
-/* 5F7F5 8013EFF5 */ .byte 0x00
-/* 5F7F6 8013EFF6 */ .byte 0x00
-/* 5F7F7 8013EFF7 */ .byte 0x00
-/* 5F7F8 8013EFF8 */ .byte 0x00
-/* 5F7F9 8013EFF9 */ .byte 0x00
-/* 5F7FA 8013EFFA */ .byte 0x00
-/* 5F7FB 8013EFFB */ .byte 0x00
-/* 5F7FC 8013EFFC */ .byte 0x00
-/* 5F7FD 8013EFFD */ .byte 0x00
-/* 5F7FE 8013EFFE */ .byte 0x00
-/* 5F7FF 8013EFFF */ .byte 0x00
