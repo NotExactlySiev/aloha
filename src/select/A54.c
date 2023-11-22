@@ -765,7 +765,7 @@ void func_800E47D8(void) // TODO: this
     if (global_data->stage > 3) goto end;
     jt.audio_play_by_id(2);
     // TESTING:
-    //global_data->stage = 3;
+    global_data->stage = 3;
     switch (global_data->stage) {
     case 0:
         rc = sequence_enter_world();
