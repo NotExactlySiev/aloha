@@ -1717,9 +1717,6 @@ glabel D_8013ED7C
 glabel tower_state
 /* 5F580 8013ED80 */ .word 0x00000000
 
-glabel D_8013ED84
-/* 5F584 8013ED84 */ .word 0x00000004
-
 glabel D_8013ED88
 /* 5F588 8013ED88 */ .word 0x00000000
 
@@ -1852,17 +1849,9 @@ glabel robbit_current_step
 /* 5F6F0 8013EEF0 */ .word 0x00000000
 /* 5F6F4 8013EEF4 */ .word 0x00000000
 
-glabel tower_fall_height
-/* 5F6F8 8013EEF8 */ .word 0x00000000
-/* 5F6FC 8013EEFC */ .word 0x00000000
-
 glabel D_8013EF00
 /* 5F700 8013EF00 */ .word 0x00000000
 /* 5F704 8013EF04 */ .word 0x00000000
-
-glabel D_8013EF08
-/* 5F708 8013EF08 */ .word 0x00000000
-/* 5F70C 8013EF0C */ .word 0x00000000
 
 glabel D_8013EF10
 /* 5F710 8013EF10 */ .word 0x00000000

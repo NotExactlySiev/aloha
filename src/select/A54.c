@@ -4,13 +4,22 @@
 #include <libetc.h>
 // TODO: freeplay has the bug when going across pages
 
+s32 random_range(s32, s32);
+
 extern u32 D_80060000[];
 
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
-    UNK(0, 0xE7);
+    UNK(0, 0xE3);
+    s8  unkE4;
+    s8  unkE5;
+    s8  unkE6;
+    s8  unkE7;
     s8  unkE8;  // played before?
-    UNK(0xE9, 0x513);
+    s8  unkE9;
+    UNK(0xEA, 0x4FF);
+    u32  unk500;
+    UNK(0x504, 0x513);
     s8  world;
     s8  stage;  // next one to play
     s8  unk516;
@@ -238,13 +247,14 @@ typedef struct {
     s32 size;
 } Explosion;
 
-extern Explosion D_8013F340[4];
+
+Explosion D_8013F340[4];
 
 extern s32 tower_state;  // tower state
-extern s32 tower_fall_height;
+s32 tower_fall_height = 0;
 extern s32 D_8013EF00;
-extern s32 D_8013EF08;
-extern s32 D_8013ED84;  // compared to unk2
+s32 D_8013EF08 = 0;
+s32 D_8013ED84 = 4;
 
 #define TOWER_STATE_NORMAL  0
 #define TOWER_STATE_FALLING 1
@@ -288,7 +298,6 @@ void func_800E2090(s32 x, s32 y)
         }
         tower_fall_height += delta;
         D_8013EF08 = delta;
-
         for (int i = 0; i < 4; i++) {
             Explosion* p = &D_8013F340[i];
             sprite_draw_by_id(7, 0x1E + p->frame, x + p->offx, y + D_8013EF00/4 + p->offy, screen_brightness, p->size);
@@ -296,6 +305,7 @@ void func_800E2090(s32 x, s32 y)
                 // oh this is directional sound????
                 func_800E0330(0x3700, 100, ((x + p->offx) * 0x7F) / 0x140, 0x3A);
             }
+
             if (--(p->timer) == 0) {   // oh it's the timer
                 p->frame += 1;
                 p->timer = D_8013ED84;
@@ -304,11 +314,9 @@ void func_800E2090(s32 x, s32 y)
             if (p->frame == 8) {
                 p->offx = -53 + random_range(0, 106);
                 p->offy = -52 + random_range(0, 104);
-                p->size = random_range(0.5*ONE, 1.5*ONE);
+                p->size = random_range(ONE*0.5, ONE*1.5);
                 p->frame = 0;
-                
             }
-
         }
     } else {
         y += tower_offy;
@@ -592,29 +600,6 @@ bruh:
     do { func_800E6D00(); func_800E3D20();  \
          func_800E3D70(); func_800E6D94(); } while ((x));
 
-// custom sequence by myself
-s32 sequence_funny(void)
-{
-    func_800E0398(0xFE);
-    stage_text_anim_set_enabled(0);
-    //func_800E1500();    // set robbit on island 1?
-    func_800E4064();
-    while (1) {
-        func_800E0F9C(0x23);    // start robbit and ship animation
-        WAIT_WHILE(robbit_anim_playing);    // DOES NOT WAIT FOR SHIP TO FINISH
-        func_800E1124(0x23);    // robbit jump to island 2
-        WAIT_WHILE(robbit_anim_playing);
-        func_800E1288(0x23);    // robbit jump to island 3
-        WAIT_WHILE(robbit_anim_playing);
-        //func_800E1CA0(0x1E);
-        //WAIT_WHILE(robbit_anim_playing);
-    }
-    func_800E03D0(1);
-    stage_text_anim_set_enabled(1);
-    func_800E3CB8();
-    return func_800E413C();
-}
-
 // 4 callers
 // this function plays the jump on island 1 animation and then goes to loop
 int sequence_enter_world(void) // entrace sequence 1
@@ -739,37 +724,70 @@ s32 sequence_finished_3(void)
 }
 
 // movie data
-extern char* D_800EAA04[13];
-extern char* D_800EAA38[13];
-extern s32 D_800EAA6C[13];
-extern s32 D_800EAAA0[13];
+//const char* weird_str = "$$$$$$$$.$$$";
+char* D_800EAA04[13] = {
+    /*weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str,
+    weird_str*/
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$",
+    "$$$$$$$$.$$$"
+};
+char* D_800EAA38[13] = {
+    "MOVIE\\W1ST.STR",
+    "MOVIE\\W2ST.STR",
+    "MOVIE\\W3ST.STR",
+    "MOVIE\\W4ST.STR",
+    "MOVIE\\W5ST.STR",
+    "MOVIE\\W6ST1.STR",
+    "MOVIE\\W1ST.STR",
+    "MOVIE\\W2ST.STR",
+    "MOVIE\\W3ST.STR",
+    "MOVIE\\W4ST.STR",
+    "MOVIE\\W5ST.STR",
+    "MOVIE\\W6ST2.STR",
+    "MOVIE\\W6ST2.STR"
+};
+s32 D_800EAA6C[13] = {
+    0x00, 0xAF, 0x96, 0xA5, 0x87, 0x80, 0x00, 0xAF, 0x96, 0xA5, 0x87, 0x80, 0x80
+};
+s32 D_800EAAA0[13] = {
+    0x66, 0x66, 0x67, 0x66, 0x66, 0xAF, 0x66, 0x66, 0x67, 0x66, 0x66, 0xAF, 0xAF
+};
 
-
-// 3 big functions
-//INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E47D8);
 // normal selection
 void func_800E47D8(void) // TODO: this
 {
-    int rc = 0;
-    printf("world = %d\n", global_data->world);  // world
-    printf("stage = %d\n", global_data->stage);  // stage
-    printf("0xE8  = %d\n", global_data->unkE8);
-    
+    int rc = 0;   
     if (global_data->stage < 0) goto end;   // TODO: make this not shit. maybe default in switch?
-
     if (global_data->stage == 0 && global_data->unkE8 == 0) {
-        // FIXME: turning the movie of for testing
-        //func_800E7B68(D_800EAA38[global_data->world], 0, D_800EAAA0[global_data->world], 0);
+        func_800E7B68(D_800EAA38[global_data->world], 0, D_800EAAA0[global_data->world], 0);
         func_800E7358();    // setup scene
     }
     if (global_data->stage > 3) goto end;
     jt.audio_play_by_id(2);
-    // TESTING:
-    global_data->stage = 3;
+
     switch (global_data->stage) {
-    case 0:
-        rc = sequence_enter_world();
-        break;
     case 1:
         rc = sequence_finished_1();
         break;
@@ -778,8 +796,59 @@ void func_800E47D8(void) // TODO: this
         break;
     case 3:
         // TODO: going to 3 is a bit more complicated
-        sequence_finished_3();
-        //sequence_funny();
+        jt.audio_play_by_id(2);
+        
+        if (global_data->world != 6 && global_data->world != 12) {
+            if (shown_world == 0) {
+                sequence_finished_3();
+            } else {
+                shown_world -= 1;
+                sequence_finished_3();
+                shown_world += 1;
+            }
+            if (global_data->unkE8 == 0) {
+                while (jt.unk_flags() & 4);
+                s32 world = global_data->world;
+                func_800E7B68(D_800EAA04[world], D_800EAA38[world], D_800EAA6C[world], D_800EAAA0[world]);
+                func_800E7358();
+                jt.audio_play_by_id(2);
+            }
+            func_800E2070();
+            func_800E278C();
+            world_text_anim0_start(0x1E, 0xC000);
+            D_8013EDD8 = 0;
+            global_data->stage = 0;
+        } else {
+            shown_world = 5;
+            sequence_finished_3();
+            while (jt.unk_flags() & 4);
+            if (global_data->world == 6) {
+                if (global_data->unk500 > 999999)
+                    global_data->unkE9 |= 1;
+                // if here, but never taken?
+                func_800E7D8C("MOVIE\\NL_END1.STR", "MOVIE\\NL_END2.STR", 0x97, 0x56);
+                global_data->unkE4 = 7;
+                global_data->world = 7;
+            } else {
+                func_800E7D8C("MOVIE\\NL_END1.STR", "MOVIE\\NL_END2.STR", 0x13B, 0x804);
+                global_data->unkE4 = 12;
+                global_data->world = 12;
+                if (global_data->unk500 > 999999) {
+                    global_data->unkE9 |= 2;
+                    global_data->unkE4 = 13;
+                    global_data->world = 13;
+                    if (global_data->unkE9 & 1) {
+                        global_data->unkE4 += 1;
+                        global_data->world += 1;
+                    }
+                }
+            }
+            func_800E7358();
+            rc = -1;
+            break;
+        }
+    case 0:
+        rc = sequence_enter_world();
         break;
     }    
     // TODO: the rest of this thing lol

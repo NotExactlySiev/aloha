@@ -2,22 +2,6 @@
 
 .section .bss
 
-glabel D_8013F340
-    .space 0x4
-
-glabel D_8013F344
-    .space 0x4
-
-glabel D_8013F348
-    .space 0x4
-
-glabel D_8013F34C
-    .space 0x4
-
-glabel D_8013F350
-    .space 0x40
-
-
 glabel D_8013F390
     .space 0x2
 

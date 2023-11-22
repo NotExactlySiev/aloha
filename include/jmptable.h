@@ -65,7 +65,9 @@ extern struct {
     u32         (*GetVideoMode)(void);
     UNK(414, 767);
     void (*play_vab)(s32, void*, s32);  // audio play by addr? play file?
-    UNK(769,  784);
+    UNK(769, 779);
+    u32         (*unk_flags)(void);
+    UNK(781, 784);
     void        (*audio_unk0)(s32 arg0, s16 arg1, s16 arg2);
     void        (*audio_unk1)(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
     UNK(787, 816);
