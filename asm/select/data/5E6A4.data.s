@@ -1780,57 +1780,9 @@ glabel robbit_anim_playing
 /* 5F5E0 8013EDE0 */ .word 0x00000000
 /* 5F5E4 8013EDE4 */ .word 0x00000000
 
-glabel scrolling
-/* 5F5E8 8013EDE8 */ .word 0x00000000
-/* 5F5EC 8013EDEC */ .word 0x00000000
-
-glabel island1_offx
-/* 5F5F0 8013EDF0 */ .word 0x00000000
-/* 5F5F4 8013EDF4 */ .word 0x00000000
-
-glabel island1_offy
-/* 5F5F8 8013EDF8 */ .word 0x00000000
-/* 5F5FC 8013EDFC */ .word 0x00000000
-
-glabel island2_offx
-/* 5F600 8013EE00 */ .word 0x00000000
-/* 5F604 8013EE04 */ .word 0x00000000
-
-glabel island2_offy
-/* 5F608 8013EE08 */ .word 0x00000000
-/* 5F60C 8013EE0C */ .word 0x00000000
-
-glabel island3_offx
-/* 5F610 8013EE10 */ .word 0x00000000
-/* 5F614 8013EE14 */ .word 0x00000000
-
-glabel island3_offy
-/* 5F618 8013EE18 */ .word 0x00000000
-/* 5F61C 8013EE1C */ .word 0x00000000
-
-glabel tower_offx
-/* 5F620 8013EE20 */ .word 0x00000000
-/* 5F624 8013EE24 */ .word 0x00000000
-
-glabel tower_offy
-/* 5F628 8013EE28 */ .word 0x00000000
-/* 5F62C 8013EE2C */ .word 0x00000000
-
 glabel D_8013EE30
 /* 5F630 8013EE30 */ .word 0x00000000
 /* 5F634 8013EE34 */ .word 0x00000000
-
-glabel selected_world
-/* 5F638 8013EE38 */ .word 0x00000000
-/* 5F63C 8013EE3C */ .word 0x00000000
-
-glabel scroll_amount
-/* 5F640 8013EE40 */ .word 0x00000000
-/* 5F644 8013EE44 */ .word 0x00000000
-
-glabel scroll_delta
-/* 5F648 8013EE48 */ .word 0x00000000
-/* 5F64C 8013EE4C */ .word 0x00000000
 
 glabel world_text_anim0_t
 /* 5F650 8013EE50 */ .word 0x00000000

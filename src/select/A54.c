@@ -110,10 +110,10 @@ extern u32 world_text_anim1_t;
 
 extern s32 robbit_anim_playing;  // wrong one
 
-extern s32 scrolling;
-extern s32 scroll_amount;
-extern s32 scroll_delta;
-extern s32 selected_world;
+s32 scrolling;
+s32 scroll_amount;
+s32 scroll_delta;
+s32 selected_world;
 extern s32 shown_world;
 
 void world_text_anim0_start(s32 target, s32 magnitude)
@@ -201,14 +201,18 @@ extern s32 island2_anim_t;
 extern s32 island3_anim_t;
 extern s32 tower_anim_t;
 
-extern s32 island1_offx;
-extern s32 island1_offy;
-extern s32 island2_offx;
-extern s32 island2_offy;
-extern s32 island3_offx;
-extern s32 island3_offy;
-extern s32 tower_offx;
-extern s32 tower_offy;
+
+
+
+
+s32 island1_offx;
+s32 island1_offy;
+s32 island2_offx;
+s32 island2_offy;
+s32 island3_offx;
+s32 island3_offy;
+s32 tower_offx;
+s32 tower_offy;
 
 void islands_anim_update(void)
 {
@@ -226,16 +230,11 @@ void islands_anim_update(void)
     tower_anim_t += 0x3A;
 }
 
-// robbit.c
-
-// robbit.c OVER
-
-
 typedef struct {
     s32 offx;
     s32 offy;
     s32 frame;
-    s32 unk3;   // timer
+    s32 timer;   // timer
     s32 size;
 } Explosion;
 
@@ -252,20 +251,19 @@ extern s32 D_8013ED84;  // compared to unk2
 #define TOWER_STATE_FALLEN  2
 
 // start tower exploding animation
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1F88);
-void _func_800E1F88(void)
+//INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1F88);
+void func_800E1F88(void)
 {
-    printf("SETTING\n");
     for (int i = 0; i < 4; i++) {
         Explosion* p = &D_8013F340[i];
-        //printf("%d to %d\n", i, D_8013ED84);
-        p->frame = 2;
-        p->unk3 = D_8013ED84;
-        //p->unk0 = 
+        p->offx = -53 + random_range(0, 106);
+        p->offy = -52 + random_range(0, 104);
+        p->size = random_range(0.5*ONE, 1.5*ONE);
+        p->frame = random_range(0, 6);
+        p->timer = D_8013ED84;
     }
 
-    tower_state = 1;     // start explosion
-
+    tower_state = TOWER_STATE_FALLING;     // start explosion
     tower_fall_height = 0; 
     D_8013EF00 = 0; 
     D_8013EF08 = 2; 
@@ -294,13 +292,13 @@ void func_800E2090(s32 x, s32 y)
         for (int i = 0; i < 4; i++) {
             Explosion* p = &D_8013F340[i];
             sprite_draw_by_id(7, 0x1E + p->frame, x + p->offx, y + D_8013EF00/4 + p->offy, screen_brightness, p->size);
-            if (p->frame == 0 && p->unk3 == D_8013ED84) {
+            if (p->frame == 0 && p->timer == D_8013ED84) {
                 // oh this is directional sound????
                 func_800E0330(0x3700, 100, ((x + p->offx) * 0x7F) / 0x140, 0x3A);
             }
-            if (--(p->unk3) == 0) {   // oh it's the timer
+            if (--(p->timer) == 0) {   // oh it's the timer
                 p->frame += 1;
-                p->unk3 = D_8013ED84;
+                p->timer = D_8013ED84;
             }
 
             if (p->frame == 8) {
@@ -377,7 +375,6 @@ void func_800E25E4(void)
     render_island2(shown_world, scroll_off + ISLAND2_X + island2_offx, ISLAND2_Y + island2_offy);
     render_island3(shown_world, scroll_off + ISLAND3_X + island3_offx, ISLAND3_Y + island3_offy);
     func_800E2090(scroll_off + TOWER_X, TOWER_Y);
-    // TODO: draw tower
 }
 
 
@@ -932,7 +929,9 @@ void func_800E5714(void)
 extern const u32 common_assets[];
 void func_800E5824(void) {
     __builtin_memcpy(D_80060000, common_assets, 0x20000);
+
 }
+
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E58C4);
 
