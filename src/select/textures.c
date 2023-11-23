@@ -1,7 +1,7 @@
 // loads all the textures needed into VRAM
 
 #include "common.h"
-#include "jmptable.h"
+#include <shared.h>
 
 #include <libgpu.h>
 

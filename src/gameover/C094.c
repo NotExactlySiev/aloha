@@ -2,32 +2,10 @@
 #include <libspu.h>
 #include <libgpu.h>
 
-// stuff from main executable. TODO move these to a header, all execs need them
-#define RANGE(a,b)    char _## a ##_## b [b-a+1]
+#include "shared.h"
 
-// maybe this isn't just game config, but all vars shared between files?
-typedef struct {
-    //char raw[0x500];
-    RANGE(0, 0x4FF);
-    // game over screen vars
-    s32 unk500;
-    s32 unk504;
-    u8  unk508;
-    u8  unk509;
-    u8  unk50A;
-    u8  unk50B;
-    RANGE(0x50C, 2047);    // TODO: figure out how large this whole thing really is
-} config_t;
-
-typedef int(*fnp)();
-typedef union {
-    fnp list[1024];
-    // TODO: funcs struct (from the decomp file for main)
-} jt_t;
-
-extern jt_t jmptable;
-
-
+// is this how they did it?
+#define GetGraphType()  jt.GetGraphType()
 
 // data from here
 typedef struct {
@@ -36,24 +14,20 @@ typedef struct {
     u32    ot[4];
     u32*   next;
     u32    prims[0x8000];
-} graph_buffer_t;
+} GBuffer;
 
-// the uv field is encoded in 16 bits and needs to be unwrapped
-// u has 5 sigbits, v has 7
-#define U(s)   (((s).uv & 0x1F) << 3)
-#define V(s)   ((((s).uv & 0x0FFF) >> 5) << 3)
 typedef struct {
     s8  dx;
     s8  dy;
-    u16 uv;
-} sprt_t;
+    u16 uv;     // tile index 0-255
+} SpriteThing;  // SpriteTile
 
 typedef struct {
     u32    count;
-    sprt_t sprts[];
-} sprt_group_t;
+    SpriteThing sprts[];
+} Sprite;
 
-sprt_group_t* sprt_data[64];
+Sprite* sprt_data[64];
 
 // these might be not s32 but paired as structs?
 // these are animations for sprites,
@@ -61,7 +35,7 @@ sprt_group_t* sprt_data[64];
 s32 intarrs[3][22] = {
     { 13, 1, -1, 0 },
     { 0, 4, 1, 4, 2, 4, 3, 4, 8, 10, 9, 10, 10, 10, 11, 10, 12, 10, 13, 10, -1, 18 },
-    { 16, 8, 17, 8, -1, 0},
+    { 16, 8, 17, 8, -1, 0 },
 };
 s32* seq = 0;
 s32 seq_val = 0;
@@ -89,9 +63,11 @@ s32 D_800ED3EC = 0;
 s32 D_800ED3F4 = 0;
 s32 seq_idx = 0;
 s32 seq_timer = 0;
-jt_t *jtptr = &jmptable;
 
 s32 D_800ED340[5] = { 40, 42, 41, 42, -1 };
+
+RECT D_800ED398 = { .w = 0xFF, .h = 0xFF };
+
 
 // these change with tv standard
 s32 D_800ED384 = 1200;
@@ -99,15 +75,13 @@ s32 D_800ED424 = 0;
 s32 D_800ED42C = 0; // max sprite index (sprite count)
 
 s32 current_buffer_idx;               // current buffer id
-graph_buffer_t  graph_buffers[2];    // buffers
-graph_buffer_t *current_buffer;       // current
+GBuffer  graph_buffers[2];    // buffers
+GBuffer *current_buffer;       // current
 
 u16 D_8012DF64[6];      // global cluts for this file
 
-#define JTFUNC(id)  (*jtptr->list[id])
 
 // decls
-
 u32 input_das_read(void);
 
 
@@ -124,7 +98,7 @@ void func_800EB894(void)
 // plays some sound effect
 void play_effect(s32 arg)
 {
-    JTFUNC(0x311)(arg, 0x3e, 100);
+    jt.audio_unk0(arg, 0x3e, 100);
 }
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8F8);
@@ -236,7 +210,7 @@ void func_800EBF58(u32 buttons)
     if (buttons & BUTTONS_ACCEPT) {
         play_effect(0x2600);
         stage = 2;
-        JTFUNC(0x127)(12, 0, 0);    // add something to sndqueue idfk
+        jt.sound_fade_out(12, 0, 0);    // add something to sndqueue idfk
         if (selected == 0) {
             // selected YES
             seq_select(2);
@@ -270,7 +244,7 @@ void func_800EC098(void)
     func_800EBEA8();
     D_800ED3E4 = 0x2D;
 
-    if (JTFUNC(7)() == TV_PAL) {
+    if (jt.get_tv_system() == TV_PAL) {
         D_800ED424 = 9;
         D_800ED384 = 1000;
     } else {
@@ -305,7 +279,7 @@ void func_800EC14C(void)
 
 void func_800EC23C(s32 arg)
 {
-    func_800EB8F8();
+    func_800EB8F8(arg);
     func_800EBF58(arg);
 }
 
@@ -326,7 +300,7 @@ void func_800EC268(void)
 }
 
 
-void func_800EC318(void)
+void render_routine(void)
 {
     func_800EBA40();
     func_800EBEB8();
@@ -335,18 +309,17 @@ void func_800EC318(void)
     func_800EC14C();
 }
 
-// closely matching with 4.1 -O1
 void func_800EC358(void)
 {
-    config_t* conf;
-    conf = JTFUNC(0x14)();
+    GlobalData* global = jt.global_ptr();
     
-    conf->unk500 = 0;
-    conf->unk508 = 1;
-    conf->unk509 = 0;
-    conf->unk50A = 0;
-    conf->unk50B = 0;
-    conf->unk504 = 3;
+    global->unk500 = 0;
+    global->unk504 = 3;
+    global->unk508 = 1;
+    global->unk509 = 0;
+    global->unk50A = 0;
+    global->unk50B = 0;
+    
 }
 
 
@@ -355,127 +328,126 @@ int main(void)
     u32 temp_s0;
     s32 var_a0;
     s32 var_v0;
-    u8 temp_v0;
-    u8* temp_s2;
     int choice;
-    
+
+    // TEST: let's disable all audio shit
     func_800ED268();    // deliver events
     func_800ECDA8();    // set up graphics env
     func_800EC098();    // set up some constants
     
-    JTFUNC(0x30F)();
+    //jt.audio_unk2();
     
     input_das_setup();
-    temp_s2 = JTFUNC(0x14)();   // get shared data
-    JTFUNC(0x129)(&D_800ED370); // set global vol void(SpuVolume*)
-    JTFUNC(0x305)(0x3000);
-    JTFUNC(0x332)(0);    // mc_set_some_var
+    GlobalData* global = jt.global_ptr();   // get shared data
+    //jt.set_global_volume(&D_800ED370); // set global vol void(SpuVolume*)
+    //jt.audio_unk_volume(0x3000);
+    //jt.audio_unk3(0);    // mc_set_some_var
 
     // play some audio thing
-    temp_v0 = temp_s2[0x514];
-    if (temp_v0 > 5) temp_v0 = 5;
-    JTFUNC(0x331)(D_800ED354[temp_v0]); // int(int)
+    u8 world = global->world;
+    if (world > 5) world = 5;
+    //jt.audio_play_by_id(D_800ED354[world]);
+    
     // cycle through both buffers once
-    func_800EC608();    // clear
-    func_800EC684();    // draw
-    func_800EC608();    // clear
-    func_800EC684();    // draw
-    JTFUNC(0x181)(0);    // call_wait_frame
-    JTFUNC(0x183)(1);    // call_SetDispMask
-    
+    gbuffer_swap();    // clear
+    gbuffer_render();    // draw
+    gbuffer_swap();    // clear
+    gbuffer_render();    // draw
+    jt.wait_for_vsync();    // needs 0? TODO
+    jt.SetDispMask(1);
+
     seq_select(1);
-    
+
     do {
         temp_s0 = input_das_read();  // read input
-        func_800EC608();            // swap and clear
+        gbuffer_swap();            // swap and clear
         func_800EC23C(temp_s0);     // process input
-        func_800EC318();            // update graphics
-        func_800EC684();            // render graphics
+        render_routine();            // update graphics
+        gbuffer_render();            // render graphics
     } while (stage != 4);
     
-    JTFUNC(0xC3C)();
+    printf("and out!\n");
+
+    jt.audio_unk2();
 
     choice = 0;
     
     if (selected == 0) {
-        temp_s2[0x515] = 0;
+        global->world = 0;
         func_800EC358();
         choice = 1;
     }
-    JTFUNC(0xC)(choice);
+    jt.execs_set_next(choice);
 }
 
 // ### GRAPHICS FUNCTIONS
-void func_800EC608(void)
+void gbuffer_swap(void)
 {
     // swap buffer
     current_buffer_idx = !current_buffer_idx;
     current_buffer = &graph_buffers[current_buffer_idx];
-    // clear ot and reset prim buffer
-    JTFUNC(0x187)(current_buffer->ot, 4);
+    // clear ots and reset prim buffer
+    jt.ClearOTag(current_buffer->ot, 4);
     current_buffer->next = current_buffer->prims;
 }
 
-void func_800EC684(void)
+void gbuffer_render(void)
 {
-    JTFUNC(0x102)();
-    JTFUNC(0x18C)(0);
-    JTFUNC(0x191)(0);
+    jt.snd_queue_exec();
+    jt.DrawSync(0);
+    jt.VSync(0);
     // put env and draw
-    JTFUNC(0x185)(&current_buffer->disp);
-    JTFUNC(0x186)(&current_buffer->draw);
+    jt.PutDispEnv(&current_buffer->disp);
+    jt.PutDrawEnv(&current_buffer->draw);
     // draw ot
-    JTFUNC(0x189)(current_buffer->ot);
+    jt.DrawOTag(current_buffer->ot);
 }
 
-// load sprite data
-void load_sprites(u32* raw)
+// load sprite heads
+void load_sprites(u32* data)
 {
     s32 i;
-    sprt_group_t** gp;
     // first byte is the number of groups
-    D_800ED42C = *raw++;
-    gp = sprt_data;
-    for (i = 0; i < D_800ED42C; i++) {
-        *gp = raw;
-        // skip past to the next group (count entries and 1 size byte)
-        raw += (*gp)->count + 1;
-        gp++;
+    D_800ED42C = *data++;
+    for (int i = 0; i < D_800ED42C; i++) {
+        sprt_data[i] = data++;
+        data += sprt_data[i]->count;
     }
 }
 
 // put loaded sprite data into ots
 // rather, put a specific metasprite into ots, using its metadata
-void _load_gbuffer(u16 *cluts, s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
+void _load_gbuffer(u16 *cluts, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx)
 {
-    SPRT_8 *p;
-    sprt_group_t *group;
-    sprt_t *s;
-    s32 i;
-    s16 x,y;
+    Sprite *group;
+    SpriteThing *s;
+    SPRT_8* p;
 
-    if (idx > D_800ED42C) return;
+    if (id > D_800ED42C) return;
     
-    p = current_buffer->next;
-    group = sprt_data[idx];
-    for (i = 0; i <= group->count; i++) {
+    group = sprt_data[id];
+    for (int i = 0; i < group->count; i++) {
+        p = current_buffer->next;
         s = &group->sprts[i];
-        x = offx + s->dx;
-        y = offy + s->dy;
         // TODO: take out the magic numbers
-        if (!((x < 0xfd) && (x > -9) && (y < 0xe5) && (y > -9))) continue;
+        if (!((x+s->dx < 0xfd) && (x+s->dx > -9) && (y+s->dy < 0xe5) && (y+s->dy > -9))) continue;
         setSprt8(p);
-        setUV0(p, U(*s), V(*s));
+        setUV0(p, 8*(s->uv % 32), 8*(s->uv / 32));
         setRGB0(p, col, col, col);
-        setXY0(p, x, y);
-        p->clut = cluts[clutidx];    
-        addPrim(current_buffer->ot[z], p);
-        current_buffer->next += 1;
+        setXY0(p, x+s->dx, y+s->dy);
+        p->clut = cluts[clutidx+3];
+        addPrim(&current_buffer->ot[z], p);
+        current_buffer->next = p + 1;
     }
+    
+    DR_MODE* q = current_buffer->next;
 
-    // rest of it remains??? what about draw env
+    jt.SetDrawMode(q, 0, 0, cluts[2], &D_800ED398);
+    addPrim(&current_buffer->ot[z], q);
+    current_buffer->next = q + 1;    
 }
 
+// draws something into the buffer's ot
 void load_gbuffer(s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
 {
     _load_gbuffer(D_8012DF64, z, idx, offx, offy, col, clutidx);
@@ -489,24 +461,22 @@ extern u16 D_800EAD6C[256];
 extern u16 D_800EAF74[1152];
 
 // or maybe this load the background?
-void func_800EC9AC(u32 raw, s16 x, s16 y)
+void func_800EC9AC(u32 *raw, s16 x, s16 y)
 {
-    s32 i,j;
     RECT rect = {
-        .w = 4,
-        .h = 8,
         .x = x,
         .y = y,
+        .w = 4,
+        .h = 8,
     };
 
-    // I'm not sure what this part is loading, but the cluts are after this
-    for (i = 0; i < 32; i++) {
-        for (j = 0; j < 32; j++) {
-            JTFUNC(0x18A)(&rect, raw);  // LoadImage
-            JTFUNC(0x18C)(0);           // DrawSync
+    // loading the tiles for sprites
+    for (int i = 0; i < 32; i++) {
+        for (int j = 0; j < 32; j++) {
+            jt.LoadImage(&rect, raw);  // LoadImage
+            jt.DrawSync(0);           // DrawSync
             raw += 16;
             rect.x += rect.w;
-            
         }
         rect.x = x;
         rect.y += rect.h;
@@ -518,46 +488,44 @@ void func_800EC9AC(u32 raw, s16 x, s16 y)
     rect.h = 1;
 
     rect.y = 240;
-    JTFUNC(0x18A)(&rect, D_800EA96C);
-    JTFUNC(0x18C)(0);
+    jt.LoadImage(&rect, D_800EA96C);
+    jt.DrawSync(0);
 
-    rect.y = 240;
-    JTFUNC(0x18A)(&rect, D_800EAB6C);
-    JTFUNC(0x18C)(0);
+    rect.y = 241;
+    jt.LoadImage(&rect, D_800EAB6C);
+    jt.DrawSync(0);
 
-    rect.y = 240;
-    JTFUNC(0x18A)(&rect, D_800EAD6C);
-    JTFUNC(0x18C)(0);
+    rect.y = 242;
+    jt.LoadImage(&rect, D_800EAD6C);
+    jt.DrawSync(0);
 
     // load the bunny image
     rect.x = 256;
     rect.y = 256;
     rect.w = 24;
     rect.h = 48;
-    JTFUNC(0x18A)(&rect, D_800EAD6C);
-    JTFUNC(0x18C)(0);
+    jt.LoadImage(&rect, D_800EAF74);
+    jt.DrawSync(0);
 }
 
-RECT D_800ED398 = { .w = 0xFF, .h = 0xFF };
 
 void func_800ECBB4(s16 x, s16 y, s16 w, s16 h, u8 col)
 {
     POLY_FT4 *p;
     DR_MODE *q;
     u32 tpage;
-
     p = current_buffer->next;
     setPolyFT4(p);
     setRGB0(p, col, col, col);
     setUV4(p, 0, 0, 0, 0, 0, 24, 0, 24);
     setXY4(p, x, y, x+w, y, x, y+h, x+w, y+h);
-    p->tpage = JTFUNC(400)() ? 0x224 : 0x94;    // GetGraphType
-    p->clut  = 0x3c00;
+    p->tpage = getTPage(1, 0, 256, 256);
+    p->clut  = getClut(0, 240);
     addPrim(current_buffer->ot[1], p);
 
-    tpage = JTFUNC(400)() ? 0x224 : 0x94;
+    tpage = getTPage(1, 0, 256, 256);
     q = nextPrim(p);
-    JTFUNC(0x18D)(q, 0, 0, tpage, &D_800ED398); // SetDrawEnv
+    jt.SetDrawMode(q, 0, 0, tpage, &D_800ED398);
     addPrim(current_buffer->ot[1], q);
 
     current_buffer->next = nextPrim(q);
@@ -569,10 +537,11 @@ extern u32 D_800E0AEC[];    // background? please be background
 void func_800ECD18(void)
 {
     load_sprites(D_800E0000);
-    D_8012DF64[2] = JTFUNC(400)() ? 0x204 : 0x84;
-    D_8012DF64[3] = 0x3c00; 
-    D_8012DF64[4] = 0x3c40;
-    D_8012DF64[5] = 0x3c80;
+    D_8012DF64[2] = getTPage(1, 0, 256, 0);
+    //D_8012DF64[2] = 0x204; //GetGraphType() ? 0x204 : 0x84;
+    D_8012DF64[3] = getClut(0, 240);
+    D_8012DF64[4] = getClut(0, 241);
+    D_8012DF64[5] = getClut(0, 242);
     func_800EC9AC(D_800E0AEC, 256, 0);
 }
 
@@ -584,19 +553,20 @@ void func_800ECDA8(void)
     DRAWENV *draw;
     DISPENV *disp;
 
-    JTFUNC(0x181)();    // wait_frame
-    JTFUNC(0x183)(0);   // SetDispMask
+    jt.wait_for_vsync();    // wait_frame
+    jt.SetDispMask(0);   // SetDispMask
     current_buffer_idx = 0;
-    func_800EC608();    // clear
+    gbuffer_swap();    // clear
     func_800ECD18();
-    JTFUNC(0x18E)(&graph_buffers[0].disp, 0, 0, 256, 240);
-    JTFUNC(0x18E)(&graph_buffers[1].disp, 0, 256, 256, 240);
-    JTFUNC(0x18F)(&graph_buffers[0].draw, 0, 256, 256, 240);
-    JTFUNC(0x18F)(&graph_buffers[1].draw, 0, 0, 256, 240);
+    jt.SetDefDispEnv(&graph_buffers[0].disp, 0, 0, 256, 240);
+    jt.SetDefDispEnv(&graph_buffers[1].disp, 0, 256, 256, 240);
+    jt.SetDefDrawEnv(&graph_buffers[0].draw, 0, 256, 256, 240);
+    jt.SetDefDrawEnv(&graph_buffers[1].draw, 0, 0, 256, 240);
     
     for (i = 0; i < 2; i++) {
         draw = &graph_buffers[i].draw;
         disp = &graph_buffers[i].disp;
+        draw->isbg = 1;
         draw->r0 = 0;
         draw->g0 = 0;
         draw->b0 = 0;
@@ -604,7 +574,7 @@ void func_800ECDA8(void)
         draw->dtd = 0;
         draw->dfe = 0;
 
-        tv_standard = JTFUNC(7)();
+        tv_standard = jt.get_tv_system;
 
         disp->screen.x = 4;
         disp->screen.y = tv_standard == TV_PAL ? 12 : 36;
@@ -631,7 +601,7 @@ s32 das_state = -1;
 // set up DAS times based on framerate
 void input_das_setup(void)
 {
-    if (JTFUNC(7)() == TV_PAL) {
+    if (jt.get_tv_system() == TV_PAL) {
         initial_delay = 8;
         repeat_delay = 3;
     } else {
@@ -651,7 +621,7 @@ u32 input_das_read(void)
     u32 face;
     u32 nav;
 
-    raw = JTFUNC(0xF0)();
+    raw = jt.PadRead();
     face_raw = raw & 0xF000;
     nav_raw  = raw & 0x08E0;
     face = 0;

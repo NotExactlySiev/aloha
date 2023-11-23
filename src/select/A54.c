@@ -1,5 +1,5 @@
 #include "common.h"
-#include "jmptable.h"
+#include <shared.h>
 
 #include <libetc.h>
 // TODO: freeplay has the bug when going across pages
@@ -7,25 +7,6 @@
 s32 random_range(s32, s32);
 
 extern u32 D_80060000[];
-
-#define UNK(a,b)    u8 unk##a[b - a + 1]
-typedef struct {
-    UNK(0, 0xE3);
-    s8  unkE4;
-    s8  unkE5;
-    s8  unkE6;
-    s8  unkE7;
-    s8  unkE8;  // played before?
-    s8  unkE9;
-    UNK(0xEA, 0x4FF);
-    u32  unk500;
-    UNK(0x504, 0x513);
-    s8  world;
-    s8  stage;  // next one to play
-    s8  unk516;
-    s8  debug_features;
-    s8  unk519; // have beaten the game?
-} GlobalData;
 
 extern GlobalData* global_data;
 
@@ -893,7 +874,7 @@ void func_800E5258(void)
         if (scrolling == 0) {
             buttons = func_800E77D4(0);
         }
-        jt.PadRead(0);  // why? print the raw for debug?
+        //jt.PadRead(0);  // why? print the raw for debug?
         world_text_anim1_enabled = 0; // world caption animation
         if (buttons & PADLleft) {
             if (scrolling == 0) {

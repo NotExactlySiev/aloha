@@ -1,5 +1,5 @@
 #include "common.h"
-#include "jmptable.h"
+#include <shared.h>
 
 // TODO: these go in a common header
 extern u32 screen_brightness;  // screen brightness (or maybe fade value is better?)

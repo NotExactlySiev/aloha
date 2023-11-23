@@ -2,6 +2,7 @@
 #define _GBUFFER_H
 
 #include "common.h"
+#include <libgpu.h>
 
 typedef struct {
     DISPENV disp;

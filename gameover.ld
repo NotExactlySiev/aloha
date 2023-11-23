@@ -23,7 +23,7 @@ SECTIONS
     .None 0x800E0000 : AT(None_ROM_START) SUBALIGN(16)
     {
         None_RODATA_START = .;
-        build/gameover/800.rodata.o(.rodata);
+        *(.rodata*);
         None_RODATA_END = .;
         None_RODATA_SIZE = ABSOLUTE(None_RODATA_END - None_RODATA_START);
         None_TEXT_START = .;
