@@ -1,3 +1,5 @@
+__addr  = 0x800E0000;
+
 jmptable = 0x80010000;
 jt = jmptable;
 

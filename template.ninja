@@ -25,7 +25,7 @@ rule cc
 
 rule link
     command = ${cross}ld $ldflagas -Map=build/$modid.map $
-              -T $modid.ld -T symbols.$modid.ld $in -o $out
+              -T symbols.$modid.ld -T shared.ld $in -o $out
 rule objcopy
     command = ${cross}objcopy -O binary $in $out
 

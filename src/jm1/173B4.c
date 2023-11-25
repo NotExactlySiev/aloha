@@ -927,7 +927,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6E74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6EEC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
+func_800D6F14() {}  // FIXME !!!
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D71A4);
 

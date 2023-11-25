@@ -1,3 +1,5 @@
+__addr  = 0x80018000;
+
 /* put symbols here that the non-decomped assemblies need */
 D_7FFFFF = 0x7FFFFF;
 D_80000004 = 0x80000004;

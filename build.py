@@ -107,7 +107,7 @@ for mod, files in proc.items():
     elf = "build/" + ext(mod, "elf")
     exe = "build/" + ext(mod, "exe")
 
-    build("link", elf, allObjs)
+    build("link", elf, allObjs + " | shared.ld")
     var("modid", mod)
 
     ## compress and finalize
