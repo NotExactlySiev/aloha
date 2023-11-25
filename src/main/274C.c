@@ -508,6 +508,7 @@ void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 
+// TODO: sound lol
 int sndqueue_exec_all(void)
 {
     s32 ret;
@@ -1155,7 +1156,6 @@ void execute_compressed(u32* addr, u32 stack)
 {
     EXEC header;
     EXEC* p;
-    
     __builtin_memcpy(&header, addr+4, 0x3c);
     lz1_decode((u8* ) (addr + 0x201), header.t_addr);
     header.s_addr = stack;

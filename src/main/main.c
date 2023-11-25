@@ -90,7 +90,7 @@ void file_execute_loop(void)
                 while (addr[0] != 0x582D5350 || addr[1] != 0x45584520) {
                     cd_fs_read(g_Files[g_CurrFile].addr, addr, 0);
                     k_printf("Exec File Read Error\n");
-                }    
+                }
             }
             execute_compressed(addr, 0);
         } else {
@@ -98,6 +98,7 @@ void file_execute_loop(void)
             execute_uncompressed(g_Files[g_CurrFile].addr, 0);
         }
         g_CurrFile = getNextFile();
+        
     }
 }
 
