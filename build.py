@@ -18,6 +18,7 @@ specialFiles = {
     "main": ["SCUS_941.03", False],
     "jm1": ["JM1/MAIN.PEX", True],
     "select": ["SELECT.PEX", True],
+    "gameover": ["GAMEOVER.PEX", True],
 }
 
 

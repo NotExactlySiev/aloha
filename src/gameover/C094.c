@@ -453,12 +453,18 @@ void load_gbuffer(s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
     _load_gbuffer(D_8012DF64, z, idx, offx, offy, col, clutidx);
 }
 
+// # LOADING TEXTURES
+
+// tiles
+extern u32 D_800E0000[];    // sprite metadata (pos and uv)
+extern u32 D_800E0AEC[];    // big texture of tiles 256x256
 // cluts
 extern u16 D_800EA96C[256];
 extern u16 D_800EAB6C[256];
 extern u16 D_800EAD6C[256];
 // image (background?)
-extern u16 D_800EAF74[1152];
+// TODO: struct this:
+extern u16 D_800EAF6C[1156];
 
 // or maybe this load the background?
 void func_800EC9AC(u32 *raw, s16 x, s16 y)
@@ -504,7 +510,7 @@ void func_800EC9AC(u32 *raw, s16 x, s16 y)
     rect.y = 256;
     rect.w = 24;
     rect.h = 48;
-    jt.LoadImage(&rect, D_800EAF74);
+    jt.LoadImage(&rect, D_800EAF6C + 4);
     jt.DrawSync(0);
 }
 
@@ -530,9 +536,6 @@ void func_800ECBB4(s16 x, s16 y, s16 w, s16 h, u8 col)
 
     current_buffer->next = nextPrim(q);
 }
-
-extern u32 D_800E0000[];    // sprite metadata (pos and uv)
-extern u32 D_800E0AEC[];    // background? please be background
 
 void func_800ECD18(void)
 {

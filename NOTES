@@ -100,3 +100,17 @@ The file map doesn't seem to be as tidy and organized as main. Gonna have to fig
 8013DEF0    .data (libgte)  just gotta keep this in the same place
 8013F000    .bss
 
+## GAMEOVER.PEX
+
+None of the embedded files are compressed
+
+800E0000    sprite data
+800E0AEC    sprite tiles
+800EA96C    clut 0
+800EAB6C    clut 1
+800EAD6C    clut 2
+800EAF6C    bunny image (with header)
+800EB874    .rodata (one jump table)
+800EB894    .text
+800ED264    crt0
+800ED2B0    .data
