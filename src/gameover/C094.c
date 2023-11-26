@@ -4,13 +4,11 @@
 
 #include "shared.h"
 
-// is this how they did it?
-
 // data from here
 typedef struct {
     DISPENV disp;
     DRAWENV draw;
-    u32    ot[4];
+    u32    ot[4];   // layers
     u32*   next;
     u32    prims[0x8000];
 } GBuffer;
@@ -105,6 +103,8 @@ void play_effect(s32 arg)
 }
 
 INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8F8);
+// controls screen fade and general state
+//func_800EB8F8() {}
 
 void func_800EBA08(void)
 {
@@ -121,7 +121,6 @@ void func_800EBA20(void)
 // bounce animation
 void func_800EBA40(void)
 {
-    printf("STATE %d\n", bounce_anim_state);
     switch (bounce_anim_state) {
     case 0: // wait
         bounce_anim_counter -= 1;
@@ -431,7 +430,7 @@ int main(void)
     
     printf("and out!\n");
 
-    jt.audio_unk2();
+    //jt.audio_unk2();
 
     choice = 0;
     

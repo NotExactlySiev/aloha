@@ -18,7 +18,7 @@ shared one anyway.
 SCUS_941.03     0x80018000, 0x30000     CODE: 0x800188C8 - 0x800EB004   = 215503 instructions   WITHOUT PSYQ: - 0x80023994  = 11315 instructions 
 TITLE.PEX       0x800E0000, 0x15000     CODE: 0x800E0920 - 0x800EB004   = 10681  instructions
 SELECT.PEX      0x800E0000, 0x5F000     CODE: 0x800E0254 - 0x800EAA04   = 10732  instructions   WITHOUT PSYQ: - 0x800E7FC0  = 8027  instructions
-GAMEOVER.PEX    0x800E0000, 0xD800      CODE: 0x800EB894 - 0x800ED2B0   = 1671   instructions
+GAMEOVER.PEX    0x800E0000, 0xD800      CODE: 0x800EB894 - 0x800ED2B0   = 1671   instructions   NO PSYQ
 MAIN.PEX        0x800B0000, 0x53000     CODE: 0x800B0A68 - 0x800FD400   = 78438  instructions
 
 for now we're ignoring the MAIN.PEX files other than JM1.
