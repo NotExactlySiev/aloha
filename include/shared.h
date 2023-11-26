@@ -116,6 +116,7 @@ extern struct {
     UNK(819, 1023);
 } jt;
 
-
+// DON'T include this header in main, or this macro breaks things
+#define GetGraphType()  jt.GetGraphType()
 
 #endif

@@ -5,7 +5,6 @@
 #include "shared.h"
 
 // is this how they did it?
-#define GetGraphType()  jt.GetGraphType()
 
 // data from here
 typedef struct {
@@ -43,8 +42,13 @@ s32 seq_wait = 0;
 
 int D_800ED354[7] = { 32, 33, 34, 35, 36, 37, 32 };
 SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
-s32 D_800ED374 = -0x2400;       // dy
-s32 D_800ED378 = 0x600;         // ddy
+s32 bounce_y = -0x2400;       // y
+s32 bounce_dy = 0x600;         // dy
+s32 bounce_anim_counter = 60;            // initial counter
+s32 bounce_anim_state = 0;     // bounce animation state
+
+s32 D_800ED380 = 0; // the shut the fuck up counter
+
 
 // this might be a struct
 s32 D_800ED388 = 0;
@@ -53,9 +57,8 @@ s32 D_800ED390 = 40;
 
 s32 D_800ED394 = 0;
 s32 D_800ED3B4 = 0;
-s32 bounce_stage = 0;     // bounce animation state
 s32 D_800ED3C4 = 0;
-s32 D_800ED3CC = 0;     // color for something (screen fading?)
+s32 screen_brightness = 0;     // color for something (screen fading?)
 s32 stage = 0;          // stage of the entire sequence of this file. from fadein to fadeout
 s32 selected = 0;       // selected
 s32 D_800ED3E4 = 0;
@@ -89,7 +92,7 @@ u32 input_das_read(void);
 
 void func_800EB894(void)
 {
-    D_800ED3CC = 0;
+    screen_brightness = 0;
     stage = 0;
     D_800ED3EC = 0;
     D_800ED3F4 = 0;
@@ -106,17 +109,79 @@ INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8F8);
 void func_800EBA08(void)
 {
     D_800ED3B4 = 0x00005F00;
-    bounce_stage = 0;
+    bounce_anim_state = 0;
 }
 
 void func_800EBA20(void)
 {
-    D_800ED374 = 0x00005F00;
-    bounce_stage = 0;
+    bounce_y = 0x00005F00;
+    bounce_anim_state = 5;
 }
 
 // bounce animation
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBA40);
+void func_800EBA40(void)
+{
+    printf("STATE %d\n", bounce_anim_state);
+    switch (bounce_anim_state) {
+    case 0: // wait
+        bounce_anim_counter -= 1;
+        if (bounce_anim_counter < 0) bounce_anim_state = 1;
+        break;
+    case 1:
+        bounce_dy += 128;   // half?
+        bounce_y += bounce_dy;
+        if (bounce_y > 95 << 8) {
+            bounce_anim_state = 3;
+            bounce_y = 95 << 8;
+            seq_select(0);
+            play_effect(0xB00);
+            bounce_dy = -8 << 8;
+        }
+        break;
+    case 2: // final drop if NO is selected
+        if (D_800ED3F4 == 1) {
+            bounce_dy += 0x20;
+            bounce_y += bounce_dy;
+        }
+        if (D_800ED3F4 == -1) bounce_anim_state = 7;
+        break;
+    case 3: // just like 1
+        bounce_dy += 128;   // half?
+        bounce_y += bounce_dy;
+        if (bounce_y > 95 << 8) {
+            bounce_anim_state = 4;
+            bounce_y = 95 << 8;
+            seq_select(0);
+            play_effect(0xB00);
+            bounce_dy = -4 << 8;
+        }
+        break;
+    case 4: // just like 1
+        bounce_dy += 128;   // half?
+        bounce_y += bounce_dy;
+        if (bounce_y > (95 << 8)) {
+            bounce_anim_state = 5;
+            bounce_y = 95 << 8;
+            seq_select(0);
+            play_effect(0xB00);
+        }
+        break;
+    case 5: // start bunny animation
+    // TODO: the animation plays wrong, stops on the wrong frame
+        D_800ED3EC = 1;
+        D_800ED380 += 1;
+        if (D_800ED380 > D_800ED384) {
+            play_effect(0x5300);
+            D_800ED380 = 0;
+        }
+        break;
+    case 6: // selected YES
+        bounce_y += -0x800;
+        if (bounce_y <= -0x2000) bounce_anim_state = 7;
+        break;
+    }
+    load_gbuffer(3, 0x18, 124, bounce_y >> 8, screen_brightness, 0);
+}
 
 void func_800EBCE0(void)
 {
@@ -128,6 +193,7 @@ void func_800EBCF0(void)
     seq_select(0);
 }
 
+// bunny animation
 void seq_select(int idx)
 {
     seq = intarrs[idx];
@@ -160,18 +226,18 @@ void func_800EBD5C(void)
         }
 
         // whether the values have changed or not, call the function
-        load_gbuffer(1, seq_val, 0x78, 0x78, D_800ED3CC, 0);
+        load_gbuffer(1, seq_val, 0x78, 0x78, screen_brightness, 0);
         return;
     }
 
     // don't know what this part does
-    temp_v1_2 = (s32) D_800ED374 >> 8;
+    temp_v1_2 = (s32) bounce_y >> 8;
     if (temp_v1_2 > 0x77) {
         D_800ED3F4 = -1;
         return;
     }
 
-    func_800ECBB4(0x60, temp_v1_2 + 0x10, 0x30, 0x77 - temp_v1_2, D_800ED3CC);
+    func_800ECBB4(0x60, temp_v1_2 + 0x10, 0x30, 0x77 - temp_v1_2, screen_brightness);
 }
 
 void func_800EBEA8(void)
@@ -186,9 +252,9 @@ void func_800EBEA8(void)
 // This probably draw the menu options? With the color of the buttons changing based on the selection
 void func_800EBEB8(void)
 {
-    load_gbuffer(2, 32, 68, 144, D_800ED3CC, 0);
-    load_gbuffer(2, 33, 68, 160, D_800ED3CC, selected == 0);
-    load_gbuffer(2, 34, 68, 176, D_800ED3CC, selected == 1);
+    load_gbuffer(2, 32, 68, 144, screen_brightness, 0);
+    load_gbuffer(2, 33, 68, 160, screen_brightness, selected == 0);
+    load_gbuffer(2, 34, 68, 176, screen_brightness, selected == 1);
 }
 
 // TODO: where the fuck is lib pad? :/ I need macros for input
@@ -197,9 +263,6 @@ void func_800EBEB8(void)
 #define BUTTON_UP           0x1000
 #define BUTTON_DOWN         0x4000
 
-s32 D_800ED380 = 0; // the shut the fuck up counter
-
-//INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EBF58);
 void func_800EBF58(u32 buttons)
 {
     // stage 1 is when the menu is shown and we receive input
@@ -214,13 +277,13 @@ void func_800EBF58(u32 buttons)
         if (selected == 0) {
             // selected YES
             seq_select(2);
-            bounce_stage = 6;
+            bounce_anim_state = 6;
             play_effect(0x4A00);
         } else {
             // selected NO
             D_800ED3F4 = 1;
-            D_800ED378 = 0; // no change in speed anymore
-            bounce_stage = 2;
+            bounce_dy = 0; // no change in speed anymore
+            bounce_anim_state = 2;
         }
     }
 
@@ -274,7 +337,7 @@ void func_800EC14C(void)
     }
 
     tmp = selected == 1 ? 0xAB : 0x9B;
-    load_gbuffer(2, D_800ED390, 0x44, tmp, D_800ED3CC, 0);
+    load_gbuffer(2, D_800ED390, 0x44, tmp, screen_brightness, 0);
 }
 
 void func_800EC23C(s32 arg)
@@ -296,7 +359,7 @@ void func_800EC268(void)
             load_gbuffer(0, 0x30, 
                 ((i << 7) - D_800ED394) - 0x40, 
                 ((j << 7) + D_800ED394) - 0x40, 
-                D_800ED3CC / 2, 2);
+                screen_brightness / 2, 2);
 }
 
 
@@ -674,6 +737,3 @@ u32 input_das_read(void)
 }
 
 // TODO: put das stuff in a seperate file, make variables static
-
-// ASSEMBLY FUNCTIONS (_start and the weird syscall one)
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", misc);
