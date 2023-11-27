@@ -123,7 +123,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
 #define SNQ_FINISHED    -1
 #define SNQ_SET_FE       -2  //  arg0
 #define SNQ_SET_FULL       -3
-#define SNQ_SET_SCALED       -4
+#define SNQ_SET_SCALED  -4
 #define SNQ_FADE_OUT       -5
 #define SNQ_FADE_IN       -6
 #define SNQ_SET_REVERB  -7
@@ -277,21 +277,76 @@ void* cd_arg;     // param
 void* cd_result;     // result
 u8 D_80047EDC = 0;
 
-snd_task_t _sndqueue[192];
+snd_task_t _sndqueue[256];
 
 s8 D_80047EC4[8];
 
+void sndqueue_reset(void) {
+    _sndqueue_next = 0;
+    D_80047F34 = 0;
+    D_80047E94 = 0;
+    D_80047DD8 = 1;
+    _sndqueue_empty = 1;
+    D_80047DE0 = 0;
+    _sndqueue[0].com = -1;
+    _sndqueue_size = 0;
+}
+
+s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2)
+{
+    u8 tmp;
+    snd_task_t* task;
+
+    task = &_sndqueue[_sndqueue_next];
+
+    if (_sndqueue_busy == 1 || _sndqueue_size > 192) return 0;
+
+    _sndqueue_busy = 1;
+    _sndqueue[(_sndqueue_next+1)%256].com = -1;
+    task->com = arg0;
+    task->arg0 = arg1;
+    task->arg1 = arg2;
+
+    _sndqueue_size++;
+    _sndqueue_next = (_sndqueue_next + 1) & 0xff;
+    _sndqueue_empty = 0;
+    _sndqueue_busy = 0;
+    return 1;
+}
+
+void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
+{
+    if (sndqueue_is_running == 0) {
+        while (_sndqueue_size > 192)
+            sndqueue_exec();
+    }
+    sndqueue_add(arg0, arg1, arg2);
+}
+
+// FIXME: disabled because causes CD bug
+//INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 // execute one block of command
-s32 TEMP_sndqueue_exec()
+s32 sndqueue_exec()
 {
     s32 rc;
 
     if (sndqueue_is_running == 1) return 0;
     sndqueue_is_running = 1;
 
+#if 0
+    k_printf("RUN %d: ", D_80047F34);
+    snd_task_t *p = &_sndqueue[D_80047F34];
+    for (int i = 0; i < 6; i++) {
+        k_printf("%X\t", p->com);
+        if (p->com == 0xFF) break;
+        p++;
+    }
+    k_printf("\n");
+#endif
+
     if (cd_busy == 1) {
         rc = CdControl(sndqueue_com, cd_arg, cd_result);
-        if (rc == 1) {
+        if (rc != 1) {
             cd_busy = 1;
             sndqueue_is_running = 0;
             return 0;
@@ -301,6 +356,7 @@ s32 TEMP_sndqueue_exec()
         goto flush_and_flee;
     }
 
+    //return;
     // ...
     // check_fe:
     CdSync(1, 0);
@@ -343,16 +399,16 @@ flush_and_flee:
 
     // and then the actual queue
     snd_task_t* t;
-    u32 next;
+    u32 next = 0xDEADBEEF;
 
     while (1) { // i think I can break instead of return
         t = &_sndqueue[D_80047F34];
-        if (t->com == SNQ_FINISHED) {
+        if (t->com == 0xFF) {
             D_80047DD8 = 0;
             sndqueue_com = CdlNop;
             cd_arg = 0;
             cd_result = &D_80047EDC;
-            cd_busy = 1 != cd_get_status(&D_80047EDC);
+            cd_busy = (1 != cd_get_status(&D_80047EDC));
             _sndqueue_empty = 1;
             break;
         }
@@ -462,74 +518,14 @@ flush_and_flee:
 }
 
 
-void sndqueue_reset(void) {
-    _sndqueue_next = 0;
-    D_80047F34 = 0;
-    D_80047E94 = 0;
-    D_80047DD8 = 1;
-    _sndqueue_empty = 1;
-    D_80047DE0 = 0;
-    _sndqueue[0].com = -1;
-    _sndqueue_size = 0;
-}
-
-s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2)
-{
-    u8 tmp;
-    snd_task_t* task;
-
-    task = &_sndqueue[_sndqueue_next];
-
-    if (_sndqueue_busy == 1 || _sndqueue_size > 192) return 0;
-
-    _sndqueue_busy = 1;
-    _sndqueue[(_sndqueue_next+1)%256].com = -1;
-    task->com = arg0;
-    task->arg0 = arg1;
-    task->arg1 = arg2;
-
-    _sndqueue_size++;
-    _sndqueue_next++;
-    _sndqueue_next = (u8) _sndqueue_next;
-    //_sndqueue_next = _sndqueue_next & 0xff;
-    _sndqueue_empty = 0;
-    _sndqueue_busy = 0;
-    return 1;
-}
-
-void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
-{
-    if (sndqueue_is_running == 0) {
-        while (_sndqueue_size > 192)
-            sndqueue_exec();
-    }
-    sndqueue_add(arg0, arg1, arg2);
-}
-
-// FIXME: disabled because causes CD bug
-INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
-//sndqueue_exec() {}
 
 // TODO: sound lol
 int sndqueue_exec_all(void)
 {
-    s32 ret;
-#if 0
-    s32 com;
-    s32 val;
-    k_printf("sndqueue_exec_all: %d items: \n", _sndqueue_size);
-    for (int i = 0; i < _sndqueue_size; i++) {
-        com = _sndqueue[i].com;
-        val = _sndqueue[i].arg0;
-        if (com == CdlSetmode) val = *(u8*)val;
-        k_printf("\t%X\t%X\n", com, val);
-    }
-#endif
-    ret = 0;
+    s32 ret = 0;
     if (_sndqueue_empty == 0) do {
         ret = sndqueue_exec();
     } while (_sndqueue_empty == 0 && ret != -1);
-    
     CdSync(0, 0);
     return ret;
 }

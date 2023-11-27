@@ -67,6 +67,8 @@ glabel D_800184D8
 /* DC4 800185C4 6F700000 */ .word 0x0000706F
 /* DC8 800185C8 43646C53 */ .word 0x536C6443
 /* DCC 800185CC 796E6300 */ .word 0x00636E79
+
+glabel D_800185D0
 /* DD0 800185D0 4469736B */ .word 0x6B736944
 /* DD4 800185D4 4572726F */ .word 0x6F727245
 /* DD8 800185D8 72000000 */ .word 0x00000072
@@ -81,6 +83,8 @@ glabel D_800184D8
 /* DFC 800185FC 44617461 */ .word 0x61746144
 /* E00 80018600 52656164 */ .word 0x64616552
 /* E04 80018604 79000000 */ .word 0x00000079
+
+glabel D_80018608
 /* E08 80018608 4E6F496E */ .word 0x6E496F4E
 /* E0C 8001860C 74720000 */ .word 0x00007274
 
@@ -156,5 +160,7 @@ glabel D_8001870C
 glabel D_8001873C
 /* F3C 8001873C */ .asciz "DMA STATUS ERROR %x\n"
                       .balign 4
+
+glabel D_80018754
 /* F54 80018754 */ .asciz "$Id: intr.c,v 1.61 1995/05/18 06:47:50 suzu Exp $"
                       .balign 4

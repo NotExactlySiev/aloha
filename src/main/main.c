@@ -640,6 +640,7 @@ int main(int argc, char** argv)
     //getGameConfig()[0x517] = 1;
     // give printf
     //jt_set(k_printf, 9);
+    //CdSetDebug(2);
 
     // run the game
     setNextFile(0);

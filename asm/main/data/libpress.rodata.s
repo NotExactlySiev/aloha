@@ -31,5 +31,6 @@ glabel D_800181E0
 glabel D_800181F0
 /* 9F0 800181F0 */ .asciz "MDEC_vlec: invalid VLC ID\n"
                       .balign 4
+glabel D_8001820C
 /* A0C 8001820C */ .asciz "$Id: sys.c,v 1.83 1995/05/25 13:43:27 suzu Exp $"
                       .balign 4
