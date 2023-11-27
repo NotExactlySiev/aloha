@@ -79,7 +79,7 @@ typedef struct {
     int hi, lo;
     int sr;
     int cause;
-    int _pad2;
+    int _pad2[9];
 } TCB;
 
 typedef struct {
@@ -95,8 +95,8 @@ void func_80018AB4(void);
 void func_8001926C(void);
 void func_80019680(void);
 void game_shutdown(void);
-s32 enable_timer3_event(void*);
-void disable_timer3_event(s32);
+s32 enable_vblank_event(void*);
+void disable_vblank_event(s32);
 void nop(void);
 void flush_cache_safe(void);
 void jt_clear(void);
@@ -112,11 +112,11 @@ s32 get_GameNP(void);
 void read_version(void);
 s32 get_GameRegion(void);
 u8* get_VersionStr(void);
-void jt_series1(void);
+void game_init(void);
 s32 get_D_80047E6C(void);
 void* jt_reset(void);
 void func_80019D0C(void);
-void func_80019D64(void);
+void exception_handler(void);
 s32 enable_exception_event(void*);
 u32 func_80019DCC(void);
 void setNextFile(s32);

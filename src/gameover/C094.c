@@ -29,12 +29,14 @@ Sprite* sprt_data[64];
 // these might be not s32 but paired as structs?
 // these are animations for sprites,
 //s32* intarrs[3] = {
-s32 intarrs[3][22] = {
-    { 13, 1, -1, 0 },
-    { 0, 4, 1, 4, 2, 4, 3, 4, 8, 10, 9, 10, 10, 10, 11, 10, 12, 10, 13, 10, -1, 18 },
-    { 16, 8, 17, 8, -1, 0 },
+s32 *intarrs[3] = {
+    (s32[]) { 13, 1, -1, 0 },
+    (s32[]) { 0, 4, 1, 4, 2, 4, 3, 4, 8, 10, 9, 10, 10, 10, 11, 10, 12, 10, 13, 10, -1, 18 },
+    (s32[]) { 16, 8, 17, 8, -1, 0 },
 };
-s32* seq = 0;
+
+
+s32 *seq = 0;
 s32 seq_val = 0;
 s32 seq_wait = 0;
 
@@ -192,6 +194,7 @@ void func_800EBCF0(void)
     seq_select(0);
 }
 
+
 // bunny animation
 void seq_select(int idx)
 {
@@ -229,14 +232,14 @@ void func_800EBD5C(void)
         return;
     }
 
-    // don't know what this part does
-    temp_v1_2 = (s32) bounce_y >> 8;
-    if (temp_v1_2 > 0x77) {
+    temp_v1_2 = bounce_y >> 8;
+    if (temp_v1_2 < 0x78) {
+        // squash animation
+        func_800ECBB4(0x60, temp_v1_2 + 0x10, 0x30, 0x77 - temp_v1_2, screen_brightness);
+    } else {
+        // no more bunny
         D_800ED3F4 = -1;
-        return;
-    }
-
-    func_800ECBB4(0x60, temp_v1_2 + 0x10, 0x30, 0x77 - temp_v1_2, screen_brightness);
+    }    
 }
 
 void func_800EBEA8(void)
@@ -397,18 +400,18 @@ int main(void)
     func_800ECDA8();    // set up graphics env
     func_800EC098();    // set up some constants
     
-    //jt.audio_unk2();
+    jt.audio_unk2();
     
     input_das_setup();
     GlobalData* global = jt.global_ptr();   // get shared data
-    //jt.set_global_volume(&D_800ED370); // set global vol void(SpuVolume*)
-    //jt.audio_unk_volume(0x3000);
-    //jt.audio_unk3(0);    // mc_set_some_var
+    jt.set_global_volume(&D_800ED370); // set global vol void(SpuVolume*)
+    jt.audio_unk_volume(0x3000);
+    jt.audio_unk3(0);    // mc_set_some_var
 
     // play some audio thing
     u8 world = global->world;
     if (world > 5) world = 5;
-    //jt.audio_play_by_id(D_800ED354[world]);
+    jt.audio_play_by_id(D_800ED354[world]);
     
     // cycle through both buffers once
     gbuffer_swap();    // clear
@@ -428,9 +431,7 @@ int main(void)
         gbuffer_render();            // render graphics
     } while (stage != 4);
     
-    printf("and out!\n");
-
-    //jt.audio_unk2();
+    jt.audio_unk2();
 
     choice = 0;
     
@@ -580,23 +581,23 @@ void func_800EC9AC(u32 *raw, s16 x, s16 y)
 void func_800ECBB4(s16 x, s16 y, s16 w, s16 h, u8 col)
 {
     POLY_FT4 *p;
-    DR_MODE *q;
+    
     u32 tpage;
     p = current_buffer->next;
     setPolyFT4(p);
     setRGB0(p, col, col, col);
-    setUV4(p, 0, 0, 0, 0, 0, 24, 0, 24);
+    setUV4(p, 0, 0, 48, 0, 0, 24, 48, 24);
     setXY4(p, x, y, x+w, y, x, y+h, x+w, y+h);
     p->tpage = getTPage(1, 0, 256, 256);
     p->clut  = getClut(0, 240);
-    addPrim(current_buffer->ot[1], p);
+    addPrim(&current_buffer->ot[1], p);
+    current_buffer->next = p + 1;
 
+    DR_MODE *q = current_buffer->next;
     tpage = getTPage(1, 0, 256, 256);
-    q = nextPrim(p);
     jt.SetDrawMode(q, 0, 0, tpage, &D_800ED398);
-    addPrim(current_buffer->ot[1], q);
-
-    current_buffer->next = nextPrim(q);
+    addPrim(&current_buffer->ot[1], q);
+    current_buffer->next = q + 1;
 }
 
 void func_800ECD18(void)

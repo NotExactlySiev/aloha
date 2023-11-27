@@ -63,8 +63,8 @@ s32 g_GameIsZ = 0;
 void* D_80048044;       // hold return for _start
 s32 D_80047E6C;         // 80047e6c
 s32 D_80047E70;         // 80047e70
-s32 tim3event;          // 80047e74
-s32 excpevent;          // 80047e7c
+s32 vblank_event;          // 80047e74
+s32 exception_event;          // 80047e7c
 char g_VersionStr[20];
 
 
@@ -220,8 +220,6 @@ void func_80018AB4(void)
     }
 }
 
-//#define DrawSync        call_DrawSync
-//#define wait_frame   call_wait_frame
 void func_8001926C(void)
 {
     DRAWENV drawenv;
@@ -280,26 +278,46 @@ void func_8001926C(void)
     call_PutDrawEnv(&drawenv);
     call_PutDispEnv(&dispenv);
 }
-//#undef DrawSync
-//#undef wait_frame
 
+// setup_thing (setup_video?)
 void func_80019680(void)
 {
+    // setup audio and cd
     func_8001A3B8();
+
+    // set tv system
     read_version();
     wait_frame(0);
     SetVideoMode(get_GameNP() != 0);
     wait_frame(0);
+
+    // setup graphics
     call_ResetGraph(0);
     call_SetGraphDebug(0);
     call_SetDispMask(0);
+
+    // spu set default
     func_8001DD7C();
+
+    // gpu jt stuff
     jt_series_gpu();
+
+    // show logo
     func_80018AB4();
+    
+    // init pad
     func_8001E33C();
+
+    // init mc
     func_8002092C();
+
+    // init playing audio effects and control
     func_80021D54();
+
+    // jt vab stuff?
     func_8001E7B0();
+
+    // init font and characters
     func_8001E38C();
 }
 
@@ -312,31 +330,31 @@ void game_shutdown(void)
     func_8001DE98();
     StopCallback();
     PadStop();
-    disable_timer3_event(tim3event);
-    k_CloseEvent(excpevent);
+    disable_vblank_event(vblank_event);
+    k_CloseEvent(exception_event);
     StopRCnt(0xF2000000);
     StopRCnt(0xF2000001);
     StopRCnt(0xF2000002);
     StopRCnt(0xF2000003);
 }
 
-s32 enable_timer3_event(void* handler)
+s32 enable_vblank_event(void* handler)
 {
     s32 event;
     k_EnterCriticalSection();
-    event = k_OpenEvent(0xF2000003, 2, 0x1000, handler);
-    SetRCnt(0xF2000003, 1, 0x1000);
-    StartRCnt(0xF2000003);
+    event = k_OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, handler);
+    SetRCnt(RCntCNT3, 1, EvMdINTR);
+    StartRCnt(RCntCNT3);
     k_EnableEvent(event);
     k_ExitCriticalSection();
     return event;
 }
 
-void disable_timer3_event(s32 arg0)
+void disable_vblank_event(s32 event)
 {
     k_EnterCriticalSection();
-    StopRCnt(0xF2000003);
-    k_CloseEvent(arg0);
+    StopRCnt(RCntCNT3);
+    k_CloseEvent(event);
     k_ExitCriticalSection();
 }
 
@@ -386,7 +404,7 @@ void jt_set(void* func, s32 idx)
 void func_80019948(void)
 {
     if (D_80047D64 != 1) {
-        disable_timer3_event(tim3event);
+        disable_vblank_event(vblank_event);
         D_80047D64 = 1;
     }
 }
@@ -394,7 +412,7 @@ void func_80019948(void)
 void func_80019990(void)
 {
     if (D_80047D64 != 0) {
-        tim3event = enable_timer3_event(regular_run_tasks);
+        vblank_event = enable_vblank_event(regular_run_tasks);
         D_80047D64 = 0;
     }
 }
@@ -454,18 +472,23 @@ u8* get_VersionStr(void)
     return g_VersionStr;
 }
 
-void jt_series1(void)
-{ // TODO: this is probably game_bootup
+void game_init(void)
+{
+    // setup events and handlers
     ResetCallback();
     StopRCnt(0xF2000000);
     StopRCnt(0xF2000001);
     StopRCnt(0xF2000002);
     StopRCnt(0xF2000003);
     VSyncCallbacks(0, 0);
-    tim3event = enable_timer3_event(regular_run_tasks);
+    vblank_event = enable_vblank_event(regular_run_tasks);
     regular_active(1);
+
+    // setup IO
     func_80019680();
     k_ChangeClearPAD(0);
+
+    // set basic jt functions
 #ifdef LOG_JT
     jt_set(_jt_set, 1);
 #else
@@ -483,8 +506,14 @@ void jt_series1(void)
     jt_set(func_80018A7C, 9);
     jt_set(func_80018A8C, 10);
     jt_set(get_VersionStr, 11);
+
+    // clear global space
     memset((void*) 0x80014000, 0x4000, 0);
+
+    // set reverb
     func_80020F9C(5, 0);
+
+    // audio stuff? no idea
     func_8001FBC0(0);
     func_80020000(0);
 }
@@ -500,7 +529,7 @@ void* jt_reset(void)
     jt_set(func_80019DCC, 0xFF);
     jt_set(get_D_80047E6C, 0x2);
     jt_set(get_file_addr, 0x6);
-    return jt_series1;
+    return game_init;
 }
 
 void func_80019D0C(void)
@@ -515,7 +544,7 @@ void func_80019D0C(void)
     if (D_80047D58 == 0) {
         D_80047D58 = 1;
         jt_reset();
-        tcb->regs[2] = (int) jt_series1;
+        tcb->regs[2] = (int) game_init;
     }
     else
     {
@@ -523,14 +552,19 @@ void func_80019D0C(void)
     }
 }
 
-void func_80019D64(void)
+void exception_handler(void)
 {
     struct {
-        ExCB* excb[2];
-        PCB* pcb;
-        TCB* tcb;
+        ExCB *excb;
+        u32 excb_size;
+        PCB *pcb;
+        u32 pcb_size;
+        TCB (*tcb)[4];   // usually 4?
+        u32 tcb_size;
     } *bios_tables = (void*) 0x100;
 
+   // when the exception returns, if v0 is not 0 the exception generating
+   // function jumps to it
     bios_tables->pcb->current_tcb->regs[2] = 0;
 }
 
@@ -539,6 +573,7 @@ s32 enable_exception_event(void* handler)
     s32 event;
 
     k_EnterCriticalSection();
+    // exception event (only cause by the invalid syscall function at the start of every main)
     event = k_OpenEvent(0xF0000010, 0x4000, 0x1000, handler);
     k_EnableEvent(event);
     k_ExitCriticalSection();
@@ -572,20 +607,31 @@ int main(int argc, char** argv)
     
     k_printf("MAX ADR:%x\n", k_malloc(4));
     D_80047E6C = 1;
+
+    // initialization
     jt_reset();
-    jt_series1();
-    excpevent = enable_exception_event(func_80019D64);
+    game_init();
+    exception_event = enable_exception_event(exception_handler);
     func_80020FC0(&D_80034344);
 
-    rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
-    while (rc < 0 || tmpfilebuf != 0x56414270) {
+    // play some sound
+    //rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
+    while (1) {
         rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
+        if (rc > 0 && tmpfilebuf == 0x56414270) break;
         k_printf("VAB file Reload\n");
     }
 
-    func_80020D5C(0, &tmpfilebuf, 0);
+    //while (1) {
+        rc = func_80020D5C(0, &tmpfilebuf, 0);
+        //k_printf("RET %d\n", rc);
+    //}
+
+    // fade logo?
     func_8001926C();
-    if (func_8001E36C(0) == 6) {
+
+    // activate debug mode? (it's actually never checked)
+    if (call_PadRead(0) == 6) {
         D_80047D50 = 1;
     }
 
@@ -595,8 +641,11 @@ int main(int argc, char** argv)
     // give printf
     //jt_set(k_printf, 9);
 
+    // run the game
     setNextFile(0);
     file_execute_loop();
+
+    // shutdowns
     call_wait_frame(0);
     call_SetDispMask(0);
     func_80021600();

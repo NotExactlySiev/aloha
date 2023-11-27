@@ -506,7 +506,9 @@ void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
     sndqueue_add(arg0, arg1, arg2);
 }
 
+// FIXME: disabled because causes CD bug
 INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
+//sndqueue_exec() {}
 
 // TODO: sound lol
 int sndqueue_exec_all(void)
@@ -907,15 +909,15 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E2FC);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E31C);
 
-u32 func_8001E36C(s32 id);
+u32 call_PadRead(s32 id);
 
 void func_8001E33C(void)
 {
     PadInit(0);
-    jt_set(func_8001E36C, 0xf0);
+    jt_set(call_PadRead, 0xf0);
 }
 
-u32 func_8001E36C(s32 id)
+u32 call_PadRead(s32 id)
 {
     return PadRead(id);
 }
