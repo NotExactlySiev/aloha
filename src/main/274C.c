@@ -344,6 +344,7 @@ s32 sndqueue_exec()
     k_printf("\n");
 #endif
 
+    // try again
     if (cd_busy == 1) {
         rc = CdControl(sndqueue_com, cd_arg, cd_result);
         if (rc != 1) {
@@ -876,8 +877,7 @@ void func_8001E0CC(SpuVoiceAttr* arg0) {
         call_SpuSetVoiceAttr(&attr);
         return;
     }
-    else
-    {
+    else {
         call_SpuSetVoiceAttr(arg0);
     }
 }
