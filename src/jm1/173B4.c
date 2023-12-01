@@ -1,56 +1,7 @@
 #include "common.h"
 #include <libgpu.h>
 #include "gbuffer.h"
-
-
-typedef struct LinkedList LinkedList;
-typedef struct Entity Entity;
-typedef struct Component Component;
-
-struct Component {
-    u16 param;
-    u16 disabled;
-    u32 unk0;
-    u32 unk1;
-    void (*func)(Entity*, Component*); // this probably has a specific type
-};
-
-struct LinkedList {
-    LinkedList* next;
-    LinkedList* prev;
-};
-
-struct Entity {
-    Entity* next;
-    Entity* prev;
-    Component comp0;
-    Component comp1;
-    Component render_comp;
-    Component comp3;
-    u32 model[4]; // model_t
-    u16 unk0;
-    u8 unk1;
-    u8 unk2;
-    u16 health;
-    u16 unk3;
-    u32 unk4;
-    u32 unk5;
-    s32 pos_x;
-    s32 pos_y;
-    s32 pos_z;
-    s32 vel_x;
-    s32 vel_y;
-    s32 vel_z;
-    u32 unk6;
-    u32 unk7;
-    u32 unk8;
-    s32 angle_y;
-    s32 angle_x;
-    s32 angle_z;
-    s32 dangle_y;
-    s32 dangle_x;
-    s32 dangle_z;
-};
+#include "entity.h"
 
 typedef struct {
     s16     count;
@@ -927,8 +878,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6E74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6EEC);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
-func_800D6F14() {}  // FIXME !!!
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
+//func_800D6F14() {}  // FIXME !!!
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D71A4);
 
@@ -1026,7 +977,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4C8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4D8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4E8);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4E8);
+// FOR NOW
+func_800DA4E8() {}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA85C);
 
@@ -1242,7 +1195,7 @@ void func_800DDF04(void)
         x = player_entity.pos_x >> 12;
         //y = player_entity.max_y;
         z = player_entity.pos_z >> 12;
-        func_800E5E60(); // TODO TODO!
+        //func_800E5E60(); // TODO TODO!
     }
     
 }
@@ -1788,9 +1741,9 @@ typedef struct {
 extern u32 D_8013CC28; // mesh_array_count
 extern Mesh mesh_array[1024];
 extern u16 D_801381F8[256]; // I think it would be 256? no idea tbh
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
 // load_mesh_from_vo2
-u32 func_800E4C34(u32* data, u32 mesh_palette, u32 texture_palette, u32 texture_id)
+u32 _func_800E4C34(u32* data, u32 mesh_palette, u32 texture_palette, u32 texture_id)
 {
     u32 ret = D_8013CC28;
     Mesh* m;
@@ -1924,33 +1877,85 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
 // main function called for rendering models. disabled for now
 // because the model rendering code is a nightmare and has to
 // be fully disassembled and understood otherwise everything
-// breaks. because spimdasm is dumb and loads of symbols are
+// breaks. because spimdasm is dfor nowumb and loads of symbols are
 // lost.
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
+
+extern s32 D_801380B0;  // lod_distance
+extern u16 D_8013EC48[1024]; // added flags and stuff
+extern s16 D_80141468[1024];    // z offsets
 
 SVECTOR* camera_pos = 0x1F8003C8;
 // draw_model
-void func_800E5E60(SVECTOR* pos, SVECTOR* angle, s32 id)
+void _func_800E5E60(SVECTOR* pos, SVECTOR* angle, s32 id)
 {
-    return;
     if (id < 0) return;
-    SVECTOR* dir = 0x1F800000;
-    SVECTOR* tmp = 0x1F800024;
+
+    // LET's only do the frog for now
+    if (id != 0x196) return;
+
+    SVECTOR *dir = 0x1F800000;
+    SVECTOR *tmp = 0x1F800024;
     Mesh* mesh = &mesh_array[id & 0x3FF];
     //gprintf("DRAW %d\n", id);
     //gprintf("\tat\t%d %d %d\n", pos->vx, pos->vy, pos->vz);
     //gprintf("\trot\t%d %d %d\n", angle->vx, angle->vy, angle->vz);
     
+    
     dir->vx = pos->vx - camera_pos->vx;
     dir->vy = pos->vy - camera_pos->vy;
     dir->vz = pos->vz - camera_pos->vz;
-    u32 mag2 = func_800F4354(dir, tmp, mesh);
-    u32 mag  = func_800C9D70(mag2);
+    s32 mag2 = func_800F4354(dir, tmp, mesh);
+    //gprintf("DRAW: MAG2 %d\t\n", mag2);
+    //s32 mag  = func_800C9D70(mag2);
+    // is in frame?
     if (mag2 <= -1) return;
 
-    gprintf("MAG2 = %d\t%d\n", mag2, mag);
+    if (mag2 >= D_801380B0/4) {
+        //gprintf("FAR");
+    }
 
-    for (;;);
+    if (mag2 >= D_801380B0) {
+        //gprintf(", VERY FAR");
+    }
+
+    id |= D_8013EC48[id & 0x3FF] & 0xFC00;
+    //gprintf(" ADDED FLAGS: %X\n", D_8013EC48[id & 0x3FF] & 0xFC00);
+
+    // for now assume no 0x800
+    s32 mag = func_800C9D70(mag2) + D_80141468[id & 0x3FF];
+    mag = mag >> 4;
+    s32 diff = mag;
+    if (mag < 1) diff = 1;
+    if (mag > 511) diff = 511;
+    //gprintf("MAG %d\t", mag);
+    mag = 558 - diff;
+    //gprintf("-> %d\n", mag);
+
+    // let's assume angle == NULL
+    // just use the basic matrices
+    func_800E8838(0x1F8003E4, 0x1F800010);
+    func_800E8838(0x1F8003D0, 0x1F800024);
+
+    // SetLightMatrix
+    func_800CAC90(0x1F800024);
+    
+    // double matrix
+    func_800E87B8(0x1F800010);
+    // SetRotMatrix
+    func_800CAC60(0x1F800010);
+    // SetTransMatrix
+    func_800CACF0(0x1F800010);
+
+    //mag = 4;
+
+    GBuffer* gbuf = gbuffer_get_current();
+    gprintf("LAYER %d\n", mag);
+    gprintf("%p\t", gbuf->nextfree);
+    gbuf->nextfree = func_800F4548(mesh, gbuf->nextfree, gbuf->ot + mag, 0);
+    gprintf("-> %p\n", gbuf->nextfree);
+
+    //for (;;);
 }
 
 // ground collision is also lost and you just fall.

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "entity.h"
+#include <libgpu.h>
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A68);
 
@@ -40,7 +42,25 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1788);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
 
+extern s32 D_80103164;
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
+// frog render
+_func_800B1BF4(Entity* this)
+{
+    SVECTOR pos;
+    SVECTOR rot;
+    pos.vx = this->pos_x >> 12;
+    pos.vy = this->pos_y >> 12;
+    pos.vz = this->pos_z >> 12;
+    rot.vy =  this->angle_y;
+    rot.vx = -this->angle_x;
+    rot.vz =  this->angle_z;
+    if (func_800E5DD8(&pos, this->model[1] + D_80103164) > -1) {
+        u32 meshid = func_800B1B28(this, 0);
+        gprintf("FROG: MESH %X\t%d\t%d\t%d\n", meshid, pos.vx, pos.vy, pos.vz);
+        func_800E5E60(&pos, &rot, meshid);
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1D78);
 

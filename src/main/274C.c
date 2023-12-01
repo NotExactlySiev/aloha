@@ -323,7 +323,6 @@ void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
     sndqueue_add(arg0, arg1, arg2);
 }
 
-// FIXME: disabled because causes CD bug
 //INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 // execute one block of command
 s32 sndqueue_exec()
