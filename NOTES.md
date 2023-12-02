@@ -19,7 +19,7 @@ SCUS_941.03     0x80018000, 0x30000     CODE: 0x800188C8 - 0x800EB004   = 215503
 TITLE.PEX       0x800E0000, 0x15000     CODE: 0x800E0920 - 0x800EB004   = 10681  instructions
 SELECT.PEX      0x800E0000, 0x5F000     CODE: 0x800E0254 - 0x800EAA04   = 10732  instructions   WITHOUT PSYQ: - 0x800E7FC0  = 8027  instructions
 GAMEOVER.PEX    0x800E0000, 0xD800      CODE: 0x800EB894 - 0x800ED2B0   = 1671   instructions   NO PSYQ
-MAIN.PEX        0x800B0000, 0x53000     CODE: 0x800B0A68 - 0x800FD400   = 78438  instructions
+MAIN.PEX        0x800B0000, 0x53000     CODE: 0x800B0A68 - 0x800FD400   = 78438  instructions   WITHOUT PSYQ: 70813 instructions
 
 for now we're ignoring the MAIN.PEX files other than JM1.
 
@@ -68,16 +68,20 @@ is going to be doing 3D rendering so things are about to get interesting.
 The file map doesn't seem to be as tidy and organized as main. Gonna have to figure it out.
 
 800B0000    .rodata     loads of switch case tables
-
-800B0A68    game code   .text
-
-800DB018    game code (seperate objects?) (uses jtp)
-            some libgpu again
-800DF1E4    game code (i'm pretty sure)
+800B0A68    game code       22591 instructions
+800C6B64    crt0
 800C6BD4    libgpu
 800C98F8    libgte
 800CC338    libetc (yay, the entire gang is back!)
-
+800CD010    game code       484 instructions
+800CD7A0    libgte AGAIN
+800CE098    game code       17039 instructions 
+800DEAD4    libgpu
+800DF1B4    game code       8069 instructions
+800E6FC8    libgte
+800E7268    game code (weird func, custom coprocessor functions, rendering)     13652 instructions
+800F47B8    core rendering code. assembly hellscape         2663 instructions
+800F7154    level loading and some more entity functions    6315 instructions
 800FD400    .data
 \
 801383F0    various lists of pointers (to entities, but maybe more)
@@ -85,7 +89,6 @@ The file map doesn't seem to be as tidy and organized as main. Gonna have to fig
 80103000
 
 80060000 is where COM_DAT.EAR is loaded by SELECT.PEX
-
 
 
 ## SELECT.PEX

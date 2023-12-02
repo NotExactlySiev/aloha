@@ -11,4 +11,7 @@ typedef struct {
     u32* nextfree;
 } GBuffer;
 
+extern GBuffer *gbuffer_get_current(void);
+
+
 #endif

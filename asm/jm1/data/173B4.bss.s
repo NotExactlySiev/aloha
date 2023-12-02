@@ -610,9 +610,6 @@ glabel D_801226EC
 glabel D_801226EF
 	.space 0x7f9
 
-glabel D_80122EE8
-	.space 0x2000
-
 glabel D_80124EE8
 	.space 0x800
 

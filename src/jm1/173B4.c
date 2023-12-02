@@ -27,6 +27,43 @@ struct {
         LinkedList tail;
     } lists[3];
 } D_8010295C = {};
+
+typedef struct {
+    u8 v0, v1, v2, v3;
+    u16 flags0, flags1;
+    u32 unk0;   // these are color and texture stuff
+    u32 unk1;
+    u16 unk2, unk3, unk4, unk5;
+    u32 command;
+} Face;
+
+// mesh data
+// 32 count-1
+// header: [16 offset 16 something]*count
+
+typedef struct {
+    u32 count;  // one less
+    SVECTOR data[];
+} VertList;
+
+typedef struct {
+    u32 size;  // in bytes
+    Face data[];
+} FaceList;
+
+
+typedef struct {
+    s16 a, b;
+    VertList* verts;
+    struct {
+        u32 count;  // one less
+        u32 data[];
+    } *unk1;
+    void *unk2;
+} Mesh;
+
+
+
 /*Entity* D_8010295C = 0;   // entity_list_0
 Entity* D_80102960 = 0;
 Entity* D_80102964 = 0;
@@ -41,6 +78,8 @@ Entity* D_8010297C = 0;
 Entity* D_80102980 = 0;
 Entity* D_80102984 = 0;
 Entity* D_80102988 = 0;*/
+
+
 
 extern gprintf(char* fmt, ...);
 
@@ -878,8 +917,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6E74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6EEC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
-//func_800D6F14() {}  // FIXME !!!
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
+func_800D6F14() {}  // FIXME !!!
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D71A4);
 
@@ -977,9 +1016,98 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4C8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4D8);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4E8);
+u32 *D_80102ACC;    // section1 base
+s32   D_80102ADC;    // render_range_thing
+SVECTOR D_80122EE8[1024];    // objs
+extern s32   D_80102AE4;    // area side len
+extern s32   D_80102AD4;    // object id offset
+
+extern s32 D_80142D48; // render distance vertical
+extern s32 D_80141460; // render distance horizontal
+
+extern u16 D_80121CE8[];
+extern SVECTOR D_80121EE8[];    // position offsets
+extern SVECTOR D_801226E8[];   // rotation vectors
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4E8);
 // FOR NOW
-func_800DA4E8() {}
+// render level objects
+void _func_800DA4E8(void)
+{
+    return;
+    SVECTOR *tmp = 0x1F800000;
+    SVECTOR *cam = 0x1F8003C8;
+    Mesh *mesh = 0x1F800010;
+
+    // top left corner of the chunks we're gonna draw
+    s32 player_chunk_x = (2*cam->vx - D_80102ADC*ONE + 16*ONE) >> 12;
+    s32 player_chunk_z = (2*cam->vz - D_80102ADC*ONE + 16*ONE) >> 12;
+
+    // TODO: when this is turned on the entities get weird. memory corruption?
+    /*for (int i = 0; i < D_80102AE4; i++) {
+        for (int j = 0; j < D_80102AE4; j++) {
+            s32 chunk = (player_chunk_x+i)*32 + (player_chunk_z+j);
+            u32 sect_off = D_80102ACC[chunk];
+            SVECTOR *thing = &D_80122EE8[chunk];
+            if (sect_off == 0) continue;
+            // TODO: rotation stuff
+            tmp->vx = thing->vx - cam->vx;
+            tmp->vy = thing->vy - cam->vy;
+            tmp->vz = thing->vz - cam->vz;
+            mesh->a = mesh->b = thing->pad;
+
+            s32 mag = func_800F4354(tmp, tmp, mesh);
+            if (mag < 0) continue;
+
+            u16 *sect = D_80102ACC + sect_off/4;
+            u16 count = *sect;
+            SVECTOR *pos = sect + 1;
+            for (int k = 0; k < count; k++) {
+                s16 dx = cam->vx - pos->vx;
+                s16 dy = cam->vy - pos->vy;
+                s16 dz = cam->vz - pos->vz;
+                u16 id = D_80121CE8[pos->pad];
+                if (-D_80141460 <= dx && dx <= D_80141460
+                 && -D_80142D48 <= dy && dy <= D_80142D48
+                 && -D_80141460 <= dz && dz <= D_80141460) {
+                    if (id & 0x8000) {
+                        tmp->vx = pos->vx + D_80121EE8[pos->pad].vx;
+                        tmp->vy = pos->vy + D_80121EE8[pos->pad].vy;
+                        tmp->vz = pos->vz + D_80121EE8[pos->pad].vz;
+                        func_800E5E60(tmp, &D_801226E8[pos->pad], D_80102AD4 + (id & 0x7FFF) + 0x10000);
+                    } else {
+                        //gprintf("ID %d, %d, %d\n", id, pos->vx, pos->vy);
+                        func_800E5E60(pos, 0, D_80102AD4 + id + 0x10000);
+                    }
+                }
+                pos += 1;
+            }
+        }
+    }*/
+
+
+    /*for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            SVECTOR pos = {
+                -512*i, 0, -512*j, 0
+            };
+            func_800E5E60(&pos, 0, D_80102AD4 + 1 + 0x10000);
+        }
+    }*/
+}
+
+// big function. uncomment to check for memory corruption
+/*
+void space_filler()
+{
+    __builtin_memcpy(0xa123456, 0xe4123, 999999);
+    __builtin_memcpy(0x1b23456, 0x412a3, 999999);
+    __builtin_memcpy(0x12c3456, 0x412c3, 999999);
+    __builtin_memcpy(0x123d456, 0x4c123, 999999);
+    __builtin_memcpy(0x1234e56, 0x4212, 999999);
+    __builtin_memcpy(0x12345f6, 0x4123, 999999);
+    __builtin_memcpy(0x123456f, 0x4112, 999999);
+    __builtin_memcpy(0x1236, 0x4134, 999999);
+}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA85C);
 
@@ -1704,46 +1832,12 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4BC0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4BE0);
 
-typedef struct {
-    u8 v0, v1, v2, v3;
-    u16 flags0, flags1;
-    u32 unk0;   // these are color and texture stuff
-    u32 unk1;
-    u16 unk2, unk3, unk4, unk5;
-    u32 command;
-} Face;
-
-// mesh data
-// 32 count-1
-// header: [16 offset 16 something]*count
-
-typedef struct {
-    u32 count;  // one less
-    SVECTOR data[];
-} VertList;
-
-typedef struct {
-    u32 size;  // in bytes
-    Face data[];
-} FaceList;
-
-
-typedef struct {
-    s16 a, b;
-    VertList* verts;
-    struct {
-        u32 count;  // one less
-        u32 data[];
-    } *unk1;
-    void *unk2;
-} Mesh;
-
 extern u32 D_8013CC28; // mesh_array_count
 extern Mesh mesh_array[1024];
 extern u16 D_801381F8[256]; // I think it would be 256? no idea tbh
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
 // load_mesh_from_vo2
-u32 _func_800E4C34(u32* data, u32 mesh_palette, u32 texture_palette, u32 texture_id)
+/*u32 _func_800E4C34(u32* data, u32 mesh_palette, u32 texture_palette, u32 texture_id)
 {
     u32 ret = D_8013CC28;
     Mesh* m;
@@ -1805,7 +1899,7 @@ u32 _func_800E4C34(u32* data, u32 mesh_palette, u32 texture_palette, u32 texture
             }
         }
     }
-}
+}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4FB8);
 
@@ -1887,7 +1981,7 @@ extern s16 D_80141468[1024];    // z offsets
 
 SVECTOR* camera_pos = 0x1F8003C8;
 // draw_model
-void _func_800E5E60(SVECTOR* pos, SVECTOR* angle, s32 id)
+/*void _func_800E5E60(SVECTOR* pos, SVECTOR* angle, s32 id)
 {
     if (id < 0) return;
 
@@ -1956,7 +2050,7 @@ void _func_800E5E60(SVECTOR* pos, SVECTOR* angle, s32 id)
     gprintf("-> %p\n", gbuf->nextfree);
 
     //for (;;);
-}
+}*/
 
 // ground collision is also lost and you just fall.
 // but the ground texture bug is gone too. so that one's also

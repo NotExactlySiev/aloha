@@ -2,6 +2,8 @@
 #include "entity.h"
 #include <libgpu.h>
 
+// map stuff
+
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A68);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A78);
@@ -26,6 +28,11 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0CAC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0CBC);
 
+// entity functions
+
+// frog stuff
+
+// frog basic
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0CCC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1054);
@@ -36,17 +43,21 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B124C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B12E4);
 
+// frog process
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B13BC);
 
+// frog custom
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1788);
 
+// get frame
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
 
 extern s32 D_80103164;
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
-// frog render
-_func_800B1BF4(Entity* this)
+// frog render (TODO: shadow)
+/*void func_800B1BF4(Entity* this)
 {
+    //SVECTOR *cam = 0x1F8003CA;
     SVECTOR pos;
     SVECTOR rot;
     pos.vx = this->pos_x >> 12;
@@ -57,16 +68,33 @@ _func_800B1BF4(Entity* this)
     rot.vz =  this->angle_z;
     if (func_800E5DD8(&pos, this->model[1] + D_80103164) > -1) {
         u32 meshid = func_800B1B28(this, 0);
-        gprintf("FROG: MESH %X\t%d\t%d\t%d\n", meshid, pos.vx, pos.vy, pos.vz);
+        //if (this->unk5 != 0) {
+            //meshid |= 0x8000;
+        //}
         func_800E5E60(&pos, &rot, meshid);
     }
-}
+    // and the shadow
+    pos.vy = this->max_y + 2;
+    if (cam->vy < pos.vy &&
+        func_800E5DD8(&pos, this->model[1] + D_80103164) > -1) {
+        u32 meshid = func_800B1B28(this, 0);
+        func_800E5B88(0, 0, 0);
+        func_800E5E60(&pos, &rot, meshid | 0x4000);
+        func_800E5B88(0, 0, 0);
 
+    }
+
+    if (this->unk5 != 0) this->unk5 = -1;
+}*/
+
+// contrusction
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1D78);
 
+// destructor
 void func_800B1F8C(void) {
 }
 
+// kiwi stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1F94);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2354);
@@ -158,7 +186,29 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B661C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B66A0);
 
+
+extern s32 D_801031A4;
+// block render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6744);
+/*void _func_800B6744(Entity* this)
+{
+    SVECTOR pos = {
+        this->pos_x >> 12,
+        this->pos_y >> 12 - 0xC0,
+        this->pos_z >> 12,
+    };
+
+    SVECTOR rot = {
+        0, 0, 0
+    };
+
+    func_800E5E60(&pos, &rot, D_801031A4 + 2);
+
+    pos.vy = this->pos_y >> 12;
+    rot.vy = this->angle_y;
+
+    func_800E5E60(&pos, &rot, D_801031A4 + 1);
+}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6820);
 

@@ -393,6 +393,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EFEC4);
     return;
 }*/
 
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F0074);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F00D0);
@@ -401,7 +402,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F0134);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F020C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F021C);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F021C);   // not disassembled, not used
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F023C);
 
@@ -692,6 +693,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F91EC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F9284);
 
+// shoot gun
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F94FC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F9598);

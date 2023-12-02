@@ -51,6 +51,22 @@ struct Entity {
     s32 dangle_y;
     s32 dangle_x;
     s32 dangle_z;
+
+    u32 unk9;
+    u32 unk10;
+    u32 unk11;
+    u32 unk12;
+    u32 unk13;
+    u32 unk14;
+    u32 unk15;
+    u32 unk16;
+    u32 unk17;
+    u32 unk18;
+    u32 unk19;
+    u32 unk20;
+    u32 unk21;
+    u32 unk22;
+    s32 max_y;  // TODO: bad name
 };
 
 
