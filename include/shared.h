@@ -31,7 +31,7 @@ typedef struct {
     s8  debug_features;
     s8  unk519; // have beaten the game?
 } GlobalData;
-
+#undef UNK
 
 #define UNK(a,b)    void* unk##a[b - a + 1]
 extern struct {
@@ -78,7 +78,7 @@ extern struct {
     u32*        (*ClearOTag)(u32* ot, s32 n);
     void        (*ClearOTagR)(u32* ot, s32 n);
     void        (*DrawOTag)(u32* ot);
-    s32         (*LoadImage)(RECT*, u32*);
+    s32         (*LoadImage)(RECT*, void*);
     int         (*ClearImage)(RECT*, u8, u8, u8);
     s32         (*DrawSync)(s32 mode);
     void        (*SetDrawMode)(DR_MODE* p, s32 dfe, s32 dtd, s32 tpage, RECT* tw);
@@ -115,7 +115,10 @@ extern struct {
     void        (*audio_unk3)(s32);
     UNK(819, 1023);
 } jt;
+#undef UNK
 
+
+// TODO: this is stupid, move it
 // DON'T include this header in main, or this macro breaks things
 #define GetGraphType()  jt.GetGraphType()
 

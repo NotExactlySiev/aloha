@@ -4,25 +4,15 @@
 
 #include "shared.h"
 
-// data from here
-typedef struct {
-    DISPENV disp;
-    DRAWENV draw;
-    u32    ot[4];   // layers
-    u32*   next;
-    u32    prims[0x8000];
-} GBuffer;
+#include "gameover.h"
 
-typedef struct {
-    s8  dx;
-    s8  dy;
-    u16 uv;     // tile index 0-255
-} SpriteThing;  // SpriteTile
+// TODO: menu DAS broken (needs to be held down for too long)
+// TODO: figure out how many different types of GBuffer there are
+// (this one, main one in game, debug one in game, and more?)
+// TODO: header file
+// TODO: naming everything and reorganizing
+// TODO: seperate different modules in files
 
-typedef struct {
-    u32    count;
-    SpriteThing sprts[];
-} Sprite;
 
 Sprite* sprt_data[64];
 
@@ -35,13 +25,15 @@ s32 *intarrs[3] = {
     (s32[]) { 16, 8, 17, 8, -1, 0 },
 };
 
-
 s32 *seq = 0;
 s32 seq_val = 0;
 s32 seq_wait = 0;
+s32 seq_idx = 0;
+s32 seq_timer = 0;
 
 int D_800ED354[7] = { 32, 33, 34, 35, 36, 37, 32 };
-SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
+//SpuVolume D_800ED370 = { 0x7FFF, 0x7FFF };
+
 s32 bounce_y = -0x2400;       // y
 s32 bounce_dy = 0x600;         // dy
 s32 bounce_anim_counter = 60;            // initial counter
@@ -64,8 +56,7 @@ s32 selected = 0;       // selected
 s32 D_800ED3E4 = 0;
 s32 D_800ED3EC = 0;
 s32 D_800ED3F4 = 0;
-s32 seq_idx = 0;
-s32 seq_timer = 0;
+
 
 s32 D_800ED340[5] = { 40, 42, 41, 42, -1 };
 
@@ -84,8 +75,6 @@ GBuffer *current_buffer;       // current
 u16 D_8012DF64[6];      // global cluts for this file
 
 
-// decls
-u32 input_das_read(void);
 
 
 // functions
@@ -186,7 +175,7 @@ void func_800EBA40(void)
 
 void func_800EBCE0(void)
 {
-    D_800ED3C4 = 0;
+    D_800ED3C4 = 0; // unused var?
 }
 
 void func_800EBCF0(void)
@@ -396,15 +385,15 @@ int main(void)
     int choice;
 
     // TEST: let's disable all audio shit
-    func_800ED268();    // deliver events
+    func_800ED268();    // go to weird event handler
     func_800ECDA8();    // set up graphics env
     func_800EC098();    // set up some constants
     
     jt.audio_unk2();
     
     input_das_setup();
-    GlobalData* global = jt.global_ptr();   // get shared data
-    jt.set_global_volume(&D_800ED370); // set global vol void(SpuVolume*)
+    GlobalData* global = jt.global_ptr();
+    jt.set_global_volume(&(SpuVolume){ 0x7FFF, 0x7FFF });
     jt.audio_unk_volume(0x3000);
     jt.audio_unk3(0);    // mc_set_some_var
 
@@ -473,7 +462,7 @@ void load_sprites(u32* data)
     // first byte is the number of groups
     D_800ED42C = *data++;
     for (int i = 0; i < D_800ED42C; i++) {
-        sprt_data[i] = data++;
+        sprt_data[i] = (Sprite*) data++;
         data += sprt_data[i]->count;
     }
 }
@@ -640,7 +629,7 @@ void func_800ECDA8(void)
         draw->dtd = 0;
         draw->dfe = 0;
 
-        tv_standard = jt.get_tv_system;
+        tv_standard = jt.get_tv_system();
 
         disp->screen.x = 4;
         disp->screen.y = tv_standard == TV_PAL ? 12 : 36;

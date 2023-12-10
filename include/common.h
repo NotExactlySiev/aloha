@@ -6,8 +6,6 @@
 #include "types.h"
 #include <sys/types.h>
 
-#define LANGUAGE_C
-
 #define LEN(x) ((s32)(sizeof(x) / sizeof(*(x))))
 #define LENU(x) ((u32)(sizeof(x) / sizeof(*(x))))
 #define STRCPY(dst, src) __builtin_memcpy(dst, src, sizeof(src))
