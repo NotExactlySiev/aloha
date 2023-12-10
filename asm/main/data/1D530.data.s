@@ -37018,7 +37018,7 @@ glabel D_80046ED8
 /* 2F6D8 80046ED8 */ .word D_80046E98
 
 glabel D_80046EDC
-/* 2F6DC 80046EDC */ .word k_printf
+/* 2F6DC 80046EDC */ .word  printf
 
 glabel D_80046EE0
 /* 2F6E0 80046EE0 */ .word 0x00000000

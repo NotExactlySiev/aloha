@@ -371,6 +371,7 @@ void func_800E25E4(void)
 
 extern s32 D_8013ED8C;  // mag
 
+#define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
     s16 unk0;
     s16 unk2;
@@ -389,15 +390,14 @@ typedef struct {
     s32 unk90;
     UNK(0x94, 659);
 } Chain;    // 660 bytes
-
-s32 meow = sizeof(Chain);
+#undef UNK
 
 extern Chain D_8013F390[3];
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E278C);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2A30);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E2B74);
-
+/*
 void _func_800E2B74(void)
 {
     s32 val;
@@ -417,7 +417,7 @@ void _func_800E2B74(void)
         // TODO: jesus fucking christ I have no idea what's happening
         func_800E6548(2, 3, 40, 40, 128);
     }
-}
+}*/
 
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E32B0);

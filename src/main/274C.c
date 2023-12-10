@@ -333,14 +333,14 @@ s32 sndqueue_exec()
     sndqueue_is_running = 1;
 
 #if 0
-    k_printf("RUN %d: ", D_80047F34);
+    printf("RUN %d: ", D_80047F34);
     snd_task_t *p = &_sndqueue[D_80047F34];
     for (int i = 0; i < 6; i++) {
-        k_printf("%X\t", p->com);
+        printf("%X\t", p->com);
         if (p->com == 0xFF) break;
         p++;
     }
-    k_printf("\n");
+    printf("\n");
 #endif
 
     // try again
@@ -651,7 +651,7 @@ s32 execute_uncompressed(char* file, s32 param) {
 
     flush_cache_safe();
     setNextFile(0);
-    k_Exec(&header, 1, 0);
+    Exec(&header, 1, 0);
     return 0;
 }
 // ENDOF fs.c
@@ -1044,9 +1044,9 @@ s32 mc_file_create(s32 mtidx, char* file, u32 size)
     size += 0x2000 - 1;
     if (size < 0) size += 0x2000 - 1 + 0x2000 - 1;
     size >>= 13;
-    fd = k_open(D_800521F8, (size << 16) | O_CREAT);
+    fd = open(D_800521F8, (size << 16) | O_CREAT);
     if (fd == -1) return 0;
-    k_close(fd);
+    close(fd);
     return 1;
 }
 
@@ -1054,19 +1054,19 @@ s32 mc_file_open(s32 mtidx, char* file, u32 mode)
 {
     if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
         return -1;
-    return k_open(D_800521F8, mode);
+    return open(D_800521F8, mode);
 }
 
 s32 mc_file_close(s32 fd)
 {
-    return k_close(fd);
+    return close(fd);
 }
 
 s32 mc_file_delete(u32 mtidx, char* file)
 {
     if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
         return 0;
-    return k_erase(D_800521F8);
+    return erase(D_800521F8);
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002026C);   // mc_write
@@ -1157,7 +1157,7 @@ void execute_compressed(u32* addr, u32 stack)
     lz1_decode((u8* ) (addr + 0x201), header.t_addr);
     header.s_addr = stack;
     flush_cache_safe();
-    k_Exec(&header, 1, 0);
+    Exec(&header, 1, 0);
 }
 
 void func_800218A0(void (*fn)(void))
@@ -1381,7 +1381,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strncmp);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", memcpy);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", memset);
+INCLUDE_ASM("asm/main/nonmatchings/274C", memset2);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 

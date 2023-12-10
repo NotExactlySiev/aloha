@@ -66,8 +66,8 @@ struct Entity {
     u32 unk19;
     u32 unk20;
     u32 unk21;
-    u32 unk22;
-    s32 max_y;     // 0xDC // TODO: bad name 
+    s32 max_y;      // 0xDC // TODO: bad name 
+    s32 unk22;     
 
     // is this specific to each entity?
     u8 UNK[92];

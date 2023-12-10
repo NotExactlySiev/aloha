@@ -1,4 +1,5 @@
 #include "common.h"
+#include "shared.h"
 #include <kernel.h>
 
 //#define LOG_JT
@@ -120,6 +121,6 @@ void exception_handler(void);
 s32 enable_exception_event(void*);
 u32 func_80019DCC(void);
 void setNextFile(s32);
-s32 getNextFile();
-u8* getGameConfig();
+s32 getNextFile(void);
+GlobalData *getGameConfig(void);
 int main(int, char**);

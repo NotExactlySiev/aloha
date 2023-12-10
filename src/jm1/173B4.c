@@ -1394,6 +1394,9 @@ void func_800DDF04(void)
         debug_print_str("RENDERING IS FUCKING OFF");
         debug_set_pos(1, 15);
         debug_print_str("NO MODEL RENDERING");
+        debug_set_pos(1, 16);
+        debug_print_str("GROUND=");
+        debug_print_decimal(player_entity.unk22);
         
         debug_set_pos(1, 23);
         debug_print_str("X=");
@@ -2106,7 +2109,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
 // be fully disassembled and understood otherwise everything
 // breaks. because spimdasm is dfor nowumb and loads of symbols are
 // lost.
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
 //__asm__(".section .text\n" "\t.align\t2\n" "\t.globl\t" "_func_800E5E60" "\n" "\t.ent\t" "_func_800E5E60" "\n" "_func_800E5E60" ":\n" ".include \"" "asm/jm1/nonmatchings/173B4" "/" "func_800E5E60" ".s\"\n" "\t.set reorder\n" "\t.set at\n" "\t.end\t" "_func_800E5E60");
 
 
@@ -2116,13 +2119,13 @@ extern u16 D_8013EC48[1024]; // added flags and stuff
 extern s16 D_80141468[1024];    // z offsets
 
 SVECTOR* camera_pos = 0x1F8003C8;
-void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
+/*void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
 {
     //if ((id & 0xFFFF) == 406) 
     //_func_800E5E60(pos, angle, id);
         //gprintf("DRAWING %X\n", id);
 
-}
+}*/
 
 // draw_model
 /*void func_800E5E60(SVECTOR* pos, SVECTOR* angle, u32 id)

@@ -49,7 +49,7 @@ glabel _start
 /* BFC4 800237C4 04801C3C */  lui        $gp, (0x80040000 >> 16)
 /* BFC8 800237C8 447D9C27 */  addiu      $gp, $gp, 0x7D44
 /* BFCC 800237CC 21F0A003 */  addu       $fp, $sp, $zero
-/* BFD0 800237D0 EE8E000C */  jal        k_InitHeap
+/* BFD0 800237D0 EE8E000C */  jal        InitHeap
 /* BFD4 800237D4 04008420 */   addi      $a0, $a0, %lo(D_80000004) # handwritten instruction
 /* BFD8 800237D8 05801F3C */  lui        $ra, %hi(D_80048044)
 /* BFDC 800237DC 4480FF8F */  lw         $ra, %lo(D_80048044)($ra)

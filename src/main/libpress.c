@@ -31,7 +31,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libpress", func_800241A8);   // MDEC_out_sync
 
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80024240);   // timeout
 
-INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80024374);   // k_exit + MDEC_vlc
+INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80024374);   // exit + MDEC_vlc
 
 // or maybe with top MDEC_vlc are in one file idk i have to check the libs
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_800245D4);   // MDEC_vlc2

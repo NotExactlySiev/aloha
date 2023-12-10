@@ -106,4 +106,4 @@ INCLUDE_ASM("asm/main/nonmatchings/libgpu/core", get_alarm);
 
 INCLUDE_ASM("asm/main/nonmatchings/libgpu/core", _memset);
 
-INCLUDE_ASM("asm/main/nonmatchings/libgpu/core", k_GPU_cw);
+INCLUDE_ASM("asm/main/nonmatchings/libgpu/core", GPU_cw);

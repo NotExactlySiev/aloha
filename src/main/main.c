@@ -3,8 +3,13 @@
 #include "common.h"
 #include "main.h"
 #include <kernel.h>
+#include <malloc.h>
+#include <stdio.h>
 #include <libgpu.h>
+#include <string.h>
+#include <libetc.h>
 #include <shared.h>
+#include <libapi.h>
 
 
 #define DFILE(ptr, name)    { (void*) (ptr | 1), name }
@@ -59,7 +64,6 @@ s32 g_GameRegion = 0;
 u32 g_GameNP = TV_NTSC;
 s32 g_GameIsZ = 0;
 
-// .bss
 void* D_80048044;       // hold return for _start
 s32 D_80047E6C;         // 80047e6c
 s32 D_80047E70;         // 80047e70
@@ -68,28 +72,35 @@ s32 exception_event;          // 80047e7c
 char g_VersionStr[20];
 
 
+s32     cd_fs_read(const char* addr, void* buf, s32 mode);
+void    wait_frame();   // TODO: args?
+void    execute_compressed(u32* addr, u32 stack);
+s32     execute_uncompressed(char* file, s32 param);
+
+// boot.h
+void reset(void);
 
 void file_execute_loop(void)
 {
-    s32 *addr;
+    u32 *addr;
     s32 tmp;
 
     while (1) {
         if (g_CurrFile == -1) g_CurrFile = 0;
 
         addr = g_Files[g_CurrFile].header;
-        k_printf("now executing: %s\n", g_Files[g_CurrFile].addr);
+        printf("now executing: %s\n", g_Files[g_CurrFile].addr);
         if (addr != NULL) {
             // if addr isn't NULL, it's compressed
-            if ((s32) addr & 1) {
-                addr = (s32) addr & ~0xF;
+            if ((u32) addr & 1) {
+                addr = (u32*) ((u32) addr & ~0xF);
                 while (cd_fs_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
-                    k_printf("Exec File Read Error\n");
+                    printf("Exec File Read Error\n");
                 }
 
                 while (addr[0] != 0x582D5350 || addr[1] != 0x45584520) {
                     cd_fs_read(g_Files[g_CurrFile].addr, addr, 0);
-                    k_printf("Exec File Read Error\n");
+                    printf("Exec File Read Error\n");
                 }
             }
             execute_compressed(addr, 0);
@@ -143,8 +154,9 @@ void func_80018AB4(void)
     u32 h;
 
     // set the enviroment
-    call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
-    call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
+    // TODO: should I get rid of the  stuff? They do nothing
+    SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
+    SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
     drawenv.isbg = 0;
     drawenv.dtd = 1;
     drawenv.dfe = 1;
@@ -153,8 +165,8 @@ void func_80018AB4(void)
         dispenv.pad0 = 1;
         dispenv.screen.y += 24;
     }
-    call_PutDrawEnv(&drawenv);
-    call_PutDispEnv(&dispenv);
+    PutDrawEnv(&drawenv);
+    PutDispEnv(&dispenv);
     DrawSync(0);
     
     // clear the screen with black
@@ -177,7 +189,7 @@ void func_80018AB4(void)
         SLEEP_FRAMES(10);
         
         wait_frame(0);
-        call_SetDispMask(1); // set disp mask to show it
+        SetDispMask(1); // set disp mask to show it
         
         FADE_IN(4,4);
         
@@ -191,7 +203,7 @@ void func_80018AB4(void)
     }
     
     wait_frame(0);
-    call_SetDispMask(0);
+    SetDispMask(0);
     
     do {
         D_80047D48 = cd_fs_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
@@ -203,7 +215,7 @@ void func_80018AB4(void)
         SLEEP_FRAMES(10);
         
         wait_frame(0);
-        call_SetDispMask(1);
+        SetDispMask(1);
         
         FADE_IN(4,4);
     } else {
@@ -214,7 +226,7 @@ void func_80018AB4(void)
         SLEEP_FRAMES(10);
         
         wait_frame(0);
-        call_SetDispMask(1);
+        SetDispMask(1);
         
         FADE_IN(4,5);
     }
@@ -230,8 +242,8 @@ void func_8001926C(void)
     s32 y, h;
     u32 col;
 
-    call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
-    call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
+    SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
+    SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
     drawenv.isbg = 0;
     drawenv.dtd = 1;
     drawenv.dfe = 1;
@@ -240,8 +252,8 @@ void func_8001926C(void)
         dispenv.pad0 = 1;
         dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
     }
-    call_PutDrawEnv(&drawenv);
-    call_PutDispEnv(&dispenv);
+    PutDrawEnv(&drawenv);
+    PutDispEnv(&dispenv);
 
     if (D_80047D48 == -2) {
         MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
@@ -254,10 +266,10 @@ void func_8001926C(void)
         FADE_OUT(4,5);
     }
     
-    call_wait_frame(0);
-    call_SetDispMask(0);
-    call_SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
-    call_SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
+    wait_frame(0);
+    SetDispMask(0);
+    SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
+    SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
     dispenv.pad0 = 0;
     if (get_GameNP() == 1) {
         dispenv.pad0 = 1;
@@ -268,15 +280,15 @@ void func_8001926C(void)
     drawenv.g0 = 0;
     drawenv.b0 = 0;
     
-    call_DrawSync(0);
-    call_wait_frame(0);
-    call_PutDrawEnv(&drawenv);
-    call_PutDispEnv(&dispenv);
+    DrawSync(0);
+    wait_frame(0);
+    PutDrawEnv(&drawenv);
+    PutDispEnv(&dispenv);
     
-    call_DrawSync(0);
-    call_wait_frame(0);
-    call_PutDrawEnv(&drawenv);
-    call_PutDispEnv(&dispenv);
+    DrawSync(0);
+    wait_frame(0);
+    PutDrawEnv(&drawenv);
+    PutDispEnv(&dispenv);
 }
 
 // setup_thing (setup_video?)
@@ -292,9 +304,9 @@ void func_80019680(void)
     wait_frame(0);
 
     // setup graphics
-    call_ResetGraph(0);
-    call_SetGraphDebug(0);
-    call_SetDispMask(0);
+    ResetGraph(0);
+    SetGraphDebug(0);
+    SetDispMask(0);
 
     // spu set default
     func_8001DD7C();
@@ -331,7 +343,7 @@ void game_shutdown(void)
     StopCallback();
     PadStop();
     disable_vblank_event(vblank_event);
-    k_CloseEvent(exception_event);
+    CloseEvent(exception_event);
     StopRCnt(0xF2000000);
     StopRCnt(0xF2000001);
     StopRCnt(0xF2000002);
@@ -341,30 +353,30 @@ void game_shutdown(void)
 s32 enable_vblank_event(void* handler)
 {
     s32 event;
-    k_EnterCriticalSection();
-    event = k_OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, handler);
+    EnterCriticalSection();
+    event = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, handler);
     SetRCnt(RCntCNT3, 1, EvMdINTR);
     StartRCnt(RCntCNT3);
-    k_EnableEvent(event);
-    k_ExitCriticalSection();
+    EnableEvent(event);
+    ExitCriticalSection();
     return event;
 }
 
 void disable_vblank_event(s32 event)
 {
-    k_EnterCriticalSection();
+    EnterCriticalSection();
     StopRCnt(RCntCNT3);
-    k_CloseEvent(event);
-    k_ExitCriticalSection();
+    CloseEvent(event);
+    ExitCriticalSection();
 }
 
 void nop(void) {}
 
 void flush_cache_safe(void)
 {
-    k_EnterCriticalSection();
-    k_FlushCache();
-    k_ExitCriticalSection();
+    EnterCriticalSection();
+    FlushCache();
+    ExitCriticalSection();
 }
 
 void jt_clear(void)
@@ -394,7 +406,7 @@ void jt_set(void* func, s32 idx)
 #endif
 {
 #ifdef LOG_JT
-    k_printf("Set %X (%d) to %08X: %s\n", idx, idx, func, name);
+    printf("Set %X (%d) to %08X: %s\n", idx, idx, func, name);
 #endif
     void** jmptable = (void**) &jt;
     jmptable[idx] = KSEG0(func);
@@ -486,7 +498,7 @@ void game_init(void)
 
     // setup IO
     func_80019680();
-    k_ChangeClearPAD(0);
+    ChangeClearPAD(0);
 
     // set basic jt functions
 #ifdef LOG_JT
@@ -508,7 +520,7 @@ void game_init(void)
     jt_set(get_VersionStr, 11);
 
     // clear global space
-    memset((void*) 0x80014000, 0x4000, 0);
+    memset2((void*) 0x80014000, 0x4000, 0);
 
     // set reverb
     func_80020F9C(5, 0);
@@ -572,11 +584,11 @@ s32 enable_exception_event(void* handler)
 {
     s32 event;
 
-    k_EnterCriticalSection();
+    EnterCriticalSection();
     // exception event (only cause by the invalid syscall function at the start of every main)
-    event = k_OpenEvent(0xF0000010, 0x4000, 0x1000, handler);
-    k_EnableEvent(event);
-    k_ExitCriticalSection();
+    event = OpenEvent(0xF0000010, 0x4000, 0x1000, handler);
+    EnableEvent(event);
+    ExitCriticalSection();
     return event;
 }
 
@@ -590,14 +602,14 @@ void setNextFile(s32 id)
     g_NextFile = id;    
 }
 
-s32 getNextFile()
+s32 getNextFile(void)
 {
     return g_NextFile;
 }
 
-u8* getGameConfig()
+GlobalData *getGameConfig(void)
 {
-    return 0x80014000;
+    return (GlobalData*) 0x80014000;
 }
 
 int main(int argc, char** argv)
@@ -605,7 +617,7 @@ int main(int argc, char** argv)
     s32 pad[22];
     s32 rc;
     
-    k_printf("MAX ADR:%x\n", k_malloc(4));
+    printf("MAX ADR:%x\n", malloc(4));
     D_80047E6C = 1;
 
     // initialization
@@ -619,7 +631,7 @@ int main(int argc, char** argv)
     while (1) {
         rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
         if (rc > 0 && tmpfilebuf == 0x56414270) break;
-        k_printf("VAB file Reload\n");
+        printf("VAB file Reload\n");
     }
 
     //while (1) {
@@ -631,13 +643,13 @@ int main(int argc, char** argv)
     func_8001926C();
 
     // activate debug mode? (it's actually never checked)
-    if (call_PadRead(0) == 6) {
+    if (PadRead(0) == 6) {
         D_80047D50 = 1;
     }
 
     // # custom stuff:
     // debug mode
-    //getGameConfig()[0x517] = 1;
+    getGameConfig()->debug_features = 1;
     // give printf
     //jt_set(k_printf, 9);
     //CdSetDebug(2);
@@ -647,11 +659,10 @@ int main(int argc, char** argv)
     file_execute_loop();
 
     // shutdowns
-    call_wait_frame(0);
-    call_SetDispMask(0);
+    wait_frame(0);
+    SetDispMask(0);
     func_80021600();
     game_shutdown();
-    call_ResetGraph(3);
+    ResetGraph(3);
     reset();
-    return;
 }

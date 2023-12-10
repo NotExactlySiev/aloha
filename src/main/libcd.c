@@ -82,7 +82,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libcd", def_cbready);
 
 INCLUDE_ASM("asm/main/nonmatchings/libcd", def_cbread);
 
-INCLUDE_ASM("asm/main/nonmatchings/libcd", k_DeliverEvent);
+INCLUDE_ASM("asm/main/nonmatchings/libcd", DeliverEvent);
 
 INCLUDE_ASM("asm/main/nonmatchings/libcd", StSetRing);
 

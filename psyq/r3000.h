@@ -231,7 +231,7 @@ extern int (*c0vec_tbl[])();
 }
 #endif
 #endif
-#endif !LOCORE
+#endif /* LOCORE */
 
 #define BRK_KERNEL 	0xf1
 #define EXCEPT_NORM     1
