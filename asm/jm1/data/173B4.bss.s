@@ -346,7 +346,7 @@ glabel D_80107678
 glabel D_80108F78
 	.space 0xbb80
 
-glabel D_80114AF8
+glabel entity_array
 	.space 0x9e00
 
 glabel D_8011E8F8
@@ -1036,9 +1036,6 @@ glabel D_80137CF0
 glabel D_80137CF8
 	.space 0x8
 
-glabel gbuffers
-	.space 0x168
-
 glabel D_80137E68
 	.space 0x1fe
 
@@ -1204,7 +1201,7 @@ glabel D_801381F8
 glabel D_801383F6
 	.space 0x2
 
-glabel D_801383F8
+glabel entity_ptrs
 	.space 0x200
 
 glabel D_801385F8
@@ -1287,9 +1284,6 @@ glabel D_8013E448
 
 glabel D_8013EC48
 	.space 0x800
-
-glabel D_8013F448
-	.space 0x2000
 
 glabel D_80141448
 	.space 0x2
@@ -1374,9 +1368,6 @@ glabel D_80141C8F
 
 glabel D_80142C88
 	.space 0x40
-
-glabel gbuffer_current_index
-	.space 0x8
 
 glabel D_80142CD0
 	.space 0x1

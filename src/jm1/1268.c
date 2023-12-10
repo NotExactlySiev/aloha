@@ -53,9 +53,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1788);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
 
 extern s32 D_80103164;
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
 // frog render (TODO: shadow)
-/*void func_800B1BF4(Entity* this)
+void func_800B1BF4(Entity* this)
 {
     //SVECTOR *cam = 0x1F8003CA;
     SVECTOR pos;
@@ -71,10 +71,11 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
         //if (this->unk5 != 0) {
             //meshid |= 0x8000;
         //}
+        //gprintf("FROG %d\n", meshid);
         func_800E5E60(&pos, &rot, meshid);
     }
     // and the shadow
-    pos.vy = this->max_y + 2;
+    /*pos.vy = this->max_y + 2;
     if (cam->vy < pos.vy &&
         func_800E5DD8(&pos, this->model[1] + D_80103164) > -1) {
         u32 meshid = func_800B1B28(this, 0);
@@ -84,11 +85,16 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
 
     }
 
-    if (this->unk5 != 0) this->unk5 = -1;
-}*/
+    if (this->unk5 != 0) this->unk5 = -1;*/
+}
 
 // contrusction
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1D78);
+INCLUDE_ASM("asm/jm1/nonmatchings/1268", _func_800B1D78);
+void func_800B1D78(Entity *this, void *params)
+{
+    gprintf("A FROG! %p\n", this);
+    _func_800B1D78(this, params);
+}
 
 // destructor
 void func_800B1F8C(void) {

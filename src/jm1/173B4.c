@@ -3,6 +3,7 @@
 #include "gbuffer.h"
 #include "entity.h"
 
+// todo: the OT in this one is wrong. also it's just another gbuffer
 typedef struct {
     s16     count;
     u32     lastprim;    // entrypoint
@@ -21,12 +22,15 @@ extern Entity player_entity;
 
 // entity lists
 
-struct {
-    struct {
+typedef struct {
         LinkedList head;
         LinkedList tail;
-    } lists[3];
-} D_8010295C = {};
+} List;
+
+List entity_list_0 = {};
+List entity_list_1 = {};
+List entity_list_2 = {};
+List entity_list_free = {};
 
 typedef struct {
     u8 v0, v1, v2, v3;
@@ -62,28 +66,7 @@ typedef struct {
     void *unk2;
 } Mesh;
 
-
-
-/*Entity* D_8010295C = 0;   // entity_list_0
-Entity* D_80102960 = 0;
-Entity* D_80102964 = 0;
-Entity* D_80102968 = 0;
-
-Entity* D_8010296C = 0;
-Entity* D_80102970 = 0;
-Entity* D_80102974 = 0;
-Entity* D_80102978 = 0;
-
-Entity* D_8010297C = 0;
-Entity* D_80102980 = 0;
-Entity* D_80102984 = 0;
-Entity* D_80102988 = 0;*/
-
-
-
 extern gprintf(char* fmt, ...);
-
-
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
 
@@ -407,16 +390,38 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCE1C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCF74);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
+// ^ these are standard lib functions 
 
-extern s16 D_8013F448[4096];
+// custom math functions. math.c?
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", make_sin_lut);
-// make sin lut
+extern s32 D_801028F4;  // rng
+extern s32 D_801028FC;  // prng
+
+// seed arrs
+extern s8 D_8010154C[64];   // seed
+extern s8 D_8010158C[16];   // buttons
+
+// working arrs
+extern s8 D_80106D28[64];
+extern s8 D_80106D68[64];
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
+void func_800CD010(void)
+{
+    D_801028F4 = 0;
+    D_801028FC = 0;
+    for (int i = 0; i < 64; i++) {
+        D_80106D28[i] = D_8010154C[i];
+        D_80106D68[i] = D_8010154C[i];
+    }
+}
+
+s16 sin_lut[4096];
+
 void make_sin_lut(void)
 {
     for (int i = 0; i < 4096; i++) {
-        D_8013F448[i] = func_800CBCE4(i);
+        sin_lut[i] = func_800CBCE4(i);   // rsin
     }
 }
 
@@ -572,27 +577,86 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0370);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0428);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0438);
+extern s32 entity_free_count;
+extern Entity  entity_array[128]; // entity array
+extern Entity *entity_ptrs[128]; // entity pointers
+extern s32 D_801029A4;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0448);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0458);
+LinkedList *func_800D0438(void)
+{
+    return &entity_list_1.head;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0468);
+LinkedList *func_800D0448(void)
+{
+    return &entity_list_1.tail;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0478);
+LinkedList *func_800D0458(void)
+{
+    return &entity_list_2.head;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0488);
+LinkedList *func_800D0468(void)
+{
+    return &entity_list_2.tail;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0498);
+LinkedList *func_800D0478(void)
+{
+    return &entity_list_0.head;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D04B0);
+LinkedList *func_800D0488(void)
+{
+    return &entity_list_0.tail;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D04C8);
+void entity_insert_before(LinkedList *list, LinkedList *node)
+{
+    LinkedList *oldprev = list->prev;
+    list->prev = node;
+    node->next = list;
+    node->prev = oldprev;
+    oldprev->next = node;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D04E8);
+void entity_insert_after(LinkedList *list, LinkedList *node)
+{
+    LinkedList *oldnext = list->next;
+    list->next = node;
+    node->prev = list;
+    node->next = oldnext;
+    oldnext->prev = node;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D053C);
+void entity_detach_from_list(LinkedList *node)
+{
+    node->prev->next = node->next;
+    node->next->prev = node->prev;
+}
+
+Entity *entity_create(void)
+{
+    if (entity_free_count == 0) return 0;
+    entity_free_count -= 1;
+
+    Entity *ret = entity_list_free.head.next;
+    entity_detach_from_list(ret);
+    ret->unk1 = 0;
+
+    return ret;
+}
+
+void entity_destroy(Entity *e)
+{
+    e->unk2 = 0;
+    entity_detach_from_list(e);
+    entity_insert_after(&entity_list_free.head, e);
+    entity_free_count += 1;
+}
+
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D058C);
 
@@ -626,7 +690,45 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C48);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C5C);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C5C);
+// entity lists init
+void func_800D0C5C(void)
+{
+    func_800D0C48(&entity_list_0.head, &entity_list_0.tail);
+    func_800D0C48(&entity_list_2.head, &entity_list_2.tail);
+    func_800D0C48(&entity_list_1.head, &entity_list_1.tail);
+    entity_free_count = 128;
+
+    // TODO: entity size should be correct 
+    // initialize all entities as free
+    gprintf("SIZEOF ENTITY: %d\n", sizeof(Entity));
+
+    entity_list_free.head.prev = 0;
+    LinkedList *last = &entity_list_free.head;
+    for (int i = 0; i < 128; i++) {
+        Entity *e = &entity_array[i];
+        entity_ptrs[i] = e;
+        e->unk0 = i;    // id
+        e->unk1 = 0;    // active
+        LinkedList *node = (LinkedList*) e;
+        // connect to tail
+        entity_list_free.tail.prev = node;
+        // connect to last element
+        last->next = node;
+        node->prev = last;
+        
+        last = node;
+    }
+    last->next = &entity_list_free.tail;
+    entity_list_free.tail.next = 0;
+
+    Entity *e = entity_create();
+    gprintf("ENTITY: %p\n", e);
+    func_800D0C08(0, 0, 0);
+    func_800D0C28(0, 0, 0);
+    func_800D058C();
+    D_801029A4 = 1;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0D70);
 /*void func_800D0D70(Entity* e, u32 offset)
@@ -1360,6 +1462,7 @@ u32 debug_font_x = 960;
 u32 debug_font_y = 256;
 u32 D_80102788 = 224;
 
+
 s16 debug_ot_index = 0;
 extern TextOT debug_text_ot[3];
 extern TextUV debug_char_uvs[128];
@@ -1672,17 +1775,47 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F4C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F84);
 
-extern u32 gbuffer_current_index;
-extern GBuffer gbuffers[3];
+#define OT_SIZE 567
+
+// this actually holds the primitive data
+typedef struct {
+    u32 ot[OT_SIZE];
+    u32 prims[40960];
+} PrimBuffer;
+
+
+PrimBuffer *gbuffer_prim_buffers = 0x80060000;
+s32 D_80102D3C = 0;  // primbuffer_index
+
+GBuffer gbuffers[3];
+s32 gbuffer_current_index;
+
+
+extern s32 D_80102DBC;
 
 GBuffer* gbuffer_get_current(void)
 {
     return &gbuffers[gbuffer_current_index];
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0FBC);
+u32 *gbuffer_get_next_ot(void)
+{
+    return gbuffer_prim_buffers[D_80102D3C + 1].ot;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E100C);
+void gbuffer_swap(void)
+{
+    if (++gbuffer_current_index > 2)
+        gbuffer_current_index = 0;
+    if (++D_80102D3C > 1)
+        D_80102D3C = 0;
+    
+    PrimBuffer *pb = gbuffer_prim_buffers + D_80102D3C;
+    gbuffers[gbuffer_current_index].ot = pb->ot;
+    gbuffers[gbuffer_current_index].nextfree = pb->prims;
+    func_800E8B5C(pb->ot, OT_SIZE);
+    D_80102DBC = 0;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E10F8);
 
@@ -1973,20 +2106,31 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
 // be fully disassembled and understood otherwise everything
 // breaks. because spimdasm is dfor nowumb and loads of symbols are
 // lost.
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
+//__asm__(".section .text\n" "\t.align\t2\n" "\t.globl\t" "_func_800E5E60" "\n" "\t.ent\t" "_func_800E5E60" "\n" "_func_800E5E60" ":\n" ".include \"" "asm/jm1/nonmatchings/173B4" "/" "func_800E5E60" ".s\"\n" "\t.set reorder\n" "\t.set at\n" "\t.end\t" "_func_800E5E60");
+
+
 
 extern s32 D_801380B0;  // lod_distance
 extern u16 D_8013EC48[1024]; // added flags and stuff
 extern s16 D_80141468[1024];    // z offsets
 
 SVECTOR* camera_pos = 0x1F8003C8;
+void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
+{
+    //if ((id & 0xFFFF) == 406) 
+    //_func_800E5E60(pos, angle, id);
+        //gprintf("DRAWING %X\n", id);
+
+}
+
 // draw_model
-/*void _func_800E5E60(SVECTOR* pos, SVECTOR* angle, s32 id)
+/*void func_800E5E60(SVECTOR* pos, SVECTOR* angle, u32 id)
 {
     if (id < 0) return;
 
     // LET's only do the frog for now
-    if (id != 0x196) return;
+    //if (id != 0x196) return;
 
     SVECTOR *dir = 0x1F800000;
     SVECTOR *tmp = 0x1F800024;

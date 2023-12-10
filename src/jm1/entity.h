@@ -11,8 +11,9 @@ typedef struct Component Component;
 struct Component {
     u16 param;
     u16 disabled;
-    u32 unk0;
-    u32 unk1;
+    u16 unk0;
+    u16 unk1;
+    void *unk2;
     void (*func)(Entity*, Component*); // this probably has a specific type
 };
 
@@ -50,7 +51,7 @@ struct Entity {
     s32 angle_z;
     s32 dangle_y;
     s32 dangle_x;
-    s32 dangle_z;
+    s32 dangle_z;   // 0xA0
 
     u32 unk9;
     u32 unk10;
@@ -66,7 +67,10 @@ struct Entity {
     u32 unk20;
     u32 unk21;
     u32 unk22;
-    s32 max_y;  // TODO: bad name
+    s32 max_y;     // 0xDC // TODO: bad name 
+
+    // is this specific to each entity?
+    u8 UNK[92];
 };
 
 
