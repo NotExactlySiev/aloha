@@ -78,8 +78,11 @@ def asm_add(ent):
     global proc
     # also add its data files
     proc[ent.name]["data"] = []
-    for dat in os.scandir(ent.path + "/data"):
-        proc[ent.name]["data"].append(dat.name)
+    try:
+        for dat in os.scandir(ent.path + "/data"):
+            proc[ent.name]["data"].append(dat.name)
+    except:
+        pass
 
 
 for_dirs("./src", src_add)
