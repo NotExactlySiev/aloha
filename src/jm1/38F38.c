@@ -2,6 +2,8 @@
 #include <libgpu.h>
 #include "gbuffer.h"
 
+#include "entity.h"
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8738);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E87B8);
@@ -54,6 +56,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E91F4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E929C);
 
+// polar to cart
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9324);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E939C);
@@ -687,7 +690,12 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8F68);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8FE8);
 
+// entity_shot_update
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F9034);
+/*void _func_800F9034(Entity *this)
+{
+    //gprintf("update bullet!\n");
+}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F91EC);
 
