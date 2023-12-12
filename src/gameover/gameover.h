@@ -8,10 +8,10 @@ extern s32  bounce_y;
 void func_800EB894(void);
 void play_effect(s32 arg);
 // ASM ONE HERE
-int func_800EB8F8();
+void func_800EB8F8(u32 buttons);
 // bounce animation
 void func_800EBA08(void);   // set state to
-void func_800EBA20(void);   // set state to
+void bigtext_anim_play_drop(void);   // set state to
 void func_800EBA40(void);   // update
 // unused?
 void func_800EBCE0(void);   // 
@@ -24,7 +24,7 @@ void func_800EBEB8(void);   // menu_render
 void func_800EC098(void);
 void func_800EC128(void);
 void func_800EC14C(void);
-void update_routine(s32 arg);    // update from input (one of 4)
+void update_routine(u32 buttons);    // update from input (one of 4)
 // background
 void func_800EC268(void);   // update and draw
 

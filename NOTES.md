@@ -28,6 +28,8 @@ UI drawing functions are shared between GAMEOVER and SELECT.
 The loop of gbuffer_clear -> update_routine -> render_routine -> gbuffer_draw
 is used in both and the first and last functions are identical.
 
+loads of UI code is reused between SELECT, GAMEOVER and (I think) TITLE.
+
 ## TODO
 - asserts for panicking when something bad happens
 
@@ -117,3 +119,69 @@ None of the embedded files are compressed
 800EB894    .text
 800ED264    crt0
 800ED2B0    .data
+
+
+# Level Data
+
+Each level's assets are in two EAR files.
+xxx_DAT.EAR contains the level geometry, textures, objects, enemy spawners, collisions, etc.
+xxx_ENE.EAR contains the entities used in that level.
+They possibly have more stuff in them? But I haven't figured them out yet.
+
+## xxx_DAT.EAR
+
+- sky clut
+- sky texture
+- ground clut
+- ground texture
+- meshes and textures for level objects
+- ... (if there's more than 1 sublevel)
+- SEPERATOR
+- level geometry file
+- ... (if there's more than 1 sublevel)
+- SEPERATOR
+- unknown binary file (collision data perhaps? there's only one tho)
+
+
+The level geometry file includes 4 binaries (followed by 1 seperator)
+
+- section0
+- section1
+- section2
+- section3
+- SEPERATOR
+
+**section0** is tiled but with a header
+
+
+**section1** is a 32x32 array of 32 bit offsets into the file, followed
+by the data at 0x1000 in this format:
+```
+{
+    u16 count;
+    {
+        s16 x, y, z;
+        u16 id;
+    } objs[count];
+} entries[];
+```
+There are as many of these as the non-zero offsets in the table. each offset points to the `count` field of each successive entry.
+
+**section2** is a 64x64 array of 16 bit offsets into the file, followed
+by the data at 0x2000 in this format:
+
+```
+{
+    u16 count;
+    {
+        u16 id;
+        s16 x, y, z;
+    } objs[count];
+} entries[];
+```
+There are as many of these as the non-zero offsets in the table. each offset points to the `count` field of each successive entry.
+
+I'm not sure exactly what they are.
+
+
+**section3** fuck knows. looks like a mesh but it's not.

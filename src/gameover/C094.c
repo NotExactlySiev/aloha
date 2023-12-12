@@ -13,7 +13,6 @@
 // "draw" refers to passing those to the GPU
 // should I reverse those?
 
-// TODO: menu DAS broken (needs to be held down for too long)
 // TODO: figure out how many different types of GBuffer there are
 // (this one, main one in game, debug one in game, and more?)
 // TODO: header file
@@ -62,7 +61,7 @@ s32 D_800ED424 = 0;
 // screen init?
 void func_800EB894(void)
 {
-    screen_brightness = 0;
+    screen_brightness = 4;
     stage = 0;
     D_800ED3EC = 0;
     D_800ED3F4 = 0;
@@ -74,19 +73,55 @@ void play_effect(s32 arg)
     jt.audio_unk0(arg, 0x3e, 100);
 }
 
-INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8F8);
+// controls for when before the thing is fully loaded. update for fadein and shit
+// fading_in_update
+//INCLUDE_ASM("asm/gameover/nonmatchings/C094", func_800EB8F8);
 // controls screen fade and general state
-//func_800EB8F8() {}
+void func_800EB8F8(u32 buttons)
+{
+    switch (stage) {
+    case 0:
+        // fading in
+        screen_brightness += 4;
+        if (buttons != 0 || screen_brightness == 128) {
+            screen_brightness = 128;
+            stage = 1;
+        }
+        break;
+    case 1:
+        // waiting
+        break;
+    case 2:
+        // gonna fade out
+        stage = 3;
+        break;
+    case 3:
+        // play anim and fade out
+        if (D_800ED3E4 > 0) D_800ED3E4 -= 1;
+        else if (screen_brightness > 0) screen_brightness -= 4;
+        else stage = 4; // end this file
+        break;
+    }
+
+    if (D_800ED3EC != 1 && buttons != 0) {
+        bigtext_anim_play_drop();
+        func_800EBCF0();
+        D_800ED3EC = 1;
+    }
+}
+
+
 
 // text.c
 
 void bigtext_anim_play_bounce(void)
 {
-    D_800ED3B4 = 0x00005F00;
+    D_800ED3B4 = 0;
     bounce_anim_state = 0;
 }
 
 // is this even drop??
+// this isn't play, it's set to already dropped
 void bigtext_anim_play_drop(void)   // TODO: the name isn't changed in the asm function
 {
     bounce_y = 0x00005F00;
@@ -260,7 +295,7 @@ void menu_cursor_render(void)
     sprite_render(2, D_800ED390, 0x44, tmp, screen_brightness, 0);
 }
 
-void update_routine(s32 arg)
+void update_routine(u32 arg)
 {
     func_800EB8F8(arg);
     func_800EBF58(arg);
@@ -308,7 +343,7 @@ void func_800EC358(void)
 
 int main(void)
 {
-    u32 temp_s0;
+    u32 buttons;
     s32 var_a0;
     s32 var_v0;
     int choice;
@@ -343,9 +378,9 @@ int main(void)
 
 
     do {
-        temp_s0 = input_das_read();  // read input
+        buttons = input_das_read();  // read input
         gbuffer_swap();            // swap and clear
-        update_routine(temp_s0);     // process input
+        update_routine(buttons);     // process input
         render_routine();            // update graphics
         gbuffer_draw();            // render graphics
     } while (stage != 4);
@@ -384,5 +419,3 @@ void func_800ECBB4(s16 x, s16 y, s16 w, s16 h, u8 col)
     addPrim(&gbuffer_current->ot[1], q);
     gbuffer_current->next = q + 1;
 }
-
-// TODO: put das stuff in a seperate file, make variables static

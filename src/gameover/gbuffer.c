@@ -33,20 +33,21 @@ void gbuffer_init(void)
         draw = &gbuffers[i].draw;
         disp = &gbuffers[i].disp;
 
+
         draw->isbg = 1;
         draw->r0 = 0;
         draw->g0 = 0;
         draw->b0 = 0;
         draw->tw = D_800ED398;
+
         draw->dtd = 0;
         draw->dfe = 0;
-
         tv_standard = jt.get_tv_system();
         disp->screen.x = 4;
-        disp->screen.y = tv_standard == TV_PAL ? 12 : 36;
+        disp->screen.y = tv_standard == TV_PAL ? 36 : 12;
         disp->screen.w = 248;
         disp->screen.h = 216;
-        disp->pad0 = tv_standard == TV_PAL ? 0 : 1;
+        disp->pad0 = tv_standard == TV_PAL ? 1 : 0;
     }
 }
 

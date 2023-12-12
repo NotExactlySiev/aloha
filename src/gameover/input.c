@@ -53,7 +53,6 @@ u32 input_das_read(void)
         if (face_raw) {
             face_timer = 0;
             face_wait = initial_delay;
-            face = face_raw;
             das_state = 0;
         }
         if (nav_raw) {
@@ -66,16 +65,17 @@ u32 input_das_read(void)
     // now we can decide if input should be triggered
     //   I changed the syntax a bit, I feel like this is more readable
     //   even if not as pretty
-    // trigger if enough time has passed, and switch to the shorter interval
+    // trigger immediately the first time, and after that
+    // trigger again if enough time has passed, and switch to the shorter interval
     if (das_state == 0) {
-        if ((face_raw & face_prev) && (++face_timer > face_wait)) {
+        if ((face_raw & face_prev) == 0 || (++face_timer > face_wait)) {
             face = face_raw;
             face_timer = 0;
             face_wait = repeat_delay;
         }
     } else
     if (das_state == 1) {
-        if ((nav_raw & nav_prev) && (++nav_timer > nav_wait)) {
+        if ((nav_raw & nav_prev) == 0 || (++nav_timer > nav_wait)) {
             nav = nav_raw;
             nav_timer = 0;
             nav_wait = repeat_delay;
