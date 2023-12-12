@@ -62,15 +62,16 @@ struct Entity {
     u32 unk15;
     u32 unk16;
     u32 unk17;
-    u32 unk18;
-    u32 unk19;
-    u32 unk20;
+    u32 carry_x;
+    u32 carry_y;
+    u32 carry_z;
     u32 unk21;
-    s32 max_y;      // 0xDC // TODO: bad name 
-    s32 unk22;     
+    s32 max_y;      // ground_y // 0xDC // TODO: bad name 
+    s32 unk22;      // ceiling_y
 
     // is this specific to each entity?
-    u8 UNK[92];
+    u8 UNK[28];
+    s16 sub[32]; // union
 };
 
 

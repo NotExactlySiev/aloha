@@ -613,18 +613,6 @@ glabel D_801226EF
 glabel D_80124EE8
 	.space 0x800
 
-glabel debug_text_ot
-	.space 0x4
-
-glabel D_801256EC
-	.space 0x8
-
-glabel D_801256F4
-	.space 0x2004
-
-glabel D_801276F8
-	.space 0x4048
-
 glabel debug_char_uvs
 	.space 0x1
 
@@ -1412,3 +1400,4 @@ glabel D_80142D40
 	.space 0x8
 
 glabel D_80142D48
+    .space 0x4

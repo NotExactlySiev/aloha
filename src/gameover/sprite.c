@@ -7,6 +7,8 @@
 
 #include "sprite.h"
 
+// I think this exact module is also used in SELECT?
+
 // tiles
 extern u32 D_800E0000[];    // sprite metadata (pos and uv)
 extern u32 D_800E0AEC[];    // big texture of tiles 256x256
@@ -20,8 +22,18 @@ extern u16 D_800EAF6C[1156];
 Sprite* sprt_data[64];
 s32 D_800ED42C = 0; // max sprite index (sprite count)
 
-u16 D_8012DF64[6];      // sprite cluts and tpage
+SpriteSet D_8012DF64;      // sprite cluts and tpage
 
+void sprite_init(void)
+{
+    sprite_load_data(D_800E0000);      // load sprites
+    // TODO: this should be a struct. but why? context? palette?
+    D_8012DF64.tpage = getTPage(1, 0, 256, 0);
+    D_8012DF64.cluts[0] = getClut(0, 240);
+    D_8012DF64.cluts[1] = getClut(0, 241);
+    D_8012DF64.cluts[2] = getClut(0, 242);
+    sprite_load_tiles(D_800E0AEC, 256, 0);  // load tiles into vram
+}
 
 // load sprite heads
 void sprite_load_data(u32* raw)
@@ -37,7 +49,7 @@ void sprite_load_data(u32* raw)
 
 // put loaded sprite data into ots
 // rather, put a specific metasprite into ots, using its metadata
-void _sprite_render(u16 *cluts, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx)
+void _sprite_render(SpriteSet *set, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx)
 {
     Sprite *group;
     SpriteThing *s;
@@ -55,7 +67,7 @@ void _sprite_render(u16 *cluts, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx
         setUV0(p, 8*(s->uv % 32), 8*(s->uv / 32));
         setRGB0(p, col, col, col);
         setXY0(p, x+s->dx, y+s->dy);
-        p->clut = cluts[clutidx+3];
+        p->clut = set->cluts[clutidx];
         addPrim(&gbuffer_current->ot[z], p);
         gbuffer_current->next = p + 1;
     }
@@ -63,14 +75,14 @@ void _sprite_render(u16 *cluts, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx
     
     DR_MODE* q = gbuffer_current->next;
 
-    jt.SetDrawMode(q, 0, 0, cluts[2], &D_800ED398);
+    jt.SetDrawMode(q, 0, 0, set->tpage, &D_800ED398);
     addPrim(&gbuffer_current->ot[z], q);
     gbuffer_current->next = q + 1;    
 }
 
 void sprite_render(s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
 {
-    _sprite_render(D_8012DF64, z, idx, offx, offy, col, clutidx);
+    _sprite_render(&D_8012DF64, z, idx, offx, offy, col, clutidx);
 }
 
 void sprite_load_tiles(u32 *raw, s16 x, s16 y)
@@ -120,13 +132,4 @@ void sprite_load_tiles(u32 *raw, s16 x, s16 y)
     jt.DrawSync(0);
 }
 
-void sprite_init(void)
-{
-    sprite_load_data(D_800E0000);      // load sprites
-    // TODO: this should be a struct. but why? context? palette?
-    D_8012DF64[2] = getTPage(1, 0, 256, 0);
-    D_8012DF64[3] = getClut(0, 240);
-    D_8012DF64[4] = getClut(0, 241);
-    D_8012DF64[5] = getClut(0, 242);
-    sprite_load_tiles(D_800E0AEC, 256, 0);  // load tiles into vram
-}
+

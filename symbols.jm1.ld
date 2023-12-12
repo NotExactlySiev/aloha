@@ -12,6 +12,10 @@ D_800F42F0 = 0x800F42F0;
 
 DATA_OFFSET = 0;
 
+
+D_801256EC = debug_text_ot + 0x4;
+D_801256F4 = debug_text_ot + 0xC;
+
 /*D_80102960 = entity_list_0 + 4;
 D_80102964 = D_80102960 + 4;
 D_80102968 = D_80102964 + 4;

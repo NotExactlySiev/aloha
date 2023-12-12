@@ -7,8 +7,8 @@
 typedef struct {
     DISPENV disp;
     DRAWENV draw;
-    u32* ot;
-    u32* nextfree;
+    u32     *ot;
+    void    *nextfree;
 } GBuffer;
 
 extern GBuffer *gbuffer_get_current(void);

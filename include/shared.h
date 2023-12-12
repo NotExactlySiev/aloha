@@ -10,7 +10,8 @@
 
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
-    UNK(0, 0xE3);
+    uint best_times[6][3][3];
+    UNK(0xD8, 0xE3);
     s8  unkE4;
     s8  unkE5;
     s8  unkE6;
@@ -44,9 +45,9 @@ extern struct {
     char*       (*execs_get_path)(s32);
     s32         (*get_tv_system)(void);
     s32         (*get_region)(void);
-    void        (*printf)(const char* fmt, ...);    // I ADDED THIS MYSELF
-    UNK(10, 10);
-    //UNK(9, 10);
+    //void        (*printf)(const char* fmt, ...);    // I ADDED THIS MYSELF
+    //UNK(10, 10);
+    UNK(9, 10);
     char*       (*get_version_string)(void);
     UNK(12, 191);
     void        (*decompress_rle)(u32,void* src,void* dst);

@@ -17,17 +17,25 @@ void printf(const char* fmt, ...);
 s32 random_byte(void);
 
 
+void func_800E02F8(s32 arg0)
+{
+    jt.audio_unk0(arg0, 0x3E, 100);
+}
 
-// 2 jt
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E02F8);  // play_effect
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E0330);  // play_effect the underlying func
-
-// 4 trivial
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E0374);
-
-
+void func_800E0330(s32 arg0, s16 arg1, s16 arg2, s16 arg3)
+{
+    // TODO: is this the correct number of arguments?
+    //jt.audio_unk1(arg0, arg1, arg2, arg3, -1);
+    jt.audio_unk1(arg0, arg1, arg2, arg3);
+}
 
 
+extern s32 D_8013ED24;
+
+void func_800E0374(void)
+{
+    D_8013ED24 = 16;    // never read?
+}
 
 extern s32 scrolling;
 
@@ -1099,22 +1107,16 @@ INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7078);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7358);
 
 
-
-
-// 2 simple functions
+// das input stuff, the same as the one from GAMEOVER
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7724);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E77A4);
-
-// 2 slightly long functions
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E77D4);
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E799C);
 
-// reset cool struct
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7AA4);
-
-// 2 similar funcs that call loads of jt stuff
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7B68);
-INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7D8C);
+// movie playing stuff
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E799C);  // callback
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7AA4);  // init struct viddct
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7B68);  // play two movies
+INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7D8C);  // play two movies
 
 // asm thingy (syscall)
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E7F68);

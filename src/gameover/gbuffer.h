@@ -5,7 +5,7 @@
 #include <libgpu.h>
 
 #define LAYER_BG    0
-#define LAYER_robbit_anim_keyframes   1 // don't know what this one is
+#define LAYER_UNK   1 // don't know what this one is
 #define LAYER_MENU  2
 
 typedef struct {

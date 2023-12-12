@@ -188,7 +188,27 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6430);
 void func_800B6614(void) {
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B661C);
+// block update
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B661C);
+void func_800B661C(Entity *this)
+{
+    s32 old_y = this->pos_y;
+    s32 new_y = old_y + this->vel_y;
+    this->angle_y += 64;    // rotation of the blades
+
+    if ((this->sub[0] << 12) < new_y) {
+        new_y = this->sub[0] << 12;
+        this->vel_y *= -1;
+    }
+
+    if ((this->sub[1] << 12) > new_y) {
+        new_y = this->sub[1] << 12;
+        this->vel_y *= -1;
+    }
+
+    this->pos_y = new_y;
+    this->carry_y = (this->pos_y >> 12) - (old_y >> 12);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B66A0);
 

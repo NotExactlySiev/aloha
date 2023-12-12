@@ -5,12 +5,11 @@
 
 // todo: the OT in this one is wrong. also it's just another gbuffer
 typedef struct {
-    s16     count;
-    u32     lastprim;    // entrypoint
-    u32     firstprim;    // terminator
-    SPRT_8*    nextfree;
-    u32     ot[2048];
-    DR_MODE    draw_mode;
+    s16         count;
+    u32         ot[2];
+    SPRT_8     *nextfree;
+    u32         prims[2048];
+    DR_MODE     draw_mode;
 } TextOT;
 
 typedef struct {
@@ -1465,9 +1464,8 @@ u32 debug_font_x = 960;
 u32 debug_font_y = 256;
 u32 D_80102788 = 224;
 
-
 s16 debug_ot_index = 0;
-extern TextOT debug_text_ot[3];
+TextOT debug_text_ot[3];
 extern TextUV debug_char_uvs[128];
 
 void debug_print_char(char c)
@@ -1484,7 +1482,7 @@ void debug_print_char(char c)
         p->y0 = debug_char_y * 8;
         p->u0 = debug_char_uvs[c].u;
         p->v0 = debug_char_uvs[c].v;
-        last = &debug_text_ot[debug_ot_index].lastprim;
+        last = &debug_text_ot[debug_ot_index].ot[0];
         debug_char_x += 1;
         addPrim(last, p);
     }
@@ -1555,15 +1553,15 @@ void debug_text_draw(void)
     p = &debug_text_ot[debug_ot_index].draw_mode;
     tpage = func_800DEAD4(0,debug_font_index, debug_font_x, debug_font_y);
     func_800C7D90(p, 0, 0, tpage, &debug_text_texture);
-    last = &debug_text_ot[debug_ot_index].lastprim;
+    last = &debug_text_ot[debug_ot_index].ot[0];
     addPrim(last, p);
     func_800E9818(last);
     debug_ot_index += 1;
     if (debug_ot_index > 2) debug_ot_index = 0;
-    debug_text_ot[debug_ot_index].nextfree = &debug_text_ot[debug_ot_index].ot;
+    debug_text_ot[debug_ot_index].nextfree = &debug_text_ot[debug_ot_index].prims[0];
     debug_text_ot[debug_ot_index].count = 0;
     // re-initialize an empty one
-    func_800E8B5C(&debug_text_ot[debug_ot_index].lastprim, 2);
+    func_800E8B5C(&debug_text_ot[debug_ot_index].ot[0], 2);
 }
 
 void func_800DE8B0(u32 x, u32 y)

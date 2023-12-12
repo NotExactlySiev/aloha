@@ -4,6 +4,8 @@
 
 #include "entity.h"
 
+POLY_FT4 *func_800E9FDC(u32 x, u32 y, u32 id, u32 color, u32 trans, POLY_F4* prims, u32 *ot);
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8738);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E87B8);
@@ -601,18 +603,18 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F47B8);   // not disassembled
 // FUCK rendering code
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F49A0);   // not disassembled, LOOOONG
 // smol function. assembly?
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C14);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C14);   // disassembled
 // weird function with two entry points
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C48);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C48);   // disassembled
 // more stupid assembly shit using $t9
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6D78);
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E18);
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C);   // not disassembled, short
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6D78);   // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E18);   // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C);   // disassembled
 // big function, probably C?
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6EE0);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6EE0);   // disassembled
 // stupid shit using weird registers, but very small
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C);   // not disassembled, short
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7130);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C);   // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7130);   // disassembled
 
 // ## Insanity over
 
