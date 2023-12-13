@@ -599,8 +599,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
 #define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
 
 // sort faces (sets actually)
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
-/*void func_800F443C(FaceList *facelist)
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
+void func_800F443C(FaceList *facelist)
 {
     MATRIX *m;
 
@@ -647,7 +647,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
         dst0[j+1] = tmp0;
         dst1[j+1] = tmp1;
     }
-}*/
+}
 
 // draw_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
