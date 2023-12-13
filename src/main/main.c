@@ -577,7 +577,26 @@ void exception_handler(void)
 
    // when the exception returns, if v0 is not 0 the exception generating
    // function jumps to it
+    //printf("BRUH!\n");
+
     bios_tables->pcb->current_tcb->regs[2] = 0;
+}
+
+void funny(void) {
+    //u32 *I_STAT = (u32*) 0x1F801070;
+    //printf("MOMENT! %08X\n", *I_STAT);
+
+    /*__asm__("lui    $t1, 0x4000;"
+            "mfc0   $t0, $12;"
+            "or     $t0, $t1;"
+            "mtc0   $t0, $12;");*/
+
+    u32 epc;
+
+    __asm__ volatile(
+        "mfc0   %0, $14;" : "=r"(epc));
+    
+    printf("JIQ %08X\n", epc);
 }
 
 s32 enable_exception_event(void* handler)
@@ -586,8 +605,12 @@ s32 enable_exception_event(void* handler)
 
     EnterCriticalSection();
     // exception event (only cause by the invalid syscall function at the start of every main)
-    event = OpenEvent(0xF0000010, 0x4000, 0x1000, handler);
+    event = OpenEvent(0xF0000010, 0x4000, EvMdINTR, handler);
     EnableEvent(event);
+
+    // TEST: let's try having another one too
+    EnableEvent(OpenEvent(HwCPU, EvSpTRAP, EvMdINTR, funny));
+
     ExitCriticalSection();
     return event;
 }

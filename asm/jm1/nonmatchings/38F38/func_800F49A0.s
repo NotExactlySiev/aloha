@@ -1,6 +1,8 @@
 .set noat      /* allow manual use of $at */
 .set noreorder /* don't insert nops after branches */
 
+# Rendering
+
 glabel func_800F49A0
 /* 451A0 800F49A0 */ addiu  $sp, 0xfffc # .word 0x27BDFFFC
 /* 451A4 800F49A4 */ sw     $ra, 0x0000($sp) # .word 0xAFBF0000
@@ -25,38 +27,43 @@ glabel func_800F49A0
 /* 451E8 800F49E8 */ or     $s2, $v0    # .word 0x02429025
 /* 451EC 800F49EC */ lw     $s3, 0x03b0($s5)    # .word 0x8EB303B0
 /* 451F0 800F49F0 */ move   $t6, $a3     # .word 0x00E07021
-/* 451F4 800F49F4 */ lw     $a3, 0x001c($a0)       # .word 0x8C87001C
-/* 451F8 800F49F8 */ srl    $t9, $t6, 0x18      # .word 0x000ECE02
-/* 451FC 800F49FC */ srl    $t8, $t6, 0x0e      # .word 0x000EC382
-/* 45200 800F4A00 */ andi   $t8, 0x03fc       # .word 0x331803FC
-/* 45204 800F4A04 */ srl    $t7, $t6, 0x06      # .word 0x000E7982
-/* 45208 800F4A08 */ andi   $t7, 0x03fc       # .word 0x31EF03FC
-/* 4520C 800F4A0C */ sll    $t6, 0x02     # .word 0x000E7080
-/* 45210 800F4A10 */ andi   $t6, 0x03fc       # .word 0x31CE03FC
-/* 45214 800F4A14 */ addu   $t6, $s5        # .word 0x01D57021
-/* 45218 800F4A18 */ addu   $t7, $s5        # .word 0x01F57821
-/* 4521C 800F4A1C */ addu   $t8, $s5        # .word 0x0315C021
-/* 45220 800F4A20 */ addiu  $t9, 0xfffe       # .word 0x2739FFFE
-/* 45224 800F4A24 */ bgtz   $t9, .QUAD       # .word 0x1F2005FE
-/* 45228 800F4A28 */ addiu  $t9, 0x0002       # .word 0x27390002
-/* 4522C 800F4A2C */ bne    $t6, $t8, .TRI    # .word 0x15D80503
-/* 45230 800F4A30 */ nop        # .word 0x00000000
-/* 45234 800F4A34 */ b      .LINE       # .word 0x100005BB
-/* 45238 800F4A38 */ nop       # .word 0x00000000
-/* 4523C 800F4A3C */ .word 0x10940006
-/* 45240 800F4A40 */ .word 0x2484001C
-/* 45244 800F4A44 */ .word 0x8C87001C
-/* 45248 800F4A48 */ .word 0x3252FFFE
-/* 4524C 800F4A4C */ .word 0x3252B3FF
-/* 45250 800F4A50 */ .word 0x1494FFE7
-/* 45254 800F4A54 */ .word 0x2484001C
+/* 451F4 800F49F4 */ lw     $a3, 0x001c($a0)
+/* 451F8 800F49F8 */ srl    $t9, $t6, 0x18
+/* 451FC 800F49FC */ srl    $t8, $t6, 0x0e
+/* 45200 800F4A00 */ andi   $t8, 0x03fc
+/* 45204 800F4A04 */ srl    $t7, $t6, 0x06
+/* 45208 800F4A08 */ andi   $t7, 0x03fc
+/* 4520C 800F4A0C */ sll    $t6, 0x02
+/* 45210 800F4A10 */ andi   $t6, 0x03fc
+/* 45214 800F4A14 */ addu   $t6, $s5
+/* 45218 800F4A18 */ addu   $t7, $s5
+/* 4521C 800F4A1C */ addu   $t8, $s5
+/* 45220 800F4A20 */ addiu  $t9, 0xfffe
+/* 45224 800F4A24 */ bgtz   $t9,        .QUAD
+/* 45228 800F4A28 */ addiu  $t9, 0x0002
+/* 4522C 800F4A2C */ bne    $t6, $t8,   .TRI
+/* 45230 800F4A30 */ nop
+/* 45234 800F4A34 */ b                  .LINE
+/* 45238 800F4A38 */ nop
 
+# return here after the primitive is done:
+
+    beq    $a0, $s4, .ALLDONE
+    addiu  $a0, 0x1c           # next face
+    lw     $a3, 0x1c($a0)
+    andi   $s2, 0xFFFE
+.L800F4A4C:
+    andi   $s2, 0xB3FF
+    .word 0x1494FFE7
+    addiu  $a0, 0x1c           # next face
 .ALLDONE:
-/* 45258 800F4A58 */ cfc2   $zero, $31      # .word 0x4840F800
-/* 4525C 800F4A5C */ lw     $ra, 0x0000($sp)       # .word 0x8FBF0000
-/* 45260 800F4A60 */ addiu  $sp, 0x0004       # .word 0x27BD0004
-/* 45264 800F4A64 */ jr     $ra       # .word 0x03E00008
-/* 45268 800F4A68 */ nop            # .word 0x00000000
+    cfc2   $zero, $31
+    lw     $ra, 0x0000($sp)
+    addiu  $sp, 0x0004
+    jr     $ra
+    nop
+
+
 glabel func_800F4A6C
 /* 4526C 800F4A6C */ .word 0x32420400
 /* 45270 800F4A70 */ .word 0x14400009
@@ -1337,10 +1344,10 @@ glabel func_800F5E04
 .TRI:
 /* 4663C 800F5E3C */ jalr   $fp       # .word 0x03C0F809
 /* 46640 800F5E40 */ nop            # .word 0x00000000
-/* 46644 800F5E44 */ bgtz   $t5, .L800F4BC8       # .word 0x1DA0FB60
-/* 46648 800F5E48 */ srl    $v0, $t5, 0x1a      # .word 0x000D1682
-/* 4664C 800F5E4C */ andi   $v0, 0x000f       # .word 0x3042000F
-/* 46650 800F5E50 */ bne    $v0, $zero, .L800F4BC8        # .word 0x1440FB5D
+/* 46644 800F5E44 */ bgtz   $t5, .L800F4BC8     # textured?
+/* 46648 800F5E48 */ srl    $v0, $t5, 0x1a
+/* 4664C 800F5E4C */ andi   $v0, 0x000f
+/* 46650 800F5E50 */ bne    $v0, $zero, .L800F4BC8  # any high flags set? (other than the top one)
 /* 46654 800F5E54 */ andi   $v0, $s2, 0x8000        # .word 0x32428000
 /* 46658 800F5E58 */ beq    $v0, $zero, .L3        # .word 0x1040000E
 /* 4665C 800F5E5C */ move   $t4, $zero        # .word 0x00006021
@@ -1366,11 +1373,11 @@ glabel func_800F5E04
 /* 466A4 800F5EA4 */ .word 0x13200004
 /* 466A8 800F5EA8 */ .word 0x27390002
 .L2:
-	jal func_800F671C
-/* 466B0 800F5EB0 */ nop        # .word 0x00000000
-/* 466B4 800F5EB4 */ .word 0x36520001
-/* 466B8 800F5EB8 */ .word 0x11800044
-/* 466BC 800F5EBC */ .word 0x00000000
+	jal func_800F671C   # check clipping
+    nop
+/* 466B4 800F5EB4 */ ori    $s2, 1          # remember that it wasn't clipped # .word 0x36520001
+/* 466B8 800F5EB8 */ beq    $t4, $zero, .L800F5FCC  # don't really know what this checks
+/* 466BC 800F5EBC */ nop
 /* 466C0 800F5EC0 */ .word 0x26AA0300
 /* 466C4 800F5EC4 */ .word 0x85C20004
 /* 466C8 800F5EC8 */ .word 0x85E30004
@@ -1438,33 +1445,37 @@ glabel func_800F5E04
 /* 467C0 800F5FC0 */ .word 0x00000000
 /* 467C4 800F5FC4 */ .word 0x05A1002C
 /* 467C8 800F5FC8 */ .word 0x00000000
-	jal func_800F68B0
-/* 467D0 800F5FD0 */ .word 0x00000000
-/* 467D4 800F5FD4 */ .word 0x31A20001
-/* 467D8 800F5FD8 */ .word 0x10400009
-/* 467DC 800F5FDC */ .word 0x00000000
-/* 467E0 800F5FE0 */ .word 0x84820008
-/* 467E4 800F5FE4 */ .word 0x32432000
-/* 467E8 800F5FE8 */ .word 0x04410003
-/* 467EC 800F5FEC */ .word 0x30427FFF
-/* 467F0 800F5FF0 */ .word 0x10600011
-/* 467F4 800F5FF4 */ .word 0x00000000
-	jal func_800F6798
-/* 467FC 800F5FFC */ .word 0x00000000
-	jal func_800F6808
-/* 46804 800F6004 */ .word 0x85C90004
-	jal func_800F6928
-/* 4680C 800F600C */ .word 0x00000000
-	jal func_800F6808
+.L800F5FCC:
+	jal func_800F68B0               # go to funky color function
+    nop
+    andi    $v0, $t5, 1             # not shaded?
+    beq     $v0, $zero, .TRI_FLAT
+    nop    
+    lh      $v0, 8($a0)
+    andi    $v1, $s2, 0x2000
+    bgez    $v0, .L800F5FF8
+    andi    $v0, 0x7fff
+    beq     $v1, $zero, .L800F6038  # what are we bypassing here?
+    nop    
+.L800F5FF8:
+	jal     func_800F6798           # step 1 (shading?)
+    nop
+.TRI_FLAT:
+	jal     func_800F6808           # I think we run this on every vertex
+    lh      $t1, 4($t6)
+	jal     func_800F6928           # set 2 of the verts
+    nop
+	jal     func_800F6808
 /* 46814 800F6014 */ .word 0x85E90004
 /* 46818 800F6018 */ .word 0xACA80008
-	jal func_800F6958
-/* 46820 800F6020 */ .word 0x34080730
-	jal func_800F6808
-/* 46828 800F6028 */ .word 0x87090004
-/* 4682C 800F602C */ .word 0xACA80018
-	j func_800F6970
-/* 46834 800F6034 */ .word 0x24080020
+	jal     func_800F6958           # set the actual primitive command
+    li      $t0, 0x0730
+	jal     func_800F6808
+    lh      $t1, 4($t8)
+    sw      $t0, 0x0018($a1)        # color 2
+	j       func_800F6970           # finalize
+    li      $t0, 0x20
+.L800F6038:
 	jal func_800F682C
 /* 4683C 800F603C */ .word 0x85C90004
 /* 46840 800F6040 */ .word 0x8482000A
@@ -1830,6 +1841,7 @@ glabel func_800F5E04
 /* 46DA4 800F65A4 */ .word 0xACA8002C
 	j func_800F6AA8
 /* 46DAC 800F65AC */ .word 0x2408006C
+
 glabel func_800F65B0
 /* 46DB0 800F65B0 */ .word 0x85E80000
 /* 46DB4 800F65B4 */ .word 0x85E90002
@@ -1924,56 +1936,67 @@ glabel func_800F65B0
 /* 46F18 800F6718 */ .word 0x00000000
 
 # clipping
+# this function has 4 possible results
+# if $t9 is 1 it takes a different branch that's almost the same
+# except one of the 3 results (mesh done, return, goto folan) is different
+# if the face isn't clipped and should be drawn, simply returns
 glabel func_800F671C
-/* 46F1C 800F671C */ lwc2   $12, 0x0008($t6)  # .word 0xC9CC0008
-/* 46F20 800F6720 */ lwc2   $13, 0x0008($t8)  # .word 0xCB0D0008
-/* 46F24 800F6724 */ lwc2   $14, 0x0008($t7)  # .word 0xC9EE0008
-/* 46F28 800F6728 */ nop        # .word 0x00000000
-/* 46F2C 800F672C */ nop        # .word 0x00000000
-/* 46F30 800F6730 */ .word 0x4B400006 # nclip
-/* 46F34 800F6734 */ lui    $at, %hi(D_800F42F0)       # .word 0x3C01800F
-/* 46F38 800F6738 */ lw     $at, %lo(D_800F42F0)($at)       # .word 0x8C2142F0
-/* 46F3C 800F673C */ addiu  $t9, 0xffff       # .word 0x2739FFFF
-/* 46F40 800F6740 */ beq    $t9, $zero, .L800F6770        # .word 0x1320000B
-/* 46F44 800F6744 */ addiu  $t9, 0x0001       # .word 0x27390001
-/* 46F48 800F6748 */ subu   $at, $a1        # .word 0x00250823
-# this, I'm pretty sure we shouldn't take this but we do:
-/* 46F4C 800F674C */ blez   $at, .ALLDONE       # .word 0x1820F8C2
-/* 46F50 800F6750 */ nop            # .word 0x00000000
-/* 46F54 800F6754 */ .word 0x4840F800
-/* 46F58 800F6758 */ .word 0x4801C000
-/* 46F5C 800F675C */ .word 0x00000000
-/* 46F60 800F6760 */ .word 0x1820F8BA
-/* 46F64 800F6764 */ .word 0x00000000
-/* 46F68 800F6768 */ .word 0x03E00008
-/* 46F6C 800F676C */ .word 0x00000000
+    lwc2   $12, 0x0008($t6)
+    lwc2   $13, 0x0008($t8)
+    lwc2   $14, 0x0008($t7)
+    nop
+    nop
+    .word 0x4B400006        # nclip
+    lui    $at, %hi(D_800F42F0)
+    lw     $at, %lo(D_800F42F0)($at)
+    addiu  $t9, -1
+    beq    $t9, $zero, .L800F6770  # oh t9 is the fourth vertex!
+    addiu  $t9, 1
 
+# branch 1
+    subu   $at, $a1        # check the critical point in prims
+    blez   $at, .ALLDONE   # if too many prims, stop drawing
+    nop
+    cfc2   $zero, $31
+    mfc2   $at, $24
+    nop
+    blez   $at, .L800F4A4C # negative? clipped. don't draw
+    nop
+    jr     $ra
+    nop
+
+# branch 2, almost the same as the other branch
 .L800F6770:
-/* 46F70 800F6770 */ .word 0x00250823
-/* 46F74 800F6774 */ .word 0x1820F8B8
-/* 46F78 800F6778 */ .word 0x00000000
-/* 46F7C 800F677C */ .word 0x4840F800
-/* 46F80 800F6780 */ .word 0x4801C000
-/* 46F84 800F6784 */ .word 0x00000000
-/* 46F88 800F6788 */ .word 0x1820F8AC
-/* 46F8C 800F678C */ .word 0x00000000
-/* 46F90 800F6790 */ .word 0x03E00008
-/* 46F94 800F6794 */ .word 0x00000000
+    subu   $at, $a1             # check the critical point in prims
+    blez   $at, .ALLDONE        # if too many prims, stop drawing
+    nop
+    cfc2   $zero, $31
+    mfc2   $at, $24
+    nop
+    blez   $at, func_800F65B0   # negative? clipped. don't draw
+    nop
+    jr     $ra
+    nop
+
+
+# shading
 glabel func_800F6798
-/* 46F98 800F6798 */ .word 0x00531021
-/* 46F9C 800F679C */ .word 0x8C420000
-/* 46FA0 800F67A0 */ .word 0x00000000
-/* 46FA4 800F67A4 */ .word 0x3043FF00
-/* 46FA8 800F67A8 */ .word 0x00431023
-/* 46FAC 800F67AC */ .word 0x00021200
-/* 46FB0 800F67B0 */ .word 0x48820000
-/* 46FB4 800F67B4 */ .word 0x48830800
-/* 46FB8 800F67B8 */ .word 0x00000000
-/* 46FBC 800F67BC */ .word 0x4B08041B # invalid instruction
-/* 46FC0 800F67C0 */ .word 0x4840F800
-/* 46FC4 800F67C4 */ .word 0x4802B000
-/* 46FC8 800F67C8 */ .word 0x03E00008
-/* 46FCC 800F67CC */ .word 0x48823000
+/* 46F98 800F6798 */ addu   $v0, $s3
+/* 46F9C 800F679C */ lw     $v0, 0($v0)         # get the normal vector
+/* 46FA0 800F67A0 */ nop
+/* 46FA4 800F67A4 */ andi   $v1, $v0, 0xff00    # and load it into GTE
+/* 46FA8 800F67A8 */ subu   $v0, $v1
+/* 46FAC 800F67AC */ sll    $v0, 8
+/* 46FB0 800F67B0 */ mtc2   $v0, $0
+/* 46FB4 800F67B4 */ mtc2   $v1, $1
+/* 46FB8 800F67B8 */ nop
+/* 46FBC 800F67BC */ .word 0x4B08041B # nccs
+/* 46FC0 800F67C0 */ cfc2   $zero, $31
+/* 46FC4 800F67C4 */ mfc2   $v0, $22          # and the shuffle something around?
+/* 46FC8 800F67C8 */ jr     $ra
+/* 46FCC 800F67CC */ mtc2   $v0, $6
+
+
 glabel func_800F67D0
 /* 46FD0 800F67D0 */ .word 0x00531021
 /* 46FD4 800F67D4 */ .word 0x8C420000
@@ -2044,13 +2067,13 @@ glabel D_800F68A4
 glabel func_800F68B0
 # these two instructions are modified by code from somewhere
 # else to load different immediate values
-/* 470B0 800F68B0 */ .word 0x3C080000
-/* 470B4 800F68B4 */ .word 0x35080000
-/* 470B8 800F68B8 */ .word 0x31A3FFFC
-/* 470BC 800F68BC */ .word 0x00681821
-/* 470C0 800F68C0 */ .word 0x8C630000
-/* 470C4 800F68C4 */ .word 0x00000000
-/* 470C8 800F68C8 */ .word 0x04610010
+/* 470B0 800F68B0 */ lui    $t0, 0x0000         # clut addr
+/* 470B4 800F68B4 */ ori    $t0, 0x0000         # changed in runtime
+/* 470B8 800F68B8 */ andi   $v1, $t5, 0xfffc    # get color index (already shifted)
+/* 470BC 800F68BC */ addu   $v1, $t0            # look it up
+/* 470C0 800F68C0 */ lw     $v1, 0x0000($v1)
+/* 470C4 800F68C4 */ nop
+/* 470C8 800F68C8 */ bgez   $v1, .L800F690C     # high bit of color set?
 /* 470CC 800F68CC */ .word 0x48833000
 /* 470D0 800F68D0 */ .word 0x00031A00
 /* 470D4 800F68D4 */ .word 0x00031A02
@@ -2067,20 +2090,25 @@ glabel func_800F68B0
 /* 47100 800F6900 */ .word 0x48C3B800
 /* 47104 800F6904 */ .word 0x03E00008
 /* 47108 800F6908 */ .word 0x00000000
-/* 4710C 800F690C */ .word 0x48082800
-/* 47110 800F6910 */ .word 0x4849E800
-/* 47114 800F6914 */ .word 0x4843F000
-/* 47118 800F6918 */ .word 0x48C8A800
-/* 4711C 800F691C */ .word 0x48C9B000
-/* 47120 800F6920 */ .word 0x03E00008
-/* 47124 800F6924 */ .word 0x48C3B800
+
+.L800F690C:
+/* 4710C 800F690C */ mfc2   $t0, $5            # put the far color values in the registers
+/* 47110 800F6910 */ cfc2   $t1, $29
+/* 47114 800F6914 */ cfc2   $v1, $30
+/* 47118 800F6918 */ ctc2   $t0, $21
+/* 4711C 800F691C */ ctc2   $t1, $22
+/* 47120 800F6920 */ jr     $ra
+/* 47124 800F6924 */ ctc2   $v1, $23
+
+
 glabel func_800F6928
-/* 47128 800F6928 */ .word 0x8DC80008
-/* 4712C 800F692C */ .word 0x8DE90008
-/* 47130 800F6930 */ .word 0xACA8000C
-/* 47134 800F6934 */ .word 0xACA9001C
-/* 47138 800F6938 */ .word 0x03E00008
-/* 4713C 800F693C */ .word 0x00000000
+    lw     $t0, 8($t6)
+    lw     $t1, 8($t7)
+    sw     $t0, 0x0c($a1)       # vert 0
+    sw     $t1, 0x1c($a1)       # vert 2
+    jr     $ra
+    nop
+
 glabel func_800F6940
 /* 47140 800F6940 */ .word 0x8F080008
 /* 47144 800F6944 */ .word 0x8F290008
@@ -2088,13 +2116,15 @@ glabel func_800F6940
 /* 4714C 800F694C */ .word 0xACA90014
 /* 47150 800F6950 */ .word 0x03E00008
 /* 47154 800F6954 */ .word 0x00000000
+
 glabel func_800F6958
-/* 47158 800F6958 */ .word 0x31A90002
-/* 4715C 800F695C */ .word 0x01094025
-/* 47160 800F6960 */ .word 0xA0A8000B
-/* 47164 800F6964 */ .word 0xB8A80002
-/* 47168 800F6968 */ .word 0x03E00008
-/* 4716C 800F696C */ .word 0x00000000
+    andi   $t1, $t5, 2          # set something from attribute flags
+    or     $t0, $t1
+    sb     $t0, 0xb($a1)        # set command (30 = POLY_F3)
+    swr    $t0, 0x2($a1)        # set size
+    jr     $ra
+    nop
+
 glabel func_800F6970
 /* 47170 800F6970 */ .word 0x8F020008
 /* 47174 800F6974 */ .word 0x00000000

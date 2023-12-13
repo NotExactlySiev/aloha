@@ -932,7 +932,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5D68);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D60C8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
+// render robbit. is acting really weird so I'm gonna disable it for now
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
+func_800D6190() {}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
 

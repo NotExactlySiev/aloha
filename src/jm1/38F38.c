@@ -599,9 +599,11 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
 #define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
 
 // sort faces (sets actually)
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
-void func_800F443C(FaceList *facelist)
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
+// TODO: this breaks and I don't know why. maybe shouldn't be C at all?
+void _func_800F443C(FaceList *facelist)
 {
+    /*
     MATRIX *m;
 
     s32 *dst0 = (s32*) SCRTCHPAD(0x288);
@@ -609,9 +611,9 @@ void func_800F443C(FaceList *facelist)
     void *verts = *(void**) SCRTCHPAD(0x3A0);
 
     //__asm__ volatile( "mfc0   %0, $12; nop;" :  :"r"(sr) : "memory");
-
-    gprintf("COUNT: %d\n", facelist->size + 1);
+    
     for (int i = 0; i < facelist->size + 1; i++) {
+        EnterCriticalSection();
         u16 *sets = &facelist->data[i];
         u32 vertoff = sets[0];  // stores the offset not the index
         SVECTOR *vert = verts + vertoff;
@@ -622,6 +624,7 @@ void func_800F443C(FaceList *facelist)
         //__asm__ volatile( "mtc0   %0, $12;" : :"r"(no_intr) : "memory");
 
         gte_sqr0_b();
+        ExitCriticalSection();
         //__asm__ volatile( "mtc0   %0, $12;" : :"r"(sr) : "memory");
         //gte_stflg(0);
         VECTOR projected;
@@ -629,7 +632,6 @@ void func_800F443C(FaceList *facelist)
 
         dst0[i] = ((projected.vx + projected.vy) >> 2) + projected.vz;
         dst1[i] = sets[1];
-        //gprintf("(%d, %d, %d)\t -> (%d, %d, %d) %d\n", vert->vx, vert->vy, vert->vz, projected.vx, projected.vy, projected.vz, sets[1]);
     }
 
     // now sorting?
@@ -646,11 +648,18 @@ void func_800F443C(FaceList *facelist)
 
         dst0[j+1] = tmp0;
         dst1[j+1] = tmp1;
-    }
+    }*/
 }
 
 // draw_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
+
+void *draw_mesh(int mesh_with_flag, void *prim, u32 *ot_with_flag, u32 *arg3)
+{
+    //gprintf("DRAWING %p : %p\n", mesh_with_flag, arg3);
+    return func_800F4548(mesh_with_flag, prim, ot_with_flag, arg3);
+    //return prim;
+}
 
 // ## I think the insanity of rendering code is confined to here
 

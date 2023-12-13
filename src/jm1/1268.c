@@ -92,8 +92,8 @@ void func_800B1BF4(Entity* this)
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", _func_800B1D78);
 void func_800B1D78(Entity *this, void *params)
 {
-    gprintf("A FROG! %p\n", this);
-    _func_800B1D78(this, params);
+    //gprintf("A FROG! %p\n", this);
+    //_func_800B1D78(this, params);
 }
 
 // destructor
