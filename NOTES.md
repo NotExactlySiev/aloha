@@ -33,6 +33,13 @@ loads of UI code is reused between SELECT, GAMEOVER and (I think) TITLE.
 ## TODO
 - asserts for panicking when something bad happens
 
+
+## Rendering
+rewriting func_800F443C (sort sets) causes the rendering code to break. the rewritten one in C destroys $a3, which
+is not expected by func_800F4548 (draw_mesh)
+this makes me quite certain that draw_mesh was written in assembly. because otherwise it would have saved $a3.
+was sort_sets also written in assembly? who knows. it accesses the system status register (cop0r12) which is weird.
+
 ## Compiler
 *this part related to matching the binaries is no longer relevant*
 I think the standard libraries are compiled using PSYQ-3.5 but the game code itself is compiled using gcc 2.8.1 from PSYQ-4.3

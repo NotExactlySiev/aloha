@@ -1,6 +1,7 @@
 #include "common.h"
 #include <libgpu.h>
 #include "gbuffer.h"
+#include "mesh.h"
 
 #include "entity.h"
 
@@ -583,16 +584,70 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42A4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42C8);
 
+// these could be assmebly too? this sets the pointer in ot (saved right below it)
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42E0);
 
+// thse set and get the fucky color value in the middle of code
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42F4);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4338);
 
+// this is the distance from camera calculator thing
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
+#include <inline_n.h>
 
+#define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
+
+// sort faces (sets actually)
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
+/*void func_800F443C(FaceList *facelist)
+{
+    MATRIX *m;
+
+    s32 *dst0 = (s32*) SCRTCHPAD(0x288);
+    u16 *dst1 = (u16*) SCRTCHPAD(0x3A8);
+    void *verts = *(void**) SCRTCHPAD(0x3A0);
+
+    //__asm__ volatile( "mfc0   %0, $12; nop;" :  :"r"(sr) : "memory");
+
+    gprintf("COUNT: %d\n", facelist->size + 1);
+    for (int i = 0; i < facelist->size + 1; i++) {
+        u16 *sets = &facelist->data[i];
+        u32 vertoff = sets[0];  // stores the offset not the index
+        SVECTOR *vert = verts + vertoff;
+        // TODO: do we need to disable interrupts?
+        // Can I just use critical section?
+        gte_ldv0(vert);
+        gte_rt_b();
+        //__asm__ volatile( "mtc0   %0, $12;" : :"r"(no_intr) : "memory");
+
+        gte_sqr0_b();
+        //__asm__ volatile( "mtc0   %0, $12;" : :"r"(sr) : "memory");
+        //gte_stflg(0);
+        VECTOR projected;
+        gte_stlvnl(&projected);
+
+        dst0[i] = ((projected.vx + projected.vy) >> 2) + projected.vz;
+        dst1[i] = sets[1];
+        //gprintf("(%d, %d, %d)\t -> (%d, %d, %d) %d\n", vert->vx, vert->vy, vert->vz, projected.vx, projected.vy, projected.vz, sets[1]);
+    }
+
+    // now sorting?
+    for (int i = 1; i < facelist->size + 1; i++) {
+        s32 tmp0 = dst0[i];
+        u16 tmp1 = dst1[i];
+
+        int j;
+        for (j = i - 1; j >= 0; j--) {
+            if (dst0[j] <= tmp0) break;
+            dst0[j+1] = dst0[j];
+            dst1[j+1] = dst1[j];
+        }
+
+        dst0[j+1] = tmp0;
+        dst1[j+1] = tmp1;
+    }
+}*/
 
 // draw_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
