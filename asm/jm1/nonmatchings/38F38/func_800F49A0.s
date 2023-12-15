@@ -4,78 +4,79 @@
 # Rendering
 
 glabel func_800F49A0
-/* 451A0 800F49A0 */ addiu  $sp, 0xfffc # .word 0x27BDFFFC
-/* 451A4 800F49A4 */ sw     $ra, 0x0000($sp) # .word 0xAFBF0000
-/* 451A8 800F49A8 */ lw     $s4, 0x0000($a0) # .word 0x8C940000
-/* 451AC 800F49AC */ andi   $v0, $a3, 0x800f # .word 0x30E2800F
-/* 451B0 800F49B0 */ beq    $v0, $zero, .L0 # .word 0x10400002
-/* 451B4 800F49B4 */ move   $s2, $zero # .word 0x00009021
-/* 451B8 800F49B8 */ .word 0x36528000
+    addiu   $sp, 0xfffc
+    sw      $ra, 0x0000($sp)
+    lw      $s4, 0x0000($a0)
+    andi    $v0, $a3, 0x800f
+    beq     $v0, $zero, .L0
+    move    $s2, $zero
+    .word 0x36528000
 .L0:
-/* 451BC 800F49BC */ addiu  $v1, 0xf800   # .word 0x2463F800
-/* 451C0 800F49C0 */ bltz   $v1, .L1   # .word 0x04600002
-/* 451C4 800F49C4 */ nop        # .word 0x00000000
-/* 451C8 800F49C8 */ ori    $s2, 0x1000       # .word 0x36521000
+    addiu   $v1, 0xf800
+    bltz    $v1, .L1
+    nop
+    ori     $s2, 0x1000
 .L1:
-/* 451CC 800F49CC */ lw     $a3, 0x0004($a0)     # .word 0x8C870004
-/* 451D0 800F49D0 */ lui    $s5, 0x1f7f       # .word 0x3C151F7F
-/* 451D4 800F49D4 */ ori    $s5, 0xfff4       # .word 0x36B5FFF4
-/* 451D8 800F49D8 */ lh     $v0, 0x037e($s5)   # .word 0x86A2037E
-/* 451DC 800F49DC */ addiu  $a0, 0x0004       # .word 0x24840004
-/* 451E0 800F49E0 */ addu   $s4, $a0    # .word 0x0284A021
-/* 451E4 800F49E4 */ addiu  $s4, 0xffe4     # this is the next subset         # .word 0x2694FFE4
-/* 451E8 800F49E8 */ or     $s2, $v0    # .word 0x02429025
-/* 451EC 800F49EC */ lw     $s3, 0x03b0($s5)    # .word 0x8EB303B0
-/* 451F0 800F49F0 */ move   $t6, $a3     # .word 0x00E07021
-/* 451F4 800F49F4 */ lw     $a3, 0x001c($a0)
-/* 451F8 800F49F8 */ srl    $t9, $t6, 0x18
-/* 451FC 800F49FC */ srl    $t8, $t6, 0x0e
-/* 45200 800F4A00 */ andi   $t8, 0x03fc
-/* 45204 800F4A04 */ srl    $t7, $t6, 0x06
-/* 45208 800F4A08 */ andi   $t7, 0x03fc
-/* 4520C 800F4A0C */ sll    $t6, 0x02
-/* 45210 800F4A10 */ andi   $t6, 0x03fc
-/* 45214 800F4A14 */ addu   $t6, $s5
-/* 45218 800F4A18 */ addu   $t7, $s5
-/* 4521C 800F4A1C */ addu   $t8, $s5
-/* 45220 800F4A20 */ addiu  $t9, 0xfffe
-/* 45224 800F4A24 */ bgtz   $t9,        .QUAD
-/* 45228 800F4A28 */ addiu  $t9, 0x0002
-/* 4522C 800F4A2C */ bne    $t6, $t8,   .TRI
-/* 45230 800F4A30 */ nop
-/* 45234 800F4A34 */ b                  .LINE
-/* 45238 800F4A38 */ nop
+    lw      $a3, 0x0004($a0)
+    lui     $s5, 0x1f7f
+    ori     $s5, 0xfff4
+    lh      $v0, 0x037e($s5)
+    addiu   $a0, 0x0004
+    addu    $s4, $a0
+    addiu   $s4, 0xffe4     # this is the next subset
+    or      $s2, $v0
+    lw      $s3, 0x03b0($s5)
+    move    $t6, $a3
+    lw      $a3, 0x001c($a0)
+    srl     $t9, $t6, 0x18
+    srl     $t8, $t6, 0x0e
+    andi    $t8, 0x03fc
+    srl     $t7, $t6, 0x06
+    andi    $t7, 0x03fc
+    sll     $t6, 0x02
+    andi    $t6, 0x03fc
+    addu    $t6, $s5
+    addu    $t7, $s5
+    addu    $t8, $s5
+    addiu   $t9, 0xfffe
+    bgtz    $t9,        .QUAD
+    addiu   $t9, 0x0002
+    bne     $t6, $t8,   .TRI
+    nop
+    b                   .LINE
+    nop
 
 # return here after the primitive is done:
-
-    beq    $a0, $s4, .ALLDONE
-    addiu  $a0, 0x1c           # next face
-    lw     $a3, 0x1c($a0)
-    andi   $s2, 0xFFFE
-.L800F4A4C:
-    andi   $s2, 0xB3FF
+.continue0:
+    beq     $a0, $s4, .ALLDONE
+    addiu   $a0, 0x1c           # next face
+    lw      $a3, 0x1c($a0)
+.continue1:
+    andi    $s2, 0xFFFE
+.continue2:
+    andi    $s2, 0xB3FF
     .word 0x1494FFE7
-    addiu  $a0, 0x1c           # next face
+    addiu   $a0, 0x1c           # next face
 .ALLDONE:
-    cfc2   $zero, $31
-    lw     $ra, 0x0000($sp)
-    addiu  $sp, 0x0004
-    jr     $ra
+    cfc2    $zero, $31
+    lw      $ra, 0x0000($sp)
+    addiu   $sp, 0x0004
+    jr      $ra
     nop
 
 
 glabel func_800F4A6C
 /* 4526C 800F4A6C */ .word 0x32420400
 /* 45270 800F4A70 */ .word 0x14400009
-/* 45274 800F4A74 */ .word 0x00000000
+/* 45274 800F4A74 */ nop
 /* 45278 800F4A78 */ .word 0x4840F800
 /* 4527C 800F4A7C */ .word 0x48024000
 /* 45280 800F4A80 */ .word 0xEA0E0008
 /* 45284 800F4A84 */ .word 0x30421FE0
 /* 45288 800F4A88 */ .word 0x3842800F
 /* 4528C 800F4A8C */ .word 0xA6020004
-/* 45290 800F4A90 */ .word 0x03E00008
-/* 45294 800F4A94 */ .word 0x00000000
+/* 45290 800F4A90 */ jr    $ra
+/* 45294 800F4A94 */ nop
 /* 45298 800F4A98 */ .word 0x4840F800
 /* 4529C 800F4A9C */ .word 0x4842F800
 /* 452A0 800F4AA0 */ .word 0x48037000
@@ -101,8 +102,8 @@ glabel func_800F4A6C
 /* 452F0 800F4AF0 */ .word 0x00481025
 /* 452F4 800F4AF4 */ .word 0x3842800F
 /* 452F8 800F4AF8 */ .word 0xA6020004
-/* 452FC 800F4AFC */ .word 0x03E00008
-/* 45300 800F4B00 */ .word 0x00000000
+/* 452FC 800F4AFC */ jr    $ra
+/* 45300 800F4B00 */ nop
 glabel func_800F4B04
 /* 45304 800F4B04 */ .word 0x4882F000
 /* 45308 800F4B08 */ .word 0x2442FFE0
@@ -117,9 +118,9 @@ glabel func_800F4B04
 /* 4532C 800F4B2C */ .word 0x18400002
 /* 45330 800F4B30 */ .word 0x00411021
 /* 45334 800F4B34 */ .word 0x00201021
-/* 45338 800F4B38 */ .word 0x03E00008
-/* 4533C 800F4B3C */ .word 0x00000000
-/* 45340 800F4B40 */ .word 0x03E00008
+/* 45338 800F4B38 */ jr    $ra
+/* 4533C 800F4B3C */ nop
+/* 45340 800F4B40 */ jr    $ra
 /* 45344 800F4B44 */ .word 0x00001021
 glabel func_800F4B48
 /* 45348 800F4B48 */ .word 0x85C80004
@@ -152,8 +153,8 @@ glabel func_800F4B48
 /* 453B4 800F4BB4 */ .word 0x95C90006
 /* 453B8 800F4BB8 */ .word 0x48C81800
 /* 453BC 800F4BBC */ .word 0x48C92000
-/* 453C0 800F4BC0 */ .word 0x03E00008
-/* 453C4 800F4BC4 */ .word 0x00000000
+/* 453C0 800F4BC0 */ jr    $ra
+/* 453C4 800F4BC4 */ nop
 
 .L800F4BC8:
 /* 453C8 800F4BC8 */ .word 0x85C20004
@@ -176,24 +177,24 @@ glabel func_800F4B48
 /* 4540C 800F4C0C */ .word 0x17200005
 /* 45410 800F4C10 */ .word 0x27390002
 /* 45414 800F4C14 */ .word 0x1020000C
-/* 45418 800F4C18 */ .word 0x00000000
+/* 45418 800F4C18 */ nop
 /* 4541C 800F4C1C */ .word 0x1000000A
 /* 45420 800F4C20 */ .word 0x36520400
 /* 45424 800F4C24 */ .word 0x10200005
-/* 45428 800F4C28 */ .word 0x00000000
+/* 45428 800F4C28 */ nop
 	jal func_800F65B0
 /* 45430 800F4C30 */ .word 0x36520400
 /* 45434 800F4C34 */ .word 0x10000004
 /* 45438 800F4C38 */ .word 0x36520001
 	jal func_800F671C
-/* 45440 800F4C40 */ .word 0x00000000
+/* 45440 800F4C40 */ nop
 /* 45444 800F4C44 */ .word 0x36520001
 /* 45448 800F4C48 */ .word 0x32421000
 /* 4544C 800F4C4C */ .word 0x144004DD
 /* 45450 800F4C50 */ .word 0x000D6682
 /* 45454 800F4C54 */ .word 0x318C000F
 /* 45458 800F4C58 */ .word 0x118004DA
-/* 4545C 800F4C5C */ .word 0x00000000
+/* 4545C 800F4C5C */ nop
 /* 45460 800F4C60 */ .word 0x85C90006
 /* 45464 800F4C64 */ .word 0x85EA0006
 /* 45468 800F4C68 */ .word 0x870B0006
@@ -206,14 +207,14 @@ glabel func_800F4B48
 /* 45484 800F4C84 */ .word 0x3C198000
 /* 45488 800F4C88 */ .word 0x012B1023
 /* 4548C 800F4C8C */ .word 0x18400005
-/* 45490 800F4C90 */ .word 0x00000000
+/* 45490 800F4C90 */ nop
 /* 45494 800F4C94 */ .word 0x01205021
 /* 45498 800F4C98 */ .word 0x01604821
 /* 4549C 800F4C9C */ .word 0x10000005
 /* 454A0 800F4CA0 */ .word 0x37398000
 /* 454A4 800F4CA4 */ .word 0x014B1023
 /* 454A8 800F4CA8 */ .word 0x18400002
-/* 454AC 800F4CAC */ .word 0x00000000
+/* 454AC 800F4CAC */ nop
 /* 454B0 800F4CB0 */ .word 0x01605021
 /* 454B4 800F4CB4 */ .word 0x01201021
 	jal func_800F4B04
@@ -246,21 +247,21 @@ glabel func_800F4B48
 	jal func_800F4B48
 /* 45528 800F4D28 */ .word 0x26B00294
 /* 4552C 800F4D2C */ .word 0x05A00257
-/* 45530 800F4D30 */ .word 0x00000000
+/* 45530 800F4D30 */ nop
 	jal func_800F69A0
-/* 45538 800F4D38 */ .word 0x00000000
+/* 45538 800F4D38 */ nop
 /* 4553C 800F4D3C */ .word 0x31A20001
 /* 45540 800F4D40 */ .word 0x1040000A
 /* 45544 800F4D44 */ .word 0x340E1000
 /* 45548 800F4D48 */ .word 0x84820008
-/* 4554C 800F4D4C */ .word 0x00000000
+/* 4554C 800F4D4C */ nop
 /* 45550 800F4D50 */ .word 0x04400009
 /* 45554 800F4D54 */ .word 0x30427FFF
 	jal func_800F67D0
-/* 4555C 800F4D5C */ .word 0x00000000
+/* 4555C 800F4D5C */ nop
 /* 45560 800F4D60 */ .word 0x4840F800
 /* 45564 800F4D64 */ .word 0x480E4800
-/* 45568 800F4D68 */ .word 0x00000000
+/* 45568 800F4D68 */ nop
 /* 4556C 800F4D6C */ .word 0x01C07821
 /* 45570 800F4D70 */ .word 0x10000011
 /* 45574 800F4D74 */ .word 0x01C0C021
@@ -268,11 +269,11 @@ glabel func_800F4B48
 /* 4557C 800F4D7C */ .word 0x36524000
 /* 45580 800F4D80 */ .word 0x8482000A
 	jal func_800F67D0
-/* 45588 800F4D88 */ .word 0x00000000
+/* 45588 800F4D88 */ nop
 /* 4558C 800F4D8C */ .word 0x01007021
 /* 45590 800F4D90 */ .word 0x8482000C
 	jal func_800F67D0
-/* 45598 800F4D98 */ .word 0x00000000
+/* 45598 800F4D98 */ nop
 /* 4559C 800F4D9C */ .word 0x01007821
 /* 455A0 800F4DA0 */ .word 0x4840F800
 /* 455A4 800F4DA4 */ .word 0x48184800
@@ -323,7 +324,7 @@ glabel func_800F4B48
 /* 45658 800F4E58 */ .word 0x01991023
 /* 4565C 800F4E5C */ .word 0x3042FFFF
 /* 45660 800F4E60 */ .word 0x10400049
-/* 45664 800F4E64 */ .word 0x00000000
+/* 45664 800F4E64 */ nop
 /* 45668 800F4E68 */ .word 0x240F0001
 /* 4566C 800F4E6C */ .word 0x004F7804
 /* 45670 800F4E70 */ .word 0x25EFFFFF
@@ -372,7 +373,7 @@ glabel func_800F4B48
 /* 4571C 800F4F1C */ .word 0x48820000
 /* 45720 800F4F20 */ .word 0x000E1C02
 /* 45724 800F4F24 */ .word 0x48830800
-/* 45728 800F4F28 */ .word 0x00000000
+/* 45728 800F4F28 */ nop
 /* 4572C 800F4F2C */ .word 0x4A180001 # invalid instruction
 /* 45730 800F4F30 */ .word 0x01344821
 /* 45734 800F4F34 */ .word 0x01565021
@@ -469,7 +470,7 @@ glabel func_800F4B48
 /* 458A0 800F50A0 */ .word 0x000F1402
 /* 458A4 800F50A4 */ .word 0x004F1024
 /* 458A8 800F50A8 */ .word 0x10400013
-/* 458AC 800F50AC */ .word 0x00000000
+/* 458AC 800F50AC */ nop
 /* 458B0 800F50B0 */ .word 0x8E03FFFC
 /* 458B4 800F50B4 */ .word 0x8E08FFF4
 /* 458B8 800F50B8 */ .word 0xAE030008
@@ -487,10 +488,10 @@ glabel func_800F4B48
 /* 458E8 800F50E8 */ .word 0x0441FFED
 /* 458EC 800F50EC */ .word 0x2610000C
 /* 458F0 800F50F0 */ .word 0x1000002C
-/* 458F4 800F50F4 */ .word 0x00000000
+/* 458F4 800F50F4 */ nop
 /* 458F8 800F50F8 */ .word 0x488E0000
 /* 458FC 800F50FC */ .word 0x01891006
-/* 45900 800F5100 */ .word 0x00000000
+/* 45900 800F5100 */ nop
 /* 45904 800F5104 */ .word 0x4A180001 # invalid instruction
 /* 45908 800F5108 */ .word 0x01D17021
 /* 4590C 800F510C */ .word 0x00021142
@@ -510,10 +511,10 @@ glabel func_800F4B48
 /* 45944 800F5144 */ .word 0x0441FFD6
 /* 45948 800F5148 */ .word 0x2610000C
 /* 4594C 800F514C */ .word 0x10000015
-/* 45950 800F5150 */ .word 0x00000000
+/* 45950 800F5150 */ nop
 /* 45954 800F5154 */ .word 0x488E0000
 /* 45958 800F5158 */ .word 0x01891006
-/* 4595C 800F515C */ .word 0x00000000
+/* 4595C 800F515C */ nop
 /* 45960 800F5160 */ .word 0x4A180001 # invalid instruction
 /* 45964 800F5164 */ .word 0x01D17021
 /* 45968 800F5168 */ .word 0x00021142
@@ -547,10 +548,10 @@ glabel func_800F4B48
 /* 459D8 800F51D8 */ .word 0x00587804
 /* 459DC 800F51DC */ .word 0x25EFFFFF
 /* 459E0 800F51E0 */ .word 0x19E00092
-/* 459E4 800F51E4 */ .word 0x00000000
+/* 459E4 800F51E4 */ nop
 /* 459E8 800F51E8 */ .word 0x32424C00
 /* 459EC 800F51EC */ .word 0x10400072
-/* 459F0 800F51F0 */ .word 0x00000000
+/* 459F0 800F51F0 */ nop
 /* 459F4 800F51F4 */ .word 0x96020004
 /* 459F8 800F51F8 */ .word 0x96230004
 /* 459FC 800F51FC */ .word 0x96080010
@@ -629,7 +630,7 @@ glabel func_800F4B48
 /* 45B20 800F5320 */ .word 0x1000003E
 /* 45B24 800F5324 */ .word 0x24A5006C
 /* 45B28 800F5328 */ .word 0x10400023
-/* 45B2C 800F532C */ .word 0x00000000
+/* 45B2C 800F532C */ nop
 /* 45B30 800F5330 */ .word 0x8E020008
 /* 45B34 800F5334 */ .word 0x8E030014
 /* 45B38 800F5338 */ .word 0x8E280008
@@ -695,7 +696,7 @@ glabel func_800F4B48
 /* 45C28 800F5428 */ .word 0x2631000C
 /* 45C2C 800F542C */ .word 0x32424C00
 /* 45C30 800F5430 */ .word 0x10400060
-/* 45C34 800F5434 */ .word 0x00000000
+/* 45C34 800F5434 */ nop
 /* 45C38 800F5438 */ .word 0x96020004
 /* 45C3C 800F543C */ .word 0x96230004
 /* 45C40 800F5440 */ .word 0x96080010
@@ -762,7 +763,7 @@ glabel func_800F4B48
 /* 45D34 800F5534 */ .word 0x10000036
 /* 45D38 800F5538 */ .word 0x24A50054
 /* 45D3C 800F553C */ .word 0x1040001D
-/* 45D40 800F5540 */ .word 0x00000000
+/* 45D40 800F5540 */ nop
 /* 45D44 800F5544 */ .word 0x8E020008
 /* 45D48 800F5548 */ .word 0x8E030014
 /* 45D4C 800F554C */ .word 0x8E280008
@@ -838,16 +839,16 @@ glabel func_800F5654
 /* 45E60 800F5660 */ .word 0x4808B000
 /* 45E64 800F5664 */ .word 0x30421FE0
 /* 45E68 800F5668 */ .word 0x48824000
-/* 45E6C 800F566C */ .word 0x00000000
+/* 45E6C 800F566C */ nop
 /* 45E70 800F5670 */ .word 0x4A780010 # invalid instruction
 /* 45E74 800F5674 */ .word 0x00021142
 /* 45E78 800F5678 */ .word 0x00021A00
 /* 45E7C 800F567C */ .word 0x00431025
 /* 45E80 800F5680 */ .word 0x00021A00
-/* 45E84 800F5684 */ .word 0x03E00008
+/* 45E84 800F5684 */ jr    $ra
 /* 45E88 800F5688 */ .word 0x00431025
 	jal func_800F68B0
-/* 45E90 800F5690 */ .word 0x00000000
+/* 45E90 800F5690 */ nop
 /* 45E94 800F5694 */ .word 0x480E3000
 /* 45E98 800F5698 */ .word 0x31A20001
 /* 45E9C 800F569C */ .word 0x1040000C
@@ -859,7 +860,7 @@ glabel func_800F5654
 /* 45EB4 800F56B4 */ .word 0x30427FFF
 /* 45EB8 800F56B8 */ .word 0x408A6000
 	jal func_800F5E04
-/* 45EC0 800F56C0 */ .word 0x00000000
+/* 45EC0 800F56C0 */ nop
 /* 45EC4 800F56C4 */ .word 0x4840F800
 /* 45EC8 800F56C8 */ .word 0x480EB000
 /* 45ECC 800F56CC */ .word 0x40896000
@@ -871,11 +872,11 @@ glabel func_800F5654
 /* 45EE4 800F56E4 */ .word 0x36524000
 /* 45EE8 800F56E8 */ .word 0x8482000A
 	jal func_800F5E04
-/* 45EF0 800F56F0 */ .word 0x00000000
+/* 45EF0 800F56F0 */ nop
 /* 45EF4 800F56F4 */ .word 0x01007021
 /* 45EF8 800F56F8 */ .word 0x8482000C
 	jal func_800F5E04
-/* 45F00 800F5700 */ .word 0x00000000
+/* 45F00 800F5700 */ nop
 /* 45F04 800F5704 */ .word 0x01007821
 /* 45F08 800F5708 */ .word 0x4840F800
 /* 45F0C 800F570C */ .word 0x4818B000
@@ -924,7 +925,7 @@ glabel func_800F5654
 /* 45FB8 800F57B8 */ .word 0x01991023
 /* 45FBC 800F57BC */ .word 0x3042FFFF
 /* 45FC0 800F57C0 */ .word 0x10400046
-/* 45FC4 800F57C4 */ .word 0x00000000
+/* 45FC4 800F57C4 */ nop
 /* 45FC8 800F57C8 */ .word 0x240F0001
 /* 45FCC 800F57CC */ .word 0x004F7804
 /* 45FD0 800F57D0 */ .word 0x25EFFFFF
@@ -973,7 +974,7 @@ glabel func_800F5654
 /* 4607C 800F587C */ .word 0x48820000
 /* 46080 800F5880 */ .word 0x000E1C02
 /* 46084 800F5884 */ .word 0x48830800
-/* 46088 800F5888 */ .word 0x00000000
+/* 46088 800F5888 */ nop
 /* 4608C 800F588C */ .word 0x4A180001 # invalid instruction
 /* 46090 800F5890 */ .word 0x01344821
 /* 46094 800F5894 */ .word 0x01565021
@@ -1067,7 +1068,7 @@ glabel func_800F5654
 /* 461F4 800F59F4 */ .word 0x000F1402
 /* 461F8 800F59F8 */ .word 0x004F1024
 /* 461FC 800F59FC */ .word 0x10400013
-/* 46200 800F5A00 */ .word 0x00000000
+/* 46200 800F5A00 */ nop
 /* 46204 800F5A04 */ .word 0x8E03FFFC
 /* 46208 800F5A08 */ .word 0x8E08FFF4
 /* 4620C 800F5A0C */ .word 0xAE030008
@@ -1085,10 +1086,10 @@ glabel func_800F5654
 /* 4623C 800F5A3C */ .word 0x0441FFED
 /* 46240 800F5A40 */ .word 0x2610000C
 /* 46244 800F5A44 */ .word 0x10000026
-/* 46248 800F5A48 */ .word 0x00000000
+/* 46248 800F5A48 */ nop
 /* 4624C 800F5A4C */ .word 0x488E0000
 /* 46250 800F5A50 */ .word 0x01891006
-/* 46254 800F5A54 */ .word 0x00000000
+/* 46254 800F5A54 */ nop
 /* 46258 800F5A58 */ .word 0x4A180001 # invalid instruction
 /* 4625C 800F5A5C */ .word 0x01D17021
 /* 46260 800F5A60 */ .word 0xA2020000
@@ -1105,10 +1106,10 @@ glabel func_800F5654
 /* 4628C 800F5A8C */ .word 0x0441FFD9
 /* 46290 800F5A90 */ .word 0x2610000C
 /* 46294 800F5A94 */ .word 0x10000012
-/* 46298 800F5A98 */ .word 0x00000000
+/* 46298 800F5A98 */ nop
 /* 4629C 800F5A9C */ .word 0x488E0000
 /* 462A0 800F5AA0 */ .word 0x01891006
-/* 462A4 800F5AA4 */ .word 0x00000000
+/* 462A4 800F5AA4 */ nop
 /* 462A8 800F5AA8 */ .word 0x4A180001 # invalid instruction
 /* 462AC 800F5AAC */ .word 0x01D17021
 /* 462B0 800F5AB0 */ .word 0xA2020000
@@ -1135,10 +1136,10 @@ glabel func_800F5654
 /* 46304 800F5B04 */ .word 0x00587804
 /* 46308 800F5B08 */ .word 0x25EFFFFF
 /* 4630C 800F5B0C */ .word 0x19E00059
-/* 46310 800F5B10 */ .word 0x00000000
+/* 46310 800F5B10 */ nop
 /* 46314 800F5B14 */ .word 0x32424C00
 /* 46318 800F5B18 */ .word 0x10400041
-/* 4631C 800F5B1C */ .word 0x00000000
+/* 4631C 800F5B1C */ nop
 /* 46320 800F5B20 */ .word 0x96020004
 /* 46324 800F5B24 */ .word 0x96230004
 /* 46328 800F5B28 */ .word 0x96080010
@@ -1180,7 +1181,7 @@ glabel func_800F5654
 /* 463B8 800F5BB8 */ .word 0x1000002A
 /* 463BC 800F5BBC */ .word 0x24A50024
 /* 463C0 800F5BC0 */ .word 0x10400017
-/* 463C4 800F5BC4 */ .word 0x00000000
+/* 463C4 800F5BC4 */ nop
 /* 463C8 800F5BC8 */ .word 0x8E020008
 /* 463CC 800F5BCC */ .word 0x8E030014
 /* 463D0 800F5BD0 */ .word 0x8E280008
@@ -1260,7 +1261,7 @@ glabel func_800F5654
 /* 464F8 800F5CF8 */ .word 0x10000026
 /* 464FC 800F5CFC */ .word 0x24A5001C
 /* 46500 800F5D00 */ .word 0x10400015
-/* 46504 800F5D04 */ .word 0x00000000
+/* 46504 800F5D04 */ nop
 /* 46508 800F5D08 */ .word 0x8E020008
 /* 4650C 800F5D0C */ .word 0x8E030014
 /* 46510 800F5D10 */ .word 0x8E280008
@@ -1321,14 +1322,14 @@ glabel func_800F5DDC
 /* 465E8 800F5DE8 */ .word 0x4808B000
 /* 465EC 800F5DEC */ .word 0x30421FE0
 /* 465F0 800F5DF0 */ .word 0x48824000
-/* 465F4 800F5DF4 */ .word 0x00000000
+/* 465F4 800F5DF4 */ nop
 /* 465F8 800F5DF8 */ .word 0x4A780010 # invalid instruction
-/* 465FC 800F5DFC */ .word 0x03E00008
-/* 46600 800F5E00 */ .word 0x00000000
+/* 465FC 800F5DFC */ jr    $ra
+/* 46600 800F5E00 */ nop
 glabel func_800F5E04
 /* 46604 800F5E04 */ .word 0x00531021
 /* 46608 800F5E08 */ .word 0x8C420000
-/* 4660C 800F5E0C */ .word 0x00000000
+/* 4660C 800F5E0C */ nop
 /* 46610 800F5E10 */ .word 0x3043FF00
 /* 46614 800F5E14 */ .word 0x00431023
 /* 46618 800F5E18 */ .word 0x00021200
@@ -1336,21 +1337,21 @@ glabel func_800F5E04
 /* 46620 800F5E20 */ .word 0x4808B000
 /* 46624 800F5E24 */ .word 0x48820000
 /* 46628 800F5E28 */ .word 0x48830800
-/* 4662C 800F5E2C */ .word 0x00000000
+/* 4662C 800F5E2C */ nop
 /* 46630 800F5E30 */ .word 0x4B08041B # invalid instruction
-/* 46634 800F5E34 */ .word 0x03E00008
-/* 46638 800F5E38 */ .word 0x00000000
+/* 46634 800F5E34 */ jr    $ra
+/* 46638 800F5E38 */ nop
 
 .TRI:
-/* 4663C 800F5E3C */ jalr   $fp       # .word 0x03C0F809
-/* 46640 800F5E40 */ nop            # .word 0x00000000
+/* 4663C 800F5E3C */ jalr   $fp
+/* 46640 800F5E40 */ nop
 /* 46644 800F5E44 */ bgtz   $t5, .L800F4BC8     # textured?
 /* 46648 800F5E48 */ srl    $v0, $t5, 0x1a
 /* 4664C 800F5E4C */ andi   $v0, 0x000f
 /* 46650 800F5E50 */ bne    $v0, $zero, .L800F4BC8  # any high flags set? (other than the top one)
-/* 46654 800F5E54 */ andi   $v0, $s2, 0x8000        # .word 0x32428000
-/* 46658 800F5E58 */ beq    $v0, $zero, .L3        # .word 0x1040000E
-/* 4665C 800F5E5C */ move   $t4, $zero        # .word 0x00006021
+/* 46654 800F5E54 */ andi   $v0, $s2, 0x8000
+/* 46658 800F5E58 */ beq    $v0, $zero, .L3
+/* 4665C 800F5E5C */ move   $t4, $zero
 /* 46660 800F5E60 */ .word 0x85C20004
 /* 46664 800F5E64 */ .word 0x85E30004
 /* 46668 800F5E68 */ .word 0x87080004
@@ -1366,16 +1367,16 @@ glabel func_800F5E04
 /* 46690 800F5E90 */ .word 0x26AA0294
 
 .L3:
-/* 46694 800F5E94 */ andi   $v0, $s2, 0x0001        # .word 0x32420001
-/* 46698 800F5E98 */ beq    $v0, $zero, .L2        # .word 0x10400004
-/* 4669C 800F5E9C */ andi   $s2, 0xfffe       # .word 0x3252FFFE
+/* 46694 800F5E94 */ andi   $v0, $s2, 0x0001
+/* 46698 800F5E98 */ beq    $v0, $zero, .L2
+/* 4669C 800F5E9C */ andi   $s2, 0xfffe
 /* 466A0 800F5EA0 */ .word 0x2739FFFE
 /* 466A4 800F5EA4 */ .word 0x13200004
 /* 466A8 800F5EA8 */ .word 0x27390002
 .L2:
 	jal func_800F671C   # check clipping
     nop
-/* 466B4 800F5EB4 */ ori    $s2, 1          # remember that it wasn't clipped # .word 0x36520001
+/* 466B4 800F5EB4 */ ori    $s2, 1          # remember that it wasn't clipped
 /* 466B8 800F5EB8 */ beq    $t4, $zero, .L800F5FCC  # don't really know what this checks
 /* 466BC 800F5EBC */ nop
 /* 466C0 800F5EC0 */ .word 0x26AA0300
@@ -1395,9 +1396,9 @@ glabel func_800F5E04
 /* 466F8 800F5EF8 */ .word 0xAD430014
 /* 466FC 800F5EFC */ .word 0xAD480020
 /* 46700 800F5F00 */ .word 0x10000006
-/* 46704 800F5F04 */ .word 0x00000000
+/* 46704 800F5F04 */ nop
 	jal func_800F65B0
-/* 4670C 800F5F0C */ .word 0x00000000
+/* 4670C 800F5F0C */ nop
 /* 46710 800F5F10 */ .word 0xAD4E0008
 /* 46714 800F5F14 */ .word 0xAD4F0014
 /* 46718 800F5F18 */ .word 0xAD580020
@@ -1416,35 +1417,35 @@ glabel func_800F5E04
 /* 4674C 800F5F4C */ .word 0x04410003
 /* 46750 800F5F50 */ .word 0x30427FFF
 /* 46754 800F5F54 */ .word 0x1060000B
-/* 46758 800F5F58 */ .word 0x00000000
+/* 46758 800F5F58 */ nop
 	jal func_800F67D0
-/* 46760 800F5F60 */ .word 0x00000000
+/* 46760 800F5F60 */ nop
 /* 46764 800F5F64 */ .word 0x4840F800
 /* 46768 800F5F68 */ .word 0x48024800
-/* 4676C 800F5F6C */ .word 0x00000000
+/* 4676C 800F5F6C */ nop
 /* 46770 800F5F70 */ .word 0xA5420000
 /* 46774 800F5F74 */ .word 0xA542000C
 /* 46778 800F5F78 */ .word 0xA5420018
 /* 4677C 800F5F7C */ .word 0x1000000D
-/* 46780 800F5F80 */ .word 0x00000000
+/* 46780 800F5F80 */ nop
 	jal func_800F67D0
-/* 46788 800F5F88 */ .word 0x00000000
+/* 46788 800F5F88 */ nop
 /* 4678C 800F5F8C */ .word 0x8482000A
 	jal func_800F67D0
-/* 46794 800F5F94 */ .word 0x00000000
+/* 46794 800F5F94 */ nop
 /* 46798 800F5F98 */ .word 0x8482000C
 /* 4679C 800F5F9C */ .word 0xAD480000
 	jal func_800F67D0
-/* 467A4 800F5FA4 */ .word 0x00000000
+/* 467A4 800F5FA4 */ nop
 /* 467A8 800F5FA8 */ .word 0xAD48000C
 /* 467AC 800F5FAC */ .word 0x4840F800
 /* 467B0 800F5FB0 */ .word 0xE9490018
 /* 467B4 800F5FB4 */ .word 0x1D800106
 /* 467B8 800F5FB8 */ .word 0x24020018
 /* 467BC 800F5FBC */ .word 0x100000FF
-/* 467C0 800F5FC0 */ .word 0x00000000
+/* 467C0 800F5FC0 */ nop
 /* 467C4 800F5FC4 */ .word 0x05A1002C
-/* 467C8 800F5FC8 */ .word 0x00000000
+/* 467C8 800F5FC8 */ nop
 .L800F5FCC:
 	jal func_800F68B0               # go to funky color function
     nop
@@ -1480,7 +1481,7 @@ glabel func_800F5E04
 /* 4683C 800F603C */ .word 0x85C90004
 /* 46840 800F6040 */ .word 0x8482000A
 	jal func_800F6928
-/* 46848 800F6048 */ .word 0x00000000
+/* 46848 800F6048 */ nop
 	jal func_800F682C
 /* 46850 800F6050 */ .word 0x85E90004
 /* 46854 800F6054 */ .word 0xACA80008
@@ -1493,7 +1494,7 @@ glabel func_800F5E04
 	j func_800F6970
 /* 46874 800F6074 */ .word 0x24080020
 	jal func_800F69A0
-/* 4687C 800F607C */ .word 0x00000000
+/* 4687C 800F607C */ nop
 /* 46880 800F6080 */ .word 0x31A20001
 /* 46884 800F6084 */ .word 0x10400009
 /* 46888 800F6088 */ .word 0x24AC002C
@@ -1502,13 +1503,13 @@ glabel func_800F5E04
 /* 46894 800F6094 */ .word 0x04410003
 /* 46898 800F6098 */ .word 0x30427FFF
 /* 4689C 800F609C */ .word 0x10600011
-/* 468A0 800F60A0 */ .word 0x00000000
+/* 468A0 800F60A0 */ nop
 	jal func_800F6798
-/* 468A8 800F60A8 */ .word 0x00000000
+/* 468A8 800F60A8 */ nop
 	jal func_800F6808
 /* 468B0 800F60B0 */ .word 0x85C90004
 	jal func_800F69BC
-/* 468B8 800F60B8 */ .word 0x00000000
+/* 468B8 800F60B8 */ nop
 	jal func_800F6808
 /* 468C0 800F60C0 */ .word 0x85E90004
 /* 468C4 800F60C4 */ .word 0xACA80008
@@ -1523,7 +1524,7 @@ glabel func_800F5E04
 /* 468E8 800F60E8 */ .word 0x85C90004
 /* 468EC 800F60EC */ .word 0x8482000A
 	jal func_800F69BC
-/* 468F4 800F60F4 */ .word 0x00000000
+/* 468F4 800F60F4 */ nop
 	jal func_800F682C
 /* 468FC 800F60FC */ .word 0x85E90004
 /* 46900 800F6100 */ .word 0xACA80008
@@ -1537,53 +1538,55 @@ glabel func_800F5E04
 /* 46920 800F6120 */ .word 0x24080054
 
 .LINE:
-/* 46924 800F6124 */ .word 0x32428000
-/* 46928 800F6128 */ .word 0x10400029
-/* 4692C 800F612C */ .word 0x00000000
-/* 46930 800F6130 */ .word 0x95C20004
-/* 46934 800F6134 */ .word 0x95E30004
-/* 46938 800F6138 */ .word 0x00000000
-/* 4693C 800F613C */ .word 0x00430824
-/* 46940 800F6140 */ .word 0x3021800F
-/* 46944 800F6144 */ .word 0x1420FA40
+/* 46924 800F6124 */ andi    $v0, $s2, 0x8000
+/* 46928 800F6128 */ beq     $v0, $zero, .L800F61D0
+/* 4692C 800F612C */ nop
+/* 46930 800F6130 */ lhu     $v0, 4($t6)
+/* 46934 800F6134 */ lhu     $v1, 4($t7)
+/* 46938 800F6138 */ nop
+/* 4693C 800F613C */ and     $at, $v0, $v1
+/* 46940 800F6140 */ and     $at, 0x800F
+/* 46944 800F6144 */ bnez    $at, .continue1
 /* 46948 800F6148 */ .word 0x00436025
 /* 4694C 800F614C */ .word 0x318C800F
 /* 46950 800F6150 */ .word 0x000C6400
 /* 46954 800F6154 */ .word 0x1180001E
 /* 46958 800F6158 */ .word 0x26AA0294
-/* 4695C 800F615C */ .word 0xAD4E0008
-/* 46960 800F6160 */ .word 0xAD4F0014
+/* 4695C 800F615C */ sw      $t6, 0x8($t2)
+/* 46960 800F6160 */ sw      $t7, 0x14($t2)
 /* 46964 800F6164 */ .word 0x0580000A
-/* 46968 800F6168 */ .word 0x00000000
-/* 4696C 800F616C */ .word 0x26AA0300
-/* 46970 800F6170 */ .word 0x30421FE0
-/* 46974 800F6174 */ .word 0x30631FE0
-/* 46978 800F6178 */ .word 0xA5420004
-/* 4697C 800F617C */ .word 0xA5430010
-/* 46980 800F6180 */ .word 0x8DC20008
-/* 46984 800F6184 */ .word 0x8DE30008
-/* 46988 800F6188 */ .word 0xAD420008
-/* 4698C 800F618C */ .word 0xAD430014
-/* 46990 800F6190 */ .word 0x1D800006
-/* 46994 800F6194 */ .word 0x2402000C
-	jal func_800F6B08
-/* 4699C 800F619C */ .word 0x00000000
-/* 469A0 800F61A0 */ .word 0x2443FFF4
-/* 469A4 800F61A4 */ .word 0x0460FA28
-/* 469A8 800F61A8 */ .word 0x00000000
-	jal func_800F6C48
-/* 469B0 800F61B0 */ .word 0x00000000
-	jal func_800F6C68
-/* 469B8 800F61B8 */ .word 0x00000000
+    nop
+    addiu   $t2, $s5, 0x300
+    andi    $v0, 0x1FE0
+    andi    $v1, 0x1FE0
+    sh      $v0, 0x4($t2)
+    sh      $v1, 0x10($t2)
+    lw      $v0, 0x8($t6)
+    lw      $v1, 0x8($t7)
+    sw      $v0, 0x8($t2)
+    sw      $v1, 0x14($t2)
+    bgtz    $t4, .LTOBAD
+    li      $v0, 12
+	jal     func_800F6B08
+    nop
+    addiu   $v1, $v0, -12
+    bltz    $v1, .continue1
+    nop
+.LTOBAD:
+	jal     func_800F6C48
+    nop
+	jal     func_800F6C68
+    nop
 /* 469BC 800F61BC */ .word 0x2443FFF4
 /* 469C0 800F61C0 */ .word 0x0440FA21
-/* 469C4 800F61C4 */ .word 0x00000000
+/* 469C4 800F61C4 */ nop
 /* 469C8 800F61C8 */ .word 0x26AE0300
 /* 469CC 800F61CC */ .word 0x25CF000C
+.L800F61D0:
 /* 469D0 800F61D0 */ .word 0x03C0F809
-/* 469D4 800F61D4 */ .word 0x00000000
+/* 469D4 800F61D4 */ nop
 	jal func_800F68B0
-/* 469DC 800F61DC */ .word 0x00000000
+/* 469DC 800F61DC */ nop
 	jal func_800F6808
 /* 469E4 800F61E4 */ .word 0x85C90004
 /* 469E8 800F61E8 */ .word 0x8DC80008
@@ -1602,31 +1605,31 @@ glabel func_800F5E04
 /* 46A1C 800F621C */ .word 0x24080018
 
 .QUAD:
-/* 46A20 800F6220 */ .word 0x0019C880
-/* 46A24 800F6224 */ .word 0x0335C821
+    sll     $t9, 0x2
+    addu    $t9, $s5
 /* 46A28 800F6228 */ .word 0x32428000
 /* 46A2C 800F622C */ .word 0x10400011
-/* 46A30 800F6230 */ .word 0x00006021
-/* 46A34 800F6234 */ .word 0x85C20004
-/* 46A38 800F6238 */ .word 0x85E30004
-/* 46A3C 800F623C */ .word 0x87080004
-/* 46A40 800F6240 */ .word 0x87290004
-/* 46A44 800F6244 */ .word 0x00430824
-/* 46A48 800F6248 */ .word 0x00280824
-/* 46A4C 800F624C */ .word 0x00290824
-/* 46A50 800F6250 */ .word 0x3021800F
+    move    $t4, $zero
+    lh      $v0, 4($t6)
+    lh      $v1, 4($t7)
+    lh      $t0, 4($t8)
+    lh      $t1, 4($t9)
+    and     $at, $v0, $v1
+    and     $at, $t0
+    and     $at, $t1
+    andi    $at, 0x800F
 /* 46A54 800F6254 */ .word 0x1420F9FC
-/* 46A58 800F6258 */ .word 0x00436025
-/* 46A5C 800F625C */ .word 0x01886025
-/* 46A60 800F6260 */ .word 0x01896025
-/* 46A64 800F6264 */ .word 0x318C800F
-/* 46A68 800F6268 */ .word 0x000C6400
+    or      $t4, $v0, $v1
+    or      $t4, $t0
+    or      $t4, $t1
+    andi    $t4, 0x800F
+    sll     $t4, 0x10
 /* 46A6C 800F626C */ .word 0x0580001C
-/* 46A70 800F6270 */ .word 0x26AA0294
-	jal func_800F671C
-/* 46A78 800F6278 */ .word 0x00000000
+    addiu   $t2, $s5, 0x294
+	jal     func_800F671C
+    nop
 /* 46A7C 800F627C */ .word 0x1180005C
-/* 46A80 800F6280 */ .word 0x00000000
+/* 46A80 800F6280 */ nop
 /* 46A84 800F6284 */ .word 0x26AA0300
 /* 46A88 800F6288 */ .word 0x85C20004
 /* 46A8C 800F628C */ .word 0x85E30004
@@ -1649,15 +1652,15 @@ glabel func_800F5E04
 /* 46AD0 800F62D0 */ .word 0xAD420020
 /* 46AD4 800F62D4 */ .word 0xAD43002C
 /* 46AD8 800F62D8 */ .word 0x10000007
-/* 46ADC 800F62DC */ .word 0x00000000
+/* 46ADC 800F62DC */ nop
 	jal func_800F65B0
-/* 46AE4 800F62E4 */ .word 0x00000000
+/* 46AE4 800F62E4 */ nop
 /* 46AE8 800F62E8 */ .word 0xAD4E0008
 /* 46AEC 800F62EC */ .word 0xAD4F0014
 /* 46AF0 800F62F0 */ .word 0xAD580020
 /* 46AF4 800F62F4 */ .word 0xAD59002C
 /* 46AF8 800F62F8 */ .word 0x03C0F809
-/* 46AFC 800F62FC */ .word 0x00000000
+/* 46AFC 800F62FC */ nop
 /* 46B00 800F6300 */ .word 0x05A00009
 /* 46B04 800F6304 */ .word 0x31A30001
 /* 46B08 800F6308 */ .word 0x8C880010
@@ -1675,86 +1678,85 @@ glabel func_800F5E04
 /* 46B38 800F6338 */ .word 0x04410003
 /* 46B3C 800F633C */ .word 0x30427FFF
 /* 46B40 800F6340 */ .word 0x1060000C
-/* 46B44 800F6344 */ .word 0x00000000
+/* 46B44 800F6344 */ nop
 	jal func_800F67D0
-/* 46B4C 800F634C */ .word 0x00000000
+/* 46B4C 800F634C */ nop
 /* 46B50 800F6350 */ .word 0x4840F800
 /* 46B54 800F6354 */ .word 0x48024800
-/* 46B58 800F6358 */ .word 0x00000000
+/* 46B58 800F6358 */ nop
 /* 46B5C 800F635C */ .word 0xA5420000
 /* 46B60 800F6360 */ .word 0xA542000C
 /* 46B64 800F6364 */ .word 0xA5420018
 /* 46B68 800F6368 */ .word 0xA5420024
 /* 46B6C 800F636C */ .word 0x10000011
-/* 46B70 800F6370 */ .word 0x00000000
+/* 46B70 800F6370 */ nop
 	jal func_800F67D0
-/* 46B78 800F6378 */ .word 0x00000000
+/* 46B78 800F6378 */ nop
 /* 46B7C 800F637C */ .word 0x8482000A
 	jal func_800F67D0
-/* 46B84 800F6384 */ .word 0x00000000
+/* 46B84 800F6384 */ nop
 /* 46B88 800F6388 */ .word 0x8482000C
 /* 46B8C 800F638C */ .word 0xAD480000
 	jal func_800F67D0
-/* 46B94 800F6394 */ .word 0x00000000
+/* 46B94 800F6394 */ nop
 /* 46B98 800F6398 */ .word 0x8482000E
 /* 46B9C 800F639C */ .word 0xAD48000C
 	jal func_800F67D0
-/* 46BA4 800F63A4 */ .word 0x00000000
+/* 46BA4 800F63A4 */ nop
 /* 46BA8 800F63A8 */ .word 0xAD480018
 /* 46BAC 800F63AC */ .word 0x4840F800
 /* 46BB0 800F63B0 */ .word 0xE9490024
 /* 46BB4 800F63B4 */ .word 0x1D800006
 /* 46BB8 800F63B8 */ .word 0x24020024
 	jal func_800F6B08
-/* 46BC0 800F63C0 */ .word 0x00000000
+/* 46BC0 800F63C0 */ nop
 /* 46BC4 800F63C4 */ .word 0x2443FFE8
 /* 46BC8 800F63C8 */ .word 0x0460F99F
-/* 46BCC 800F63CC */ .word 0x00000000
+/* 46BCC 800F63CC */ nop
 
 /* 46BD0 800F63D0 */ /*.word 0x0C03DB12 */
-/* 46BD4 800F63D4 */ /*.word 0x00000000 */
+/* 46BD4 800F63D4 */ /*nop */
 /* 46BD8 800F63D8 */ /*.word 0x0C03DB1A */
-/* 46BDC 800F63DC */ /*.word 0x00000000 */
+/* 46BDC 800F63DC */ /*nop */
 /* 46BE0 800F63E0 */ /*.word 0x0C03DBB8 */
-/* 46BE4 800F63E4 */ /*.word 0x00000000 */
+/* 46BE4 800F63E4 */ /*nop */
 
-    jal func_800F6C48
+    jal     func_800F6C48
     nop
-    jal func_800F6C68
+    jal     func_800F6C68
     nop
-    jal func_800F6EE0
+    jal     func_800F6EE0
+    nop
+    b       .continue2
     nop
 
 
-
-/* 46BE8 800F63E8 */ .word 0x1000F998
-/* 46BEC 800F63EC */ .word 0x00000000
-/* 46BF0 800F63F0 */ .word 0x03C0F809
-/* 46BF4 800F63F4 */ .word 0x00000000
+    jalr    $s8
+    nop
 /* 46BF8 800F63F8 */ .word 0x05A10037
-/* 46BFC 800F63FC */ .word 0x00000000
-	jal func_800F68B0
-/* 46C04 800F6404 */ .word 0x00000000
-/* 46C08 800F6408 */ .word 0x31A20001
+    nop
+	jal     func_800F68B0
+    nop
+    andi    $v0, $t5, 1
 /* 46C0C 800F640C */ .word 0x10400009
-/* 46C10 800F6410 */ .word 0x00000000
+    nop
 /* 46C14 800F6414 */ .word 0x84820008
 /* 46C18 800F6418 */ .word 0x32432000
 /* 46C1C 800F641C */ .word 0x04410003
 /* 46C20 800F6420 */ .word 0x30427FFF
 /* 46C24 800F6424 */ .word 0x10600016
-/* 46C28 800F6428 */ .word 0x00000000
+    nop
 	jal func_800F6798
-/* 46C30 800F6430 */ .word 0x00000000
+    nop
 	jal func_800F6808
 /* 46C38 800F6438 */ .word 0x85C90004
 	jal func_800F6928
-/* 46C40 800F6440 */ .word 0x00000000
+    nop
 	jal func_800F6808
 /* 46C48 800F6448 */ .word 0x85E90004
 /* 46C4C 800F644C */ .word 0xACA80008
 	jal func_800F6940
-/* 46C54 800F6454 */ .word 0x00000000
+    nop
 	jal func_800F6808
 /* 46C5C 800F645C */ .word 0x87090004
 /* 46C60 800F6460 */ .word 0xACA80018
@@ -1769,13 +1771,13 @@ glabel func_800F5E04
 /* 46C84 800F6484 */ .word 0x85C90004
 /* 46C88 800F6488 */ .word 0x8482000A
 	jal func_800F6928
-/* 46C90 800F6490 */ .word 0x00000000
+    nop
 	jal func_800F682C
 /* 46C98 800F6498 */ .word 0x85E90004
 /* 46C9C 800F649C */ .word 0xACA80008
 /* 46CA0 800F64A0 */ .word 0x8482000C
 	jal func_800F6940
-/* 46CA8 800F64A8 */ .word 0x00000000
+    nop
 	jal func_800F682C
 /* 46CB0 800F64B0 */ .word 0x87090004
 /* 46CB4 800F64B4 */ .word 0xACA80018
@@ -1788,7 +1790,7 @@ glabel func_800F5E04
 	j func_800F697C
 /* 46CD4 800F64D4 */ .word 0x24080028
 	jal func_800F69A0
-/* 46CDC 800F64DC */ .word 0x00000000
+    nop
 /* 46CE0 800F64E0 */ .word 0x31A20001
 /* 46CE4 800F64E4 */ .word 0x10400009
 /* 46CE8 800F64E8 */ .word 0x24AC0038
@@ -1797,13 +1799,13 @@ glabel func_800F5E04
 /* 46CF4 800F64F4 */ .word 0x04410003
 /* 46CF8 800F64F8 */ .word 0x30427FFF
 /* 46CFC 800F64FC */ .word 0x10600016
-/* 46D00 800F6500 */ .word 0x00000000
+/* 46D00 800F6500 */ nop
 	jal func_800F6798
-/* 46D08 800F6508 */ .word 0x00000000
+/* 46D08 800F6508 */ nop
 	jal func_800F6808
 /* 46D10 800F6510 */ .word 0x85C90004
 	jal func_800F69BC
-/* 46D18 800F6518 */ .word 0x00000000
+/* 46D18 800F6518 */ nop
 	jal func_800F6808
 /* 46D20 800F6520 */ .word 0x85E90004
 /* 46D24 800F6524 */ .word 0xACA80008
@@ -1813,7 +1815,7 @@ glabel func_800F5E04
 /* 46D34 800F6534 */ .word 0x87090004
 /* 46D38 800F6538 */ .word 0xACA80020
 	jal func_800F6A58
-/* 46D40 800F6540 */ .word 0x00000000
+/* 46D40 800F6540 */ nop
 	jal func_800F6808
 /* 46D48 800F6548 */ .word 0x87290004
 /* 46D4C 800F654C */ .word 0xACA8002C
@@ -1823,7 +1825,7 @@ glabel func_800F5E04
 /* 46D5C 800F655C */ .word 0x85C90004
 /* 46D60 800F6560 */ .word 0x8482000A
 	jal func_800F69BC
-/* 46D68 800F6568 */ .word 0x00000000
+/* 46D68 800F6568 */ nop
 	jal func_800F682C
 /* 46D70 800F6570 */ .word 0x85E90004
 /* 46D74 800F6574 */ .word 0xACA80008
@@ -1835,7 +1837,7 @@ glabel func_800F5E04
 /* 46D8C 800F658C */ .word 0xACA80020
 /* 46D90 800F6590 */ .word 0x8482000E
 	jal func_800F6A58
-/* 46D98 800F6598 */ .word 0x00000000
+/* 46D98 800F6598 */ nop
 	jal func_800F682C
 /* 46DA0 800F65A0 */ .word 0x87290004
 /* 46DA4 800F65A4 */ .word 0xACA8002C
@@ -1859,18 +1861,18 @@ glabel func_800F65B0
 /* 46DE4 800F65E4 */ .word 0x48884800
 /* 46DE8 800F65E8 */ .word 0x48895000
 /* 46DEC 800F65EC */ .word 0x48815800
-/* 46DF0 800F65F0 */ .word 0x00000000
-/* 46DF4 800F65F4 */ .word 0x00000000
+/* 46DF0 800F65F0 */ nop
+/* 46DF4 800F65F4 */ nop
 /* 46DF8 800F65F8 */ .word 0x4B70000C # invalid instruction
 /* 46DFC 800F65FC */ .word 0x4840F800
 /* 46E00 800F6600 */ .word 0x4808C800
-/* 46E04 800F6604 */ .word 0x00000000
+/* 46E04 800F6604 */ nop
 /* 46E08 800F6608 */ .word 0x05010002
 /* 46E0C 800F660C */ .word 0x01001021
 /* 46E10 800F6610 */ .word 0x00021023
 /* 46E14 800F6614 */ .word 0x40836000
 /* 46E18 800F6618 */ .word 0x4809D000
-/* 46E1C 800F661C */ .word 0x00000000
+/* 46E1C 800F661C */ nop
 /* 46E20 800F6620 */ .word 0x05210002
 /* 46E24 800F6624 */ .word 0x01201821
 /* 46E28 800F6628 */ .word 0x00031823
@@ -1879,7 +1881,7 @@ glabel func_800F65B0
 /* 46E34 800F6634 */ .word 0x00431021
 /* 46E38 800F6638 */ .word 0x00601021
 /* 46E3C 800F663C */ .word 0x4801D800
-/* 46E40 800F6640 */ .word 0x00000000
+/* 46E40 800F6640 */ nop
 /* 46E44 800F6644 */ .word 0x04210002
 /* 46E48 800F6648 */ .word 0x00201821
 /* 46E4C 800F664C */ .word 0x00031823
@@ -1888,14 +1890,14 @@ glabel func_800F65B0
 /* 46E58 800F6658 */ .word 0x00431021
 /* 46E5C 800F665C */ .word 0x00601021
 /* 46E60 800F6660 */ .word 0x4882F000
-/* 46E64 800F6664 */ .word 0x00000000
-/* 46E68 800F6668 */ .word 0x00000000
+/* 46E64 800F6664 */ nop
+/* 46E68 800F6668 */ nop
 /* 46E6C 800F666C */ .word 0x4802F800
-/* 46E70 800F6670 */ .word 0x00000000
+/* 46E70 800F6670 */ nop
 /* 46E74 800F6674 */ .word 0x00021023
 /* 46E78 800F6678 */ .word 0x24420012
 /* 46E7C 800F667C */ .word 0x18400004
-/* 46E80 800F6680 */ .word 0x00000000
+/* 46E80 800F6680 */ nop
 /* 46E84 800F6684 */ .word 0x00484007
 /* 46E88 800F6688 */ .word 0x00494807
 /* 46E8C 800F668C */ .word 0x00410807
@@ -1907,33 +1909,33 @@ glabel func_800F65B0
 /* 46EA4 800F66A4 */ .word 0x87020006
 /* 46EA8 800F66A8 */ .word 0xCB000000
 /* 46EAC 800F66AC */ .word 0x48820800
-/* 46EB0 800F66B0 */ .word 0x00000000
+/* 46EB0 800F66B0 */ nop
 /* 46EB4 800F66B4 */ .word 0x4A406012 # invalid instruction
-/* 46EB8 800F66B8 */ lui    $at, %hi(D_800F42F0)        # .word 0x3C01800F
-/* 46EBC 800F66BC */ lw     $at, %lo(D_800F42F0)($at)   # .word 0x8C2142F0
+/* 46EB8 800F66B8 */ lui    $at, %hi(D_800F42F0)
+/* 46EBC 800F66BC */ lw     $at, %lo(D_800F42F0)($at)
 /* 46EC0 800F66C0 */ .word 0x2739FFFF
 /* 46EC4 800F66C4 */ .word 0x1320000B
 /* 46EC8 800F66C8 */ .word 0x27390001
 /* 46ECC 800F66CC */ .word 0x00250823
 /* 46ED0 800F66D0 */ .word 0x1820F8E1
-/* 46ED4 800F66D4 */ .word 0x00000000
+/* 46ED4 800F66D4 */ nop
 /* 46ED8 800F66D8 */ .word 0x4840F800
 /* 46EDC 800F66DC */ .word 0x4802C800
-/* 46EE0 800F66E0 */ .word 0x00000000
+/* 46EE0 800F66E0 */ nop
 /* 46EE4 800F66E4 */ .word 0x1840F8D9
-/* 46EE8 800F66E8 */ .word 0x00000000
-/* 46EEC 800F66EC */ .word 0x03E00008
-/* 46EF0 800F66F0 */ .word 0x00000000
+/* 46EE8 800F66E8 */ nop
+/* 46EEC 800F66EC */ jr    $ra
+/* 46EF0 800F66F0 */ nop
 /* 46EF4 800F66F4 */ .word 0x00250823
 /* 46EF8 800F66F8 */ .word 0x1820F8D7
-/* 46EFC 800F66FC */ .word 0x00000000
+/* 46EFC 800F66FC */ nop
 /* 46F00 800F6700 */ .word 0x4840F800
 /* 46F04 800F6704 */ .word 0x4802C800
-/* 46F08 800F6708 */ .word 0x00000000
+/* 46F08 800F6708 */ nop
 /* 46F0C 800F670C */ .word 0x1840F8CB
-/* 46F10 800F6710 */ .word 0x00000000
-/* 46F14 800F6714 */ .word 0x03E00008
-/* 46F18 800F6718 */ .word 0x00000000
+/* 46F10 800F6710 */ nop
+/* 46F14 800F6714 */ jr    $ra
+/* 46F18 800F6718 */ nop
 
 # clipping
 # this function has 4 possible results
@@ -1954,13 +1956,13 @@ glabel func_800F671C
     addiu  $t9, 1
 
 # branch 1
-    subu   $at, $a1        # check the critical point in prims
-    blez   $at, .ALLDONE   # if too many prims, stop drawing
+    subu   $at, $a1             # check the critical point in prims
+    blez   $at, .ALLDONE        # if too many prims, stop drawing
     nop
     cfc2   $zero, $31
     mfc2   $at, $24
     nop
-    blez   $at, .L800F4A4C # negative? clipped. don't draw
+    blez   $at, .continue2      # negative? clipped. don't draw
     nop
     jr     $ra
     nop
@@ -1978,29 +1980,28 @@ glabel func_800F671C
     jr     $ra
     nop
 
-
 # shading
 glabel func_800F6798
-/* 46F98 800F6798 */ addu   $v0, $s3
-/* 46F9C 800F679C */ lw     $v0, 0($v0)         # get the normal vector
-/* 46FA0 800F67A0 */ nop
-/* 46FA4 800F67A4 */ andi   $v1, $v0, 0xff00    # and load it into GTE
-/* 46FA8 800F67A8 */ subu   $v0, $v1
-/* 46FAC 800F67AC */ sll    $v0, 8
-/* 46FB0 800F67B0 */ mtc2   $v0, $0
-/* 46FB4 800F67B4 */ mtc2   $v1, $1
-/* 46FB8 800F67B8 */ nop
-/* 46FBC 800F67BC */ .word 0x4B08041B # nccs
-/* 46FC0 800F67C0 */ cfc2   $zero, $31
-/* 46FC4 800F67C4 */ mfc2   $v0, $22          # and the shuffle something around?
-/* 46FC8 800F67C8 */ jr     $ra
-/* 46FCC 800F67CC */ mtc2   $v0, $6
+    addu   $v0, $s3
+    lw     $v0, 0($v0)          # get the normal vector
+    nop
+    andi   $v1, $v0, 0xff00     # and load it into GTE
+    subu   $v0, $v1
+    sll    $v0, 8
+    mtc2   $v0, $0
+    mtc2   $v1, $1
+    nop
+    .word 0x4B08041B # nccs
+    cfc2   $zero, $31
+    mfc2   $v0, $22             # and the shuffle something around?
+    jr     $ra
+    mtc2   $v0, $6
 
 
 glabel func_800F67D0
 /* 46FD0 800F67D0 */ .word 0x00531021
 /* 46FD4 800F67D4 */ .word 0x8C420000
-/* 46FD8 800F67D8 */ .word 0x00000000
+/* 46FD8 800F67D8 */ nop
 /* 46FDC 800F67DC */ .word 0x3043FF00
 /* 46FE0 800F67E0 */ .word 0x00431023
 /* 46FE4 800F67E4 */ .word 0x00021200
@@ -2008,24 +2009,24 @@ glabel func_800F67D0
 /* 46FEC 800F67EC */ .word 0x48084800
 /* 46FF0 800F67F0 */ .word 0x48820000
 /* 46FF4 800F67F4 */ .word 0x48830800
-/* 46FF8 800F67F8 */ .word 0x00000000
+/* 46FF8 800F67F8 */ nop
 /* 46FFC 800F67FC */ .word 0x4AC8041E # invalid instruction
-/* 47000 800F6800 */ .word 0x03E00008
-/* 47004 800F6804 */ .word 0x00000000
+/* 47000 800F6800 */ jr    $ra
+/* 47004 800F6804 */ nop
 glabel func_800F6808
 /* 47008 800F6808 */ .word 0x4840F800
 /* 4700C 800F680C */ .word 0x4808B000
 /* 47010 800F6810 */ .word 0x31291FE0
 /* 47014 800F6814 */ .word 0x48894000
-/* 47018 800F6818 */ .word 0x00000000
-/* 4701C 800F681C */ .word 0x00000000
+/* 47018 800F6818 */ nop
+/* 4701C 800F681C */ nop
 /* 47020 800F6820 */ .word 0x4A780010 # invalid instruction
-/* 47024 800F6824 */ .word 0x03E00008
-/* 47028 800F6828 */ .word 0x00000000
+/* 47024 800F6824 */ jr    $ra
+/* 47028 800F6828 */ nop
 glabel func_800F682C
 /* 4702C 800F682C */ .word 0x00531021
 /* 47030 800F6830 */ .word 0x8C420000
-/* 47034 800F6834 */ .word 0x00000000
+/* 47034 800F6834 */ nop
 /* 47038 800F6838 */ .word 0x3043FF00
 /* 4703C 800F683C */ .word 0x00431023
 /* 47040 800F6840 */ .word 0x00021200
@@ -2035,70 +2036,71 @@ glabel func_800F682C
 /* 47050 800F6850 */ .word 0x48894000
 /* 47054 800F6854 */ .word 0x48820000
 /* 47058 800F6858 */ .word 0x48830800
-/* 4705C 800F685C */ .word 0x00000000
+/* 4705C 800F685C */ nop
 /* 47060 800F6860 */ .word 0x4AE80413 # invalid instruction
-/* 47064 800F6864 */ .word 0x03E00008
-/* 47068 800F6868 */ .word 0x00000000
+/* 47064 800F6864 */ jr    $ra
+/* 47068 800F6868 */ nop
 
 glabel D_800F686C
-/* 4706C 800F686C */ .word 0x8C8D0004
-/* 47070 800F6870 */ .word 0x03E00008
-/* 47074 800F6874 */ .word 0x00000000
+    lw         $t5, 4($a0)
+    jr         $ra
+    nop
 
 glabel D_800F6878
 /* 47078 800F6878 */ .word 0x8C8D0004
 /* 4707C 800F687C */ .word 0x2402FFFC
 /* 47080 800F6880 */ .word 0x05A10004
-/* 47084 800F6884 */ .word 0x01A26824
-/* 47088 800F6888 */ .word 0x3C02FFFF
-/* 4708C 800F688C */ .word 0x03E00008
-/* 47090 800F6890 */ .word 0x01A26824
-/* 47094 800F6894 */ .word 0x3C02FFFF
-/* 47098 800F6898 */ .word 0x01A26824
-/* 4709C 800F689C */ .word 0x03E00008
-/* 470A0 800F68A0 */ .word 0x35AD3680
+/* 47084 800F6884 */ and     $t5, $v0
+/* 47088 800F6888 */ lui     $v0, 0xFFFF
+/* 4708C 800F688C */ jr      $ra
+/* 47090 800F6890 */ and     $t5, $v0
+
+/* 47094 800F6894 */ lui     $v0, 0xFFFF
+/* 47098 800F6898 */ and     $t5, $v0
+/* 4709C 800F689C */ jr      $ra
+/* 470A0 800F68A0 */ ori     $t5, 0x3680
 
 glabel D_800F68A4
-/* 470A4 800F68A4 */  lui       $t5, 0x8000     # .word 0x3C0D8000
-/* 470A8 800F68A8 */  jr        $ra             # .word 0x03E00008
-/* 470AC 800F68AC */  addiu     $t5, 4          # .word 0x25AD0004
+    lui       $t5, 0x8000
+    jr        $ra
+    addiu     $t5, 4
 
 # color thing
 glabel func_800F68B0
 # these two instructions are modified by code from somewhere
 # else to load different immediate values
-/* 470B0 800F68B0 */ lui    $t0, 0x0000         # clut addr
-/* 470B4 800F68B4 */ ori    $t0, 0x0000         # changed in runtime
-/* 470B8 800F68B8 */ andi   $v1, $t5, 0xfffc    # get color index (already shifted)
-/* 470BC 800F68BC */ addu   $v1, $t0            # look it up
-/* 470C0 800F68C0 */ lw     $v1, 0x0000($v1)
-/* 470C4 800F68C4 */ nop
-/* 470C8 800F68C8 */ bgez   $v1, .L800F690C     # high bit of color set?
+    lui    $t0, 0x0000         # clut addr
+    ori    $t0, 0x0000         # changed in runtime
+    andi   $v1, $t5, 0xfffc    # get color index (already shifted)
+    addu   $v1, $t0            # look it up
+    lw     $v1, 0x0000($v1)
+    nop
+    bgez   $v1, .L800F690C     # high bit of color set?
 /* 470CC 800F68CC */ .word 0x48833000
 /* 470D0 800F68D0 */ .word 0x00031A00
 /* 470D4 800F68D4 */ .word 0x00031A02
 /* 470D8 800F68D8 */ .word 0x48833000
-/* 470DC 800F68DC */ .word 0x00000000
+/* 470DC 800F68DC */ nop
 /* 470E0 800F68E0 */ .word 0x00031900
 /* 470E4 800F68E4 */ .word 0x30680FF0
 /* 470E8 800F68E8 */ .word 0x00031A02
 /* 470EC 800F68EC */ .word 0x30690FF0
 /* 470F0 800F68F0 */ .word 0x00031A02
 /* 470F4 800F68F4 */ .word 0x30630FF0
-/* 470F8 800F68F8 */ .word 0x48C8A800
-/* 470FC 800F68FC */ .word 0x48C9B000
-/* 47100 800F6900 */ .word 0x48C3B800
-/* 47104 800F6904 */ .word 0x03E00008
-/* 47108 800F6908 */ .word 0x00000000
+/* 470F8 800F68F8 */    .word 0x48C8A800
+/* 470FC 800F68FC */    .word 0x48C9B000
+/* 47100 800F6900 */    .word 0x48C3B800
+/* 47104 800F6904 */ jr     $ra
+/* 47108 800F6908 */ nop
 
 .L800F690C:
-/* 4710C 800F690C */ mfc2   $t0, $5            # put the far color values in the registers
-/* 47110 800F6910 */ cfc2   $t1, $29
-/* 47114 800F6914 */ cfc2   $v1, $30
-/* 47118 800F6918 */ ctc2   $t0, $21
-/* 4711C 800F691C */ ctc2   $t1, $22
-/* 47120 800F6920 */ jr     $ra
-/* 47124 800F6924 */ ctc2   $v1, $23
+    mfc2   $t0, $5              # put the far color values in the registers
+    cfc2   $t1, $29
+    cfc2   $v1, $30
+    ctc2   $t0, $21
+    ctc2   $t1, $22
+    jr     $ra
+    ctc2   $v1, $23
 
 
 glabel func_800F6928
@@ -2110,12 +2112,12 @@ glabel func_800F6928
     nop
 
 glabel func_800F6940
-/* 47140 800F6940 */ .word 0x8F080008
-/* 47144 800F6944 */ .word 0x8F290008
-/* 47148 800F6948 */ .word 0xACA80024
-/* 4714C 800F694C */ .word 0xACA90014
-/* 47150 800F6950 */ .word 0x03E00008
-/* 47154 800F6954 */ .word 0x00000000
+    lw     $t0, 8($t8)
+    lw     $t1, 8($t9)
+    sw     $t0, 0x24($a1)
+    sw     $t1, 0x14($a1)
+    jr     $ra
+    nop
 
 glabel func_800F6958
     andi   $t1, $t5, 2          # set something from attribute flags
@@ -2126,29 +2128,31 @@ glabel func_800F6958
     nop
 
 glabel func_800F6970
-/* 47170 800F6970 */ .word 0x8F020008
-/* 47174 800F6974 */ .word 0x00000000
-/* 47178 800F6978 */ .word 0xACA20014
+    lw      $v0, 0x8($t8)
+    nop
+    sw      $v0, 0x14($a1)
 glabel func_800F697C
-/* 4717C 800F697C */ .word 0x3C02E100
-/* 47180 800F6980 */ .word 0x34420600
-/* 47184 800F6984 */ .word 0xACA20004
-/* 47188 800F6988 */ .word 0xA8A60002
-/* 4718C 800F698C */ .word 0x00053200
-/* 47190 800F6990 */ .word 0x4840F800
-/* 47194 800F6994 */ .word 0xE8B60010
-/* 47198 800F6998 */ .word 0x1000F82C
-/* 4719C 800F699C */ .word 0x00A82821
+    lui     $v0, 0xE100
+    ori     $v0, 0x0600
+    sw      $v0, 4($a1)
+    swl     $a2, 2($a1)
+    sll     $a2, $a1, 8
+    cfc2    $zero, $31
+    swc2    $22, 0x10($a1)
+    b       .continue2
+    addu    $a1, $t0
 
+# actual function
 glabel func_800F69A0
-glabel func_800F69A0
-/* 471A0 800F69A0 */ .word 0x48C0A800
-/* 471A4 800F69A4 */ .word 0x48C0B000
-/* 471A8 800F69A8 */ .word 0x48C0B800
-/* 471AC 800F69AC */ .word 0x3C020080
-/* 471B0 800F69B0 */ .word 0x34428080
-/* 471B4 800F69B4 */ .word 0x03E00008
-/* 471B8 800F69B8 */ .word 0x48823000
+    ctc2    $zero, $21
+    ctc2    $zero, $22
+    ctc2    $zero, $23
+    lui     $v0, 0x0080
+    ori     $v0, 0x8080
+    jr      $ra
+    mtc2    $v0, $6
+
+# actual function
 glabel func_800F69BC
 /* 471BC 800F69BC */ .word 0x00094942
 /* 471C0 800F69C0 */ .word 0x00094200
@@ -2168,8 +2172,10 @@ glabel func_800F69BC
 /* 471F8 800F69F8 */ .word 0xA4A80012
 /* 471FC 800F69FC */ .word 0x25080040
 /* 47200 800F6A00 */ .word 0xA588000E
-/* 47204 800F6A04 */ .word 0x03E00008
-/* 47208 800F6A08 */ .word 0x00000000
+/* 47204 800F6A04 */ jr    $ra
+/* 47208 800F6A08 */ nop
+
+# actual function
 glabel func_800F6A0C
 /* 4720C 800F6A0C */ .word 0x00094942
 /* 47210 800F6A10 */ .word 0x00090A00
@@ -2188,8 +2194,10 @@ glabel func_800F6A0C
 /* 47244 800F6A44 */ .word 0xB9880002
 /* 47248 800F6A48 */ .word 0xACA90024
 /* 4724C 800F6A4C */ .word 0xAD890020
-/* 47250 800F6A50 */ .word 0x03E00008
-/* 47254 800F6A54 */ .word 0x00000000
+/* 47250 800F6A50 */ jr    $ra
+/* 47254 800F6A54 */ nop
+
+# actual function
 glabel func_800F6A58
 /* 47258 800F6A58 */ .word 0x00094942
 /* 4725C 800F6A5C */ .word 0x00090A00
@@ -2205,8 +2213,10 @@ glabel func_800F6A58
 /* 47284 800F6A84 */ .word 0xA5890030
 /* 47288 800F6A88 */ .word 0xA8A9001D
 /* 4728C 800F6A8C */ .word 0xA9890019
-/* 47290 800F6A90 */ .word 0x03E00008
-/* 47294 800F6A94 */ .word 0x00000000
+    jr      $ra
+    nop
+
+
 glabel func_800F6A98
 /* 47298 800F6A98 */ .word 0x84820014
 /* 4729C 800F6A9C */ .word 0x0300C821
@@ -2235,73 +2245,79 @@ glabel func_800F6AA8
 /* 472F4 800F6AF4 */ .word 0x00053200
 /* 472F8 800F6AF8 */ .word 0x4840F800
 /* 472FC 800F6AFC */ .word 0xE8B60014
-/* 47300 800F6B00 */ .word 0x1000F7D2
-/* 47304 800F6B04 */ .word 0x00A82821
+    b       .continue2
+    addu    $a1, $t0
+
+# actual function
 glabel func_800F6B08
-/* 47308 800F6B08 */ .word 0x27BDFFFC
-/* 4730C 800F6B0C */ .word 0xAFBF0000
-/* 47310 800F6B10 */ .word 0x3C191F80
-/* 47314 800F6B14 */ .word 0x272E0288
-/* 47318 800F6B18 */ .word 0x273902F4
-/* 4731C 800F6B1C */ .word 0x004EC021
-/* 47320 800F6B20 */ .word 0x8DC30000
-/* 47324 800F6B24 */ .word 0x8DC80004
-/* 47328 800F6B28 */ .word 0x8DC90008
-/* 4732C 800F6B2C */ .word 0xAF03000C
-/* 47330 800F6B30 */ .word 0xAF080010
-/* 47334 800F6B34 */ .word 0xAF090014
-/* 47338 800F6B38 */ .word 0x2731000C
-/* 4733C 800F6B3C */ .word 0x25CF000C
-/* 47340 800F6B40 */ .word 0x8DCC0008
-/* 47344 800F6B44 */ .word 0x8DED0008
-/* 47348 800F6B48 */ .word 0x858A0004
-/* 4734C 800F6B4C */ .word 0x85AB0004
-/* 47350 800F6B50 */ .word 0x05410011
-/* 47354 800F6B54 */ .word 0x31421FE0
-/* 47358 800F6B58 */ .word 0x0560001F
-/* 4735C 800F6B5C */ .word 0x01C01021
-/* 47360 800F6B60 */ .word 0x01E07021
-/* 47364 800F6B64 */ .word 0x00407821
-/* 47368 800F6B68 */ .word 0x8DCC0008
-/* 4736C 800F6B6C */ .word 0x8DED0008
-/* 47370 800F6B70 */ .word 0x858A0004
-/* 47374 800F6B74 */ .word 0x85AB0004
-	jal func_800F6D78
-/* 4737C 800F6B7C */ .word 0x00000000
-	jal func_800F6C14
-/* 47384 800F6B84 */ .word 0x00000000
-/* 47388 800F6B88 */ .word 0x01C01021
-/* 4738C 800F6B8C */ .word 0x01E07021
-/* 47390 800F6B90 */ .word 0x10000011
-/* 47394 800F6B94 */ .word 0x00407821
-/* 47398 800F6B98 */ .word 0x85C30006
-/* 4739C 800F6B9C */ .word 0xA7220004
-/* 473A0 800F6BA0 */ .word 0xA7230006
-/* 473A4 800F6BA4 */ .word 0x8D820008
-/* 473A8 800F6BA8 */ .word 0x8DC30000
-/* 473AC 800F6BAC */ .word 0xAF220008
-/* 473B0 800F6BB0 */ .word 0xAF230000
-/* 473B4 800F6BB4 */ .word 0x2739000C
-	jal func_800F6C14
-/* 473BC 800F6BBC */ .word 0x00000000
-/* 473C0 800F6BC0 */ .word 0x05610005
-/* 473C4 800F6BC4 */ .word 0x00000000
-	jal func_800F6D78
-/* 473CC 800F6BCC */ .word 0x00000000
-	jal func_800F6C14
-/* 473D4 800F6BD4 */ .word 0x00000000
-/* 473D8 800F6BD8 */ .word 0x15D8FFD8
-/* 473DC 800F6BDC */ .word 0x25CE000C
-/* 473E0 800F6BE0 */ .word 0x03311023
-/* 473E4 800F6BE4 */ .word 0x18400007
-/* 473E8 800F6BE8 */ .word 0x00000000
-/* 473EC 800F6BEC */ .word 0x8F28FFFC
-/* 473F0 800F6BF0 */ .word 0x8E29FFFC
-/* 473F4 800F6BF4 */ .word 0x00000000
-/* 473F8 800F6BF8 */ .word 0x15090002
-/* 473FC 800F6BFC */ .word 0x00000000
-/* 47400 800F6C00 */ .word 0x2442FFF4
-/* 47404 800F6C04 */ .word 0x8FBF0000
-/* 47408 800F6C08 */ .word 0x27BD0004
-/* 4740C 800F6C0C */ .word 0x03E00008
-/* 47410 800F6C10 */ .word 0x00000000
+    addiu   $sp, -4
+    sw      $ra, 0($sp)
+    lui     $t9, 0x1F80
+    addiu   $t6, $t9, 0x288
+    addiu   $t9, $t9, 0x2f4
+    addu    $t8, $v0, $t6
+    lw      $v1, 0x0($t6)
+    lw      $t0, 0x4($t6)
+    lw      $t1, 0x8($t6)
+    sw      $v1, 0xC($t8)
+    sw      $t0, 0x10($t8)
+    sw      $t1, 0x14($t8)
+    addiu   $s1, $t9, 12
+.L800F6B3C:
+    addiu   $t7, $t6, 12
+    lw      $t4, 8($t6)
+    lw      $t5, 8($t7)
+    lh      $t2, 4($t4)
+    lh      $t3, 4($t5)
+    bgez    $t2, .L10
+    andi    $v0, $t2, 0x1FE0
+    bltz    $t3,  .L9
+    move    $v0, $t6
+    move    $t6, $t7
+    move    $t7, $v0
+    lw      $t4, 8($t6)
+    lw      $t5, 8($t7)
+    lh      $t2, 4($t4)
+    lh      $t3, 4($t5)
+	jal     func_800F6D78
+    nop
+	jal     func_800F6C14
+    nop
+    move    $v0, $t6
+    move    $t6, $t7
+    b       .L9
+    move    $t7, $v0
+.L10:
+    lh      $v1, 6($t6)
+    sh      $v0, 4($t9)
+    sh      $v1, 6($t9)
+    lw      $v0, 8($t4)
+    lw      $v1, 0($t6)
+    sw      $v0, 8($t9)
+    sw      $v1, 0($t9)
+    addiu   $t9, 12
+	jal     func_800F6C14
+    nop
+    bgez    $t3, .L9
+    nop
+	jal     func_800F6D78
+    nop
+	jal     func_800F6C14
+    nop
+.L9:
+    bne     $t6, $t8, .L800F6B3C
+    addiu   $t6, 12
+    subu    $v0, $t9, $s1
+    blez    $v0, .LEND
+    nop
+    lw      $t0, -4($t9)
+    lw      $t1, -4($s1)
+    nop
+    bne     $t0, $t1, .LEND
+    nop
+    addiu   $v0, -12
+.LEND:
+    lw      $ra, 0($sp)
+    addiu   $sp, 4
+    jr      $ra
+    nop

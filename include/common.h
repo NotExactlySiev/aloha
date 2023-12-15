@@ -21,4 +21,6 @@ typedef struct EXEC EXEC;
 #define SCREEN_WIDTH    320
 #define SCREEN_HEIGHT   240
 
+#define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
+
 #endif

@@ -192,3 +192,57 @@ I'm not sure exactly what they are.
 
 
 **section3** fuck knows. looks like a mesh but it's not.
+
+## Permanently loaded assets
+
+read entity data reads from 2,-1 up to some n,-1
+
+COM_DAT.EAR
+[   46.2970] I/TTY: 1 2	[2344]	-> 80150000
+[   46.3157] I/TTY: 2 2	[3500]	-> 80150928
+[   46.3835] I/TTY: 3 2	[7396]	-> 801516d4
+
+common entities 5-9
+[   46.5133] I/TTY: 2 	[15044]	-> 801533b8
+
+[   46.6483] I/TTY: 2 	[21660]	-> 80156e7c
+
+[   46.6830] I/TTY: 2 	[22132]	-> 8015c318
+
+[   46.6979] I/TTY: 2 	[1900]	-> 8016198c
+
+[   46.7673] I/TTY: 2 	[90348]	-> 801620f8
+
+level entities
+[   47.8876] I/TTY: 2 	[92084]	-> 801781e4 main
+[   47.9208] I/TTY: 3 	[46916]	-> 8018e998
+
+[   48.0020] I/TTY: 2 	[2376]	-> 8019a0dc bonus
+
+# SOU_DAT level geometry sections 1 and 2
+## level objects (but not collision)
+[   48.0033] I/TTY: 7 1	[7144]	-> 8019aa24 section 1
+[   48.0036] I/TTY: 8 1	[4360]	-> 8019c60c + bonus
+## level collision data
+[   48.0192] I/TTY: 7 2	[12208]	-> 8019d714 section 2
+[   48.0198] I/TTY: 8 2	[8672]	-> 801a06c4 + bonus
+## 
+[   48.0361] I/TTY: 3 	[13836]	-> 801a28a4 section 3
+[   48.0363] I/TTY: 3 	[340]	-> 801a5eb0 + bonus
+... and sections after that until the end
+## entities and entity spawners (I think?)
+[   48.0367] I/TTY: 0 	[5736]	-> 801a6004 section 0
+[   48.0371] I/TTY: 0 	[4796]	-> 801a766c + bonus
+# SOU_DAT final part (pretty sure it's the demo)
+[   48.0523] I/TTY: 10 	[16388]	-> 801a8928
+# SOU_ENE
+[   48.3567] I/TTY: 2 	[20316]	-> 801ac92c
+[   48.3712] I/TTY: 2 	[17172]	-> 801b1888
+[   48.4030] I/TTY: 2 	[43432]	-> 801b5b9c
+[   48.4367] I/TTY: 2 	[22372]	-> 801c0544
+[   48.4541] I/TTY: 2 	[1932]	-> 801c5ca8
+[   48.4555] I/TTY: 2 	[12684]	-> 801c6434
+[   48.4696] I/TTY: 2 	[1068]	-> 801c95c0
+[   48.4708] I/TTY: 2 	[1892]	-> 801c99ec
+
+There's a permanent asset buffer and a temporary one for the assets that need to be loaded, processed and then are not needed anymore (textures go to vram, cluts get merged into the global clut)

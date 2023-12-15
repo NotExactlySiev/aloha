@@ -4,6 +4,8 @@
 #include "entity.h"
 #include "mesh.h"
 
+#include "shared.h"
+
 // todo: the OT in this one is wrong. also it's just another gbuffer
 typedef struct {
     s16         count;
@@ -550,32 +552,32 @@ extern Entity *entity_ptrs[128]; // entity pointers
 extern s32 D_801029A4;
 
 
-LinkedList *func_800D0438(void)
+LinkedList *get_list1_head(void)
 {
     return &entity_list_1.head;
 }
 
-LinkedList *func_800D0448(void)
+LinkedList *get_list1_tail(void)
 {
     return &entity_list_1.tail;
 }
 
-LinkedList *func_800D0458(void)
+LinkedList *get_list2_head(void)
 {
     return &entity_list_2.head;
 }
 
-LinkedList *func_800D0468(void)
+LinkedList *get_list2_tail(void)
 {
     return &entity_list_2.tail;
 }
 
-LinkedList *func_800D0478(void)
+LinkedList *get_list0_head(void)
 {
     return &entity_list_0.head;
 }
 
-LinkedList *func_800D0488(void)
+LinkedList *get_list0_tail(void)
 {
     return &entity_list_0.tail;
 }
@@ -1075,7 +1077,72 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA134);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA144);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA154);
+u32 *D_80102ACC;    // section1 base
+s32  D_80102ADC;    // render_range_thing
+SVECTOR D_80122EE8[32][32];    // objs, or whatever it is. center of tiles?
+extern s32   D_80102AE4;    // area side len
+extern s32   D_80102AD4;    // object id offset
+
+extern s32 D_80142D48; // render distance vertical
+extern s32 D_80141460; // render distance horizontal
+
+extern u16 D_80121CE8[];
+extern SVECTOR D_80121EE8[];    // position offsets
+extern SVECTOR D_801226E8[];   // rotation vectors
+
+// load level objects (section1)
+// this has to do with culling outside of camera objects
+// dunno how it works :/
+void func_800DA154(void *data)
+{
+    SVECTOR *vecmin = SCRTCHPAD(0);
+    SVECTOR *vecmax = SCRTCHPAD(8);
+    u32 (*offsets)[32][32] = data;
+
+    D_80102ACC = data;
+
+    for (int i = 0; i < 32; i++)
+        for (int j = 0; j < 32; j++) {
+            u32 offset = (*offsets)[i][j];
+            if (offset == 0) continue;
+            u16 *entries = data + offset;
+            u16 count = *entries;
+            SVECTOR *objs = entries + 1;
+
+            // tile position (its center I think. or bound?)
+            *vecmax = *vecmin = (SVECTOR) {
+                0x400 | (0x800 * (i - 16)),
+                0,
+                0x400 | (0x800 * (j - 16))
+            };
+
+            for (int k = 0; k < count; k++) {
+                SVECTOR *obj = &objs[k];
+                u16 meshid = D_80102AD4 + obj->pad;
+                int range = func_800E62F0(meshid);
+
+                if (vecmin->vx > (obj->vx - range)) vecmin->vx = obj->vx - range;
+                if (vecmax->vx < (obj->vx + range)) vecmax->vx = obj->vx + range;
+
+                if (vecmin->vy > (obj->vy - range)) vecmin->vy = obj->vy - range;
+                if (vecmax->vy < (obj->vy + range)) vecmax->vy = obj->vy + range;
+
+                if (vecmin->vz > (obj->vz - range)) vecmin->vz = obj->vz - range;
+                if (vecmax->vz < (obj->vz + range)) vecmax->vz = obj->vz + range;
+            }
+
+            D_80122EE8[i][j].vx = (vecmin->vx + vecmax->vx) / 2;
+            D_80122EE8[i][j].vy = (vecmin->vy + vecmax->vy) / 2;
+            D_80122EE8[i][j].vz = (vecmin->vz + vecmax->vz) / 2;
+            s32 len_x = (vecmax->vx - vecmin->vx) / 2;
+            s32 len_y = (vecmax->vy - vecmin->vy) / 2;
+            s32 len_z = (vecmax->vz - vecmin->vz) / 2;
+            s32 maxlen = len_x;
+            if (len_y > maxlen) maxlen = len_y;
+            if (len_z > maxlen) maxlen = len_z;
+            D_80122EE8[i][j].pad = (5792*maxlen) >> 12;     // sqrt(2)
+        }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA46C);
 
@@ -1087,18 +1154,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4C8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4D8);
 
-u32 *D_80102ACC;    // section1 base
-s32   D_80102ADC;    // render_range_thing
-SVECTOR D_80122EE8[1024];    // objs
-extern s32   D_80102AE4;    // area side len
-extern s32   D_80102AD4;    // object id offset
-
-extern s32 D_80142D48; // render distance vertical
-extern s32 D_80141460; // render distance horizontal
-
-extern u16 D_80121CE8[];
-extern SVECTOR D_80121EE8[];    // position offsets
-extern SVECTOR D_801226E8[];   // rotation vectors
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4E8);
 // FOR NOW
 // render level objects
@@ -1165,20 +1220,6 @@ void _func_800DA4E8(void)
         }
     }*/
 }
-
-// big function. uncomment to check for memory corruption
-/*
-void space_filler()
-{
-    __builtin_memcpy(0xa123456, 0xe4123, 999999);
-    __builtin_memcpy(0x1b23456, 0x412a3, 999999);
-    __builtin_memcpy(0x12c3456, 0x412c3, 999999);
-    __builtin_memcpy(0x123d456, 0x4c123, 999999);
-    __builtin_memcpy(0x1234e56, 0x4212, 999999);
-    __builtin_memcpy(0x12345f6, 0x4123, 999999);
-    __builtin_memcpy(0x123456f, 0x4112, 999999);
-    __builtin_memcpy(0x1236, 0x4134, 999999);
-}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA85C);
 
@@ -1832,20 +1873,61 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E20A0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E20C4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E20E8);
+// ## level loading functions
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E2124);
+// ear read section offset
+u32 func_800E20E8(u32 *header, s32 section)
+{
+    // should be converted from big endian
+    union { u8 b[4]; u32 i; } be;
+    be.i = header[section];
+    u32 le = (be.b[0] << 24) 
+           | (be.b[1] << 16) 
+           | (be.b[2] << 8) 
+           | (be.b[3] << 0);
+    return le;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E2184);
+// ear decompress section
+u32 func_800E2124(void *src, s32 section, s32 subsection, void* dst)
+{
+    // navigate to section
+    u32 offset = func_800E20E8(src, section);
+    src = src + offset;
 
+    // and subsection, if specified
+    if (subsection >= 0) {
+        offset = func_800E20E8(src, subsection);
+        src = src + offset;
+    }
+
+    return decompress_lz1_c(src + 4, dst);
+    //return jt.decompress_lz1(src + 4, dst);
+}
+
+// decompress section to permanent buffer
+void *func_800E2184(void *src, s32 section, s32 subsection)
+{
+    void *buffer = func_800E3E64();
+    u32 size = func_800E2124(src, section, subsection, buffer);
+    size = (size + 3) & ~3;     // align to 4
+    func_800E3E54(buffer + size);
+    gprintf("%d %d\t[%d]\t-> %p\n", section, subsection, size, buffer);
+    return buffer;
+}
+
+// load entity
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E21F0);
+
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E271C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E2BD8);
 
+// load level (main function)
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E2C00);
 
+// load map data
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3568);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3A58);

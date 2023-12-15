@@ -53,7 +53,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8E0C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8EBC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8F08);
+// decompress_lz1 (the c version)
+// TODO: can I just replace it with the asm one?
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", decompress_lz1_c);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E91F4);
 
@@ -253,7 +255,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4E4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 
+// enemies on radar
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
+//func_800EC5C8() {}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECD88);
 
@@ -264,7 +268,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECDE0);
 void func_800ECE00(void) {
 }
 
+// render objective text (JETPOD() and EXIT())
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECE08);
+//func_800ECE08() {}
 
 void func_800ED024(void) {
 }
@@ -596,7 +602,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
 
 #include <inline_n.h>
 
-#define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
 
 // sort faces (sets actually)
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
