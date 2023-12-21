@@ -1432,20 +1432,170 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC00C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
 
+extern int D_80102BFC;  // peak height?
+
+extern int D_80102C34;
+
+extern int D_80102724; // auto lookdown dangle
+extern int D_80102738;
+
+extern int D_80102C0C;  // jumps count
+extern int D_80102C14;  // airjump window
+extern int D_80102C1C;  // strafing thingy
+extern int D_80102C4C;
+extern int D_80102C5C;
+extern int D_80102C6C;
+extern int D_80102C8C;  // winning animation is playing
+extern int D_80102C9C;
+
+extern int D_80102710;  // jump force
+extern int D_80102718;  // jump timer?
+
+void func_800E5458(s16, s16, s16);
+
 // handle player movement
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC4C4);
-/*void func_800DC4C4 (void)
+// main player movement state machine. has 4 main states:
+// grounded, jump, air jump, falling. but also code for transitioning into each
+// state and states that run briefly before the actual state
+// the control flow is fucked
+void func_800DC4C4(void)
 {
-    u16 state = player_entity.comp1.state;
-    switch (state) {
-    case 0:
-        
+    switch (player_entity.comp1.state) {
+
+make_0: // landing
+    gprintf("landed\n");
+    D_80102C6C = 0;
+    D_80102C4C = 0x800;
+    player_entity.vel_y = 0;
+    func_800DC9EC(&player_entity);  // land
+    D_80102BFC = player_entity.max_y;
+    player_entity.comp1.state = 0;
+    case 0: // grounded
+        if (D_80102C9C > 0) {
+            D_80102C9C = 0;
+        }
+        D_80102C6C = 0;
+        D_80102724 = 0;
+        D_80102BFC = player_entity.max_y;
+        // this and ground jump are more related than I thought. both cases
+        // of make_1 are contained here and can be put in a single if
+        if (player_entity.on_air == 0 || player_entity.vel_y < 0) {
+            // we're suddenly not on ground anymore. react approprietly
+            D_80102724 = -16;
+            D_80102C0C = 0;
+            D_80102C14 = 0;
+            if (D_80102C9C > 0) {   // do we actually need this?
+                D_80102C9C = 0;
+            }
+            player_entity.unk7 = D_80102718;
+            if (player_entity.vel_y >= 0) goto make_5;
+
+            // bouncing (off an enemy, or maybe something else)
+            D_80102C6C = 0x300;
+            D_80102724 = -32;
+            player_entity.comp1.unk0 = 1;
+            player_entity.comp1.state = 1;
+            func_800CE304(0x500, 0x50, 0x3F);
+        } else {
+            D_80102C5C = func_800D9E40(&player_entity);
+            if (func_800D9F2C(&player_entity) 
+             || func_800D9DD4(&player_entity) 
+             || (D_80102C34 & D_80102738) == 0) break;
+            
+            gprintf("ground jump\n");
+            func_800CE304(0x300, 0x50, 0x3F);
+            D_80102C9C = 0;
+            D_80102C6C = 0x300;
+            D_80102724 = 0; // don't think we need this here?
+            D_80102C0C = 0;
+            D_80102C14 = 0;
+            player_entity.comp1.unk0 = 24;
+            player_entity.comp1.state = 1;
+            player_entity.vel_y = -D_80102710;
+            player_entity.unk7 = D_80102718;  // gravity? ddy
+        }
+
+    case 1: // jump (just)
+        if (D_80102C34 & D_80102738 == 0 || --player_entity.comp1.unk0 == 0) {
+            player_entity.comp1.state = 2;
+            player_entity.unk7 = (player_entity.comp1.unk0 + 2) * 0x300 + D_80102718;
+        }
+    case 2: // jump
+        player_entity.on_air = 0;
+        if (player_entity.vel_y > 0) goto make_5;   // going down
+
+        D_80102C14 = 0;
+        if (func_800DCB50()) goto make_3;
+
         break;
-    default:
-    gprintf("STATE: %d\n", player_entity.comp1.state);
+
+
+make_3:
+    func_800CE304(0x400, 0x5A, 0x3F);
+    D_80102C6C = 0x300;
+    D_80102C1C = 0;
+    D_80102724 = -16;
+    D_80102C9C = 0;
+    player_entity.comp1.unk0 = 24;
+    player_entity.comp1.state = 3;
+    player_entity.vel_y = -D_80102710;
+    player_entity.unk7 = D_80102718; 
+    case 3: // air jump (just)
+        if (D_80102C34 & D_80102738 == 0 || --player_entity.comp1.unk0 == 0) {
+            player_entity.unk7 = player_entity.comp1.unk0 * 0x300 + D_80102718;
+            player_entity.comp1.state = 4;
+            player_entity.comp1.unk0 = 0;
+        }
+    case 4: // air jump
+        player_entity.on_air = 0;
+        if (player_entity.comp1.unk0 == 0 && func_800DCB50()) goto make_3;
+        if (player_entity.vel_y > 0) {
+            D_80102724 = -32;
+            goto make_5;
+        }
+        break;
+
+
+make_5:
+    gprintf("woah, falling\n");
+    player_entity.comp1.state = 5;
+    case 5: // falling
+        D_80102C6C = 0;
+        if (func_800DCB50()) goto make_3;
+
+        if (player_entity.vel_y <= 0)
+            player_entity.unk7 = D_80102718;
+        if (player_entity.on_air != 0) goto make_0;
+
+        break;
     }
-    
-}*/
+
+    // state machine is determined. do the actual physics now
+
+    func_800DD968();
+    func_800DD994(&player_entity);
+    func_800DD158(&player_entity);
+    func_800DD794(&player_entity);
+    func_800DD534(&player_entity);
+    func_800DD750(&player_entity);
+    func_800DCEE0(&player_entity); // forward
+    func_800DCFD0(&player_entity);
+    func_800DCCB0(&player_entity);
+
+    // and set the camera too
+
+    // off from looking up and down
+    int offy = sinf(player_entity.angle_x) >> 6;
+    if (offy > 0) offy = 0;
+    if (D_80102C8C == 0)
+    {
+        //
+        offy -= func_800DDB58() + 0x90;
+        func_800E543C(player_entity.pos_x >> 12, (player_entity.pos_y >> 12) + offy, player_entity.pos_z >> 12);
+        func_800E5458(-player_entity.angle_y, -player_entity.angle_x, 0);
+        func_800D0C08(player_entity.pos_x, player_entity.pos_y, player_entity.pos_z);
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC9EC);
 

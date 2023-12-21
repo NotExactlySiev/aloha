@@ -200,7 +200,6 @@ void func_800B6614(void) {
 }
 
 // block update
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B661C);
 void func_800B661C(Entity *this)
 {
     s32 old_y = this->pos_y;
@@ -222,7 +221,6 @@ void func_800B661C(Entity *this)
 }
 
 // block custom
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B66A0);
 void func_800B66A0(Entity *this, Component *comp)
 {
     if (comp->state == 0) {
@@ -240,13 +238,13 @@ void func_800B66A0(Entity *this, Component *comp)
 }
 
 extern s32 D_801031A4;
+
 // block render
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6744);
 void func_800B6744(Entity* this)
 {
     SVECTOR pos = {
         this->pos_x >> 12,
-        this->pos_y - 0xC0 >> 12,
+        (this->pos_y >> 12) - 0xC0,
         this->pos_z >> 12,
     };
 
@@ -263,7 +261,6 @@ void func_800B6744(Entity* this)
 }
 
 // entity_block_ctor
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6820);
 void func_800B6820(Entity *e, Spirit *spirit)
 {
     LinkedList *list = get_list2_head();
@@ -308,6 +305,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B69A0);
 
+// block_dtor. but these aren't dtors actually.
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6C40);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6D28);

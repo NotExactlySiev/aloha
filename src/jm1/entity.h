@@ -69,7 +69,7 @@ struct Entity {
     s32 dangle_x;
     s32 dangle_z;   // 0xA0
     u32 unk9;
-    u32 unk10;
+    s32 speed;  // forward speed
     u32 unk11;
     u32 unk12;
     void *colptr;   // col thingy ptr

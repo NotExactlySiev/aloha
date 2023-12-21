@@ -601,7 +601,7 @@ glabel jtbl_800B0878
 /* 108C 800B088C 00000000 */ .word 0x00000000
 
 .align 3
-
+/*
 glabel jtbl_800B0890
     .word .L800DC518
     .word .L800DC628
@@ -612,7 +612,7 @@ glabel jtbl_800B0890
     .word .L800DC6C8
     .word .L800DC85C
     .word .L800DC758
-
+*/
 
 glabel D_800B08B4
 /* 10B4 800B08B4 74706167 */ .word 0x67617074
