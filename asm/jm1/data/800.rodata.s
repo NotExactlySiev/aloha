@@ -520,14 +520,15 @@ glabel D_800B0798
 /* F98 800B0798 */ .asciz "VSync: timeout\n"
                       .balign 4
 
+/*
 .align 3
 glabel jtbl_800B07A8
-/* FA8 800B07A8 300B0D80 */ .word .L800D0B30
-/* FAC 800B07AC 400B0D80 */ .word .L800D0B40
-/* FB0 800B07B0 500B0D80 */ .word .L800D0B50
-/* FB4 800B07B4 600B0D80 */ .word .L800D0B60
-/* FB8 800B07B8 700B0D80 */ .word .L800D0B70
-/* FBC 800B07BC 00000000 */ .word 0x00000000
+    .word .L800D0B30
+    .word .L800D0B40
+    .word .L800D0B50
+    .word .L800D0B60
+    .word .L800D0B70
+    .word 0x00000000*/
 
 .align 3
 glabel jtbl_800B07C0
@@ -600,16 +601,18 @@ glabel jtbl_800B0878
 /* 108C 800B088C 00000000 */ .word 0x00000000
 
 .align 3
+
 glabel jtbl_800B0890
-/* 1090 800B0890 18C50D80 */ .word .L800DC518
-/* 1094 800B0894 28C60D80 */ .word .L800DC628
-/* 1098 800B0898 98C60D80 */ .word .L800DC698
-/* 109C 800B089C BCC70D80 */ .word .L800DC7BC
-/* 10A0 800B08A0 24C80D80 */ .word .L800DC824
-/* 10A4 800B08A4 64C80D80 */ .word .L800DC864
-/* 10A8 800B08A8 C8C60D80 */ .word .L800DC6C8
-/* 10AC 800B08AC 5CC80D80 */ .word .L800DC85C
-/* 10B0 800B08B0 58C70D80 */ .word .L800DC758
+    .word .L800DC518
+    .word .L800DC628
+    .word .L800DC698
+    .word .L800DC7BC
+    .word .L800DC824
+    .word .L800DC864
+    .word .L800DC6C8
+    .word .L800DC85C
+    .word .L800DC758
+
 
 glabel D_800B08B4
 /* 10B4 800B08B4 74706167 */ .word 0x67617074

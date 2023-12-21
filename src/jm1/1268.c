@@ -2,6 +2,15 @@
 #include "entity.h"
 #include <libgpu.h>
 
+
+// from other modules
+void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id);   // render model
+void func_800E5B88(s16, s16, s16);  // does this do anything?
+
+// this module
+s32 func_800E5DD8(SVECTOR *v, u32 meshid);                  // camera transform
+
+
 // map stuff
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A68);
@@ -50,6 +59,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B13BC);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1788);
 
 // get frame
+u32 func_800B1B28(Entity *e, s32 val);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
 
 extern s32 D_80103164;
@@ -57,7 +67,7 @@ extern s32 D_80103164;
 // frog render (TODO: shadow)
 void func_800B1BF4(Entity* this)
 {
-    SVECTOR *cam = 0x1F8003CA;
+    SVECTOR *cam = SCRTCHPAD(0x3CA);
     SVECTOR pos;
     SVECTOR rot;
     pos.vx = this->pos_x >> 12;
@@ -88,6 +98,7 @@ void func_800B1BF4(Entity* this)
 }
 
 // contrusction
+void _func_800B1D78(Entity *this, void *params);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", _func_800B1D78);
 void func_800B1D78(Entity *this, void *params)
 {
@@ -196,13 +207,13 @@ void func_800B661C(Entity *this)
     s32 new_y = old_y + this->vel_y;
     this->angle_y += 64;    // rotation of the blades
 
-    if ((this->sub[0] << 12) < new_y) {
-        new_y = this->sub[0] << 12;
+    if ((this->sub.block.max_y << 12) < new_y) {
+        new_y = this->sub.block.max_y << 12;
         this->vel_y *= -1;
     }
 
-    if ((this->sub[1] << 12) > new_y) {
-        new_y = this->sub[1] << 12;
+    if ((this->sub.block.min_y << 12) > new_y) {
+        new_y = this->sub.block.min_y << 12;
         this->vel_y *= -1;
     }
 
@@ -210,17 +221,32 @@ void func_800B661C(Entity *this)
     this->carry_y = (this->pos_y >> 12) - (old_y >> 12);
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B66A0);
+// block custom
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B66A0);
+void func_800B66A0(Entity *this, Component *comp)
+{
+    if (comp->state == 0) {
+        int rc = func_800DAB0C(this->pos_x >> 12, this->pos_y >> 12, this->pos_z >> 12);
+        if (rc == 0) return;    // in range. keep vibin
+        comp->state = 1;
+    }
+    // oh no, out of range
 
+    if (comp->state == 1) {
+        this->spirit->alive = -1;
+        entity_destroy(this);
+        return;
+    }    
+}
 
 extern s32 D_801031A4;
 // block render
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6744);
-/*void _func_800B6744(Entity* this)
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6744);
+void func_800B6744(Entity* this)
 {
     SVECTOR pos = {
         this->pos_x >> 12,
-        this->pos_y >> 12 - 0xC0,
+        this->pos_y - 0xC0 >> 12,
         this->pos_z >> 12,
     };
 
@@ -234,9 +260,49 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6744);
     rot.vy = this->angle_y;
 
     func_800E5E60(&pos, &rot, D_801031A4 + 1);
-}*/
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6820);
+// entity_block_ctor
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6820);
+void func_800B6820(Entity *e, Spirit *spirit)
+{
+    LinkedList *list = get_list2_head();
+    entity_insert_after(list, e);
+    e->unk2 = 0;
+    e->unk5 = 0;
+    e->spirit = spirit;
+    e->sub.block.max_y = spirit->unk4;  // spirit also has custom fields
+    e->sub.block.min_y = spirit->unk0;
+    e->vel_x = e->vel_y = -ONE*spirit->unk1;
+    e->pos_x = ONE*spirit->x;
+    e->pos_z = ONE*spirit->z;
+    e->pos_y = ONE*spirit->unk4;    // starting height
+
+    e->comp0.disabled = 1;
+
+    e->comp1.disabled = 0;
+    e->comp1.func = func_800B661C;
+    e->comp1.state = 0;
+
+    e->comp3.disabled = 0;
+    e->comp3.func = func_800B66A0;
+    e->comp3.state = 0;
+
+    e->render_comp.disabled = 0;
+    e->render_comp.func = func_800B6744;
+    e->render_comp.state = 0;
+
+    e->angle_x = e->angle_y = e->angle_z = 0;
+    e->angle_x = 0x90;
+    e->carry_x = e->carry_y = e->carry_z = 0;
+    
+    e->range_z = 0x100;
+    e->range_x = 0x100;
+    e->range_y = 0x180;
+
+    e->on_air = 0;
+    e->uh0 = e->uh1 = e->uh2 = 0;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
 

@@ -157,19 +157,20 @@ glabel func_800F4B48
 /* 453C4 800F4BC4 */ nop
 
 .L800F4BC8:
-/* 453C8 800F4BC8 */ .word 0x85C20004
-/* 453CC 800F4BCC */ .word 0x85E30004
-/* 453D0 800F4BD0 */ .word 0x87080004
-/* 453D4 800F4BD4 */ .word 0x00430825
-/* 453D8 800F4BD8 */ .word 0x00280825
-/* 453DC 800F4BDC */ .word 0x00431024
-/* 453E0 800F4BE0 */ .word 0x00481024
-/* 453E4 800F4BE4 */ .word 0x3042800F
-/* 453E8 800F4BE8 */ .word 0x1440FF97
-/* 453EC 800F4BEC */ .word 0x30221FE0
-/* 453F0 800F4BF0 */ .word 0x10400002
-/* 453F4 800F4BF4 */ .word 0x3021800F
-/* 453F8 800F4BF8 */ .word 0x36520800
+/* 453C8 800F4BC8 */ lh     $v0, 4($t6) # load Z of each vertex
+/* 453CC 800F4BCC */ lh     $v1, 4($t7) # 
+/* 453D0 800F4BD0 */ lh     $t0, 4($t8) # 
+/* 453D4 800F4BD4 */ or     $at, $v0, $v1 # or them -> at
+/* 453D8 800F4BD8 */ or     $at, $t0 #
+/* 453DC 800F4BDC */ and    $v0, $v1       # and them too -> v0
+/* 453E0 800F4BE0 */ and    $v0, $t0       #
+/* 453E4 800F4BE4 */ andi   $v0, 0x800F   #
+/* 453E8 800F4BE8 */ bnez   $v0, .continue1   # abort if the and isn't zero
+/* 453EC 800F4BEC */ andi   $v0, $at, 0x1FE0   # 
+/* 453F0 800F4BF0 */ beqz   $v0, .L4    # idk what this is for
+/* 453F4 800F4BF4 */ andi   $at, 0x800F # 
+/* 453F8 800F4BF8 */ ori    $s2, 0x800   # remember... something
+.L4:
 /* 453FC 800F4BFC */ .word 0x32420001
 /* 45400 800F4C00 */ .word 0x10400008
 /* 45404 800F4C04 */ .word 0x3252FFFE

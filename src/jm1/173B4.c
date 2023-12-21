@@ -582,6 +582,7 @@ LinkedList *get_list0_tail(void)
     return &entity_list_0.tail;
 }
 
+// shouldn't it be list_insert_before?
 void entity_insert_before(LinkedList *list, LinkedList *node)
 {
     LinkedList *oldprev = list->prev;
@@ -606,6 +607,7 @@ void entity_detach_from_list(LinkedList *node)
     node->next->prev = node->prev;
 }
 
+// TODO: better names for these two? new and free? alloc?
 Entity *entity_create(void)
 {
     if (entity_free_count == 0) return 0;
@@ -649,7 +651,45 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D08E8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D09EC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0AA4);
+// level_entity_ctors
+extern void (*D_8011EE78[64])(Entity*, Spirit*);
+
+// entity call constructor
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0AA4);
+void func_800D0AA4(Entity *e, Spirit *spirit)
+{
+    u32 type = spirit->type & 0x7F;
+
+    if (type < 0x40) {
+        void (*ctor)(Entity*, Spirit*);
+        ctor = D_8011EE78[type];
+        if (ctor == 0)
+            entity_destroy(e);
+        else
+            ctor(e, spirit);
+    } else
+    // isn't level specific
+    switch (type) {
+    case 0x40:  // jetpod
+    func_800D2618(e, spirit);
+        break;
+    case 0x41:
+    func_800D2A8C(e, spirit);
+        break;
+    case 0x42:
+    func_800D3D28(e, spirit);
+        break;
+    case 0x43:
+    func_800D45C4(e, spirit);
+        break;
+    case 0x44:
+    func_800D2184(e, spirit);
+        break;
+    default:
+    entity_destroy(e);
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0B98);
 
@@ -670,7 +710,6 @@ void func_800D0C5C(void)
 
     // TODO: entity size should be correct 
     // initialize all entities as free
-    gprintf("SIZEOF ENTITY: %d\n", sizeof(Entity));
 
     entity_list_free.head.prev = 0;
     LinkedList *last = &entity_list_free.head;
@@ -692,7 +731,6 @@ void func_800D0C5C(void)
     entity_list_free.tail.next = 0;
 
     Entity *e = entity_create();
-    gprintf("ENTITY: %p\n", e);
     func_800D0C08(0, 0, 0);
     func_800D0C28(0, 0, 0);
     func_800D058C();
@@ -808,7 +846,62 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2B74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2F58);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D30E4);
+// actually mesh metadata struct TODOs
+extern u32 D_8011EFB8;
+
+// fast sin and cos from our own LUT
+#define sinf(a)     (sin_lut[(a) & 0xFFF])
+#define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D30E4);
+// entity_coin_render
+// TODO: this isn't complete
+void func_800D30E4(Entity *e)
+{
+    SVECTOR *cam = SCRTCHPAD(0x3CA);
+    SVECTOR pos;
+    SVECTOR rot;
+    int meshid;
+    // TODO: make the coin type in union
+    if (e->sub.unk[0] < 0) return;  // lifetime?
+    
+    // is visible? these are flags I think TODO
+    e->unk5 |= 0x8000;
+    if (e->unk5 & 1) return;
+
+
+    pos.vx = e->pos_x >> 12;
+    pos.vy = e->pos_y >> 12;
+    pos.vz = e->pos_z >> 12;
+
+    rot.vx = -e->angle_x;
+    rot.vy = e->angle_y;
+    rot.vz = e->angle_z;
+
+    meshid = e->model[1] + D_8011EFB8;
+
+    // bouncing animation and... something else?
+    pos.vy += (6 * sinf(e->angle_x) - (e->range_y / 2) * cosf(e->angle_x)) >> 12;
+
+    func_800E5E60(&pos, &rot, meshid);
+
+    pos.vy = e->max_y + 2;
+    if (cam->vy >= pos.vy || e->max_y > 0) return;
+    
+    // draw shadow
+    // TODO: make sin_lut lookup a macro?
+    s32 tmp = (e->range_y / 2) * sin_lut[e->angle_x & 0xFFF];
+    tmp /= ONE;
+
+    s32 offz = tmp * sin_lut[(e->angle_y + 0xC00) & 0xFFF];
+    s32 offx = tmp * sin_lut[(e->angle_y + 0x800) & 0xFFF];
+
+    pos.vx += offx / ONE;
+    pos.vz += offz / ONE;
+
+    func_800E5E60(&pos, &rot, meshid | 0x4000);
+
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D3378);
 
@@ -1339,7 +1432,20 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC00C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
 
+// handle player movement
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC4C4);
+/*void func_800DC4C4 (void)
+{
+    u16 state = player_entity.comp1.state;
+    switch (state) {
+    case 0:
+        
+        break;
+    default:
+    gprintf("STATE: %d\n", player_entity.comp1.state);
+    }
+    
+}*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC9EC);
 
@@ -1392,6 +1498,8 @@ void debug_print_decimal(s32 num)
 
 
 u32 D_80102794 = 0;
+extern s32 D_80102BF4;
+extern SVECTOR D_80141448;  // camera rotation?
 
 void func_800DDF04(void)
 {
@@ -1406,7 +1514,7 @@ void func_800DDF04(void)
         debug_print_str("NO MODEL RENDERING");
         debug_set_pos(1, 16);
         debug_print_str("GROUND=");
-        debug_print_decimal(player_entity.unk22);
+        debug_print_decimal(player_entity.max_y);
         
         debug_set_pos(1, 23);
         debug_print_str("X=");
@@ -1431,14 +1539,22 @@ void func_800DDF04(void)
 
     }
     // THEN PLAYER ENTITY STUFF
+    // TODO: draw feet too
 
-    // if something something
+    // player shadow
     s16 x,y,z;
-    if (0) {
-        x = player_entity.pos_x >> 12;
-        //y = player_entity.max_y;
-        z = player_entity.pos_z >> 12;
-        //func_800E5E60(); // TODO TODO!
+    if (player_entity.on_air == 0 && player_entity.max_y <= 0) {
+        func_800E5E60(
+            &(SVECTOR) { 
+                player_entity.pos_x >> 12, 
+                player_entity.max_y,
+                player_entity.pos_z >> 12
+            },
+            &(SVECTOR) { 
+                .vy = player_entity.angle_y + 0x800,
+            },
+            D_80102BF4 + 1
+        );
     }
     
 }
@@ -1555,6 +1671,7 @@ void debug_set_pos(u32 x, u32 y)
     debug_char_y = y;
 }
 
+// draw and swap
 void debug_text_draw(void)
 {
     DR_MODE* p;
