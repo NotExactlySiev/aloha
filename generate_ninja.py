@@ -51,17 +51,30 @@ def ext(x, e):
 lext = lambda e: lambda x: ext(x, e)
 objf = lambda m,o : (f"build/{m}/{ext(o, 'o')}")
 
-build = lambda r,d,s : put(f"build {d}: {r} {s}\n")
+def build(rule, target, source, indirect=""):
+    put(f"build {target}: {rule} {source}")
+    if len(indirect) > 2:
+        put(f" | {indirect}")
+    put("\n")
+
+
+
 var = lambda n,v : put(f"    {n} = {v}\n")
 
 
 # parse the file structure
 proc = {}
 
+def module_setup(ent):
+    global proc
+    proc[ent.name] = {
+        "src": [],
+        "header": [],
+        "data": [],
+    }
+
 def src_add(ent):
     global proc
-    proc[ent.name] = {}
-    proc[ent.name]["src"] = []
     src = os.walk(ent.path)
     for i,f in enumerate(src):
         base = ""
@@ -73,11 +86,12 @@ def src_add(ent):
         for file in f[2]:
             if get_ext(file) in ["c", "s"]:
                 proc[ent.name]["src"].append(base+file)
+            elif get_ext(file) == "h":
+                proc[ent.name]["header"].append(base+file)
 
 def asm_add(ent):
     global proc
     # also add its data files
-    proc[ent.name]["data"] = []
     try:
         for dat in os.scandir(ent.path + "/data"):
             proc[ent.name]["data"].append(dat.name)
@@ -85,32 +99,38 @@ def asm_add(ent):
         pass
 
 
+for_dirs("./src", module_setup)
 for_dirs("./src", src_add)
 for_dirs("./asm", asm_add)
 
 # executable files
 exes = []
 for mod, files in proc.items():
+    print(f"{mod}\t: {files}\n")
     ## compile objs
     # TODO: each source file can have a type (c, data etc.) so
     #       these can all be combined:
+    cdirpath = f"src/{mod}/"
+
+    # TODO: could be cool if each C file only depended on the headers
+    #       it actually uses and not all of them. but this works for now
+    headers = map(lambda x: cdirpath+x , files["header"])
+
     for file in files["src"]:
-        build("cc", objf(mod, file), f"src/{mod}/{file}")
+        build("cc", objf(mod, file), f"src/{mod}/{file}", " ".join(headers))
     for file in files["data"]:
         build("cc", objf(mod, file), f"asm/{mod}/data/{file}")
 
     ## link
     allDeps = (files["src"] + files["data"])
-    print(f"all deps is {allDeps}")
     allObjs = [f"build/{mod}/{x}" for x in allDeps]
-    print(f"all objs is {allObjs}")
     allObjs = " ".join(map(lext("o"), allObjs))
     allObjs += " build/header.o"
     
     elf = "build/" + ext(mod, "elf")
     exe = "build/" + ext(mod, "exe")
 
-    build("link", elf, allObjs + " | shared.ld")
+    build("link", elf, allObjs, f"shared.ld symbols.{mod}.ld")
     var("modid", mod)
 
     ## compress and finalize
