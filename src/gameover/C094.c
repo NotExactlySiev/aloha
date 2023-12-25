@@ -344,8 +344,6 @@ void func_800EC358(void)
 int main(void)
 {
     u32 buttons;
-    s32 var_a0;
-    s32 var_v0;
     int choice;
 
     // TEST: let's disable all audio shit

@@ -5,7 +5,9 @@
 
 #include <libgpu.h>
 
-extern u32 D_80060000[];
+//extern u32 D_80060000[];
+int func_800E58C4(void);
+void *const tmp_data_buffer = (void*) 0x80060000;
 
 #define TEXTURE_TOWER_WIDTH     106
 #define TEXTURE_TOWER_HEIGHT    104
@@ -72,7 +74,8 @@ void func_800E5B80(
     s16 clutx, s16 cluty)
 {
     RECT rect;
-    ImgFormat* image = &D_80060000;
+    //ImgFormat* image = &D_80060000;
+    ImgFormat* image = (void*) 0x80060000;
 
     // tower
     jt.decompress_lz1(tower_data+4, image);
@@ -167,8 +170,8 @@ void func_800E5EFC(void* data, s16 x, s16 y)
         .w = 4,
         .h = 8
     };
-    jt.decompress_lz1(data+4, D_80060000);
-    u16* p = D_80060000;
+    jt.decompress_lz1(data+4, tmp_data_buffer);
+    u16* p = tmp_data_buffer;
     for (int i = 0; i < 32; i++) {
         for (int j = 0; j < 32; j++) {
             jt.LoadImage(&rect, p);
@@ -204,8 +207,8 @@ void func_800E6050(void* data, s16 x, s16 y)
         .w = 128,
         .h = 256
     };
-    jt.decompress_lz1(data+4, D_80060000);
-    jt.LoadImage(&rect, D_80060000+2);
+    jt.decompress_lz1(data+4, tmp_data_buffer);
+    jt.LoadImage(&rect, tmp_data_buffer+2);
     jt.DrawSync(0);
 }
 

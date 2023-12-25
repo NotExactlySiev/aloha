@@ -1,0 +1,8 @@
+.vscode
+build.ninja
+us.xml
+original/*
+asm/**/nonmatchings
+execs/*
+assets/*
+build/disc

@@ -6,7 +6,7 @@ jfcomp  = $jfdir/jfcomp
 makeiso = mkpsxiso
 dumpiso = dumpsxiso
 
-cflags  = -Iinclude -Ipsyq -Iassets -Iassets/gameover $
+cflags  = -Wall -Iinclude -Ipsyq -Iassets -Iassets/gameover $
           -O1 -G0 -fno-zero-initialized-in-bss -msoft-float $
           -march=r3000 -mtune=r3000 -mabi=32 -EL -mno-abicalls $
           -fno-stack-protector -Wa,--no-pad-sections -fno-builtin

@@ -45,7 +45,7 @@ void regular_add(void);
 void regular_remove(void);
 void regular_run_tasks(void);
 void rle_decode(s32, u8*, u8*);
-void lz1_decode(const u8*, u8*);
+void lz1_decode(void*, void*);
 void reboot(char*, char*);
 
 extern u32 tmpfilebuf;
@@ -112,7 +112,7 @@ void func_80019990(void);
 s32 get_GameNP(void);
 void read_version(void);
 s32 get_GameRegion(void);
-u8* get_VersionStr(void);
+char *get_VersionStr(void);
 void game_init(void);
 s32 get_D_80047E6C(void);
 void* jt_reset(void);

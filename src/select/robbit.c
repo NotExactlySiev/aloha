@@ -4,6 +4,7 @@
 // TODO: these go in a common header
 extern u32 screen_brightness;  // screen brightness (or maybe fade value is better?)
 void sprite_draw_by_id(u32 arg0, u32 id, u32 x, u32 y, u8 brightness, s32 size);
+void func_800E6548(s32 priority, s32 id, s32 x, s32 y, u8 brightness);
 extern s32 island1_offx;
 extern s32 island1_offy;
 extern s32 island2_offx;
@@ -168,7 +169,7 @@ void func_800E156C(void)
             robbit_y += robbit_ddy;
             D_8013EEB8 += D_8013EEC0;
             robbit_t += 1;
-            offy = sin(D_8013EEB8);
+            offy = rsin(D_8013EEB8);
             offy = -(offy * D_8013EEC8);
         }
         y += offy;
@@ -212,7 +213,7 @@ void func_800E175C(void)
             robbit_y += robbit_ddy;
             D_8013EEB8 += D_8013EEC0;
             robbit_t += 1;
-            offy = sin(D_8013EEB8);
+            offy = rsin(D_8013EEB8);
             offy = -(offy * D_8013EEC8);
         }
         y += offy;
@@ -269,7 +270,7 @@ void func_800E1A38(void)
 
 // ship stuff
 //INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E1AE4);    // render
-func_800E1AE4()
+void func_800E1AE4(void)
 {
     if (robbit_state != 4 && robbit_state != 7) return;
     if (ship_x < 400) {

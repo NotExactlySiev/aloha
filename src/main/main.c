@@ -83,7 +83,6 @@ void reset(void);
 void file_execute_loop(void)
 {
     u32 *addr;
-    s32 tmp;
 
     while (1) {
         if (g_CurrFile == -1) g_CurrFile = 0;
@@ -145,7 +144,6 @@ void func_80018AB4(void)
     TILE tile;
     RECT rect;
     s16 left;
-    s16 rght;
     s32 i;
     s32 col;
     s32 tmp;
@@ -170,7 +168,9 @@ void func_80018AB4(void)
     DrawSync(0);
     
     // clear the screen with black
-    SetBlockFill(&tile);
+    //SetBlockFill(&tile);
+    setBlockFill(&tile);
+
     tile.r0 = 0; tile.g0 = 0; tile.b0 = 0;
     tile.x0 = 0; tile.y0 = 0;
     tile.w = 640; tile.h = 480;
@@ -238,7 +238,7 @@ void func_8001926C(void)
     DISPENV dispenv;
     POLY_FT4 polys[5];
     s32 i;
-    s32 left, rght, tex_x;
+    s32 left, tex_x;
     s32 y, h;
     u32 col;
 
@@ -477,7 +477,7 @@ s32 get_GameRegion(void)
     return g_GameRegion;
 }
 
-u8* get_VersionStr(void)
+char *get_VersionStr(void)
 {
     if (g_GameIsZ == 0)
         return 0;    
@@ -582,23 +582,6 @@ void exception_handler(void)
     bios_tables->pcb->current_tcb->regs[2] = 0;
 }
 
-void funny(void) {
-    //u32 *I_STAT = (u32*) 0x1F801070;
-    //printf("MOMENT! %08X\n", *I_STAT);
-
-    /*__asm__("lui    $t1, 0x4000;"
-            "mfc0   $t0, $12;"
-            "or     $t0, $t1;"
-            "mtc0   $t0, $12;");*/
-
-    u32 epc;
-
-    __asm__ volatile(
-        "mfc0   %0, $14;" : "=r"(epc));
-    
-    printf("JIQ %08X\n", epc);
-}
-
 s32 enable_exception_event(void* handler)
 {
     s32 event;
@@ -607,9 +590,6 @@ s32 enable_exception_event(void* handler)
     // exception event (only cause by the invalid syscall function at the start of every main)
     event = OpenEvent(0xF0000010, 0x4000, EvMdINTR, handler);
     EnableEvent(event);
-
-    // TEST: let's try having another one too
-    EnableEvent(OpenEvent(HwCPU, EvSpTRAP, EvMdINTR, funny));
 
     ExitCriticalSection();
     return event;
@@ -637,7 +617,7 @@ GlobalData *getGameConfig(void)
 
 int main(int argc, char** argv)
 {
-    s32 pad[22];
+    //s32 pad[22];
     s32 rc;
     
     printf("MAX ADR:%x\n", malloc(4));

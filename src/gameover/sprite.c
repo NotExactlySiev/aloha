@@ -38,7 +38,6 @@ void sprite_init(void)
 // load sprite heads
 void sprite_load_data(u32* raw)
 {
-    s32 i;
     // first byte is the number of groups
     D_800ED42C = *raw++;
     for (int i = 0; i < D_800ED42C; i++) {

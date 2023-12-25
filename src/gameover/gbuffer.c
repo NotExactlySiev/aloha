@@ -5,6 +5,8 @@
 #include "shared.h"
 
 #include "gameover.h"
+#include "sprite.h"
+
 #include "gbuffer.h"
 
 static  s32      gbuffer_current_idx; 

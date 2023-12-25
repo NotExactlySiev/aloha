@@ -1463,7 +1463,6 @@ void func_800DC4C4(void)
     switch (player_entity.comp1.state) {
 
 make_0: // landing
-    gprintf("landed\n");
     D_80102C6C = 0;
     D_80102C4C = 0x800;
     player_entity.vel_y = 0;
@@ -1502,7 +1501,6 @@ make_0: // landing
              || func_800D9DD4(&player_entity) 
              || (D_80102C34 & D_80102738) == 0) break;
             
-            gprintf("ground jump\n");
             func_800CE304(0x300, 0x50, 0x3F);
             D_80102C9C = 0;
             D_80102C6C = 0x300;
@@ -1557,7 +1555,6 @@ make_3:
 
 
 make_5:
-    gprintf("woah, falling\n");
     player_entity.comp1.state = 5;
     case 5: // falling
         D_80102C6C = 0;
@@ -1572,15 +1569,17 @@ make_5:
 
     // state machine is determined. do the actual physics now
 
-    func_800DD968();
-    func_800DD994(&player_entity);
-    func_800DD158(&player_entity);
+    func_800DD968();                    // manual vertical look?
+    func_800DD994(&player_entity);      // strafe?
+
+    func_800DD158(&player_entity);      // 4 looking and rotation stuff
     func_800DD794(&player_entity);
     func_800DD534(&player_entity);
     func_800DD750(&player_entity);
-    func_800DCEE0(&player_entity); // forward
-    func_800DCFD0(&player_entity);
-    func_800DCCB0(&player_entity);
+
+    func_800DCEE0(&player_entity);      // forward (set actual vel vector)
+    func_800DCFD0(&player_entity);      // gravity (update dy)
+    func_800DCCB0(&player_entity);      // movement (update position)
 
     // and set the camera too
 

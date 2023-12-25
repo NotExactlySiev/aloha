@@ -1,6 +1,8 @@
 #include "common.h"
 #include <shared.h>
 
+// TODO: header
+s32 random_range(s32 a, s32 b);
 
 
 #define STARS_COLOR_MIN 32

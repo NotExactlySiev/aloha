@@ -1,10 +1,13 @@
 #include "common.h"
 #include <kernel.h>
+#include <libapi.h>
 #include <libspu.h>
 #include <libcd.h>
 #include <libgpu.h>
 #include <libetc.h>
 #include <sys/file.h>
+
+#include "main.h"
 
 // data
 // but .data is not integrated into this file yet, so they're extern
@@ -30,8 +33,8 @@ extern SpuVolume vol_full;
 
 
 void cd_ready_callback(s32 status, u32 *result);
-s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2);
-
+s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2);
+void func_8001C374(void);
 
 // functions
 
@@ -292,7 +295,7 @@ void sndqueue_reset(void) {
     _sndqueue_size = 0;
 }
 
-s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2)
+s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2)
 {
     u8 tmp;
     snd_task_t* task;
@@ -314,7 +317,7 @@ s32 sndqueue_add(u8 arg0, s32 arg1, s32 arg2)
     return 1;
 }
 
-void sndqueue_add_try(u8 arg0, s32 arg1, s32 arg2)
+void sndqueue_add_try(u8 arg0, u32 arg1, u32 arg2)
 {
     if (sndqueue_is_running == 0) {
         while (_sndqueue_size > 192)
@@ -1016,7 +1019,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020000);
 
 extern char D_800521F8[32];
 
-s32 mc_addr_prefix(s32 mtidx, char* src, char* dst)
+s32 mc_addr_prefix(u32 mtidx, char* src, char* dst)
 {
     s32 rc;
     char c;
@@ -1025,7 +1028,7 @@ s32 mc_addr_prefix(s32 mtidx, char* src, char* dst)
     dst[0] = 'b';
     dst[1] = 'u';
     dst[2] = '0' + ((mtidx >> 8) & 1);
-    c &= 0xf;
+    c = mtidx & 0xf;
     c += c > 9 ? 'W' : '0';
     dst[3] = c;
     dst[4] = ':';
@@ -1149,12 +1152,11 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021600);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021740);
 
-void execute_compressed(u32* addr, u32 stack)
+void execute_compressed(void *addr, u32 stack)
 {
     EXEC header;
-    EXEC* p;
-    __builtin_memcpy(&header, addr+4, 0x3c);
-    lz1_decode((u8* ) (addr + 0x201), header.t_addr);
+    __builtin_memcpy(&header, addr+16, 0x3c);
+    lz1_decode(addr + 0x804, (void*) header.t_addr);
     header.s_addr = stack;
     flush_cache_safe();
     Exec(&header, 1, 0);

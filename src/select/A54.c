@@ -15,6 +15,42 @@ extern u32 screen_brightness;  // screen brightness (or maybe fade value is bett
 void sprite_draw_by_id(u32 arg0, u32 id, u32 x, u32 y, u8 brightness, s32 size);
 void printf(const char* fmt, ...);
 s32 random_byte(void);
+void func_800E278C(void); // chain_init
+void func_800E6640(char* str, s32 x, s32 y, u8 brightness);
+void func_800E6548(s32 priority, s32 id, s32 x, s32 y, u8 brightness);
+void func_800E6598(s32 priority, s32 id, s32 x, s32 y, u8 brightness);
+
+// TODO: I'm pretty sure these are all void
+
+void func_800E6D00(void);
+void func_800E77A4(void);
+void func_800E3CB8(void);
+void func_800E3D20(void);
+void func_800E3D70(void);
+void func_800E6D94(void);
+void func_800E4064(void);
+void func_800E1500(void);
+void func_800E16F0(void);
+void func_800E1C68(void);
+void func_800E1DDC(void);
+void func_800E40E8(void);
+void func_800E7358(void);
+void func_800E2070(void);
+
+u32  func_800E77D4();   // TODO: does this take in an int?
+
+void func_800E0398(int);
+void func_800E0F9C(int);
+void func_800E03D0(int);
+void func_800E32D8(int);
+void func_800E1124(int);
+void func_800E2A30(int, int, int);  // TODO: I think actually bool?
+void func_800E1288(int);
+void func_800E1CA0(int);
+
+void func_800E7B68(char*, char*, int, int);
+void func_800E7D8C(char*, char*, int, int);
+//void (int);
 
 
 void func_800E02F8(s32 arg0)
@@ -61,7 +97,7 @@ void stage_text_anim_update(void)
         stage_text_anim_t = 0;
     
     if (scrolling == 1) stage_text_anim_t = 0;
-    val = sin(stage_text_anim_t);    // sin
+    val = rsin(stage_text_anim_t);    // rsin
     if (val < 0) val = -val;
     stage_text_size = val + ONE;
 }
@@ -138,7 +174,7 @@ void render_world_text(s32 world, s32 x, s32 y)
         world_text_anim1_t = 0;
         // TODO: disable anim1 here
     } else if (world_text_anim1_enabled) {
-        size_offset = sin(world_text_anim1_t);
+        size_offset = rsin(world_text_anim1_t);
         if (size_offset < 0) size_offset = -size_offset;
         world_text_anim1_t += 32;
         brightness_offset = 48;
@@ -218,10 +254,10 @@ void islands_anim_update(void)
     island2_offx = 0;
     island3_offx = 0;
     tower_offx = 0;
-    island1_offy = sin(island1_anim_t) / 0x555;
-    island2_offy = sin(island2_anim_t) / 0x555;
-    island3_offy = sin(island3_anim_t) / 0x555;
-    tower_offy = sin(tower_anim_t) / 0x555;
+    island1_offy = rsin(island1_anim_t) / 0x555;
+    island2_offy = rsin(island2_anim_t) / 0x555;
+    island3_offy = rsin(island3_anim_t) / 0x555;
+    tower_offy = rsin(tower_anim_t) / 0x555;
     island1_anim_t += 0x44;
     island2_anim_t += 0x44;
     island3_anim_t += 0x44;
@@ -416,7 +452,7 @@ void _func_800E2B74(void)
         if (c->unk88 == 2) continue;
         for (int j = 0; j < 6; j++) {
             // ignore middle one for now
-            val = sin(c->unk60 + c->unk64 * D_8013ED8C * (j + 1));
+            val = rsin(c->unk60 + c->unk64 * D_8013ED8C * (j + 1));
             val *= c->unk12[8+j*2];
             if (val < 0) val += 0xFFF;
             c->unk12[j*2] = val >> 12;
@@ -440,7 +476,7 @@ typedef struct {
 extern UnkStruct D_80170A28[3];
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E3308);
-void _func_800E3308(void)
+/*void _func_800E3308(void)
 {
     static int frame = 0;
     for (int i = 0; i < 3; i++) {
@@ -450,7 +486,7 @@ void _func_800E3308(void)
     }
     sprite_draw_by_id(12, 0x1E + (frame/4), 0x80, 0x5E, screen_brightness, 0x1800);
     frame++;
-}
+}*/
 
 
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E357C);
@@ -709,7 +745,7 @@ s32 sequence_finished_3(void)
         jt.sound_fade_out(12, 0, 0);
     }
     func_800E40E8();    // wait until fadeout finished
-    func_800E413C();
+    return func_800E413C();
 }
 
 // movie data
@@ -878,10 +914,7 @@ void func_800E5258(void)
     // set island selected animation
 
     do {
-        //printf("SHIT: %d\n", scrolling);
-        if (scrolling == 0) {
-            buttons = func_800E77D4(0);
-        }
+        buttons = scrolling ? 0 : func_800E77D4(0);
         //jt.PadRead(0);  // why? print the raw for debug?
         world_text_anim1_enabled = 0; // world caption animation
         if (buttons & PADLleft) {
@@ -938,7 +971,7 @@ void func_800E5258(void)
                 func_800E02F8(0x2700);
                 tmp = -1;
                 // selecting with square sends you to extra version of the world
-                global_data->world = shown_world + 6 * (buttons & PADRleft != 0);
+                global_data->world = shown_world + 6 * ((buttons & PADRleft) != 0);
                 global_data->stage = D_8013EDA4;
                 jt.execs_set_next(3 * shown_world + D_8013EDA4 + 2);
                 D_8013EDD8 = 2; // start fade
@@ -952,7 +985,8 @@ void func_800E5258(void)
         func_800E6D94();
     } while (D_8013EDD8 != 3);  // exit when the fade is done
     
-    return tmp;
+    // TODO: does this need to return anything?
+    //return tmp;
 }
 
 // apparently unused?
@@ -1046,7 +1080,7 @@ void func_800E65EC(s32 priority, s32 id, s16 x, s16 y, u8 brightness, s32 clutid
 void func_800E6640(char* str, s32 x, s32 y, u8 brightness)
 {
     char c;
-    while (c = *str++) {
+    while ((c = *str++)) {
         if (c > 0x7F) c -= 0x31;    // why?
         func_800E6548(10, c, x, y, brightness);
         x += 8;
@@ -1055,6 +1089,14 @@ void func_800E6640(char* str, s32 x, s32 y, u8 brightness)
 
 
 // so are these also a separate system for drawing sprites?
+typedef struct {
+    u16 u, v, w, h;
+} SpriteThing;
+
+void func_800E66C8(u32, Sprite*, u32, u32, u8, s32);
+void func_800E6E5C(Sprite*, SpriteThing*, u8, u8, u32, u32);
+
+
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E66C8);
 
 void sprite_draw_by_id(u32 arg0, u32 id, u32 x, u32 y, u8 brightness, s32 size)
@@ -1069,11 +1111,6 @@ INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E6B1C);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E6D00);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E6D94);
 INCLUDE_ASM("asm/select/nonmatchings/A54", func_800E6E5C);
-
-// what on earth is this thing
-typedef struct {
-    u16 u, v, w, h;
-} SpriteThing;
 
 // the tower and island textures are stored in vram like this:
 void func_800E6F5C(Sprite* group, u16 u, u16 v, u32 clutx, u32 cluty)
