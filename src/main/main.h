@@ -108,7 +108,7 @@ void _jt_set(void*, s32, const char*);
 void jt_set(void*, s32);
 #endif
 void func_80019948(void);
-void func_80019990(void);
+s32 func_80019990(void);
 s32 get_GameNP(void);
 void read_version(void);
 s32 get_GameRegion(void);

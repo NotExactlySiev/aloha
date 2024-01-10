@@ -421,12 +421,15 @@ void func_80019948(void)
     }
 }
 
-void func_80019990(void)
+s32 func_80019990(void)
 {
+    s32 ret = 0;
     if (D_80047D64 != 0) {
         vblank_event = enable_vblank_event(regular_run_tasks);
+        ret = vblank_event;
         D_80047D64 = 0;
     }
+    return ret;
 }
 
 s32 get_GameNP(void)
