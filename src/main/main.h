@@ -109,10 +109,10 @@ void jt_set(void*, s32);
 #endif
 void func_80019948(void);
 s32 func_80019990(void);
-s32 get_GameNP(void);
+s32 get_tv_system(void);
 void read_version(void);
-s32 get_GameRegion(void);
-char *get_VersionStr(void);
+s32 get_region(void);
+char *get_version_string(void);
 void game_init(void);
 s32 get_D_80047E6C(void);
 void* jt_reset(void);

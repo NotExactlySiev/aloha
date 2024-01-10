@@ -214,7 +214,7 @@ s32 fade_out(s32 duration, s32 dstvol, void* callback)
 {
     if (fade_out_active == 1) return 0;
 
-    if (TV_PAL == get_GameNP()) {
+    if (TV_PAL == get_tv_system()) {
         duration = (duration * 5) / 6 - 1;
     }
     fade_out_active = 1;
@@ -238,7 +238,7 @@ s32 fade_in(s32 duration, s32 dstvol, void* callback)
 {
     if (fade_in_active == 1) return 0;
 
-    if (TV_PAL == get_GameNP()) {
+    if (TV_PAL == get_tv_system()) {
         duration = (duration * 5) / 6 - 1;
         //if (duration < 1) duration = 1;
     }

@@ -60,8 +60,8 @@ file_t g_Files[42] = {
 
 s32 g_CurrFile = 0;
 s32 g_NextFile = 0;
-s32 g_GameRegion = 0;
-u32 g_GameNP = TV_NTSC;
+s32 game_region = 0;
+u32 tv_system = TV_NTSC;
 s32 g_GameIsZ = 0;
 
 void* D_80048044;       // hold return for _start
@@ -69,7 +69,7 @@ s32 D_80047E6C;         // 80047e6c
 s32 D_80047E70;         // 80047e70
 s32 vblank_event;          // 80047e74
 s32 exception_event;          // 80047e7c
-char g_VersionStr[20];
+char version_string[20];
 
 
 s32     cd_fs_read(const char* addr, void* buf, s32 mode);
@@ -159,7 +159,7 @@ void func_80018AB4(void)
     drawenv.dtd = 1;
     drawenv.dfe = 1;
     dispenv.pad0 = 0;
-    if (get_GameNP() == 1) {
+    if (get_tv_system() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y += 24;
     }
@@ -219,7 +219,7 @@ void func_80018AB4(void)
         
         FADE_IN(4,4);
     } else {
-        if (get_GameRegion() == 1) { y = 120; h = 240; } 
+        if (get_region() == 1) { y = 120; h = 240; } 
         else { y = 0; h = 480; }
         MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
         LOAD_PRS(&tmpfilebuf, 320, 240);
@@ -248,7 +248,7 @@ void func_8001926C(void)
     drawenv.dtd = 1;
     drawenv.dfe = 1;
     dispenv.pad0 = 0;
-    if (get_GameNP() == 1) {
+    if (get_tv_system() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
     }
@@ -259,7 +259,7 @@ void func_8001926C(void)
         MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
         FADE_OUT(4,4);
     } else {
-        if (get_GameRegion() == 1) { y = 120; h = 240; } 
+        if (get_region() == 1) { y = 120; h = 240; } 
         else { y = 0; h = 480; }
         
         MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
@@ -271,7 +271,7 @@ void func_8001926C(void)
     SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
     SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
     dispenv.pad0 = 0;
-    if (get_GameNP() == 1) {
+    if (get_tv_system() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
     }
@@ -300,7 +300,7 @@ void func_80019680(void)
     // set tv system
     read_version();
     wait_frame(0);
-    SetVideoMode(get_GameNP() != 0);
+    SetVideoMode(get_tv_system() != 0);
     wait_frame(0);
 
     // setup graphics
@@ -432,9 +432,9 @@ s32 func_80019990(void)
     return ret;
 }
 
-s32 get_GameNP(void)
+s32 get_tv_system(void)
 {
-    return g_GameNP;
+    return tv_system;
 }
 
 void read_version(void)
@@ -448,43 +448,43 @@ void read_version(void)
         tmp = cd_fs_read("COUNTRY.TXT", (u32*) buf, 0x400);
     } while (tmp == -1);
     
-    g_GameRegion = 0;
-    g_GameNP = TV_NTSC;
+    game_region = 0;
+    tv_system = TV_NTSC;
     if (tmp == -2) return; 
     
-    if (buf[0] == 'P') g_GameNP = TV_PAL;
+    if (buf[0] == 'P') tv_system = TV_PAL;
     
     if (buf[1] == 'U') {
-        g_GameRegion = 1;
+        game_region = 1;
     }
     else if (buf[1] == 'E') {
-        g_GameRegion = 2;
+        game_region = 2;
     }
     
     if (buf[1] == 'Z') {
-        g_GameRegion = 3;
+        game_region = 3;
         i = 0;
         p = &buf[2];
         do {
-            g_VersionStr[i] = *p;
+            version_string[i] = *p;
             i += 1;
             p += 1;
         } while (i < 12);
-        strcpy("EXACT01", &g_VersionStr[12]);
+        strcpy("EXACT01", &version_string[12]);
         g_GameIsZ = 1;
     }
 }
 
-s32 get_GameRegion(void)
+s32 get_region(void)
 {
-    return g_GameRegion;
+    return game_region;
 }
 
-char *get_VersionStr(void)
+char *get_version_string(void)
 {
     if (g_GameIsZ == 0)
         return 0;    
-    return g_VersionStr;
+    return version_string;
 }
 
 void game_init(void)
@@ -516,11 +516,11 @@ void game_init(void)
     jt_set(setNextFile, 3);
     jt_set(getNextFile, 4);
     jt_set(getGameConfig, 5);
-    jt_set(get_GameNP, 7);
-    jt_set(get_GameRegion, 8);
+    jt_set(get_tv_system, 7);
+    jt_set(get_region, 8);
     jt_set(func_80018A7C, 9);
     jt_set(func_80018A8C, 10);
-    jt_set(get_VersionStr, 11);
+    jt_set(get_version_string, 11);
 
     // clear global space
     memset2((void*) 0x80014000, 0x4000, 0);
