@@ -1238,6 +1238,7 @@ void call_SetDrawArea(DR_AREA *p, RECT *r) {
     SetDrawArea(p, r);
 }
 
+#undef GetGraphType
 int call_GetGraphType(void) {
     return GetGraphType();
 }
