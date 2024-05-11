@@ -38859,9 +38859,6 @@ glabel D_80047DA0
 glabel D_80047DAC
 /* 305AC 80047DAC */ .word 0x00160200
 
-glabel D_80047DB0
-/* 305B0 80047DB0 */ .word 0x00000000
-
 glabel fade_out_active
 /* 305B4 80047DB4 */ .word 0x00000000
 

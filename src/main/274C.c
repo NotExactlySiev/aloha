@@ -734,69 +734,91 @@ void fade_unpause(void) {
 // play movie
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
 
-// FILE cache.c
+// FILE disc_cache.c
 
+// TODO: all CD/FS stuff should go in a directory of their own
+// with these in a common header
 #define     CD_SECTOR_SIZE      0x800
-
 #define     CACHE_ENTRIES       10
-#define     CACHE_DATA_SIZE     CD_SECTOR_SIZE
 
 typedef struct {
-    u32    expire;
+    u32    last_access;
     CdlLOC loc;
-    u8     data[CACHE_DATA_SIZE];
+    u8     data[CD_SECTOR_SIZE];
 } cache_entry_t;
 
-cache_entry_t cache_entries[10];
+u32 D_80047DB0;
+cache_entry_t cache_entries[CACHE_ENTRIES];
 
-// cache handling functions (i think) and more cd stuff
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D398);   // update
+void func_8001D398(cache_entry_t *block)
+{
+    if (D_80047DB0++ > 0x100000) {
+        // adjust the main counter and all the counters for all
+        // the blocks
+        for (int i = 0; i < CACHE_ENTRIES; i++) {
+            cache_entries[i].last_access >>= 1;
+            cache_entries[i].last_access++;
+        }
+        D_80047DB0 >>= 1;
+    }
+    block->last_access = D_80047DB0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D414);   // clear
+// sector_cache_clear
+void func_8001D414(void)
+{
+    for (int i = 0; i < CACHE_ENTRIES; i++)
+        cache_entries[i].last_access = 0;
+}
 
-s32 func_8001D440(CdlLOC* loc, u8* data) {
-    s32 i;  
-    u32 minidx;
-    u32 minexp;
+// sector_cache_get
+s32 func_8001D440(CdlLOC* loc, u8* data)
+{
+    int i;  
+    u32 oldest_access;
+    cache_entry_t *entry;
 
     for (i = 0; i < CACHE_ENTRIES; i++) {
-        if (cache_entries[i].expire == 0) continue;
-        if (strncmp(3, loc, &cache_entries[i].loc) == 0) continue;
-        // found it!
-        memcpy(0x800, &cache_entries[i].data, data);
-        return 1;
+        if (cache_entries[i].last_access
+         && strncmp(3, loc, &cache_entries[i].loc)) {
+            // found it!
+            entry = &cache_entries[i];
+            memcpy(0x800, &cache_entries[i].data, data);
+            goto done;
+        }
     }
 
     // it's not cached, load from disc
     CdSync(0, 0);
     do {
-            try_CdControl(2, &loc->minute, 0);
-            try_CdRead(1, data, 0x80);
+        try_CdControl(2, &loc->minute, 0);
+        try_CdRead(1, data, 0x80);
     } while (func_8001A2C8(0, 0) == -1);
     try_CdControl(9, 0, 0); //pause
 
     // and then try to cache it. first look for an empty entry
     for (i = 0; i < CACHE_ENTRIES; i++) {
-        if (cache_entries[i].expire == 0) {
-            memcpy(0x800, data, cache_entries[i].data);
-            func_8001D398(&cache_entries[i].expire);
-            cache_entries[i].loc = *loc;
-            return 1;
+        if (cache_entries[i].last_access == 0) {
+            entry = &cache_entries[i];
+            goto found;
         }
     }
     
-    // if not found, find the one with the closest expiry
-    minexp = -1;
-    
+    // if not found, replace the least recently accessed sector
+    oldest_access = -1;
     for (i = 0; i < CACHE_ENTRIES; i++) {
-        if (cache_entries[i].expire < minexp) {
-            minexp = cache_entries[i].expire;
-            minidx = i;
+        if (cache_entries[i].last_access < oldest_access) {
+            oldest_access = cache_entries[i].last_access;
+            entry = &cache_entries[i];
         }
     }
-    memcpy(0x800, data, cache_entries[minidx].data);
-    cache_entries[i].loc = *loc;
-    func_8001D398(&cache_entries[i].expire);
+
+found:
+    memcpy(0x800, data, entry->data);
+    entry->loc = *loc;
+
+done:
+    func_8001D398(entry);
     return 1;
 }
 

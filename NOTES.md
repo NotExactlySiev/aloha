@@ -213,24 +213,27 @@ common entities 5-9
 
 [   46.7673] I/TTY: 2 	[90348]	-> 801620f8
 
-level entities
+
+
+# SOU_DAT
+## level objects models and meshes
 [   47.8876] I/TTY: 2 	[92084]	-> 801781e4 main
 [   47.9208] I/TTY: 3 	[46916]	-> 8018e998
 
 [   48.0020] I/TTY: 2 	[2376]	-> 8019a0dc bonus
 
-# SOU_DAT level geometry sections 1 and 2
-## level objects (but not collision)
+## level geometry sections 1 and 2
+### level objects (but not collision)
 [   48.0033] I/TTY: 7 1	[7144]	-> 8019aa24 section 1
 [   48.0036] I/TTY: 8 1	[4360]	-> 8019c60c + bonus
-## level collision data
+### level collision data
 [   48.0192] I/TTY: 7 2	[12208]	-> 8019d714 section 2
 [   48.0198] I/TTY: 8 2	[8672]	-> 801a06c4 + bonus
-## 
+###
 [   48.0361] I/TTY: 3 	[13836]	-> 801a28a4 section 3
 [   48.0363] I/TTY: 3 	[340]	-> 801a5eb0 + bonus
 ... and sections after that until the end
-## entities and entity spawners (I think?)
+### entities and entity spawners (I think?)
 [   48.0367] I/TTY: 0 	[5736]	-> 801a6004 section 0
 [   48.0371] I/TTY: 0 	[4796]	-> 801a766c + bonus
 # SOU_DAT final part (pretty sure it's the demo)

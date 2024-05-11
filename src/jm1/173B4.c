@@ -1460,6 +1460,7 @@ void func_800E5458(s16, s16, s16);
 // the control flow is fucked
 void func_800DC4C4(void)
 {
+    gprintf("%d\n", player_entity.comp1.state);
     switch (player_entity.comp1.state) {
 
 make_0: // landing
@@ -1558,6 +1559,7 @@ make_5:
     player_entity.comp1.state = 5;
     case 5: // falling
         D_80102C6C = 0;
+        gprintf("timer: %d\n", D_80102C14);
         if (func_800DCB50()) goto make_3;
 
         if (player_entity.vel_y <= 0)
@@ -1598,6 +1600,7 @@ make_5:
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC9EC);
 
+// is there a jump action?
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DCB50);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DCCB0);

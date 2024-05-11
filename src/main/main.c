@@ -649,15 +649,15 @@ int main(int argc, char** argv)
     func_8001926C();
 
     // activate debug mode? (it's actually never checked)
-    if (PadRead(0) == 6) {
+    if (PadRead(0) == (PADL1 | PADR2)) {
         D_80047D50 = 1;
     }
 
     // # custom stuff:
     // debug mode
-    getGameConfig()->debug_features = 1;
+    //getGameConfig()->debug_features = 1;
     // give printf
-    //jt_set(k_printf, 9);
+    jt_set(printf, 9);
     //CdSetDebug(2);
 
     // run the game
