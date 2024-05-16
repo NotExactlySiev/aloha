@@ -20,7 +20,7 @@ s32 fe_value;
 
 
 // regular task vars, they're in the assembly
-extern s32 D_800234B0;
+extern volatile s32 D_800234B0;
 extern s32 D_800234B4;
 extern s32 D_80047D78;
 extern SpuVolume D_80047D8C;
@@ -989,24 +989,46 @@ void func_8001E0CC(SpuVoiceAttr* arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17C);
 
 // the rest are trivial again
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E22C);
+void func_8001E22C(s32 arg0) {
+    func_800316F0(1, arg0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E250);
+void func_8001E250(s32 arg0) {
+    func_800316F0(0, arg0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E274);
+void func_8001E274(void)
+{
+    func_800309F4();
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E294);
+void func_8001E294(void)
+{
+    func_800313A0();
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E2B4);
+void func_8001E2B4(void)
+{
+    func_80031074();
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E2D4);
+void func_8001E2D4(void)
+{
+    func_800309C0();
+}
 
 void func_8001E2F4(void) {
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E2FC);
+void func_8001E2FC(void)
+{
+    func_80030A98();
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E31C);
+void func_8001E31C(void)
+{
+    func_80030A44();
+}
 
 u32 call_PadRead(s32 id);
 
@@ -1100,13 +1122,46 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FBE4);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FC34);
 
 // 3 event test functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FC5C);
+int D_80047FB4;
+int D_80047FBC;
+int D_80047FC4;
+int D_80047FCC;
+int D_80047FD4;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FCF4);
+int D_80047FDC;
+int D_80047FE4;
+int D_80047FEC;
+int D_80047FF4;
+int D_80047FFC;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FD8C);
+int func_8001FC5C(void)
+{
+    if (TestEvent(D_80047FB4) == 1) return 4;
+    if (TestEvent(D_80047FBC) == 1) return 0x8000;
+    if (TestEvent(D_80047FC4) == 1) return 0x100;
+    if (TestEvent(D_80047FCC) == 1) return 0x2000;
+    return (TestEvent(D_80047FD4) == 1) << 9;
+}
 
-// 1 big function related to memory card
+int func_8001FCF4(void)
+{
+    if (TestEvent(D_80047FDC) == 1) return 4;
+    if (TestEvent(D_80047FE4) == 1) return 0x8000;
+    if (TestEvent(D_80047FEC) == 1) return 0x100;
+    if (TestEvent(D_80047FF4) == 1) return 0x2000;
+    return (TestEvent(D_80047FFC) == 1) << 9;
+}
+
+void func_8001FD8C(void)
+{
+    TestEvent(D_80047FDC);
+    TestEvent(D_80047FE4);
+    TestEvent(D_80047FEC);
+    TestEvent(D_80047FF4);
+    TestEvent(D_80047FFC);
+}
+
+// 1 big function related to memory card testing (uses 3 above)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FDF4);
 
 // 3 trivial functions
@@ -1286,6 +1341,35 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);
 
 // jmptable setter 0x300-0x344
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
+// first decomp the functions that are referenced
+/*void func_80021D54(void)
+{
+    fnptr = 0;
+    jt_set(&func_80020D5C, 0x300);
+    jt_set(&func_80020DC4, 0x301);
+    jt_set(&func_80020DE8, 0x302);
+    jt_set(&func_80020E30, 0x303);
+    jt_set(&func_80020E40, 0x304);
+    jt_set(&func_80020F48, 0x305);
+    jt_set(&func_80020F9C, 0x307);
+    jt_set(&func_80020E88, 0x308);
+    jt_set(&func_80020EB4, 0x309);
+    jt_set(&func_80021320, 0x30A);
+    jt_set(&func_80021490, 0x30B);
+    jt_set(&func_80021740, 0x30C);
+    jt_set(&func_800212FC, 0x30D);
+    jt_set(&func_80021310, 0x30E);
+    jt_set(&func_80021600, 0x30F);
+    jt_set(&execute_compressed, 0x320);
+    jt_set(&func_80020FC0, 0x330);
+    jt_set(&func_80021028, 0x331);
+    jt_set(&func_800210D4, 0x332);
+    jt_set(&func_800218DC, 0x340);
+    jt_set(&func_800219DC, 0x341);
+    jt_set(&func_80021BCC, 0x342);
+    jt_set(&func_80021D08, 0x343);
+    jt_set(&func_800218A0, 0x344);
+}*/
 
 // FILE vid.c
 
@@ -1404,7 +1488,10 @@ int get_vsync_event_cnt(void) {
     return D_800234B0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", wait_frame);
+void wait_frame(void) {
+    int curr = get_vsync_event_cnt();
+    while (curr == get_vsync_event_cnt());
+}
 
 int call_SetGraphDebug(int level) {
     return SetGraphDebug(level);

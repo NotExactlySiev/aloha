@@ -84,38 +84,6 @@ glabel D_80047FA4
 glabel D_80047FAC
 /* 30794 80047FAC */ .space 0x08
 
-glabel D_80047FB4
-/* 3079C 80047FB4 */ .space 0x08
-
-glabel D_80047FBC
-/* 307A4 80047FBC */ .space 0x08
-
-glabel D_80047FC4
-/* 307AC 80047FC4 */ .space 0x08
-
-glabel D_80047FCC
-/* 307B4 80047FCC */ .space 0x08
-
-glabel D_80047FD4
-/* 307BC 80047FD4 */ .space 0x08
-
-glabel D_80047FDC
-/* 307C4 80047FDC */ .space 0x08
-
-glabel D_80047FE4
-/* 307CC 80047FE4 */ .space 0x08
-
-glabel D_80047FEC
-/* 307D4 80047FEC */ .space 0x08
-
-glabel D_80047FF4
-/* 307DC 80047FF4 */ .space 0x08
-
-glabel D_80047FFC
-/* 307E4 80047FFC */ .space 0x04
-
-
-
 /* MORE BSS BROUGHT OVER FROM THE SYMBOL FILE */
 
 glabel D_80048004
