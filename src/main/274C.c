@@ -122,6 +122,8 @@ void func_8001A74C(void) {
     CdSyncCallback(0);
 }
 
+CdlLOC D_80047DAC = { 0, 2, 22, 0 };
+
 void func_8001A77C(void) {
     u8 sp10[2048];
 
@@ -137,7 +139,7 @@ void func_8001A77C(void) {
             CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
         }
         CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
-        CdControl(2U, &(CdlLOC) { 0, 2, 22, 0 }, NULL);
+        CdControl(2U, &D_80047DAC, NULL);
         try_CdRead(1, &sp10, 0x80);
     } while (func_8001A2C8(0, NULL) == -1);
     D_80047EE4 = 0;
@@ -286,7 +288,13 @@ s32 fade_in(s32 duration, s32 dstvol, void* callback)
     return 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001AE90);
+void func_8001AE90(void)
+{
+    sndqueue_add_try(0xFA, 0, 0);
+    sndqueue_add_try(0xFB, 0, 0);
+    sndqueue_exec_all();
+    fade_paused = 0;
+}
 
 s8 sndqueue_com = SNQ_FINISHED;
 s8 D_80047D94 = SNQ_FINISHED;
@@ -347,7 +355,7 @@ void sndqueue_add_try(u8 arg0, u32 arg1, u32 arg2)
     sndqueue_add(arg0, arg1, arg2);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
+//NCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 // execute one block of command
 s32 sndqueue_exec()
 {
@@ -556,11 +564,61 @@ int sndqueue_exec_all(void)
 
 
 // and then these functinos actually use those 4 to do stuff
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B94C);
+u8 D_80047DA0[8] = { 8, 0, 0, 0, 0, 0, 0, 0 };
+int D_80047DE4 = 1;
+int D_80047DE8 = 0;
+int D_80047EEC;
+extern CdlFILTER D_80047ECC;
+extern int D_8004D0E0;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001B9D8);
+int func_8001B94C(void) {
+    int ret;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BA50);
+    D_80047F24 = 3;
+    D_800548EC = 0;
+    ret = 0;
+    if (fe_value != 3) {
+        func_8001C2F4();
+        sndqueue_add_try(0xE, &D_80047DA0, 0);
+        func_8001C34C();
+        sndqueue_add_try(0xFC, &D_80047D8C, 0);
+        sndqueue_add_try(0xFE, 3, 0);
+        ret = sndqueue_exec_all();
+    }
+    return ret;
+}
+
+void func_8001B9D8(void) {
+    func_8001D104();
+    if (fe_value == 3) {
+        func_8001A380();
+    }
+    func_8001C2F4();
+    sndqueue_add_try(0xFE, 1, 0);
+    D_80047DE8 = 0;
+    D_80047F24 = 1;
+    D_800548EC = 1;
+    D_80047DE4 = 1;
+}
+
+void func_8001BA50(void) {
+    func_8001CEA0();
+    sndqueue_add_try(0xFC, &D_80047D8C, 0);
+    sndqueue_add_try(0xFE, NULL, 0);
+    func_8001C34C();
+    func_8001C2F4();
+    sndqueue_add_try(0xE, &D_80047EC4, 0);
+    sndqueue_add_try(0xD, &D_80047ECC, 0);
+    sndqueue_add_try(0x15, &D_8004D0E0, 0);
+    sndqueue_add_try(9, NULL, 0);
+    sndqueue_add_try(0x1B, &D_8004D0E0, 0);
+    func_8001C374();
+    sndqueue_add_try(0xFC, &vol_full, 0);
+    sndqueue_add_try(0xF7, D_80047EEC, 0);
+    sndqueue_add_try(0xFE, 2, 0);
+    D_80047DE4 = 1;
+}
+
 
 // ENDOF audio.c
 

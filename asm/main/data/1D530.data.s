@@ -38852,13 +38852,6 @@ glabel D_80047D98
 /* 30598 80047D98 */ .word 0x00000007
 /* 3059C 80047D9C */ .word 0x00000000
 
-glabel D_80047DA0
-/* 305A0 80047DA0 */ .word 0x00000080
-/* 305A4 80047DA4 */ .word 0x00000000
-
-glabel D_80047DAC
-/* 305AC 80047DAC */ .word 0x00160200
-
 glabel fade_out_active
 /* 305B4 80047DB4 */ .word 0x00000000
 
@@ -38882,12 +38875,6 @@ glabel fade_out_dest
 
 glabel fade_in_dest
 /* 305D0 80047DD0 */ .word 0x00000400
-
-glabel D_80047DE4
-/* 305E4 80047DE4 */ .word 0x00000001
-
-glabel D_80047DE8
-/* 305E8 80047DE8 */ .word 0x00000000
 
 glabel D_80047DF0
 /* 305F0 80047DF0 */ .word 0x00000000
