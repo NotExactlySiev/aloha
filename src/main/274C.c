@@ -39,6 +39,12 @@ void func_8001C374(void);
 // functions
 
 // FILE disc.c
+
+s32 cd_busy = 0;   // step1
+void* cd_arg;     // param
+void* cd_result;     // result
+u8 D_80047EDC = 0;
+
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
@@ -116,7 +122,28 @@ void func_8001A74C(void) {
     CdSyncCallback(0);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A77C);
+void func_8001A77C(void) {
+    u8 sp10[2048];
+
+    // TODO: inlined function?
+    CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
+    
+    if (!(D_80047EDC & 0x10)) return;
+    
+    do {
+        while (D_80047EDC & 0x10) {
+            CdSync(0, NULL);
+            CdControl(0U, NULL, &D_80047EDC);
+            CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
+        }
+        CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
+        CdControl(2U, &(CdlLOC) { 0, 2, 22, 0 }, NULL);
+        try_CdRead(1, &sp10, 0x80);
+    } while (func_8001A2C8(0, NULL) == -1);
+    D_80047EE4 = 0;
+    func_8001D414();
+}
+
 // ENDOF disc.c
 
 // FILE audio.c
@@ -273,12 +300,6 @@ u16 _sndqueue_size;
 s32 D_80047E94;      // this one just gets 0 written to it
 s32 sndqueue_is_running;      // execution is in process
 u16 D_80047F34;      // index of the task being executed
-
-
-s32 cd_busy = 0;   // step1
-void* cd_arg;     // param
-void* cd_result;     // result
-u8 D_80047EDC = 0;
 
 snd_task_t _sndqueue[256];
 
@@ -621,9 +642,9 @@ s32 set_mono(s32 arg0) {
 // FILE fs.c
 
 // cd file management functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file);   // cd_fs_get_file
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // cd_fs_get_file_safe
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_size);   // cd_fs_get_file_size
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file);   // iso_get_file
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_size);   // iso_get_file_size
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_file);   // cd_seek_file
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
@@ -836,7 +857,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_root);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D8B0);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DA00);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DA00);   // iso_get_file_proper
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DB04);
 
