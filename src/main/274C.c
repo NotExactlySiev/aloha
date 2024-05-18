@@ -1584,9 +1584,51 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
 
 // the variables for this one are all in the assembly file for the final one
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", regular_add_tmp);
+typedef struct {
+    int (*fn)();
+    s16 wait;
+    s16 counter;
+} RoutineTask;
+
+extern RoutineTask D_80023370[];
+extern RoutineTask D_80023470[];
+
+int regular_add(int (*fn)(), s16 arg1) {
+    RoutineTask *p;
+    int i;
+    p = D_80023370;
+    i = 32;
+    while (--i) {
+        if (p->fn == 0) {
+            p->fn = fn;
+            p->wait = arg1;
+            p->counter = 0;
+            return i;
+        }
+        p++;
+    }
+    return -1;
+}
+
+int regular_add_tmp(int (*fn)(), s16 arg1) {
+    RoutineTask *p;
+    int i;
+    p = D_80023470;
+    i = 8;
+    while (--i) {
+        if (p->fn == 0) {
+            p->fn = fn;
+            p->wait = arg1;
+            p->counter = 0;
+            return i;
+        }
+        p++;
+    }
+    return -1;
+}
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_remove);
 
@@ -1596,5 +1638,5 @@ void regular_active(s32 val) {
     D_800234B4 = val;
 }
 
-// this one is handwritten in assembly
+// ISR routine, handwritten in assembly?
 INCLUDE_ASM("asm/main/nonmatchings/274C", regular_run_tasks);

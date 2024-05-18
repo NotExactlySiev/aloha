@@ -41,7 +41,8 @@ typedef struct {
 } file_t;
 
 // TODO: these should be in headers for their own files
-void regular_add(void);
+int regular_add(int (*)(), short);
+int regular_add_tmp(int (*)(), short);
 void regular_remove(void);
 void regular_run_tasks(void);
 void rle_decode(s32, u8*, u8*);
