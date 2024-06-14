@@ -625,15 +625,37 @@ void func_8001BA50(void) {
 // 2 functions for converting between frame number and byte offset in videos
 // I have no idea why but these actually use div for dividing by constants
 // and do some other weird stuff that doesn't make any sense
-#define     BCD(x)    (((x / 10) << 4) + (x % 10))
-#define     UNBCD(x)    ((x >> 4)*10 + x&0xF)
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BB50);
 
+inline int bcd(int x)
+{ 
+    return ((x / 10) << 4) + (x % 10);
+}
+
+inline int unbcd(int x)
+{
+    return ((x >> 4)*10 + x&0xF);
+}
+
+void func_8001BB50(int arg0, CdlLOC *loc) {
+    int sector;
+    int seconds;
+    int second;
+    int minute;
+
+    seconds = get_tv_system() == TV_PAL ? 203 : 200;
+    sector = ((arg0 % 2048) * seconds) / 200;
+    second = sector / 75;
+    
+    loc->sector = bcd(sector % 75);
+    loc->minute = bcd(second / 60);
+    loc->second = bcd(second % 60);
+}
+
+// uses unbcd
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
-// ALMOST MATCHING with 4.3 -O1, only issue is double zero
 void func_8001C20C(CdlLOC* loc) {
     D_80047D78 = 0;
     D_80047F24 = 0;
@@ -651,8 +673,6 @@ void func_8001C20C(CdlLOC* loc) {
     func_8001B9D8();
 }
 
-// these 4 are NON MATCHING
-// but only double zero
 void func_8001C2F4(void) {
     sndqueue_add_try(CdlPause, 0, 0);
 }
@@ -670,8 +690,6 @@ void func_8001C374(void) {
     sndqueue_add_try(CdlDemute, 0, 0);
 }
 
-
-// NON MATCHING only 1 instruction swapped
 s32 set_mono(s32 arg0) {
     CdlATV vol;
     s32 ret;
@@ -957,7 +975,10 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DD7C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DE98);   // snd_mute
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DED0);   // call_SpuSetCommonAttr
+long func_8001DED0(SpuCommonAttr *attr)
+{
+    SpuSetCommonAttr(attr);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DEF0);   // call_***
 
@@ -965,11 +986,20 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF14);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF78);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF8C);
+long call_SpuMalloc(long size)
+{
+    return SpuMalloc(size);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DFAC);
+long call_SpuMallocWithStartAddr(unsigned long addr, long size)
+{
+    return SpuMallocWithStartAddr(addr, size);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DFCC);
+void call_SpuFree(unsigned long addr)
+{
+    SpuFree(addr);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DFEC);
 

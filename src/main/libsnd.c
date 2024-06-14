@@ -16,17 +16,17 @@ INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002D3C0);     // _spu_gcSPU
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002D6C0);     // SpuInitMalloc
 
-INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002D730);     // SpuMalloc
+INCLUDE_ASM("asm/main/nonmatchings/libsnd", SpuMalloc);     // SpuMalloc
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002D9FC);     // _SpuMallocSparateTo3
 
-INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002DD58);     // SpuMallocWithStartAddr
+INCLUDE_ASM("asm/main/nonmatchings/libsnd", SpuMallocWithStartAddr);     // SpuMallocWithStartAddr
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002E008);
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002E078);     // _SpuIsInAllocateArea_
 
-INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002E0F0);     // SpuFree
+INCLUDE_ASM("asm/main/nonmatchings/libsnd", SpuFree);     // SpuFree
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8002E16C);     // _spu_print
 
