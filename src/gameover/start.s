@@ -25,5 +25,3 @@ glabel _start
 /* DAA4 800ED2A4 70D39C27 */  addiu      $gp, $gp, -0x2C90
 /* DAA8 800ED2A8 E9B00308 */  j          main
 /* DAAC 800ED2AC 00000000 */   nop
-
-kern 0xA0, 0x3F, printf

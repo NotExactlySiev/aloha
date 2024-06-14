@@ -34,9 +34,6 @@ List entity_list_1 = {};
 List entity_list_2 = {};
 List entity_list_free = {};
 
-
-extern gprintf(char* fmt, ...);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BC4);
@@ -1460,7 +1457,7 @@ void func_800E5458(s16, s16, s16);
 // the control flow is fucked
 void func_800DC4C4(void)
 {
-    gprintf("%d\n", player_entity.comp1.state);
+    jt.printf("%d\n", player_entity.comp1.state);
     switch (player_entity.comp1.state) {
 
 make_0: // landing
@@ -1559,7 +1556,7 @@ make_5:
     player_entity.comp1.state = 5;
     case 5: // falling
         D_80102C6C = 0;
-        gprintf("timer: %d\n", D_80102C14);
+        jt.printf("timer: %d\n", D_80102C14);
         if (func_800DCB50()) goto make_3;
 
         if (player_entity.vel_y <= 0)
@@ -2181,7 +2178,7 @@ void *func_800E2184(void *src, s32 section, s32 subsection)
     u32 size = func_800E2124(src, section, subsection, buffer);
     size = (size + 3) & ~3;     // align to 4
     func_800E3E54(buffer + size);
-    gprintf("%d %d\t[%d]\t-> %p\n", section, subsection, size, buffer);
+    jt.printf("%d %d\t[%d]\t-> %p\n", section, subsection, size, buffer);
     return buffer;
 }
 
@@ -2510,10 +2507,10 @@ SVECTOR* camera_pos = 0x1F8003C8;
     //mag = 4;
 
     GBuffer* gbuf = gbuffer_get_current();
-    gprintf("LAYER %d\n", mag);
-    gprintf("%p\t", gbuf->nextfree);
+    jt.printf("LAYER %d\n", mag);
+    jt.printf("%p\t", gbuf->nextfree);
     gbuf->nextfree = func_800F4548(mesh, gbuf->nextfree, gbuf->ot + mag, 0);
-    gprintf("-> %p\n", gbuf->nextfree);
+    jt.printf("-> %p\n", gbuf->nextfree);
 
     //for (;;);
 }*/

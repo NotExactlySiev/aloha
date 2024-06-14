@@ -6,9 +6,6 @@
 
 /* this is actually in the final file (initialized to 0) */
 
-glabel D_80047E84
-/* 3066C 80047E84 */ .space 0x08
-
 glabel D_80047E8C
 /* 30674 80047E8C */ .space 0x08
 
@@ -21,23 +18,11 @@ glabel D_80047E9E
 glabel D_80047E9F
 /* 30687 80047E9F */ .space 0x05
 
-glabel D_80047EA4
-/* 3068C 80047EA4 */ .space 0x08
-
-glabel D_80047EAC
-/* 30694 80047EAC */ .space 0x08
-
 glabel D_80047ECC
 /* 306B4 80047ECC */ .space 0x01
 
 glabel D_80047ECD
 /* 306B5 80047ECD */ .space 0x07
-
-glabel D_80047EE4
-/* 306CC 80047EE4 */ .space 0x08
-
-glabel D_80047F24
-/* 3070C 80047F24 */ .space 0x08
 
 glabel D_80047F44
 /* 3072C 80047F44 */ .space 0x08

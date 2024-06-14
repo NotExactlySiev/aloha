@@ -45,8 +45,6 @@ extern struct {
     char*       (*execs_get_path)(s32);
     s32         (*get_tv_system)(void);
     s32         (*get_region)(void);
-    //void        (*printf)(const char* fmt, ...);    // I ADDED THIS MYSELF
-    //UNK(10, 10);
     UNK(9, 10);
     char*       (*get_version_string)(void);
     UNK(12, 191);
@@ -114,7 +112,10 @@ extern struct {
     UNK(787, 816);
     s32         (*audio_play_by_id)(s32);
     void        (*audio_unk3)(s32);
-    UNK(819, 1023);
+    UNK(819, 1000);
+    // custom added functions block
+    void        (*printf)(const char* fmt, ...);    // I ADDED THIS MYSELF
+    UNK(1002, 1023);
 } jt;
 #undef UNK
 

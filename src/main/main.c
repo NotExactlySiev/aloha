@@ -88,7 +88,7 @@ void file_execute_loop(void)
         if (g_CurrFile == -1) g_CurrFile = 0;
 
         addr = g_Files[g_CurrFile].header;
-        printf("now executing: %s\n", g_Files[g_CurrFile].addr);
+        //printf("now executing: %s\n", g_Files[g_CurrFile].addr);
         if (addr != NULL) {
             // if addr isn't NULL, it's compressed
             if ((u32) addr & 1) {
@@ -578,10 +578,8 @@ void exception_handler(void)
         u32 tcb_size;
     } *bios_tables = (void*) 0x100;
 
-   // when the exception returns, if v0 is not 0 the exception generating
-   // function jumps to it
-    //printf("BRUH!\n");
-
+    // when the exception returns, if v0 is not 0 the exception generating
+    // function jumps to it
     bios_tables->pcb->current_tcb->regs[2] = 0;
 }
 
@@ -657,7 +655,7 @@ int main(int argc, char** argv)
     // debug mode
     //getGameConfig()->debug_features = 1;
     // give printf
-    jt_set(printf, 9);
+    jt_set(printf, 1001);
     //CdSetDebug(2);
 
     // run the game

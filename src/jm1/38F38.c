@@ -661,7 +661,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
 
 void *draw_mesh(int mesh_with_flag, void *prim, u32 *ot_with_flag, u32 *arg3)
 {
-    //gprintf("DRAWING %p : %p\n", mesh_with_flag, arg3);
+    //jt.printf("DRAWING %p : %p\n", mesh_with_flag, arg3);
     return func_800F4548(mesh_with_flag, prim, ot_with_flag, arg3);
     //return prim;
 }
@@ -765,7 +765,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8FE8);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F9034);
 /*void _func_800F9034(Entity *this)
 {
-    //gprintf("update bullet!\n");
+    //jt.printf("update bullet!\n");
 }*/
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F91EC);
