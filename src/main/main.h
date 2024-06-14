@@ -43,7 +43,7 @@ typedef struct {
 // TODO: these should be in headers for their own files
 int regular_add(int (*)(), short);
 int regular_add_tmp(int (*)(), short);
-void regular_remove(void);
+void regular_remove(int);
 void regular_run_tasks(void);
 void rle_decode(s32, u8*, u8*);
 void lz1_decode(void*, void*);
