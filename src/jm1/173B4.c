@@ -1291,7 +1291,7 @@ void _func_800DA4E8(void)
                         tmp->vz = pos->vz + D_80121EE8[pos->pad].vz;
                         func_800E5E60(tmp, &D_801226E8[pos->pad], D_80102AD4 + (id & 0x7FFF) + 0x10000);
                     } else {
-                        //gprintf("ID %d, %d, %d\n", id, pos->vx, pos->vy);
+                        //jt.printf("ID %d, %d, %d\n", id, pos->vx, pos->vy);
                         func_800E5E60(pos, 0, D_80102AD4 + id + 0x10000);
                     }
                 }
@@ -2300,7 +2300,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
     // loads up the mesh palette and sets conversion
     func_800E3F5C(mesh_palette);
     count = *data++;
-    //gprintf("LOADING %d MESHES\n", count);
+    //jt.printf("LOADING %d MESHES\n", count);
     for (u32 i = 0; i < count && D_8013CC28 <= 1024; i++) {
         m = &mesh_array[D_8013CC28++];
         head = *data++;
@@ -2311,7 +2311,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
         data += 1;
         // skip this section
         data = ((SVECTOR*) data) + m->verts->count + 1;
-        //gprintf("\tMESH %d: %d, %d VERTS\n", D_8013CC28-1, head, m->verts->count);
+        //jt.printf("\tMESH %d: %d, %d VERTS\n", D_8013CC28-1, head, m->verts->count);
         m->unk1 = data;
         data += 1;
         data += m->unk1->count + 1;
@@ -2324,10 +2324,10 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
         // skip header
         data += fcount + 1;
         if (fcount > 2) {
-                //gprintf("BIG ONE!\n");
+                //jt.printf("BIG ONE!\n");
         }
         for (int j = 0; j < fcount; j++) {
-            //gprintf("\t\tSET VOFF: %d\tFOFF: %d\n", header[2*j], header[2*j+1]);
+            //jt.printf("\t\tSET VOFF: %d\tFOFF: %d\n", header[2*j], header[2*j+1]);
             gcount = *data++ + 1;
             for (int k = 0; k < gcount; k++) {
                 
@@ -2335,10 +2335,10 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
                 data += (*data)/4 + 1;
                 u32 size = *data++;
                 Face* face = data;
-                //gprintf("\t\t\tSUBSET %d FACES\n", size/sizeof(Face));
+                //jt.printf("\t\t\tSUBSET %d FACES\n", size/sizeof(Face));
                 data += size/4;
                 for (size; size > 0; size -= sizeof(Face)) {
-                    //gprintf("FACES %X %X\n", faces->flags0, faces->flags1);
+                    //jt.printf("FACES %X %X\n", faces->flags0, faces->flags1);
                     if (face->flags1 & 0x8000 == 0) {
                         // texture stuff. TODO
                     }
@@ -2439,7 +2439,7 @@ SVECTOR* camera_pos = 0x1F8003C8;
 {
     //if ((id & 0xFFFF) == 406) 
     //_func_800E5E60(pos, angle, id);
-        //gprintf("DRAWING %X\n", id);
+        //jt.printf("DRAWING %X\n", id);
 
 }*/
 
@@ -2454,30 +2454,30 @@ SVECTOR* camera_pos = 0x1F8003C8;
     SVECTOR *dir = 0x1F800000;
     SVECTOR *tmp = 0x1F800024;
     Mesh* mesh = &mesh_array[id & 0x3FF];
-    //gprintf("DRAW %d\n", id);
-    //gprintf("\tat\t%d %d %d\n", pos->vx, pos->vy, pos->vz);
-    //gprintf("\trot\t%d %d %d\n", angle->vx, angle->vy, angle->vz);
+    //jt.printf("DRAW %d\n", id);
+    //jt.printf("\tat\t%d %d %d\n", pos->vx, pos->vy, pos->vz);
+    //jt.printf("\trot\t%d %d %d\n", angle->vx, angle->vy, angle->vz);
     
     
     dir->vx = pos->vx - camera_pos->vx;
     dir->vy = pos->vy - camera_pos->vy;
     dir->vz = pos->vz - camera_pos->vz;
     s32 mag2 = func_800F4354(dir, tmp, mesh);
-    //gprintf("DRAW: MAG2 %d\t\n", mag2);
+    //jt.printf("DRAW: MAG2 %d\t\n", mag2);
     //s32 mag  = func_800C9D70(mag2);
     // is in frame?
     if (mag2 <= -1) return;
 
     if (mag2 >= D_801380B0/4) {
-        //gprintf("FAR");
+        //jt.printf("FAR");
     }
 
     if (mag2 >= D_801380B0) {
-        //gprintf(", VERY FAR");
+        //jt.printf(", VERY FAR");
     }
 
     id |= D_8013EC48[id & 0x3FF] & 0xFC00;
-    //gprintf(" ADDED FLAGS: %X\n", D_8013EC48[id & 0x3FF] & 0xFC00);
+    //jt.printf(" ADDED FLAGS: %X\n", D_8013EC48[id & 0x3FF] & 0xFC00);
 
     // for now assume no 0x800
     s32 mag = func_800C9D70(mag2) + D_80141468[id & 0x3FF];
@@ -2485,9 +2485,9 @@ SVECTOR* camera_pos = 0x1F8003C8;
     s32 diff = mag;
     if (mag < 1) diff = 1;
     if (mag > 511) diff = 511;
-    //gprintf("MAG %d\t", mag);
+    //jt.printf("MAG %d\t", mag);
     mag = 558 - diff;
-    //gprintf("-> %d\n", mag);
+    //jt.printf("-> %d\n", mag);
 
     // let's assume angle == NULL
     // just use the basic matrices
