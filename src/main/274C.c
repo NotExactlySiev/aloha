@@ -20,7 +20,6 @@ s32 fe_value;
 
 
 // regular task vars, they're in the assembly
-extern volatile s32 D_800234B0;
 extern s32 D_80047D78;
 extern SpuVolume D_80047D8C;
 s32 D_80047EAC;
@@ -36,116 +35,6 @@ s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2);
 void func_8001C374(void);
 
 // functions
-
-// FILE disc.c
-
-s32 cd_busy = 0;   // step1
-void* cd_arg;     // param
-void* cd_result;     // result
-u8 D_80047EDC = 0;
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80019F4C);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
-
-s32 try_CdControl(u8 arg0, u8* arg1, u8* arg2) {
-    while (CdControl(arg0, arg1, arg2) != 1);
-    return 1;
-}
-
-s32 try_CdControlB(u8 arg0, u8* arg1, u8* arg2) {
-    while (CdControlB(arg0, arg1, arg2) != 1);
-    return 1;
-}
-
-s32 try_CdGetSector(void* madr, s32 size) {
-    while (CdGetSector(madr, size) == 0);
-    return 1;
-}
-
-s32 try_CdRead(s32 sectors, u32* buf, s32 mode) {
-    while (CdRead(sectors, buf, mode) == 0);
-    return 1;
-}
-
-extern s32 D_80047EE4;
-
-// MATCHING with 4.3 -O1   
-s32 func_8001A2C8(s32 mode, u8* result) {
-    s32 rc;
-    s32 ret;
-    
-    rc = CdReadSync(mode, result);
-    ret = -1;
-    if (rc == -1) {
-        D_80047EE4 = 0;
-        ret = func_8001D414();
-    }
-    
-    if (rc >= 0) {
-        ret = func_80019990();
-    }
-    return ret;
-}
-
-
-s32 try_CdMix(CdlATV* vol) {
-    while (CdMix(vol) == 0);
-    return 1;
-}
-
-s32 cd_get_status(u8* result) {
-    return CdControl(CdlNop, 0, result);
-}
-
-void cd_read_callback(void) {
-}
-
-int func_8001A378(void) {
-    return 0;
-}
-
-void func_8001A380(void) {
-    CdReadyCallback(cd_ready_callback);
-    CdReadCallback(cd_read_callback);
-}
-
-
-// jmptable setter 0x100-0x140
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A3B8);
-
-// clears all cd callbacks
-void func_8001A74C(void) {
-    CdReadyCallback(0);
-    CdReadCallback(0);
-    CdSyncCallback(0);
-}
-
-CdlLOC D_80047DAC = { 0, 2, 22, 0 };
-
-void func_8001A77C(void) {
-    u8 sp10[2048];
-
-    // TODO: inlined function?
-    CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
-    
-    if (!(D_80047EDC & 0x10)) return;
-    
-    do {
-        while (D_80047EDC & 0x10) {
-            CdSync(0, NULL);
-            CdControl(0U, NULL, &D_80047EDC);
-            CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
-        }
-        CdSync(0, NULL); while (cd_get_status(&D_80047EDC) != 1);
-        CdControl(2U, &D_80047DAC, NULL);
-        try_CdRead(1, &sp10, 0x80);
-    } while (func_8001A2C8(0, NULL) == -1);
-    D_80047EE4 = 0;
-    func_8001D414();
-}
-
-// ENDOF disc.c
 
 // FILE audio.c
 
@@ -164,14 +53,9 @@ void func_8001A77C(void) {
 
 #define CLAMP(a,b,x)    { if (x < a) x = a; if (x > b) x = b; }
 
-typedef struct {
-    u8     com;
-    u32    arg0;
-    u32    arg1;
-} snd_task_t;
 
 // TODO: the multiplications here have the weird if statements
-void set_vol_scaled(SpuVolume* vol, s32 scale)
+void set_vol_scaled(SpuVolume *vol, s32 scale)
 {
     SpuCommonAttr attr;
     CLAMP(0, VOL_FULL, scale);
@@ -182,7 +66,7 @@ void set_vol_scaled(SpuVolume* vol, s32 scale)
 }
 
 // this one ignores fading effects
-void set_vol_full(SpuVolume* vol) {
+void set_vol_full(SpuVolume *vol) {
     set_vol_scaled(vol, VOL_FULL);
     vol_full = *vol;
 }
@@ -295,273 +179,6 @@ void func_8001AE90(void)
     fade_paused = 0;
 }
 
-s8 sndqueue_com = SNQ_FINISHED;
-s8 D_80047D94 = SNQ_FINISHED;
-s32 D_80047DD8 = 1;  // this is still a mystery. probably enum. gets set in the first function here
-s32 D_80047DE0 = 0;  // step? no idea. maybe a state machine
-s32 D_80047DEC = 0;
-s32 _sndqueue_empty = 0;
-s32 _sndqueue_busy = 0;
-u16 _sndqueue_next;
-u16 _sndqueue_size;
-s32 D_80047E94;      // this one just gets 0 written to it
-s32 sndqueue_is_running;      // execution is in process
-u16 D_80047F34;      // index of the task being executed
-
-snd_task_t _sndqueue[256];
-
-s8 D_80047EC4[8];
-
-void sndqueue_reset(void) {
-    _sndqueue_next = 0;
-    D_80047F34 = 0;
-    D_80047E94 = 0;
-    D_80047DD8 = 1;
-    _sndqueue_empty = 1;
-    D_80047DE0 = 0;
-    _sndqueue[0].com = -1;
-    _sndqueue_size = 0;
-}
-
-s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2)
-{
-    u8 tmp;
-    snd_task_t* task;
-
-    task = &_sndqueue[_sndqueue_next];
-
-    if (_sndqueue_busy == 1 || _sndqueue_size > 192) return 0;
-
-    _sndqueue_busy = 1;
-    _sndqueue[(_sndqueue_next+1)%256].com = -1;
-    task->com = arg0;
-    task->arg0 = arg1;
-    task->arg1 = arg2;
-
-    _sndqueue_size++;
-    _sndqueue_next = (_sndqueue_next + 1) & 0xff;
-    _sndqueue_empty = 0;
-    _sndqueue_busy = 0;
-    return 1;
-}
-
-void sndqueue_add_try(u8 arg0, u32 arg1, u32 arg2)
-{
-    if (sndqueue_is_running == 0) {
-        while (_sndqueue_size > 192)
-            sndqueue_exec();
-    }
-    sndqueue_add(arg0, arg1, arg2);
-}
-
-//NCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
-// execute one block of command
-s32 sndqueue_exec()
-{
-    s32 rc;
-
-    if (sndqueue_is_running == 1) return 0;
-    sndqueue_is_running = 1;
-
-#if 0
-    printf("RUN %d: ", D_80047F34);
-    snd_task_t *p = &_sndqueue[D_80047F34];
-    for (int i = 0; i < 6; i++) {
-        printf("%X\t", p->com);
-        if (p->com == 0xFF) break;
-        p++;
-    }
-    printf("\n");
-#endif
-
-    // try again
-    if (cd_busy == 1) {
-        rc = CdControl(sndqueue_com, cd_arg, cd_result);
-        if (rc != 1) {
-            cd_busy = 1;
-            sndqueue_is_running = 0;
-            return 0;
-        }
-        cd_busy = 0;
-        D_80047DE0 = 1;
-        goto flush_and_flee;
-    }
-
-    //return;
-    // ...
-    // check_fe:
-    CdSync(1, 0);
-    func_80019F4C(rc, 0);   // rc doesn't exist yet lolololol
-    if (2 == fe_value && func_8001CE18()) {
-        fe_value = 0;
-        set_vol_scaled(&D_80047D8C, 0x400);
-        if (1 == D_80047D78) {
-            sndqueue_add(CdlPause, 0, 0);   // TODO: arguments
-            sndqueue_add(CdlSetmode, D_80047EC4, 0);
-            sndqueue_add(CdlSetfilter, 0, 0);
-            sndqueue_add(CdlSeekL, 0, 0);
-            sndqueue_add(CdlPause, 0, 0);
-            sndqueue_add(CdlReadS, 0, 0);
-            sndqueue_add(SNQ_SET_SCALED, 0, 0);
-            sndqueue_add(SNQ_FUNC9, 0, 0);
-            sndqueue_add(SNQ_SET_FE, 2, 0);
-        } else {
-            sndqueue_add(CdlPause, 0, 0);
-            D_800548EC = 0;
-        }
-    }
-    // ... more shit
-    CdSync(0, 0);
-    rc = cd_get_status(&D_80047EDC);
-    if (rc == 1) {
-        if (D_80047EDC & 0x10) {
-            cd_busy = 1;
-flush_and_flee:
-            D_80047EE4 = 0;
-            func_8001D414();
-            sndqueue_is_running = 0;
-            return 0;
-        }
-        if (D_80047EDC & 0x40) {
-            sndqueue_is_running = 0;
-            return 0;
-        }
-    }
-
-    // and then the actual queue
-    snd_task_t* t;
-    u32 next = 0xDEADBEEF;
-
-    while (1) { // i think I can break instead of return
-        t = &_sndqueue[D_80047F34];
-        if (t->com == 0xFF) {
-            D_80047DD8 = 0;
-            sndqueue_com = CdlNop;
-            cd_arg = 0;
-            cd_result = &D_80047EDC;
-            cd_busy = (1 != cd_get_status(&D_80047EDC));
-            _sndqueue_empty = 1;
-            break;
-        }
-
-        sndqueue_com = t->com;
-        D_80047D94 = t->com;
-        if (sndqueue_com == SNQ_SET_FE) {   // done
-            s32 newval = t->arg0;
-            if (fe_value == 5 && newval != 5)
-                func_8001A380(); // activate ready and read callbacks
-            if (newval != 2)
-                func_8001D104();
-            fe_value = newval;
-            next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_SET_FULL) {
-            set_vol_full(t->arg0);
-            next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_SET_SCALED) {
-            set_vol_scaled(t->arg0, vol_scale);
-            next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FADE_OUT) {     // done
-            fade_out_active = t->arg0;
-            fading_out = t->arg0;
-            if (fade_out_active == 1) {
-                // turn fadeout on
-                if (fade_in_active == 1) {
-                    regular_clear_tmps(fade_in_task);
-                    fade_in_active = 0;
-                    fading_in = 0;
-                    if (fade_in_callback != 0) (*fade_in_callback)();
-                    fade_in_callback = 0;
-                }
-            } else {
-                // turn fadeout off
-                if (-1 < fade_out_task) regular_clear_tmps(fade_out_task);
-                vol_scale = VOL_FULL;
-                fade_paused = 0;
-            }
-            next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FADE_IN) {      // done
-            fade_in_active = t->arg0;
-            fading_in = t->arg0;
-            if (fade_in_active == 1) {
-                // turn fadein on
-                if (fade_out_active == 1) {
-                    regular_clear_tmps(fade_out_task);
-                    fade_out_active = 0;
-                    fading_out = 0;
-                    if (fade_out_callback != 0) (*fade_out_callback)();
-                    fade_out_callback = 0;
-                }
-            } else {
-                // turn fadein off
-                if (-1 < fade_in_task) regular_clear_tmps(fade_in_task);
-                vol_scale = VOL_FULL;
-                fade_paused = 0;
-            }
-            next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_SET_REVERB) {   // done
-            SpuCommonAttr attr;
-            attr.mask = 0x100;
-            attr.cd.reverb = t->arg0;
-            SpuSetCommonAttr(&attr);
-            D_80047EA4 = t->arg0;
-            func_8001FBE4();
-            next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FUNC8) {    // done
-            if (fade_out_active == 1 || fade_in_active == 1) break;
-            next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FUNC9) {    // done
-            func_8001D0AC(t->arg0);
-            next = D_80047F34 + 1;
-        } else      
-        if (sndqueue_com == SNQ_FUNC10) {   // done
-            D_80047DEC = t->arg0;
-            next = D_80047F34 + 1;
-        } else {   // done
-            // normal cd control functions
-            D_80047DD8 = 0;
-
-            cd_arg = t->arg0;
-            cd_result = t->arg1;
-            rc = CdControl(sndqueue_com, cd_arg, cd_result);
-            if (rc == 1) {
-                cd_busy = 0;
-                D_80047E94 = 0;
-                D_80047F34 = (D_80047F34 + 1) & 0xff;
-                _sndqueue_size -= 1;
-            } else {
-                cd_busy = 1;
-            }
-            break;
-        }
-        _sndqueue_size -= 1;
-        D_80047F34 = next & 0xff;
-    }
-
-    sndqueue_is_running = 0;
-    return 0;
-}
-
-
-
-// TODO: sound lol
-int sndqueue_exec_all(void)
-{
-    s32 ret = 0;
-    if (_sndqueue_empty == 0) do {
-        ret = sndqueue_exec();
-    } while (_sndqueue_empty == 0 && ret != -1);
-    CdSync(0, 0);
-    return ret;
-}
-
-
 // and then these functinos actually use those 4 to do stuff
 u8 D_80047DA0[8] = { 8, 0, 0, 0, 0, 0, 0, 0 };
 int D_80047DE4 = 1;
@@ -599,6 +216,8 @@ void func_8001B9D8(void) {
     D_800548EC = 1;
     D_80047DE4 = 1;
 }
+
+extern s8 D_80047EC4[];
 
 void func_8001BA50(void) {
     func_8001CEA0();
@@ -716,10 +335,12 @@ s32 set_mono(s32 arg0) {
 
 // FILE fs.c
 
-// cd file management functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file);   // iso_get_file
+// iso functions
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file);        // iso_get_file
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_size);   // iso_get_file_size
+
+// helper functions for cd stuff
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_file);   // cd_seek_file
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
@@ -738,7 +359,7 @@ s32 func_8001C734(s32 mode, u8* result) {   // pause
 
 // cd filesystem io
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_read);   // cd_fs_read
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_write);   // cd_fs_write
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_write);   // cd_fs_read_harder?
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_io);   // cd_fs_io
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);   // cd_fs_load_exe
 
@@ -829,145 +450,6 @@ void fade_unpause(void) {
 
 // play movie
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
-
-// FILE disc_cache.c
-
-// TODO: all CD/FS stuff should go in a directory of their own
-// with these in a common header
-#define     CD_SECTOR_SIZE      0x800
-#define     CACHE_ENTRIES       10
-
-typedef struct {
-    u32    last_access;
-    CdlLOC loc;
-    u8     data[CD_SECTOR_SIZE];
-} cache_entry_t;
-
-u32 D_80047DB0;
-cache_entry_t cache_entries[CACHE_ENTRIES];
-
-void func_8001D398(cache_entry_t *block)
-{
-    if (D_80047DB0++ > 0x100000) {
-        // adjust the main counter and all the counters for all
-        // the blocks
-        for (int i = 0; i < CACHE_ENTRIES; i++) {
-            cache_entries[i].last_access >>= 1;
-            cache_entries[i].last_access++;
-        }
-        D_80047DB0 >>= 1;
-    }
-    block->last_access = D_80047DB0;
-}
-
-// sector_cache_clear
-void func_8001D414(void)
-{
-    for (int i = 0; i < CACHE_ENTRIES; i++)
-        cache_entries[i].last_access = 0;
-}
-
-// sector_cache_get
-s32 func_8001D440(CdlLOC* loc, u8* data)
-{
-    int i;  
-    u32 oldest_access;
-    cache_entry_t *entry;
-
-    for (i = 0; i < CACHE_ENTRIES; i++) {
-        if (cache_entries[i].last_access
-         && strncmp(3, loc, &cache_entries[i].loc)) {
-            // found it!
-            entry = &cache_entries[i];
-            memcpy(0x800, &cache_entries[i].data, data);
-            goto done;
-        }
-    }
-
-    // it's not cached, load from disc
-    CdSync(0, 0);
-    do {
-        try_CdControl(2, &loc->minute, 0);
-        try_CdRead(1, data, 0x80);
-    } while (func_8001A2C8(0, 0) == -1);
-    try_CdControl(9, 0, 0); //pause
-
-    // and then try to cache it. first look for an empty entry
-    for (i = 0; i < CACHE_ENTRIES; i++) {
-        if (cache_entries[i].last_access == 0) {
-            entry = &cache_entries[i];
-            goto found;
-        }
-    }
-    
-    // if not found, replace the least recently accessed sector
-    oldest_access = -1;
-    for (i = 0; i < CACHE_ENTRIES; i++) {
-        if (cache_entries[i].last_access < oldest_access) {
-            oldest_access = cache_entries[i].last_access;
-            entry = &cache_entries[i];
-        }
-    }
-
-found:
-    memcpy(0x800, data, entry->data);
-    entry->loc = *loc;
-
-done:
-    func_8001D398(entry);
-    return 1;
-}
-
-// ENDOF cache.c
-
-// FILE iso.c?
-s32 func_8001D67C(u8* arg0) {
-    s32 ret;
-    s32 shift;
-    ret = 0;
-    for (shift = 0; shift < 32; shift += 8) {
-        ret |= *arg0++ << shift;
-    }
-    return ret;
-}
-
-// root sector loc is cached here
-CdlLOC D_80047E84;
-int D_80047EE4;
-
-int func_8001D6AC(CdlLOC *loc)
-{
-    int rc;
-    u8 buf[0x800];
-    if (D_80047EE4 == 0) {
-        rc = func_8001D440(&D_80047DAC, buf);
-        if (rc != 1)
-            return 0;
-        D_80047EE4 = rc;
-        CdIntToPos(func_8001D67C(buf + 0x9E), &D_80047E84);
-    }
-
-    *loc = D_80047E84;
-    return 1;
-}
-
-// never called
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D740);
-
-// load_sectors
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D780);
-
-// get the first directory in path
-INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_root);
-
-// iso_get_file
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D8B0);
-
-// static
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DA00);   // iso_get_file_proper
-
-// does this also belong to iso.c? calls some of the functions there
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DB04);
 
 // trivial and caller sound functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DD7C);
@@ -1453,170 +935,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // vid_wait_for_
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // vid_play_file
 
 // ENDOF vid.c
-
-// FILE gpu.c
-
-// these jt ones all should be matching as they're very simple
-int call_StoreImage(RECT *rect, u_long *p) {
-    return StoreImage(rect, p);
-}
-
-int call_MoveImage(RECT *rect, int x, int y) {
-    return MoveImage(rect, x, y);
-}
-
-DISPENV *call_GetDispEnv(DISPENV *env) {
-    return GetDispEnv(env);
-}
-
-DRAWENV *call_GetDrawEnv(DRAWENV *env) {
-    return GetDrawEnv(env);
-}
-
-void call_SetDrawEnv(DR_ENV *dr_env, DRAWENV *env) {
-    SetDrawEnv(dr_env, env);
-}
-
-void call_SetDrawOffset(DR_OFFSET *p, u_short *ofs) {
-    SetDrawOffset(p, ofs);
-}
-
-void call_SetDrawArea(DR_AREA *p, RECT *r) {
-    SetDrawArea(p, r);
-}
-
-#undef GetGraphType
-int call_GetGraphType(void) {
-    return GetGraphType();
-}
-
-DISPENV *call_SetDefDispEnv(DISPENV *env, int x, int y, int w, int h) {
-    return SetDefDispEnv(env, x, y, w, h);
-}
-
-DRAWENV *call_SetDefDrawEnv(DRAWENV *env, int x, int y, int w, int h) {
-    return SetDefDrawEnv(env, x, y, w, h);
-}
-
-void call_SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw) {
-    SetDrawMode(p, dfe, dtd, tpage, tw);
-}
-
-int call_ClearImage(RECT *rect, u_char r, u_char g, u_char b) {
-    return ClearImage(rect, r, g, b);
-}
-
-int call_LoadImage(RECT *rect, u_long *p) {
-    return LoadImage(rect, p);
-}
-
-u_long *call_CleaOTag(u_long *ot, int n) {
-    return ClearOTag(ot, n);
-}
-
-u_long *call_ClearOTagR(u_long *ot, int n) {
-    return ClearOTagR(ot, n);
-}
-
-void call_DrawOTag(u_long *p) {
-    DrawOTag(p);
-}
-
-DISPENV *call_PutDispEnv(DISPENV *env) {
-    return PutDispEnv(env);
-}
-
-DRAWENV *call_PutDrawEnv(DRAWENV *env) {
-    return PutDrawEnv(env);
-}
-
-int call_DrawSync(int mode) {
-    return DrawSync(mode);
-}
-
-int call_ResetGraph(int mode) {
-    return ResetGraph(mode);
-}
-
-void call_wait_frame(void) {
-    wait_frame();
-}
-
-int call_VSync(int mode) {
-    return VSync(mode);
-}
-
-int get_vsync_event_cnt(void) {
-    return D_800234B0;
-}
-
-void wait_frame(void) {
-    int curr = get_vsync_event_cnt();
-    while (curr == get_vsync_event_cnt());
-}
-
-int call_SetGraphDebug(int level) {
-    return SetGraphDebug(level);
-}
-
-void call_SetDispMask(int mask) {
-    SetDispMask(mask);
-}
-
-void call_DrawPrim(void *p) {
-    DrawPrim(p);
-}
-
-u_short call_LoadClut(u_long *clut, int x, int y) {
-    return LoadClut(clut, x, y);
-}
-
-u_short call_LoadTPage(u_long *pix, int tp, int abr, int x, int y, int w, int h) {
-    return LoadTPage(pix, tp, abr, x, y, w, h);
-}
-
-long call_SetVideoMode(long mode) {
-    return SetVideoMode(mode);
-}
-
-long call_GetVideoMode(void) {
-    return GetVideoMode();
-}
-
-void jt_series_gpu(void) {
-    jt_set(call_ResetGraph, 0x180);
-    jt_set(call_wait_frame, 0x181);
-    jt_set(call_SetGraphDebug, 0x182);
-    jt_set(call_SetDispMask, 0x183);
-    jt_set(get_vsync_event_cnt, 0x184);
-    jt_set(call_PutDispEnv, 0x185);
-    jt_set(call_PutDrawEnv, 0x186);
-    jt_set(call_CleaOTag, 0x187);
-    jt_set(call_ClearOTagR, 0x188);
-    jt_set(call_DrawOTag, 0x189);
-    jt_set(call_LoadImage, 0x18A);
-    jt_set(call_ClearImage, 0x18B);
-    jt_set(call_DrawSync, 0x18C);
-    jt_set(call_SetDrawMode, 0x18D);
-    jt_set(call_SetDefDispEnv, 0x18E);
-    jt_set(call_SetDefDrawEnv, 0x18F);
-    jt_set(call_GetGraphType, 0x190);
-    jt_set(call_VSync, 0x191);
-    jt_set(call_GetDispEnv, 0x192);
-    jt_set(call_GetDrawEnv, 0x193);
-    jt_set(call_SetDrawEnv, 0x194);
-    jt_set(call_SetDrawOffset, 0x195);
-    jt_set(call_SetDrawArea, 0x196);
-    jt_set(call_StoreImage, 0x197);
-    jt_set(call_MoveImage, 0x198);
-    jt_set(call_DrawPrim, 0x199);
-    jt_set(call_LoadTPage, 0x19A);
-    jt_set(call_LoadClut, 0x19B);
-    jt_set(call_SetVideoMode, 0x19C);
-    jt_set(call_GetVideoMode, 0x19D);
-}
-
-// ENDOF gpu.c
 
 // standard str functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", strcpy);

@@ -36,6 +36,7 @@ typedef struct {
 
 #define UNK(a,b)    void* unk##a[b - a + 1]
 extern struct {
+    // General Functions
     void        (*nop)(void);
     void        (*jt_set)(void*, s32);
     s32         (*is_game_running)(void);
@@ -55,7 +56,10 @@ extern struct {
     void        (*routine_task_remove)(u32 taskid);
     UNK(226, 239);
     u32         (*PadRead)();    
-    UNK(241, 257);
+    UNK(241, 255);
+
+    // CD functions
+    UNK(256, 257);
     s32         (*snd_queue_exec)(void);
     UNK(259, 272);
     s32         (*cd_fs_read)(const char* addr, void* buf, s32 mode);
@@ -67,6 +71,8 @@ extern struct {
     UNK(299, 319);
     s32         (*play_movie)(char*, void*, void* callback);
     UNK(321, 383);
+
+    // GPU Functions
     s32         (*ResetGraph)(s32 mode);
     void        (*wait_for_vsync)(void);
     void        (*SetGraphDebug)(s32 level);
@@ -97,7 +103,15 @@ extern struct {
     u16         (*LoadClut)(u16* data, u32 x, u32 y);
     u32         (*SetVideoMode)(u32);
     u32         (*GetVideoMode)(void);
-    UNK(414, 767);
+    UNK(414, 511);
+
+    // Audio Functions
+    UNK(512, 639);
+
+    // Memory Card Functions
+    UNK(640, 767);
+
+    // More MC/Audio stuff
     void (*play_vab)(s32, void*, s32);  // audio play by addr? play file?
     UNK(769, 772);
     s32         (*audio_unk_volume)(s16);
@@ -113,8 +127,9 @@ extern struct {
     s32         (*audio_play_by_id)(s32);
     void        (*audio_unk3)(s32);
     UNK(819, 1000);
-    // custom added functions block
-    void        (*printf)(const char* fmt, ...);    // I ADDED THIS MYSELF
+
+    // added block for my own new functions
+    void        (*printf)(const char* fmt, ...);
     UNK(1002, 1023);
 } jt;
 #undef UNK

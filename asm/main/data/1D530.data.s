@@ -38876,8 +38876,7 @@ glabel fade_out_dest
 glabel fade_in_dest
 /* 305D0 80047DD0 */ .word 0x00000400
 
-glabel D_80047DF0
-/* 305F0 80047DF0 */ .word 0x00000000
+/* unused? */
 /* 305F8 80047DF8 */ .word 0x6F726463
 /* 305FC 80047DFC */ .word 0x005C3A6D
 
