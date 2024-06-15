@@ -21,7 +21,6 @@ s32 fe_value;
 
 // regular task vars, they're in the assembly
 extern volatile s32 D_800234B0;
-extern s32 D_800234B4;
 extern s32 D_80047D78;
 extern SpuVolume D_80047D8C;
 s32 D_80047EAC;
@@ -1617,6 +1616,7 @@ void jt_series_gpu(void) {
     jt_set(call_GetVideoMode, 0x19D);
 }
 
+// ENDOF gpu.c
 
 // standard str functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", strcpy);
@@ -1640,86 +1640,3 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", memset2);
 INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
-
-// ENDOF gpu.c
-
-// FILE routine.c
-
-// the variables for this one are all in the assembly file for the final one
-
-typedef struct {
-    int (*fn)();
-    s16 wait;
-    s16 counter;
-} RoutineTask;
-
-extern RoutineTask D_80023370[];
-extern RoutineTask D_80023470[];
-
-int regular_add(int (*fn)(), s16 arg1)
-{
-    RoutineTask *p;
-    int i;
-    p = D_80023370;
-    i = 32;
-    while (--i) {
-        if (p->fn == 0) {
-            p->fn = fn;
-            p->wait = arg1;
-            p->counter = 0;
-            return i;
-        }
-        p++;
-    }
-    return -1;
-}
-
-int regular_add_tmp(int (*fn)(), s16 arg1)
-{
-    RoutineTask *p;
-    int i;
-    p = D_80023470;
-    i = 8;
-    while (--i) {
-        if (p->fn == 0) {
-            p->fn = fn;
-            p->wait = arg1;
-            p->counter = 0;
-            return i;
-        }
-        p++;
-    }
-    return -1;
-}
-
-void regular_remove(s32 arg0) {
-    regular_active(0);
-
-    if (arg0 < 0)
-        for (int i = 0; i < 32; i++)
-            D_80023370[i].fn = 0;
-    else if (arg0 <= 32)
-        D_80023370[32 - arg0].fn = 0;
-
-    regular_active(1);
-}
-
-
-void regular_clear_tmps(int i)
-{
-    regular_active(0);
-
-    if (i >= 0 && i <= 8) {
-        D_80023470[8 - i].fn = 0;
-    }
-    
-    regular_active(1);
-}
-
-void regular_active(s32 val)
-{
-    D_800234B4 = val;
-}
-
-// ISR routine, handwritten in assembly?
-INCLUDE_ASM("asm/main/nonmatchings/274C", regular_run_tasks);
