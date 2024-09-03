@@ -28,11 +28,11 @@ void func_80019F4C(s32 arg0) {
         D_80047DD8 = 2;
         break;
     }
-    
+
     lock = 0;
 }
 
-
+// this break the cd queue abstraction by calling queue_add_unsafe
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
 
 s32 try_CdControl(u8 arg0, u8* arg1, u8* arg2) {

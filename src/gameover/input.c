@@ -1,5 +1,3 @@
-
-// input.c
 #include "common.h" // TODO: this is from main api, use <>
 #include "shared.h"
 
