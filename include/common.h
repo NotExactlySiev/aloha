@@ -22,5 +22,6 @@ typedef struct EXEC EXEC;
 #define SCREEN_HEIGHT   240
 
 #define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
+#define NON_IMPL(fn)  int fn() { printf("called non-implemented function " #fn "\n"); while (1); }
 
 #endif
