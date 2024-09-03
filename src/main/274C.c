@@ -124,7 +124,7 @@ s32 fade_out(s32 duration, s32 dstvol, void* callback)
 {
     if (fade_out_active == 1) return 0;
 
-    if (TV_PAL == get_tv_system()) {
+    if (MODE_PAL == get_tv_system()) {
         duration = (duration * 5) / 6 - 1;
     }
     fade_out_active = 1;
@@ -148,7 +148,7 @@ s32 fade_in(s32 duration, s32 dstvol, void* callback)
 {
     if (fade_in_active == 1) return 0;
 
-    if (TV_PAL == get_tv_system()) {
+    if (MODE_PAL == get_tv_system()) {
         duration = (duration * 5) / 6 - 1;
         //if (duration < 1) duration = 1;
     }
@@ -258,7 +258,7 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
     int second;
     int minute;
 
-    seconds = get_tv_system() == TV_PAL ? 203 : 200;
+    seconds = get_tv_system() == MODE_PAL ? 203 : 200;
     sector = ((arg0 % 2048) * seconds) / 200;
     second = sector / 75;
     
@@ -947,7 +947,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", strlen);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_leaf);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", strncmp);
+INCLUDE_ASM("asm/main/nonmatchings/274C", memcmp);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", memcpy);
 

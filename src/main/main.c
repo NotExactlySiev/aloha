@@ -61,7 +61,7 @@ file_t g_Files[42] = {
 s32 g_CurrFile = 0;
 s32 g_NextFile = 0;
 s32 game_region = 0;
-u32 tv_system = TV_NTSC;
+u32 tv_system = MODE_NTSC;
 s32 g_GameIsZ = 0;
 
 void* D_80048044;       // hold return for _start
@@ -449,10 +449,10 @@ void read_version(void)
     } while (tmp == -1);
     
     game_region = 0;
-    tv_system = TV_NTSC;
+    tv_system = MODE_NTSC;
     if (tmp == -2) return; 
     
-    if (buf[0] == 'P') tv_system = TV_PAL;
+    if (buf[0] == 'P') tv_system = MODE_PAL;
     
     if (buf[1] == 'U') {
         game_region = 1;

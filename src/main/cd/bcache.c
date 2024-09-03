@@ -1,13 +1,14 @@
 #include "common.h"
 #include "cd.h"
 #include <libcd.h>
+#include <memory.h>
 
 #define CACHE_ENTRIES   10
 
 typedef struct {
     u32    last_access;
     CdlLOC loc;
-    u8     data[SECTOR_SIZE];
+    u8     data[SECTOR_BYTES];
 } cache_entry_t;
 
 u32 cache_epoch;
@@ -33,15 +34,14 @@ void sector_cache_clear(void)
         cache_entries[i].last_access = 0;
 }
 
-s32 sector_cache_get(CdlLOC *loc, u8* data)
+int sector_cache_get(CdlLOC *loc, u8 *data)
 {
     int i;  
     u32 oldest_access;
     cache_entry_t *entry;
-
     for (i = 0; i < CACHE_ENTRIES; i++) {
         if (cache_entries[i].last_access
-         && strncmp(3, loc, &cache_entries[i].loc)) {
+         && memcmp(3, loc, &cache_entries[i].loc)) {
             // found it!
             entry = &cache_entries[i];
             memcpy(0x800, &cache_entries[i].data, data);
@@ -53,7 +53,7 @@ s32 sector_cache_get(CdlLOC *loc, u8* data)
     CdSync(0, 0);
     do {
         try_CdControl(2, &loc->minute, 0);
-        try_CdRead(1, data, 0x80);
+        try_CdRead(1, (u_long*) data, 0x80);
     } while (func_8001A2C8(0, 0) == -1);
     try_CdControl(9, 0, 0); //pause
 

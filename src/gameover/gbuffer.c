@@ -1,6 +1,7 @@
 #include "common.h"
 #include <libspu.h>
 #include <libgpu.h>
+#include <libetc.h>
 
 #include "shared.h"
 
@@ -46,10 +47,10 @@ void gbuffer_init(void)
         draw->dfe = 0;
         tv_standard = jt.get_tv_system();
         disp->screen.x = 4;
-        disp->screen.y = tv_standard == TV_PAL ? 36 : 12;
+        disp->screen.y = tv_standard == MODE_PAL ? 36 : 12;
         disp->screen.w = 248;
         disp->screen.h = 216;
-        disp->pad0 = tv_standard == TV_PAL ? 1 : 0;
+        disp->pad0 = tv_standard == MODE_PAL ? 1 : 0;
     }
 }
 

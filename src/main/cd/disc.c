@@ -2,6 +2,9 @@
 #include "cd.h"
 #include <libcd.h>
 
+s32 vblank_enable(void); // TODO: goes in a module header
+
+
 // general state
 extern int D_80047DD8;
 
@@ -37,25 +40,25 @@ void func_80019F4C(s32 arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
 
 
-s32 try_CdControl(u8 arg0, u8* arg1, u8* arg2) {
-    while (CdControl(arg0, arg1, arg2) != 1);
+int try_CdControl(u_char com, u_char *param, u_char *result) {
+    while (CdControl(com, param, result) != 1);
     return 1;
 }
 
 
-s32 try_CdControlB(u8 arg0, u8* arg1, u8* arg2) {
-    while (CdControlB(arg0, arg1, arg2) != 1);
+int try_CdControlB(u_char com, u_char *param, u_char *result) {
+    while (CdControlB(com, param, result) != 1);
     return 1;
 }
 
 
-s32 try_CdGetSector(void* madr, s32 size) {
+int try_CdGetSector(void *madr, int size) {
     while (CdGetSector(madr, size) == 0);
     return 1;
 }
 
 
-s32 try_CdRead(s32 sectors, u32* buf, s32 mode) {
+int try_CdRead(int sectors, u_long *buf, int mode) {
     while (CdRead(sectors, buf, mode) == 0);
     return 1;
 }
@@ -71,7 +74,7 @@ int func_8001A2C8(int mode, u8 *result)
     ret = -1;
     if (rc == -1) {
         pvd_is_cached = 0;
-        ret = sector_cache_clear();
+        sector_cache_clear();
     }
     
     if (rc >= 0) {
@@ -118,7 +121,7 @@ void func_8001A74C(void)
 }
 
 
-static inline sync_and_check(void)
+static inline void sync_and_check(void)
 {
     CdSync(0, NULL);
     while (cd_get_status(&cd_status) != 1);
@@ -142,8 +145,8 @@ void func_8001A77C(void)
             sync_and_check();
         }
         sync_and_check();
-        CdControl(CdlSetloc, &pvd_loc, NULL);
-        try_CdRead(1, &buf, CdlModeSpeed);
+        CdControl(CdlSetloc, (u_char*) &pvd_loc, NULL);
+        try_CdRead(1, (u_long*) buf, CdlModeSpeed);
     } while (func_8001A2C8(0, NULL) == -1);
     pvd_is_cached = 0;
     sector_cache_clear();

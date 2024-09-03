@@ -1,5 +1,6 @@
 #include "common.h" // TODO: this is from main api, use <>
 #include "shared.h"
+#include <libetc.h>
 
 // ### DAS INPUT FUNCTIONS
 static s32 initial_delay = 0;
@@ -17,7 +18,7 @@ static s32 das_state = -1;
 // set up DAS times based on framerate
 void input_das_setup(void)
 {
-    if (jt.get_tv_system() == TV_PAL) {
+    if (jt.get_tv_system() == MODE_PAL) {
         initial_delay = 8;
         repeat_delay = 3;
     } else {

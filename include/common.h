@@ -14,14 +14,10 @@
 
 typedef struct EXEC EXEC;
 
-// these need somewhere else to exist
-#define TV_NTSC 0
-#define TV_PAL  1
-
 #define SCREEN_WIDTH    320
 #define SCREEN_HEIGHT   240
 
 #define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
-#define NON_IMPL(fn)  int fn() { printf("called non-implemented function " #fn "\n"); while (1); }
+#define NOT_IMPL(fn)  int fn() { printf("called non-implemented function " #fn "\n"); while (1); }
 
 #endif

@@ -1,5 +1,6 @@
 #include "common.h"
 #include <libgpu.h>
+#include <libetc.h>
 #include "gbuffer.h"
 #include "entity.h"
 #include "mesh.h"
@@ -2001,7 +2002,7 @@ void data_buffer_reset(void)
 
 void func_800E0ABC(DISPENV* disp)
 {
-    if (func_800E95A0() != TV_NTSC) {
+    if (func_800E95A0() != MODE_NTSC) {
         disp->pad0 = 1;
         disp->screen.y += 24;
     }

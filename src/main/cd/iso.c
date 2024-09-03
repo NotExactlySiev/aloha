@@ -1,4 +1,6 @@
 #include "common.h"
+#include <stdio.h>
+#include <string.h>
 #include "cd.h"
 
 static int read_unaligned_int(u8 *p) {
@@ -32,23 +34,20 @@ static int get_root_loc(CdlLOC *loc)
 
 // never called
 //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D740);
-NON_IMPL(func_8001D740)
+NOT_IMPL(func_8001D740)
 
 
 static int read_sectors(CdlLOC *loc, u8 *buf, u32 nsectors) {
     CdlLOC sp10;
     s32 off;
-    s32 var_s2_2;
-    s32 var_s3;
     u32 max;
-    u32 var_s2;
     u8* dst;
 
     off = CdPosToInt(loc);
     if (sector_cache_get(loc, buf) == 0)
         return 0;
     
-    max = read_unaligned_int(&buf[10]) / SECTOR_SIZE;
+    max = read_unaligned_int(&buf[10]) / SECTOR_BYTES;
     dst = buf + 0x800;
     if (max < nsectors) {
         nsectors = max;
@@ -71,7 +70,7 @@ static int get_dir(char *path, char *dir) {
     if (*path++ != '\\')
         return 0;
     
-    while (c = *path++) {
+    while ((c = *path++)) {
         if (c == '\\') {
             *dir++ = 0;
             ret += 1;
@@ -84,27 +83,25 @@ static int get_dir(char *path, char *dir) {
 }
 
 
-static u8 find_entry(char *filename, u8* buf, u32 max, CdlFILE* file) {
-    s8* expected_name;
-    u32 temp_a0;
+static u8 find_entry(char *filename, u8 *buf, u32 max, CdlFILE* file) {
+    char *expected_name;
     u8 expected_len;
-    u8 temp_v0;
-    u8* real_name;
-    u8* np;
-    u8* p;
+    char *real_name;
+    char *np;
+    u8 *p;
 
     // TODO: make dir entries in iso a struct instead of having magic offsets here for p
     for (p = buf; (int) p < (int)(buf + max); p += *p) {
         if (*p == 0) {
-            temp_a0 = ((u32) ((p + 0x800) - buf) >> 0xB) << 0xB;
+            u32 temp_a0 = ((u32) ((p + 0x800) - buf) >> 0xB) << 0xB;
             if (temp_a0 >= max) break;
             p = buf + temp_a0;
         }
         expected_len = p[0x20];
         if (expected_len != strlen(filename)) continue;
-        real_name = p + 0x21;
+        real_name = (char*) p + 0x21;
         expected_name = file->name;
-        if (strncmp(p[0x20], (s32) filename, real_name) != 1) continue;
+        if (memcmp(p[0x20], (s32) filename, real_name) != 1) continue;
         np = real_name;
         for (int i = 0; i < (s32) p[0x20]; i++) {
             *expected_name++ = *np++;
@@ -124,7 +121,7 @@ static u8 find_entry(char *filename, u8* buf, u32 max, CdlFILE* file) {
 extern int D_800548EC;
 int iso_get_file(CdlFILE *file, char *filename)
 {
-    char buf[4 * SECTOR_SIZE];
+    u8 buf[4 * SECTOR_BYTES];
     char path[128];
     char *p = path;
 
@@ -152,4 +149,4 @@ int iso_get_file(CdlFILE *file, char *filename)
 
 // TODO: I don't think this is ever called. keeping around for now
 //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DB04);
-NON_IMPL(func_8001DB04)
+NOT_IMPL(func_8001DB04)

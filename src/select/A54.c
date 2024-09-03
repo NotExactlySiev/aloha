@@ -152,7 +152,7 @@ extern s32 shown_world;
 
 void world_text_anim0_start(s32 target, s32 magnitude)
 {
-    if (jt.get_tv_system() == TV_PAL)
+    if (jt.get_tv_system() == MODE_PAL)
         target = (target * 5) / 6;
 
     world_text_anim0_t = 0;
