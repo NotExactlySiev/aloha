@@ -1010,7 +1010,7 @@ void func_800E5714(void)
 {
     if (jt.execs_get_next() - 2 < 18) {
         while (1) {
-            jt.cd_fs_read(D_800EAC70[global_data->world % 6][global_data->stage], D_80060000, 0);
+            jt.cd_file_read(D_800EAC70[global_data->world % 6][global_data->stage], D_80060000, 0);
             if (D_80060000[0] == 0x56414270) break;
             printf("VAB file Reload\n");
         }

@@ -65,7 +65,7 @@ int try_CdRead(int sectors, u_long *buf, int mode) {
 
 
 extern s32 pvd_is_cached;
-int func_8001A2C8(int mode, u8 *result)
+int cd_verify_read(int mode, u8 *result)
 {
     int rc;
     int ret;
@@ -147,7 +147,7 @@ void func_8001A77C(void)
         sync_and_check();
         CdControl(CdlSetloc, (u_char*) &pvd_loc, NULL);
         try_CdRead(1, (u_long*) buf, CdlModeSpeed);
-    } while (func_8001A2C8(0, NULL) == -1);
+    } while (cd_verify_read(0, NULL) == -1);
     pvd_is_cached = 0;
     sector_cache_clear();
 }

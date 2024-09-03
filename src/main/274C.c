@@ -6,6 +6,7 @@
 #include <libgpu.h>
 #include <libetc.h>
 #include <sys/file.h>
+#include "cd/cd.h"
 
 #include "main.h"
 
@@ -185,7 +186,8 @@ int D_80047EEC;
 extern CdlFILTER D_80047ECC;
 extern int D_8004D0E0;
 
-int func_8001B94C(void) {
+int func_8001B94C(void)
+{
     int ret;
 
     D_80047F24 = 3;
@@ -202,7 +204,8 @@ int func_8001B94C(void) {
     return ret;
 }
 
-void func_8001B9D8(void) {
+void func_8001B9D8(void)
+{
     func_8001D104();
     if (fe_value == 3) {
         func_8001A380();
@@ -333,8 +336,34 @@ s32 set_mono(s32 arg0) {
 
 // FILE fs.c
 
-// iso functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file);        // iso_get_file
+static int cd_file_read_prv(int fast, char *filename, u32 *buf, int n);
+
+int cd_fs_get_file(CdlFILE *file, char *filename) {
+    char upper[128];
+    char formatted[128];
+    char *dst = formatted;
+
+    // format the name
+    strupper(filename, upper);
+    if (upper[0] != '\\') {
+        *dst++ = '\\';
+    }
+    
+    if (strnchr(upper, ';') == 0) {
+        strcat(upper, ";1", dst);
+    } else {
+        strcpy(upper, dst);
+    }
+    
+    // call the iso function
+    for (int i = 0; i < 10; i++) {
+        if (iso_get_file(file, formatted))
+            return 1;
+    }
+    return 0;
+}
+
+
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_size);   // iso_get_file_size
 
@@ -347,7 +376,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
 s32 func_8001C734(s32 mode, u8* result) {   // pause
     s32 ret;
 
-    ret = func_8001A2C8(mode, result);
+    ret = cd_verify_read(mode, result);
     if (ret == 2) {
         try_CdControl(CdlPause, 0, 0);
         flush_cache_safe();
@@ -356,9 +385,84 @@ s32 func_8001C734(s32 mode, u8* result) {   // pause
 }
 
 // cd filesystem io
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_read);   // cd_fs_read
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_write);   // cd_fs_read_harder?
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_io);   // cd_fs_io
+int cd_file_read(char *filename, u8 *buf, int n)
+{
+    return cd_file_read_prv(0, filename, buf, n);
+}
+
+// with rounding, fast
+int cd_file_read_fast(char *filename, u8 *buf, int n)
+{
+    return cd_file_read_prv(1, filename, buf, n);
+}
+
+static int cd_file_read_prv(int fast, char *filename, u32 *buf, int n)
+{
+    // what even is this function...
+    int ret;
+
+    func_8001A77C();
+    if (func_8001B94C() == -1)
+        return -1;
+    
+    CdlFILE file;
+    if (cd_fs_get_file(&file, filename) == 0)
+        return -2;
+    
+    if (n == 0 || n > file.size)
+        n = file.size;
+
+    if (fast) {
+        // round up to sector, no error checking (I don't think this is used ever)
+        try_CdControl(CdlSetloc, &file.pos, NULL);
+        try_CdRead((n + SECTOR_BYTES - 1) / SECTOR_BYTES, buf, 0x80);
+    } else {
+        int sectors = n / SECTOR_BYTES;
+        int fine = n % SECTOR_BYTES;
+
+        if (sectors) {
+            try_CdControl(CdlSetloc, &file.pos, NULL);
+            try_CdRead(sectors, buf, 0x80);
+            if (cd_verify_read(0, NULL) == -1) {
+                // second time's the charm!
+                try_CdControl(CdlSetloc, &file.pos, NULL);
+                try_CdRead(sectors, buf, 0x80);
+                if (cd_verify_read(0, NULL) == -1)
+                    return -1;
+            }
+            buf += sectors * SECTOR_SIZE;
+        }
+
+        if (fine) {
+            int file_start = CdPosToInt(&file.pos);
+            CdlLOC last_sector;
+            CdIntToPos(file_start + sectors, &last_sector);
+            
+            u32 tmpbuf[SECTOR_SIZE];
+            try_CdControl(CdlSetloc, &last_sector, NULL);
+            try_CdRead(1, tmpbuf, 0x80);
+            if (cd_verify_read(0, NULL) == -1) {
+                // this time it's gonna work I pwomise ^_^
+                try_CdControl(CdlSetloc, &last_sector, NULL);
+                try_CdRead(1, tmpbuf, 0x80);
+                if (cd_verify_read(0, NULL) == -1)
+                    return -1;
+            }
+
+            for (int i = 0; i < fine; i++) {
+                buf[i] = tmpbuf[i];
+            }
+        }
+
+        try_CdControl(CdlPause, NULL, NULL);
+        CdSync(0, NULL);
+        flush_cache_safe();
+    }
+
+    return n;
+}
+
+
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);   // cd_fs_load_exe
 
 s32 execute_uncompressed(char* file, s32 param) {

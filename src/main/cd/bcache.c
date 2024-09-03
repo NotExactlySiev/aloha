@@ -54,7 +54,7 @@ int sector_cache_get(CdlLOC *loc, u8 *data)
     do {
         try_CdControl(2, &loc->minute, 0);
         try_CdRead(1, (u_long*) data, 0x80);
-    } while (func_8001A2C8(0, 0) == -1);
+    } while (cd_verify_read(0, 0) == -1);
     try_CdControl(9, 0, 0); //pause
 
     // and then try to cache it. first look for an empty entry

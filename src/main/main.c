@@ -72,7 +72,7 @@ s32 exception_event;          // 80047e7c
 char version_string[20];
 
 
-s32     cd_fs_read(const char* addr, void* buf, s32 mode);
+s32     cd_file_read(const char* addr, void* buf, s32 mode);
 void    wait_frame();   // TODO: args?
 void    execute_compressed(u32* addr, u32 stack);
 s32     execute_uncompressed(char* file, s32 param);
@@ -93,12 +93,12 @@ void file_execute_loop(void)
             // if addr isn't NULL, it's compressed
             if ((u32) addr & 1) {
                 addr = (u32*) ((u32) addr & ~0xF);
-                while (cd_fs_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
+                while (cd_file_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
                     printf("Exec File Read Error\n");
                 }
 
                 while (addr[0] != 0x582D5350 || addr[1] != 0x45584520) {
-                    cd_fs_read(g_Files[g_CurrFile].addr, addr, 0);
+                    cd_file_read(g_Files[g_CurrFile].addr, addr, 0);
                     printf("Exec File Read Error\n");
                 }
             }
@@ -178,7 +178,7 @@ void func_80018AB4(void)
     DrawSync(0);
     
     do {
-        tmp = cd_fs_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
+        tmp = cd_file_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
     } while (tmp == -1);
 
     if (tmp >= 0) {       
@@ -206,7 +206,7 @@ void func_80018AB4(void)
     SetDispMask(0);
     
     do {
-        D_80047D48 = cd_fs_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
+        D_80047D48 = cd_file_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
     } while (D_80047D48 == -1);
 
     if (D_80047D48 == -2) {
@@ -445,7 +445,7 @@ void read_version(void)
     u8 *p;
 
     do {
-        tmp = cd_fs_read("COUNTRY.TXT", (u32*) buf, 0x400);
+        tmp = cd_file_read("COUNTRY.TXT", (u32*) buf, 0x400);
     } while (tmp == -1);
     
     game_region = 0;
@@ -631,9 +631,9 @@ int main(int argc, char** argv)
     func_80020FC0(&D_80034344);
 
     // play some sound
-    //rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
+    //rc = cd_file_read("SYS_SE.VAB", &tmpfilebuf, 0);
     while (1) {
-        rc = cd_fs_read("SYS_SE.VAB", &tmpfilebuf, 0);
+        rc = cd_file_read("SYS_SE.VAB", &tmpfilebuf, 0);
         if (rc > 0 && tmpfilebuf == 0x56414270) break;
         printf("VAB file Reload\n");
     }
