@@ -10,32 +10,30 @@ typedef struct {
     u8     data[SECTOR_SIZE];
 } cache_entry_t;
 
-u32 D_80047DB0;
+u32 cache_epoch;
 cache_entry_t cache_entries[CACHE_ENTRIES];
 
-void func_8001D398(cache_entry_t *block)
+static void access_entry(cache_entry_t *block)
 {
-    if (D_80047DB0++ > 0x100000) {
+    if (cache_epoch++ > 0x100000) {
         // adjust the main counter and all the counters for all
         // the blocks
         for (int i = 0; i < CACHE_ENTRIES; i++) {
             cache_entries[i].last_access >>= 1;
             cache_entries[i].last_access++;
         }
-        D_80047DB0 >>= 1;
+        cache_epoch >>= 1;
     }
-    block->last_access = D_80047DB0;
+    block->last_access = cache_epoch;
 }
 
-// sector_cache_clear
-void func_8001D414(void)
+void sector_cache_clear(void)
 {
     for (int i = 0; i < CACHE_ENTRIES; i++)
         cache_entries[i].last_access = 0;
 }
 
-// sector_cache_get / bread
-s32 func_8001D440(CdlLOC *loc, u8* data)
+s32 sector_cache_get(CdlLOC *loc, u8* data)
 {
     int i;  
     u32 oldest_access;
@@ -81,6 +79,6 @@ found:
     entry->loc = *loc;
 
 done:
-    func_8001D398(entry);
+    access_entry(entry);
     return 1;
 }

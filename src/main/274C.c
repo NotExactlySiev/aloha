@@ -9,8 +9,6 @@
 
 #include "main.h"
 
-// data
-// but .data is not integrated into this file yet, so they're extern
 int (*fnptr)() = 0;
 s32 is_mono = 0;
 CdlFILE D_80048068;

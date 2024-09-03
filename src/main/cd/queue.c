@@ -43,8 +43,8 @@ s32 D_80047DEC = 0;
 extern s32 cd_busy;   // step1
 extern void* cd_arg;     // param
 extern void* cd_result;     // result
-extern u8 D_80047EDC;
-extern int D_80047EE4;
+extern u8 cd_status;
+extern int pvd_is_cached;
 extern s32 D_800548EC;
 extern s32 fade_out_active;
 extern s32 fading_out;
@@ -166,17 +166,17 @@ s32 sndqueue_exec()
     }
     // ... more shit
     CdSync(0, 0);
-    rc = cd_get_status(&D_80047EDC);
+    rc = cd_get_status(&cd_status);
     if (rc == 1) {
-        if (D_80047EDC & 0x10) {
+        if (cd_status & 0x10) {
             cd_busy = 1;
 flush_and_flee:
-            D_80047EE4 = 0;
-            func_8001D414();
+            pvd_is_cached = 0;
+            sector_cache_clear();
             sndqueue_is_running = 0;
             return 0;
         }
-        if (D_80047EDC & 0x40) {
+        if (cd_status & 0x40) {
             sndqueue_is_running = 0;
             return 0;
         }
@@ -192,8 +192,8 @@ flush_and_flee:
             D_80047DD8 = 0;
             sndqueue_com = CdlNop;
             cd_arg = 0;
-            cd_result = &D_80047EDC;
-            cd_busy = (1 != cd_get_status(&D_80047EDC));
+            cd_result = &cd_status;
+            cd_busy = (1 != cd_get_status(&cd_status));
             _sndqueue_empty = 1;
             break;
         }

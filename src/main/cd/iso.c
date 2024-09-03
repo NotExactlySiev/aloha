@@ -11,17 +11,17 @@ static int read_unaligned_int(u8 *p) {
 
 // root sector loc is cached here
 CdlLOC rootloc;
-int D_80047EE4;
+int pvd_is_cached;
 
 static int get_root_loc(CdlLOC *loc)
 {
     int rc;
     u8 buf[0x800];
-    if (D_80047EE4 == 0) {
-        rc = func_8001D440(&pvd_loc, buf);   // bread
-        if (rc != 1)
+    if (pvd_is_cached == 0) {
+        rc = sector_cache_get(&pvd_loc, buf);
+        if (rc != 1)    // impossible
             return 0;
-        D_80047EE4 = rc;
+        pvd_is_cached = rc;
         CdIntToPos(read_unaligned_int(buf + 0x9E), &rootloc);
     }
 
@@ -45,7 +45,7 @@ static int read_sectors(CdlLOC *loc, u8 *buf, u32 nsectors) {
     u8* dst;
 
     off = CdPosToInt(loc);
-    if (func_8001D440(loc, buf) == 0)
+    if (sector_cache_get(loc, buf) == 0)
         return 0;
     
     max = read_unaligned_int(&buf[10]) / SECTOR_SIZE;
@@ -56,7 +56,7 @@ static int read_sectors(CdlLOC *loc, u8 *buf, u32 nsectors) {
 
     while (--nsectors > 0) {
         CdIntToPos(++off, &sp10);
-        if (func_8001D440(&sp10, dst) == 0) return 0;
+        if (sector_cache_get(&sp10, dst) == 0) return 0;
         dst += 0x800;
     }
     return dst - buf;

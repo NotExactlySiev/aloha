@@ -413,7 +413,7 @@ void jt_set(void* func, s32 idx)
     flush_cache_safe();
 }
 
-void func_80019948(void)
+void vblank_disable(void)
 {
     if (D_80047D64 != 1) {
         disable_vblank_event(vblank_event);
@@ -421,7 +421,7 @@ void func_80019948(void)
     }
 }
 
-s32 func_80019990(void)
+s32 vblank_enable(void)
 {
     s32 ret = 0;
     if (D_80047D64 != 0) {
