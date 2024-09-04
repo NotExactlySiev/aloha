@@ -57,7 +57,7 @@ int call_LoadImage(RECT *rect, u_long *p) {
     return LoadImage(rect, p);
 }
 
-u_long *call_CleaOTag(u_long *ot, int n) {
+u_long *call_ClearOTag(u_long *ot, int n) {
     return ClearOTag(ot, n);
 }
 
@@ -138,7 +138,7 @@ void jt_series_gpu(void) {
     jt_set(get_vsync_event_cnt, 0x184);
     jt_set(call_PutDispEnv, 0x185);
     jt_set(call_PutDrawEnv, 0x186);
-    jt_set(call_CleaOTag, 0x187);
+    jt_set(call_ClearOTag, 0x187);
     jt_set(call_ClearOTagR, 0x188);
     jt_set(call_DrawOTag, 0x189);
     jt_set(call_LoadImage, 0x18A);

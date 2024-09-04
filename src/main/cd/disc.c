@@ -40,13 +40,13 @@ void func_80019F4C(s32 arg0) {
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
 
 
-int try_CdControl(u_char com, u_char *param, u_char *result) {
+int try_CdControl(u_char com, void *param, u_char *result) {
     while (CdControl(com, param, result) != 1);
     return 1;
 }
 
 
-int try_CdControlB(u_char com, u_char *param, u_char *result) {
+int try_CdControlB(u_char com, void *param, u_char *result) {
     while (CdControlB(com, param, result) != 1);
     return 1;
 }
@@ -58,7 +58,7 @@ int try_CdGetSector(void *madr, int size) {
 }
 
 
-int try_CdRead(int sectors, u_long *buf, int mode) {
+int try_CdRead(int sectors, void *buf, int mode) {
     while (CdRead(sectors, buf, mode) == 0);
     return 1;
 }

@@ -334,150 +334,6 @@ s32 set_mono(s32 arg0) {
     return ret;
 }
 
-// FILE fs.c
-
-static int cd_file_read_prv(int fast, char *filename, u32 *buf, int n);
-
-int cd_fs_get_file(CdlFILE *file, char *filename) {
-    char upper[128];
-    char formatted[128];
-    char *dst = formatted;
-
-    // format the name
-    strupper(filename, upper);
-    if (upper[0] != '\\') {
-        *dst++ = '\\';
-    }
-    
-    if (strnchr(upper, ';') == 0) {
-        strcat(upper, ";1", dst);
-    } else {
-        strcpy(upper, dst);
-    }
-    
-    // call the iso function
-    for (int i = 0; i < 10; i++) {
-        if (iso_get_file(file, formatted))
-            return 1;
-    }
-    return 0;
-}
-
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_size);   // iso_get_file_size
-
-// helper functions for cd stuff
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_file);   // cd_seek_file
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
-
-// NON MATCHING but it's only one instruction swap
-s32 func_8001C734(s32 mode, u8* result) {   // pause
-    s32 ret;
-
-    ret = cd_verify_read(mode, result);
-    if (ret == 2) {
-        try_CdControl(CdlPause, 0, 0);
-        flush_cache_safe();
-    }
-    return ret;
-}
-
-// cd filesystem io
-int cd_file_read(char *filename, u8 *buf, int n)
-{
-    return cd_file_read_prv(0, filename, buf, n);
-}
-
-// with rounding, fast
-int cd_file_read_fast(char *filename, u8 *buf, int n)
-{
-    return cd_file_read_prv(1, filename, buf, n);
-}
-
-static int cd_file_read_prv(int fast, char *filename, u32 *buf, int n)
-{
-    // what even is this function...
-    int ret;
-
-    func_8001A77C();
-    if (func_8001B94C() == -1)
-        return -1;
-    
-    CdlFILE file;
-    if (cd_fs_get_file(&file, filename) == 0)
-        return -2;
-    
-    if (n == 0 || n > file.size)
-        n = file.size;
-
-    if (fast) {
-        // round up to sector, no error checking (I don't think this is used ever)
-        try_CdControl(CdlSetloc, &file.pos, NULL);
-        try_CdRead((n + SECTOR_BYTES - 1) / SECTOR_BYTES, buf, 0x80);
-    } else {
-        int sectors = n / SECTOR_BYTES;
-        int fine = n % SECTOR_BYTES;
-
-        if (sectors) {
-            try_CdControl(CdlSetloc, &file.pos, NULL);
-            try_CdRead(sectors, buf, 0x80);
-            if (cd_verify_read(0, NULL) == -1) {
-                // second time's the charm!
-                try_CdControl(CdlSetloc, &file.pos, NULL);
-                try_CdRead(sectors, buf, 0x80);
-                if (cd_verify_read(0, NULL) == -1)
-                    return -1;
-            }
-            buf += sectors * SECTOR_SIZE;
-        }
-
-        if (fine) {
-            int file_start = CdPosToInt(&file.pos);
-            CdlLOC last_sector;
-            CdIntToPos(file_start + sectors, &last_sector);
-            
-            u32 tmpbuf[SECTOR_SIZE];
-            try_CdControl(CdlSetloc, &last_sector, NULL);
-            try_CdRead(1, tmpbuf, 0x80);
-            if (cd_verify_read(0, NULL) == -1) {
-                // this time it's gonna work I pwomise ^_^
-                try_CdControl(CdlSetloc, &last_sector, NULL);
-                try_CdRead(1, tmpbuf, 0x80);
-                if (cd_verify_read(0, NULL) == -1)
-                    return -1;
-            }
-
-            for (int i = 0; i < fine; i++) {
-                buf[i] = tmpbuf[i];
-            }
-        }
-
-        try_CdControl(CdlPause, NULL, NULL);
-        CdSync(0, NULL);
-        flush_cache_safe();
-    }
-
-    return n;
-}
-
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);   // cd_fs_load_exe
-
-s32 execute_uncompressed(char* file, s32 param) {
-    EXEC header;
-    
-    if (cd_fs_load_exe(file, param, &header) != 0)
-        return -1;
-
-    flush_cache_safe();
-    setNextFile(0);
-    Exec(&header, 1, 0);
-    return 0;
-}
-// ENDOF fs.c
-
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
 
 s32 func_8001CD30(s32 arg0) {
@@ -563,7 +419,10 @@ long func_8001DED0(SpuCommonAttr *attr)
     SpuSetCommonAttr(attr);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DEF0);   // call_***
+void func_8001DEF0(int val)
+{
+    func_8003111C(val, 0xFFFFFF);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF14);
 
@@ -584,14 +443,19 @@ void call_SpuFree(unsigned long addr)
     SpuFree(addr);
 }
 
+// call_SpuIsTransferCompleted
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DFEC);
+
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E00C);
 
+// call_SpuWrite
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E02C);
 
+// call_SpuSetIRQAddr
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E04C);
 
+// call_SpuGetKeyStatus
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E06C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E08C);
@@ -632,7 +496,7 @@ void func_8001E0CC(SpuVoiceAttr* arg0) {
 }
 
 // this is almost exactly the same as the previous one
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17C);
+NOT_IMPL(func_8001E17C) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17C);
 
 // the rest are trivial again
 void func_8001E22C(s32 arg0) {
@@ -810,12 +674,25 @@ void func_8001FD8C(void)
 // 1 big function related to memory card testing (uses 3 above)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FDF4);
 
-// 3 trivial functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FFC4);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FFD4);
+// 3 trivial memory card functions
+extern int (*D_80047E1C)();
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020000);
+void func_8001FFC4(void *val)
+{
+    D_80047E1C = val;
+}
+
+void func_8001FFD4(void)
+{
+    if (D_80047E1C)
+        D_80047E1C();
+}
+
+int func_80020000(int val)
+{
+    return func_8001FDF4(val);
+}
 
 // 15 memory card file system functions
 
@@ -911,11 +788,21 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DC4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DE8);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020E30);
+extern int D_80047E20;
+int func_80020E30(void)
+{
+    return D_80047E20;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020E40);
+void func_80020E40(void)
+{
+    func_8001F4F0(0xFFFFFF);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020E64);
+void func_80020E64(void)
+{
+    func_8001F578(0xFFFFFF);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020E88);
 
@@ -928,23 +815,39 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F48);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F9C);
 
 // 3 audio_list functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FC0);   // audio_list_set_ptr
+extern int D_80047E50;  // is a pointer?
+// audio_list_set_ptr
+void func_80020FC0(int val)
+{
+    D_80047E50 = val;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FD0);   // audio_list_find
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021028);   // audio_list_play
 
 //
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210D4);
+extern int D_80047E4C;
+void func_800210D4(int val)
+{
+    D_80047E4C = val;
+}
 
 //
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210E4);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800211F0);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800212FC);
+extern int D_80047E54;
+void func_800212FC(void)
+{
+    D_80047E54 = 1;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021310);
+void func_80021310(void)
+{
+    D_80047E54 = 0;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021320);
 
