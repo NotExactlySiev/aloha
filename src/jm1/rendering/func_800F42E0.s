@@ -1,3 +1,5 @@
+.include "macro.inc"
+
 .set noat      /* allow manual use of $at */
 .set noreorder /* don't insert nops after branches */
 
@@ -11,5 +13,6 @@ glabel func_800F42E0
 #   draw_mesh (read once)
 #   FUCK (read twice, once in clipping)
 #   this function right here ^
+
 glabel D_800F42F0
 /* 44AF0 800F42F0 00000000 */  .word    0x00000000
