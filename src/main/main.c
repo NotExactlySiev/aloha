@@ -523,7 +523,7 @@ void game_init(void)
     jt_set(get_version_string, 11);
 
     // clear global space
-    memset2((void*) 0x80014000, 0x4000, 0);
+    memset((void*) 0x80014000, 0x4000, 0);
 
     // set reverb
     func_80020F9C(5, 0);

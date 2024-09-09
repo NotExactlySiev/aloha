@@ -698,26 +698,35 @@ int func_80020000(int val)
 
 extern char D_800521F8[32];
 
-s32 mc_addr_prefix(u32 mtidx, char* src, char* dst)
+int mc_addr_prefix(u32 mtidx, char* src, char* dst)
 {
-    s32 rc;
-    char c;
-    rc = func_80020000(mtidx);
+    int rc = func_80020000(mtidx);
     if (1 != rc) return rc;
+    
     dst[0] = 'b';
     dst[1] = 'u';
     dst[2] = '0' + ((mtidx >> 8) & 1);
-    c = mtidx & 0xf;
+    
+    char c = mtidx & 0xf;
     c += c > 9 ? 'W' : '0';
     dst[3] = c;
     dst[4] = ':';
     strcpy(src, dst+5);
+    printf("%s\n", dst);
     return 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800200C8);   // mc_
+int func_800200C8(int mtidx, char *filename)
+{
+    int rc = mc_addr_prefix(mtidx, filename, D_800521F8);
+    if (rc != 0) return rc;
 
-s32 mc_file_create(s32 mtidx, char* file, u32 size)
+    struct DIRENTRY ent;
+    struct DIRENTRY *p = firstfile2(D_800521F8, &ent);
+    return p == &ent;
+}
+
+int mc_file_create(s32 mtidx, char* file, u32 size)
 {
     s32 fd;
 
@@ -732,19 +741,19 @@ s32 mc_file_create(s32 mtidx, char* file, u32 size)
     return 1;
 }
 
-s32 mc_file_open(s32 mtidx, char* file, u32 mode)
+int mc_file_open(s32 mtidx, char* file, u32 mode)
 {
     if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
         return -1;
     return open(D_800521F8, mode);
 }
 
-s32 mc_file_close(s32 fd)
+int mc_file_close(s32 fd)
 {
     return close(fd);
 }
 
-s32 mc_file_delete(u32 mtidx, char* file)
+int mc_file_delete(u32 mtidx, char* file)
 {
     if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
         return 0;
@@ -942,15 +951,52 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // vid_play_file
 // ENDOF vid.c
 
 // standard str functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", strcpy);
+void strcpy(char *src, char *dst)
+{
+    while (*src)
+        *dst++ = *src++;
+    *dst = 0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", strcat);
+void strcat(char *a, char *b, char *dst)
+{
+    char *src = a;
+    while (*src)
+        *dst++ = *src++;
+    src = b;
+    while (*src)
+        *dst++ = *src++;
+    *dst = 0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", strnchr);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", strupper);
+// TODO: this is just strchr not strnchr!
+int strnchr(char *str, char c)
+{
+    while (*str)
+        if (*str++ == c)
+            return 1;
+    return 0;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", strlen);
+
+void strupper(char *src, char *dst)
+{
+    char c;
+    while (c = *src++) {
+        if (c >= 'a' && c <= 'z')
+            c &= ~0x20;
+        *dst++ = c;
+    }
+    *dst = 0;
+}
+
+int strlen(char *str)
+{
+    int i = 0;
+    while (str[i]) i++;
+    return i;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_leaf);
 
@@ -958,8 +1004,22 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", memcmp);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", memcpy);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", memset2);
+void memset(u8 *dst, int n, u8 c)
+{
+    for (int i = 0; i < n; i++)
+        dst[i] = c;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", strlen2);
+// exactly the same as the other one. linking shenanigans?
+int strlen2(char *str)
+{
+    int i = 0;
+    while (str[i]) i++;
+    return i;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", card_write);
+void card_write(int port)
+{
+    _new_card();
+    _card_write(port, 0x3F, 0);
+}
