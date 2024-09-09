@@ -3,10 +3,10 @@
 extern CdlLOC pvd_loc;
 void cd_ready_callback(s32 status, u32 *result);
 
-int try_CdControl(u_char com, u_char *param, u_char *result);
-int try_CdControlB(u_char com, u_char *param, u_char *result);
+int try_CdControl(u_char com, void *param, u_char *result);
+int try_CdControlB(u_char com, void *param, u_char *result);
 int try_CdGetSector(void *madr, int size);
-int try_CdRead(int sectors, u_long *buf, int mode);
+int try_CdRead(int sectors, void *buf, int mode);
 int cd_verify_read(int mode, u8 *result);
 
 void sector_cache_clear(void);
