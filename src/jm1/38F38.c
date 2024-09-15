@@ -5,6 +5,11 @@
 
 #include "entity.h"
 
+// TODO: this is repeated, put in header
+extern sin_lut[4096];
+#define sinf(a)     (sin_lut[(a) & 0xFFF])
+#define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
+
 POLY_FT4 *func_800E9FDC(u32 x, u32 y, u32 id, u32 color, u32 trans, POLY_F4* prims, u32 *ot);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8738);
@@ -725,9 +730,32 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F80E0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8214);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8228);
+extern s32 D_80138620;
+extern s32 D_80141458;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F82E8);
+int func_800F8228(int arg)
+{
+    // this is weird... perhaps the formula should be rephrased
+    if (D_80141458 >= arg) return 0;
+    if (arg >= D_80138620) return 0x1000;
+
+    int range = D_80141458 - D_80138620;
+    int amt = ((D_80141458 - arg) << 0xC) / range;
+    
+    return amt * D_80138620 / arg;
+}
+
+void func_800F82E8(VECTOR *v, s32 angle)
+{
+    int val_x;
+    int val_y;
+
+    val_x = (v->vx * sinf(angle) + v->vy * cosf(angle)) >> 0xC;
+    val_y = (v->vx * cosf(angle) - v->vy * sinf(angle)) >> 0xC;
+    v->vx = (val_y << 7) / (val_x ?: 1) + 0x80;
+    v->vy = func_800F8228(val_x);
+}
+
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F83E4);
 

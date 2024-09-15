@@ -35,6 +35,10 @@ List entity_list_1 = {};
 List entity_list_2 = {};
 List entity_list_free = {};
 
+// fast sin and cos from our own LUT
+#define sinf(a)     (sin_lut[(a) & 0xFFF])
+#define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
+
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BC4);
@@ -846,10 +850,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2F58);
 
 // actually mesh metadata struct TODOs
 extern u32 D_8011EFB8;
-
-// fast sin and cos from our own LUT
-#define sinf(a)     (sin_lut[(a) & 0xFFF])
-#define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
 
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D30E4);
 // entity_coin_render
