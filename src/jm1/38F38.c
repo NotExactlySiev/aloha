@@ -1,7 +1,9 @@
 #include "common.h"
 #include <libgpu.h>
+#include <libetc.h>
 #include "gbuffer.h"
 #include "mesh.h"
+#include "shared.h"
 
 #include "entity.h"
 
@@ -437,13 +439,27 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F10B8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F11E8);
 
+
+// ground rendering functions
+extern SVECTOR D_8010285C;
+extern int D_80102864;
+extern SVECTOR D_80141448;
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1330);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F16B8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1800);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1A0C);
+// copies the ground texture from the render area to screen
+void func_800F1A0C(void)
+{
+    if (D_80141448.vx <= -0x200) return;
+    GBuffer *g = gbuffer_get_current();
+    // TODO: have camera pos defined somewhere else correctly
+    #define camera_pos ((SVECTOR*)SCRTCHPAD(0x3C8))
+    g->nextfree = func_800F1800(&D_8010285C, D_80102864, g->nextfree, &g->ot[camera_pos->vy > 0 ? 558 : 43]);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1AAC);
 
@@ -453,6 +469,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1AE4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1AF4);
 
+// something else not ground
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1BC0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1C7C);
