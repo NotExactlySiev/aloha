@@ -39,33 +39,6 @@ glabel font_ptr8
 glabel font_ptr16
 /* 3074C 80047F64 */ .space 0x08
 
-glabel vab_progs_next
-/* 30754 80047F6C */ .space 0x08
-
-glabel vab_tones_next
-/* 3075C 80047F74 */ .space 0x08
-
-glabel vab_offsets_next
-/* 30764 80047F7C */ .space 0x08
-
-glabel D_80047F84
-/* 3076C 80047F84 */ .space 0x08
-
-glabel D_80047F8C
-/* 30774 80047F8C */ .space 0x08
-
-glabel D_80047F94
-/* 3077C 80047F94 */ .space 0x07
-
-glabel D_80047F9B
-/* 30783 80047F9B */ .space 0x01
-
-glabel D_80047F9C
-/* 30784 80047F9C */ .space 0x08
-
-glabel D_80047FA4
-/* 3078C 80047FA4 */ .space 0x08
-
 glabel D_80047FAC
 /* 30794 80047FAC */ .space 0x08
 
@@ -98,91 +71,7 @@ glabel D_8004D0E0
 glabel D_8004DCF8
     .space 0x88
 
-glabel D_8004DD80
-    .space 0x2000
 
-glabel D_8004FD80
-    .space 0x2000
-
-glabel loaded_vabs
-    .space 0x4
-
-glabel D_80051D84
-    .space 0x4
-
-glabel D_80051D88
-    .space 0x4
-
-glabel D_80051D8C
-    .space 0x4
-
-glabel D_80051D90
-    .space 0x4
-
-glabel D_80051D94
-    .space 0x4
-
-glabel D_80051D98
-    .space 0x4
-
-glabel D_80051D9C
-    .space 0x4
-
-glabel D_80051DA0
-    .space 0x4
-
-glabel D_80051DA4
-    .space 0x4
-
-glabel D_80051DA8
-    .space 0x4
-
-glabel D_80051DAC
-    .space 0x4
-
-glabel D_80051DB0
-    .space 0x2
-
-glabel D_80051DB2
-    .space 0x2
-
-glabel D_80051DB4
-    .space 0x2
-
-glabel D_80051DB6
-    .space 0x1
-
-glabel D_80051DB7
-    .space 0xa9
-
-glabel D_80051E60
-    .space 0x200
-
-/* this is stupid I should get it all to C */
-glabel channels
-    .space 0x4
-
-glabel D_80052064
-    .space 0x4
-
-glabel D_80052068
-    .space 0x2
-
-glabel D_8005206A
-    .space 0x2
-
-glabel D_8005206C
-    .space 0x3
-
-glabel D_8005206F
-    .space 0x1
-
-glabel D_80052070
-    .space 0x170
-/*
-glabel D_800521E0
-    .space 0x18
-    */
 
 glabel D_800521F8
     .space 0x20

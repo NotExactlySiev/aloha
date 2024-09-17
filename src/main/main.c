@@ -327,7 +327,7 @@ void func_80019680(void)
     func_80021D54();
 
     // jt vab stuff?
-    func_8001E7B0();
+    sfx_init();
 
     // init font and characters
     func_8001E38C();

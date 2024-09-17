@@ -5,9 +5,28 @@
 #include <libcd.h>
 #include <libsnd.h>
 
-// FIXME: music suddenly cuts out. dear god what have I done
+// FIXME: the music suddenly cuts out. dear god what have I done
 
 #define NCHANNELS   24
+
+#define MAX_VABS    4
+#define MAX_PROGS   512
+#define MAX_TONES   256
+#define MAX_VAGS    256
+
+int func_8001F9EC(u32 handle, u16 pan, u16 vol);
+void func_8001F17C(u32 id, int arg2);
+int func_8001FBC0(int val);
+void func_8001F5DC(int id);
+void func_8001F610(int id, short pan, short vol);
+int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio);
+void func_8001F8D4(u32 handle);
+void func_8001F918(u32 handle);
+int sfx_set_pan(u32 handle, u16 pan);
+int sfx_set_vol(u32 handle, u16 vol);
+int sfx_get_pan(uint handle);
+int sfx_get_vol(uint handle);
+int sfx_is_valid(u32 handle);
 
 typedef struct {
     int unk0;
@@ -20,8 +39,52 @@ typedef struct {
     char active;
 } Channel;
 
-extern Channel channels[NCHANNELS];
+typedef struct {
+    VabHdr header;
+    ProgAtr progattrs[128];
+    VagAtr toneattrs[][16];
+} VabRealHeader;
+
+typedef struct {
+    int x[2];
+} P2;
+
+typedef struct {
+    VabHdr hdr;
+    ProgAtr *progs;
+    VagAtr  *tones;
+    P2 *p2;
+    u16 *offsets;
+    u16 nprogs;     // real, with and without tones
+    u16 ntones;
+    u16 nvags;
+    char a;
+    char b;
+} VabFile;
+
+Channel channels[NCHANNELS];
 char D_800521E0[NCHANNELS];
+extern int D_80047FAC;
+
+VabFile loaded_vabs[MAX_VABS];
+ProgAtr loaded_progs[MAX_PROGS];
+VagAtr loaded_tones[MAX_TONES];
+u16 loaded_offsets[MAX_VAGS];
+
+ProgAtr *vab_progs_next;
+VagAtr *vab_tones_next;
+u16 *vab_offsets_next;
+
+int vabs_count;
+int progs_count;
+int tones_count;
+int vags_count;
+
+extern int D_80047E10;
+extern int D_80047E14;
+
+u8 D_80047F9C[4];
+
 
 void sfx_tick(void) {
     func_80031770(D_800521E0);
@@ -49,59 +112,64 @@ void sfx_tick(void) {
     func_8001E2F4();    // is a nop
 }
 
+// sfx_get_mask?
+u32 func_8001E744(void)
+{
+    u32 ret = 0;
+    for (int i = 0; i < NCHANNELS; i++) {
+        if (channels[i].active)
+            ret |= 1;
+        ret << 1;
+    }
+    return ret;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E744);
-
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E790);
-// static
-void func_8001E790(void)
+void call_SpuClearReverbWorkArea(void)
 {
     func_80030E94();
 }
 
-// sfx_init
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E7B0);
+void sfx_init(void)
+{
+    vab_progs_next = &loaded_progs[0];
+    vab_tones_next = &loaded_tones[0];
+    vab_offsets_next = &loaded_offsets[0];
+    tones_count = 0;
+    progs_count = 0;
+    vags_count = 0;
+    vabs_count = 0;
+    
+    for (int i = 0; i < MAX_VABS; i++) {
+        loaded_vabs[i].a = 0;
+        loaded_vabs[i].b = 0;
+    }
+    
+    for (int i = 0; i < NCHANNELS; i++) {
+        channels[i].active = 0;
+        channels[i].epoch = 0;
+        channels[i].unk0 = 0;
+    }
 
+    jt_set(func_8001FBC0, 0x306);
+    jt_set(func_8001F5DC, 0x310);
+    jt_set(func_8001F610, 0x311);
+    jt_set(func_8001F64C, 0x312);
 
-typedef struct {
-    VabHdr header;
-    ProgAtr progattrs[128];
-    VagAtr toneattrs[][16];
-} VabRealHeader;
-
-typedef struct {
-    int x[2];
-} P2;
-
-typedef struct {
-    VabHdr hdr;
-    ProgAtr *progs;
-    VagAtr  *tones;
-    P2 *p2;
-    u16 *offsets;
-    u16 nprogs;     // real, with and without tones
-    u16 ntones;
-    u16 nvags;
-    char a;
-    char b;
-} VabFile;
-
-extern int D_80047E10;
-extern int D_80047E14;
-extern VabFile loaded_vabs[4];
-extern int D_80047F84;
-extern int D_80047F8C;
-extern int D_80047F94;
-
-extern ProgAtr *vab_progs_next;
-extern VagAtr *vab_tones_next;
-extern u16 *vab_offsets_next;
-
-extern u8 D_80047F9C[8];
-extern int D_80047FA4;
+    jt_set(func_8001F8D4, 0x313);
+    jt_set(sfx_set_pan, 0x314);
+    jt_set(sfx_set_vol, 0x315);
+    jt_set(func_8001F9EC, 0x316);
+    jt_set(sfx_get_pan, 0x317);
+    jt_set(sfx_get_vol, 0x318);
+    jt_set(sfx_is_valid, 0x319);
+    jt_set(func_8001F918, 0x31A);
+    jt_set(func_8001F17C, 0x31B);
+    jt_set(func_8001E744, 0x31C);
+    jt_set(call_SpuClearReverbWorkArea, 0x31D); // oh wait this isn't private?
+    D_80047FAC = regular_add_tmp(sfx_tick, 1);
+}
 
 //INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_load_vab);
-// sfx_load_vab
 s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
     // TODO: refactor this insanity
     u16 vagoff;
@@ -117,7 +185,7 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
     u32 ui;
 
     if (idx == -1) {        
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < MAX_VABS; i++) {
             if (loaded_vabs[i].a == 0) break;
             idx = i;
         }
@@ -126,13 +194,14 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
             return -1;
     }
 
-    if (idx >= 4)
+    if (idx >= MAX_VABS)
         return -1;
 
     if (loaded_vabs[idx].a == 1) return -1;
-    if (!(arg->header.ps + D_80047F84 < 0x200U && arg->header.ts + D_80047F8C < 0x100U)) return -1;
+    if (arg->header.ps + progs_count >= MAX_PROGS) return -1;
+    if (arg->header.ts + tones_count >= MAX_TONES) return -1;
     progattrs = arg->progattrs;
-    if (arg->header.vs + D_80047F94 >= 0x100U) return -1;
+    if (arg->header.vs + vags_count >= MAX_VAGS) return -1;
     
     loaded_vabs[idx].hdr = arg->header;
 
@@ -150,12 +219,12 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
         vab_progs_next += 1;
     }        
     loaded_vabs[idx].nprogs = ui;
-    D_80047F84 += ui;
+    progs_count += ui;
 
     loaded_vabs[idx].tones = vab_tones_next;
     loaded_vabs[idx].ntones = arg->header.ts;
     nprogs = arg->header.ps;
-    D_80047F8C += arg->header.ts;
+    tones_count += arg->header.ts;
     int real_i = 0;
     for (int i = 0; i < nprogs; i++) {
         ntones = arg->progattrs[i].tones;
@@ -173,7 +242,7 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
     vcount = arg->header.vs; 
     loaded_vabs[idx].nvags = vcount;
     loaded_vabs[idx].offsets = vab_offsets_next;
-    D_80047F94 += vcount;
+    vags_count += vcount;
     vag_sizes = arg->toneattrs[arg->header.ps];
     for (int i = 0; i < vcount; i++) {
         vagoff += vag_sizes[i];
@@ -184,21 +253,51 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
     loaded_vabs[idx].b = 0;
     //loaded_vabs[idx].hdr.fsize -= sizeof(VabRealHeader) + (arg->header.ps) * 16 * sizeof(VagAtr);
     loaded_vabs[idx].hdr.fsize -= 0xA20 + (arg->header.ps) * 16 * sizeof(VagAtr);
-    D_80047F9C[D_80047FA4++] = idx;
+    D_80047F9C[vabs_count++] = idx;
 
     return idx;
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001EEA4);
+/*int func_8001EEA4(VabRealHeader *buf, void *ptr, s16 idx)
+{
+    //if (ptr == 0) {
+    //    ptr = 
+    //}
+    // FIXME: not implemented
+    return -2;
+}*/
+//NOT_IMPL(func_8001EEA4);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001EFAC);
+int func_8001EFAC(s16 idx)
+{
+    printf("hmmm\n");
+    if (loaded_vabs == 0) return -1;
+    if (idx == -1)
+        idx = D_80047F9C[vabs_count-1];
+    if (idx != D_80047F9C[vabs_count-1]) return -2; // huh?
+
+    VabFile *v = &loaded_vabs[idx];
+    if (v->a == 0) return -1;
+    if (v->b == 1) {
+        call_SpuFree(v->p2);
+        vags_count -= v->nvags;
+        vab_offsets_next -= v->nvags;
+    }
+    vab_progs_next -= v->nprogs;
+    progs_count -= v->nprogs;
+    vabs_count -= 1;
+    tones_count -= v->ntones;
+    vab_tones_next -= v->ntones;
+    v->a = 0;
+    v->b = 0;
+    return idx;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F17C);
 
-
 // NOTE: I wouldn't bet my life on the correctness of this function. but it seems
 // to be behaving just like the original as far as I can tell.
-// static int play()
 static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, int vol, u16 note, u16 cent)
 {
     Channel *temp_s1 = &channels[channel];
@@ -322,7 +421,7 @@ int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     u32 prog_idx = (id >> 8) & 0x7F;
     u32 tone_idx = id & 0xF;
 
-    if (vab_idx >= 4) return -1;
+    if (vab_idx >= MAX_VABS) return -1;
     VabFile *vp = &loaded_vabs[vab_idx];    
     if (vp->a == 0) return -1;    
     if (vp->b == 0) return -1;
@@ -393,7 +492,6 @@ found:
     return channel | channels[channel].epoch;    
 }
 
-
 // TODO: "handle" macros
 void func_8001F8D4(u32 handle)
 {
@@ -417,8 +515,7 @@ int sfx_set_vol(u32 handle, u16 vol)
     return func_8001F9EC(handle, channels[handle & 0x1F].pan, vol);
 }
 
-// private function for the two above
-// static
+// function for the two above (not private)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F9EC);
 
 // TODO: these types are all messed up
