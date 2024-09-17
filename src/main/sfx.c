@@ -7,6 +7,8 @@
 
 // FIXME: music suddenly cuts out. dear god what have I done
 
+#define NCHANNELS   24
+
 typedef struct {
     int unk0;
     u16 epoch;
@@ -16,16 +18,16 @@ typedef struct {
     short time;
     char unk6;
     char active;
-} Flaggy;
+} Channel;
 
-extern Flaggy channels[24];
-char D_800521E0[24];
+extern Channel channels[NCHANNELS];
+char D_800521E0[NCHANNELS];
 
 void sfx_tick(void) {
     func_80031770(D_800521E0);
     u32 mask = 0;
-    for (int i = 0; i < 24; i++) {
-        Flaggy *p = &channels[i];
+    for (int i = 0; i < NCHANNELS; i++) {
+        Channel *p = &channels[i];
         if (p->active != 1) continue;
         if ((u16) p->time < 0x7FFFU) {
             p->time++;    // timer
@@ -98,9 +100,9 @@ extern u16 *vab_offsets_next;
 extern u8 D_80047F9C[8];
 extern int D_80047FA4;
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E998);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_load_vab);
 // sfx_load_vab
-s16 func_8001E998(VabRealHeader *arg, s16 idx) {
+s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
     // TODO: refactor this insanity
     u16 vagoff;
     u16 vcount;
@@ -197,9 +199,9 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F17C);
 // NOTE: I wouldn't bet my life on the correctness of this function. but it seems
 // to be behaving just like the original as far as I can tell.
 // static int play()
-int func_8001F200(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, int vol, u16 note, u16 cent)
+static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, int vol, u16 note, u16 cent)
 {
-    Flaggy *temp_s1 = &channels[channel];
+    Channel *temp_s1 = &channels[channel];
 
     if (prog_idx >= 0x80) return -1;
     if (tone_idx >= 0x10) return -1;            
@@ -267,8 +269,8 @@ int func_8001F200(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan,
 
 void func_8001F4F0(u32 mask)
 {
-    for (int i = 0; i < 24; i++) {
-        Flaggy *p = &channels[i];
+    for (int i = 0; i < NCHANNELS; i++) {
+        Channel *p = &channels[i];
         if (mask & (1 << i)) {
             p->active = 0;
             p->time = -1;
@@ -287,8 +289,8 @@ void func_8001F4F0(u32 mask)
 
 void func_8001F578(u32 mask)
 {
-    for (int i = 0; i < 24; i++) {
-        Flaggy *p = &channels[i];
+    for (int i = 0; i < NCHANNELS; i++) {
+        Channel *p = &channels[i];
         if (mask & (1 << i)) {
             p->active = 0;
             p->time = -1;
@@ -341,7 +343,7 @@ int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
         prio = 2;        
 
     // look for an empty
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < NCHANNELS; i++) {
         if (channels[i].active == 0) {
             channel = i;
             goto found;
@@ -354,7 +356,7 @@ int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     // search through different levels (of priority?)
     for (int i = 2; (i >= (prio & 0xFFFF)) && (i != 0); i--) {
         // find the effect that's been playing the longest
-        for (int j = 0; j < 24; j++) {
+        for (int j = 0; j < NCHANNELS; j++) {
             if (channels[j].unk6 != i) continue;
             u16 val = channels[j].time;
             if (max < val) {
@@ -372,7 +374,7 @@ int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     if (!(var_s2 & 0xFFFF)) return -1;                                    
 
     // screw it, look for anything
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < NCHANNELS; i++) {
         if ((u8) channels[i].unk6 != 0) {
             channel = i;
             goto found;
@@ -383,7 +385,7 @@ int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     return -1;
 
 found:
-    if ((func_8001F200(channel, vab_idx, prog_idx, tone_idx, pan, vol, arg3, arg4)) < 0)
+    if ((play(channel, vab_idx, prog_idx, tone_idx, pan, vol, arg3, arg4)) < 0)
         return -1;
 
     // TODO: this is confusing. is it correct??
@@ -393,25 +395,24 @@ found:
 
 
 // TODO: "handle" macros
-
 void func_8001F8D4(u32 handle)
 {
-    if (func_8001FB78(handle) == -1) return;
+    if (sfx_is_valid(handle) == -1) return;
     func_8001F4F0(1 << (handle & 0x1F));
 }
 
 void func_8001F918(u32 handle)
 {
-    if (func_8001FB78(handle) == -1) return;
+    if (sfx_is_valid(handle) == -1) return;
     func_8001F578(1 << (handle & 0x1F));
 }
 
-int func_8001F95C(u32 handle, u16 pan)
+int sfx_set_pan(u32 handle, u16 pan)
 {
     return func_8001F9EC(handle, pan, channels[handle & 0x1F].vol);
 }
 
-int func_8001F9A4(u32 handle, u16 vol)
+int sfx_set_vol(u32 handle, u16 vol)
 {
     return func_8001F9EC(handle, channels[handle & 0x1F].pan, vol);
 }
@@ -421,18 +422,17 @@ int func_8001F9A4(u32 handle, u16 vol)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F9EC);
 
 // TODO: these types are all messed up
-int func_8001FB38(uint handle)
+int sfx_get_pan(uint handle)
 {
     return channels[handle & 0x1F].pan;
 }
 
-int func_8001FB58(uint handle)
+int sfx_get_vol(uint handle)
 {
     return channels[handle & 0x1F].vol;
 }
 
-// sfx_is_valid
-int func_8001FB78(u32 handle)
+int sfx_is_valid(u32 handle)
 {
     if (channels[handle & 0x1F].active != 1) return handle;
     if (channels[handle & 0x1F].epoch == (handle & 0x7FE0)) return handle;
@@ -455,7 +455,7 @@ void func_8001FBE4(void)
     }
 }
 
-int func_8001FC34(u32 handle)
+int sfx_is_active(u32 handle)
 {
     return channels[handle & 0x1F].active == 1;
 }
