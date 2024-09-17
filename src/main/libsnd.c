@@ -98,7 +98,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8003109C);     // SpuSetReverbD
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_8003111C);
 
-INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80031184);     // SpuSetReverb
+INCLUDE_ASM("asm/main/nonmatchings/libsnd", SpuSetReverb);     // SpuSetReverb
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80031254);     // SpuIsTransferCompleted
 

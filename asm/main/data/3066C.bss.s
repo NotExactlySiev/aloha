@@ -159,7 +159,7 @@ glabel D_80051E60
     .space 0x200
 
 /* this is stupid I should get it all to C */
-glabel D_80052060
+glabel channels
     .space 0x4
 
 glabel D_80052064
