@@ -39,13 +39,13 @@ glabel font_ptr8
 glabel font_ptr16
 /* 3074C 80047F64 */ .space 0x08
 
-glabel D_80047F6C
+glabel vab_progs_next
 /* 30754 80047F6C */ .space 0x08
 
-glabel D_80047F74
+glabel vab_tones_next
 /* 3075C 80047F74 */ .space 0x08
 
-glabel D_80047F7C
+glabel vab_offsets_next
 /* 30764 80047F7C */ .space 0x08
 
 glabel D_80047F84
@@ -104,7 +104,7 @@ glabel D_8004DD80
 glabel D_8004FD80
     .space 0x2000
 
-glabel D_80051D80
+glabel loaded_vabs
     .space 0x4
 
 glabel D_80051D84
@@ -158,6 +158,7 @@ glabel D_80051DB7
 glabel D_80051E60
     .space 0x200
 
+/* this is stupid I should get it all to C */
 glabel D_80052060
     .space 0x4
 
@@ -178,9 +179,10 @@ glabel D_8005206F
 
 glabel D_80052070
     .space 0x170
-
+/*
 glabel D_800521E0
     .space 0x18
+    */
 
 glabel D_800521F8
     .space 0x20

@@ -637,12 +637,8 @@ int main(int argc, char** argv)
         if (rc > 0 && tmpfilebuf == 0x56414270) break;
         printf("VAB file Reload\n");
     }
-
-    //while (1) {
-        rc = func_80020D5C(0, &tmpfilebuf, 0);
-        //k_printf("RET %d\n", rc);
-    //}
-
+    func_80020D5C(0, &tmpfilebuf, 0);
+    
     // fade logo?
     func_8001926C();
 
