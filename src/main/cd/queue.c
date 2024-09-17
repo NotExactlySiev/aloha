@@ -2,6 +2,13 @@
 #include <libcd.h>
 #include <libspu.h>
 
+// TODO: these don't belong here
+extern SpuVolume vol_full;
+extern int D_80047EEC; // SpuVolume ptr?
+extern CdlFILTER D_80047ECC;
+extern int D_8004D0E0;
+extern s8 D_80047EC4[8];
+
 // what's the header situattion?
 #define SNQ_FINISHED    -1
 #define SNQ_SET_FE       -2  //  arg0
@@ -108,7 +115,7 @@ void sndqueue_add_try(u8 arg0, u32 arg1, u32 arg2)
     sndqueue_add(arg0, arg1, arg2);
 }
 
-//NCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 // execute one block of command
 s32 sndqueue_exec()
 {
@@ -138,7 +145,7 @@ s32 sndqueue_exec()
         }
         cd_busy = 0;
         D_80047DE0 = 1;
-        goto flush_and_flee;
+        goto flush_cache;
     }
 
     //return;
@@ -150,14 +157,16 @@ s32 sndqueue_exec()
         fe_value = 0;
         set_vol_scaled(&D_80047D8C, 0x400);
         if (1 == D_80047D78) {
+            // THIS RESTARTS THE BACKGROUND MUSIC YOU MORON!
+            // a ton of duplicated calls from func_8001BA50
             sndqueue_add(CdlPause, 0, 0);   // TODO: arguments
-            sndqueue_add(CdlSetmode, D_80047EC4, 0);
-            sndqueue_add(CdlSetfilter, 0, 0);
-            sndqueue_add(CdlSeekL, 0, 0);
-            sndqueue_add(CdlPause, 0, 0);
-            sndqueue_add(CdlReadS, 0, 0);
-            sndqueue_add(SNQ_SET_SCALED, 0, 0);
-            sndqueue_add(SNQ_FUNC9, 0, 0);
+            sndqueue_add(CdlSetmode, &D_80047EC4, 0);
+            sndqueue_add(CdlSetfilter, &D_80047ECC, 0);
+            sndqueue_add(CdlSeekL, &D_8004D0E0, 0);
+            sndqueue_add(CdlPause, NULL, 0);
+            sndqueue_add(CdlReadS, &D_8004D0E0, 0);
+            sndqueue_add(SNQ_SET_SCALED, &vol_full, 0);
+            sndqueue_add(SNQ_FUNC9, D_80047EEC, 0);
             sndqueue_add(SNQ_SET_FE, 2, 0);
         } else {
             sndqueue_add(CdlPause, 0, 0);
@@ -168,25 +177,19 @@ s32 sndqueue_exec()
     CdSync(0, 0);
     rc = cd_get_status(&cd_status);
     if (rc == 1) {
-        if (cd_status & 0x10) {
+        if (cd_status & CdlStatShellOpen) {
             cd_busy = 1;
-flush_and_flee:
-            pvd_is_cached = 0;
-            sector_cache_clear();
-            sndqueue_is_running = 0;
-            return 0;
+            goto flush_cache;
         }
-        if (cd_status & 0x40) {
-            sndqueue_is_running = 0;
-            return 0;
-        }
+        if (cd_status & CdlStatSeek)
+            goto done;
     }
 
     // and then the actual queue
     snd_task_t* t;
     u32 next = 0xDEADBEEF;
 
-    while (1) { // i think I can break instead of return
+    while (1) {
         t = &_sndqueue[D_80047F34];
         if (t->com == 0xFF) {
             D_80047DD8 = 0;
@@ -195,29 +198,28 @@ flush_and_flee:
             cd_result = &cd_status;
             cd_busy = (1 != cd_get_status(&cd_status));
             _sndqueue_empty = 1;
-            break;
+            goto done;
         }
 
         sndqueue_com = t->com;
         D_80047D94 = t->com;
         if (sndqueue_com == SNQ_SET_FE) {   // done
+            // this has to do with the background track being played
             s32 newval = t->arg0;
+            printf("setting FE to %d\n", newval);
             if (fe_value == 5 && newval != 5)
                 func_8001A380(); // activate ready and read callbacks
             if (newval != 2)
                 func_8001D104();
             fe_value = newval;
             next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_SET_FULL) {
+        } else if (sndqueue_com == SNQ_SET_FULL) {
             set_vol_full(t->arg0);
             next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_SET_SCALED) {
+        } else if (sndqueue_com == SNQ_SET_SCALED) {
             set_vol_scaled(t->arg0, vol_scale);
             next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FADE_OUT) {     // done
+        } else if (sndqueue_com == SNQ_FADE_OUT) {     // done
             fade_out_active = t->arg0;
             fading_out = t->arg0;
             if (fade_out_active == 1) {
@@ -236,8 +238,7 @@ flush_and_flee:
                 fade_paused = 0;
             }
             next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FADE_IN) {      // done
+        } else if (sndqueue_com == SNQ_FADE_IN) {      // done
             fade_in_active = t->arg0;
             fading_in = t->arg0;
             if (fade_in_active == 1) {
@@ -256,8 +257,7 @@ flush_and_flee:
                 fade_paused = 0;
             }
             next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_SET_REVERB) {   // done
+        } else if (sndqueue_com == SNQ_SET_REVERB) {   // done
             SpuCommonAttr attr;
             attr.mask = 0x100;
             attr.cd.reverb = t->arg0;
@@ -265,16 +265,13 @@ flush_and_flee:
             D_80047EA4 = t->arg0;
             func_8001FBE4();
             next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FUNC8) {    // done
-            if (fade_out_active == 1 || fade_in_active == 1) break;
+        } else if (sndqueue_com == SNQ_FUNC8) {    // done
+            if (fade_out_active == 1 || fade_in_active == 1) goto done;
             next = D_80047F34 + 1;
-        } else
-        if (sndqueue_com == SNQ_FUNC9) {    // done
+        } else if (sndqueue_com == SNQ_FUNC9) {    // done
             func_8001D0AC(t->arg0);
             next = D_80047F34 + 1;
-        } else      
-        if (sndqueue_com == SNQ_FUNC10) {   // done
+        } else if (sndqueue_com == SNQ_FUNC10) {   // done
             D_80047DEC = t->arg0;
             next = D_80047F34 + 1;
         } else {   // done
@@ -292,12 +289,16 @@ flush_and_flee:
             } else {
                 cd_busy = 1;
             }
-            break;
+            goto done;
         }
         _sndqueue_size -= 1;
         D_80047F34 = next & 0xff;
     }
 
+flush_cache:
+    pvd_is_cached = 0;
+    sector_cache_clear();
+done:
     sndqueue_is_running = 0;
     return 0;
 }

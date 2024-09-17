@@ -183,7 +183,7 @@ void func_8001AE90(void)
 u8 D_80047DA0[8] = { 8, 0, 0, 0, 0, 0, 0, 0 };
 int D_80047DE4 = 1;
 int D_80047DE8 = 0;
-int D_80047EEC;
+int D_80047EEC; // SpuVolume ptr?
 extern CdlFILTER D_80047ECC;
 extern int D_8004D0E0;
 
@@ -227,15 +227,15 @@ void func_8001BA50(void) {
     sndqueue_add_try(0xFE, NULL, 0);
     func_8001C34C();
     func_8001C2F4();
-    sndqueue_add_try(0xE, &D_80047EC4, 0);
-    sndqueue_add_try(0xD, &D_80047ECC, 0);
-    sndqueue_add_try(0x15, &D_8004D0E0, 0);
-    sndqueue_add_try(9, NULL, 0);
-    sndqueue_add_try(0x1B, &D_8004D0E0, 0);
+    sndqueue_add_try(CdlSetmode, &D_80047EC4, 0);
+    sndqueue_add_try(CdlSetfilter, &D_80047ECC, 0);
+    sndqueue_add_try(CdlSeekL, &D_8004D0E0, 0);
+    sndqueue_add_try(CdlPause, NULL, 0);
+    sndqueue_add_try(CdlReadS, &D_8004D0E0, 0);
     func_8001C374();
-    sndqueue_add_try(0xFC, &vol_full, 0);
-    sndqueue_add_try(0xF7, D_80047EEC, 0);
-    sndqueue_add_try(0xFE, 2, 0);
+    sndqueue_add_try(SNQ_SET_SCALED, &vol_full, 0);
+    sndqueue_add_try(SNQ_FUNC9, D_80047EEC, 0);
+    sndqueue_add_try(SNQ_SET_FE, 2, 0);
     D_80047DE4 = 1;
 }
 
@@ -711,9 +711,17 @@ int mc_file_delete(u32 mtidx, char* file)
     return erase(D_800521F8);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002026C);   // mc_write
+int func_8002026C(int fd, void *buf, int len)   // mc_write
+{
+    return write(fd, buf, (len + 127) & ~127);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202A0);   // mc_write_try
+int func_800202A0(int fd, void *buf, int len)   // mc_write_block
+{
+    int rounded = (len + 127) & ~127;
+    while (write(fd, buf, rounded) != 0);
+    return rounded;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);   //
 

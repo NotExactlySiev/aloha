@@ -3,8 +3,6 @@
 #include <libsnd.h>
 #include "main.h"
 
-// FIXME: the music suddenly cuts out. dear god what have I done
-
 #define NCHANNELS   24
 
 #define MAX_VABS    4
