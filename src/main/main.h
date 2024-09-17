@@ -41,13 +41,17 @@ typedef struct {
 } file_t;
 
 // TODO: these should be in headers for their own files
-int regular_add(int (*)(), short);
-int regular_add_tmp(int (*)(), short);
+int regular_add(void*, short);
+int regular_add_tmp(void*, short);
 void regular_remove(int);
 void regular_run_tasks(void);
 void rle_decode(s32, u8*, u8*);
 void lz1_decode(void*, void*);
 void reboot(char*, char*);
+long call_SpuMalloc(long size);
+long call_SpuMallocWithStartAddr(unsigned long addr, long size);
+void call_SpuFree(unsigned long addr);
+void func_8001E0CC(SpuVoiceAttr* arg0);
 
 extern u32 tmpfilebuf;
 extern u8 kernelbuf[8];

@@ -88,7 +88,7 @@ INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80030A98);
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", SpuSetCommonAttr);
 
-INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80030E94);     // SpuClearReverbWorkArea
+INCLUDE_ASM("asm/main/nonmatchings/libsnd", SpuClearReverbWorkArea);     // SpuClearReverbWorkArea
 
 INCLUDE_ASM("asm/main/nonmatchings/libsnd", func_80031064);     // WaitEvent
 

@@ -1,9 +1,7 @@
 #include "common.h"
-#include <kernel.h>
-#include <libapi.h>
 #include <libspu.h>
-#include <libcd.h>
 #include <libsnd.h>
+#include "main.h"
 
 // FIXME: the music suddenly cuts out. dear god what have I done
 
@@ -17,6 +15,7 @@
 int func_8001F9EC(u32 handle, u16 pan, u16 vol);
 void func_8001F17C(u32 id, int arg2);
 int func_8001FBC0(int val);
+void func_8001F578(u32 mask);
 void func_8001F5DC(int id);
 void func_8001F610(int id, short pan, short vol);
 int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio);
@@ -27,6 +26,7 @@ int sfx_set_vol(u32 handle, u16 vol);
 int sfx_get_pan(uint handle);
 int sfx_get_vol(uint handle);
 int sfx_is_valid(u32 handle);
+void func_8001FBE4(void);
 
 typedef struct {
     int unk0;
@@ -109,7 +109,7 @@ void sfx_tick(void) {
     
     if (mask)
         func_8001F578(mask);    // free these
-    func_8001E2F4();    // is a nop
+    //func_8001E2F4();    // is a nop
 }
 
 // sfx_get_mask?
@@ -118,15 +118,14 @@ u32 func_8001E744(void)
     u32 ret = 0;
     for (int i = 0; i < NCHANNELS; i++) {
         if (channels[i].active)
-            ret |= 1;
-        ret << 1;
+            ret |= 1 << i;
     }
     return ret;
 }
 
-void call_SpuClearReverbWorkArea(void)
+long call_SpuClearReverbWorkArea(long mode)
 {
-    func_80030E94();
+    return SpuClearReverbWorkArea(mode);
 }
 
 void sfx_init(void)
@@ -177,7 +176,6 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
 
     u16 nprogs;
     u16* vag_sizes;
-    u32 j;
     u8 ntones;
     ProgAtr *progattrs;
     u32 size;
@@ -243,7 +241,7 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
     loaded_vabs[idx].nvags = vcount;
     loaded_vabs[idx].offsets = vab_offsets_next;
     vags_count += vcount;
-    vag_sizes = arg->toneattrs[arg->header.ps];
+    vag_sizes = (u16*) arg->toneattrs[arg->header.ps];  // over tone attrs
     for (int i = 0; i < vcount; i++) {
         vagoff += vag_sizes[i];
         *vab_offsets_next++ = vagoff;
@@ -261,18 +259,15 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001EEA4);
 /*int func_8001EEA4(VabRealHeader *buf, void *ptr, s16 idx)
 {
-    //if (ptr == 0) {
-    //    ptr = 
-    //}
-    // FIXME: not implemented
+    if (ptr == 0) {
+        ptr = 
+    }
     return -2;
 }*/
-//NOT_IMPL(func_8001EEA4);
 
 int func_8001EFAC(s16 idx)
 {
-    printf("hmmm\n");
-    if (loaded_vabs == 0) return -1;
+    if (vabs_count == 0) return -1;
     if (idx == -1)
         idx = D_80047F9C[vabs_count-1];
     if (idx != D_80047F9C[vabs_count-1]) return -2; // huh?
@@ -280,7 +275,7 @@ int func_8001EFAC(s16 idx)
     VabFile *v = &loaded_vabs[idx];
     if (v->a == 0) return -1;
     if (v->b == 1) {
-        call_SpuFree(v->p2);
+        call_SpuFree((u32) v->p2);
         vags_count -= v->nvags;
         vab_offsets_next -= v->nvags;
     }
@@ -351,7 +346,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
         .volume.left = left * vol * 2,
         .volume.right = right * vol * 2,
         .sample_note = vag->shift | (vag->center << 8),
-        .addr = &vab->p2[vab->offsets[vag->vag - 1]],
+        .addr = (u32) &vab->p2[vab->offsets[vag->vag - 1]],
         .adsr1 = vag->adsr1,
         .adsr2 = vag->adsr2,
         .voice = mask,
@@ -415,8 +410,6 @@ void func_8001F610(int id, short pan, short vol)
 //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F64C);
 // FIXME: this is not entirely correct, even though it works
 int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
-    u16 var_s2;
-
     u32 vab_idx = id >> 0x18;
     u32 prog_idx = (id >> 8) & 0x7F;
     u32 tone_idx = id & 0xF;
@@ -469,8 +462,8 @@ int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
         goto found;
     }
 
-    // FIXME: this is uninitialized
-    if (!(var_s2 & 0xFFFF)) return -1;                                    
+    // FIXME: this is uninitialized. where did it come from?
+    //if (!(var_s2 & 0xFFFF)) return -1;                                    
 
     // screw it, look for anything
     for (int i = 0; i < NCHANNELS; i++) {
@@ -535,6 +528,8 @@ int sfx_is_valid(u32 handle)
     if (channels[handle & 0x1F].epoch == (handle & 0x7FE0)) return handle;
     return -1;
 }
+
+
 
 int func_8001FBC0(int val)
 {
