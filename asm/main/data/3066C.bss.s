@@ -24,13 +24,13 @@ glabel D_80047ECC
 glabel D_80047ECD
 /* 306B5 80047ECD */ .space 0x07
 
-glabel D_80047F44
+glabel bgm_counter
 /* 3072C 80047F44 */ .space 0x08
 
-glabel D_80047F4C
+glabel bgm_target
 /* 30734 80047F4C */ .space 0x08
 
-glabel D_80047F54
+glabel bgm_finished
 /* 3073C 80047F54 */ .space 0x08
 
 glabel font_ptr8

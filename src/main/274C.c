@@ -24,9 +24,9 @@ extern s32 D_80047D78;
 extern SpuVolume D_80047D8C;
 s32 D_80047EAC;
 s32 D_80047F24;
-extern s32 D_80047DEC;
+extern s32 bgm_paused;
 s32 D_80047EA4;
-extern s32 D_80047F54;
+extern s32 bgm_finished;
 extern SpuVolume vol_full;
 
 
@@ -49,7 +49,7 @@ void func_8001C374(void);
 #define SNQ_SET_REVERB  -7
 #define SNQ_FUNC8       -8
 #define SNQ_FUNC9       -9
-#define SNQ_FUNC10      -10
+#define SNQ_SET_PAUSED      -10
 
 #define CLAMP(a,b,x)    { if (x < a) x = a; if (x > b) x = b; }
 
@@ -242,6 +242,8 @@ void func_8001BA50(void) {
 
 // ENDOF audio.c
 
+// bgm.c
+
 // 2 functions for converting between frame number and byte offset in videos
 // I have no idea why but these actually use div for dividing by constants
 // and do some other weird stuff that doesn't make any sense
@@ -272,7 +274,48 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
 }
 
 // uses unbcd
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
+// plays background music
+void func_8001BD00(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
+{
+    if (fe_value == 3) {
+        func_8001A380();
+    }
+
+    D_80047D78 = repeat == 1;
+    //printf("PLAYING %s\n", filename);
+
+    if (cd_fs_get_file(&D_8004D0E0, filename) == 0) {
+        printf("can't find file :(\n");
+        // FIXME: code here
+        return;
+    }
+
+    //printf("%X:%X:%X:%X\n", f.pos.track, f.pos.minute, f.pos.second, f.pos.sector);
+    printf("%X:%X:%X:%X\n", loc->track, loc->minute, loc->second, loc->sector);
+    D_80047F24 = 0;
+    D_80047ECC.file = file;
+    D_80047ECC.chan = chan;
+    
+    if (get_tv_system() == MODE_PAL) {
+        unbcd(loc->minute) * 60;
+        while (1);
+    } else {
+        int seconds = unbcd(loc->minute) * 60 + unbcd(loc->second);
+        D_80047EEC = seconds * 60 + (unbcd(loc->track) * 60) / 100;
+    }
+
+    D_80047EEC *= get_tv_system() == MODE_PAL ? 203 : 200;
+    D_80047EEC /= 200;
+    printf("bgm is %d frames long\n", D_80047EEC);
+    D_80047EC4[0] = arg3;
+    sndqueue_add_try(0xFB, 0, 0);
+    sndqueue_add_try(0xFA, 0, 0);
+    func_8001BA50();
+    D_80047F24 = 2;
+    D_800548EC = 1;
+
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
@@ -366,28 +409,38 @@ void func_8001CDF0(void) {
 }
 
 s32 func_8001CE18(void) {
-    return D_80047F54;
+    return bgm_finished;
 }
 
 void func_8001CE28(void) {
     func_8001C2F4();
-    sndqueue_add_try(SNQ_FUNC10, 1, 0);
+    sndqueue_add_try(SNQ_SET_PAUSED, 1, 0);
 }
 
 void func_8001CE58(void) {
-    if (D_80047DEC == 1) {
+    if (bgm_paused == 1) {
         sndqueue_add_try(CdlReadS, 0, 0);
-        sndqueue_add_try(SNQ_FUNC10, 0, 0);
+        sndqueue_add_try(SNQ_SET_PAUSED, 0, 0);
     }
 }
 
 void func_8001CEA0(void) {
-    sndqueue_add_try(SNQ_FUNC10, 0, 0);
+    sndqueue_add_try(SNQ_SET_PAUSED, 0, 0);
 }
 
+extern int bgm_counter;  // cntr
+extern int bgm_target;  // tgt
 
-// 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CEC8);
+// bgm_tick 
+void func_8001CEC8(void)
+{
+    if ((bgm_finished == 0) && (bgm_paused == 0))
+        bgm_counter += 1;
+
+    //printf("%d\t/ %d\n", bgm_counter, bgm_target);
+    if (bgm_counter > bgm_target)
+        bgm_finished = 1;
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
 
@@ -891,7 +944,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
 // FILE vid.c
 
 // 8 loading and playing video
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);       // vid_setup_mdec
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);       // mov_setup_mdec
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021F7C);
 
@@ -899,13 +952,13 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021FD0);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);       // 
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022260);       // vid_load_frame
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022260);       // mov_load_frame
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // vid_decode_frame
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // mov_decode_frame
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // vid_wait_for_img
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // mov_wait_for_img
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // vid_play_file
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // mov_play_file
 
 // ENDOF vid.c
 

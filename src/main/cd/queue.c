@@ -19,7 +19,7 @@ extern s8 D_80047EC4[8];
 #define SNQ_SET_REVERB  -7
 #define SNQ_FUNC8       -8
 #define SNQ_FUNC9       -9
-#define SNQ_FUNC10      -10
+#define SNQ_SET_PAUSED      -10
 
 typedef struct {
     u8     com;
@@ -44,7 +44,7 @@ u16 D_80047F34;      // index of the task being executed
 
 s32 D_80047DD8 = 1;  // this is still a mystery. probably enum. gets set in the first function here
 s32 D_80047DE0 = 0;  // step? no idea. maybe a state machine
-s32 D_80047DEC = 0;
+s32 bgm_paused = 0;
 
 // this is a mess
 extern s32 cd_busy;   // step1
@@ -115,9 +115,9 @@ void sndqueue_add_try(u8 arg0, u32 arg1, u32 arg2)
     sndqueue_add(arg0, arg1, arg2);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
+INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
 // execute one block of command
-s32 sndqueue_exec()
+s32 _sndqueue_exec()
 {
     s32 rc;
 
@@ -159,7 +159,7 @@ s32 sndqueue_exec()
         if (1 == D_80047D78) {
             // THIS RESTARTS THE BACKGROUND MUSIC YOU MORON!
             // a ton of duplicated calls from func_8001BA50
-            sndqueue_add(CdlPause, 0, 0);   // TODO: arguments
+            sndqueue_add(CdlPause, 0, 0);
             sndqueue_add(CdlSetmode, &D_80047EC4, 0);
             sndqueue_add(CdlSetfilter, &D_80047ECC, 0);
             sndqueue_add(CdlSeekL, &D_8004D0E0, 0);
@@ -271,8 +271,8 @@ s32 sndqueue_exec()
         } else if (sndqueue_com == SNQ_FUNC9) {    // done
             func_8001D0AC(t->arg0);
             next = D_80047F34 + 1;
-        } else if (sndqueue_com == SNQ_FUNC10) {   // done
-            D_80047DEC = t->arg0;
+        } else if (sndqueue_com == SNQ_SET_PAUSED) {   // done
+            bgm_paused = t->arg0;
             next = D_80047F34 + 1;
         } else {   // done
             // normal cd control functions
