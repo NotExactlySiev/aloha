@@ -14,16 +14,16 @@ $ md5sum original/us.bin
 On Debian/Ubuntu:
 
 ```sh
-apt install python ninja gcc-mipsel-gnu-linux binutils-mipsel-gnu-linux
+apt install ninja gcc-mipsel-gnu-linux binutils-mipsel-gnu-linux
 ```
 
-Also mkpsxiso and dumpsxiso (
+You also need Wren CLI, mkpsxiso and dumpsxiso.
 
 ### Building
 Generate the ninja build file:
 
 ```sh
-python build.py
+wren_cli mkninja.wren
 ```
 
 And build the image:
