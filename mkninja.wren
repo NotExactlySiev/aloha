@@ -2,6 +2,9 @@ import "io" for File, Directory
 
 // all paths are relative to the main project directory
 // TODO: add INCLUDE_ASM dependencies
+// TODO: include header dependencies
+// TODO: move out the Ninja and other classes to a
+//       separate file
 
 class Ninja {
     static put(s) {
@@ -24,7 +27,7 @@ class Ninja {
                 put(" " + src)
             }
         }
-        put("\n")
+        nl()
     }
     
     static build(rule, target, direct) {
@@ -34,6 +37,10 @@ class Ninja {
     static set(varName, val) {
         put(varName + " = " + val)
         nl()
+    }
+
+    static param(varName, val) {
+        set("    " + varName, val)
     }
 
     static rule(name, cmd) {
@@ -101,8 +108,9 @@ class Executable {
             allDeps.add(buildDir + f.objName)
         }
         var elfPath = "build/" + _name + ".elf"
-        Ninja.build("link", elfPath, allDeps, ["shared.ld", "symbols." + _name + ".ld"])
-        // TODO: var modid
+        var symbolsFile = "symbols." + _name + ".ld"
+        Ninja.build("link", elfPath, allDeps, ["shared.ld", symbolsFile])
+        Ninja.param("modid", _name)
         var exeName = "build/" + _name + ".exe"
 
         if (_isComped) {
@@ -110,7 +118,6 @@ class Executable {
             Ninja.build("comp", finalPath, [exeName], ["$jfcomp"])
         } else {
             Ninja.build("objcopy", finalPath, [elfPath])
-
         }
     }
 
@@ -164,4 +171,3 @@ for (exe in execs) {
 }
 
 Ninja.build("mkiso", "build/aloha.bin", ["us.xml"], exePaths)
-
