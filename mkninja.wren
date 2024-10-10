@@ -26,6 +26,9 @@ class Executable {
         _source = []
         _header = []
         _data = []
+
+        scanDir("src/" + _name)
+        scanDir("asm/" + _name + "/data")
     }
 
     addFile(name, path) {
@@ -38,23 +41,18 @@ class Executable {
         }
     }
 
-    scan(path) {
+    scanDir(path) {
         //System.print("Scanning " + path)
         if (!Directory.exists(path)) return
         var lst = Directory.list(path)
         for (ent in lst) {
             var p = path + "/" + ent
             if (Directory.exists(p)) {
-                scan(p)
+                scanDir(p)
             } else {
                 addFile(ent, p)
             }
         }
-    }
-
-    scanDir() {
-        scan("src/" + _name)
-        scan("asm/" + _name + "/data")
     }
 
     generate() {
@@ -92,10 +90,7 @@ var execs = [
     Executable.new("GAMEOVER.PEX", "gameover", true),
 ]
 
-for (exe in execs) {
-    exe.scanDir()
-}
-
+// TODO: check for the compiler
 Ninja.set("cross", "mipsel-unknown-linux-gnu-")
 Ninja.set("jfdir", "tools/jfcomp")
 Ninja.set("jfcomp", "$jfdir/jfcomp")
