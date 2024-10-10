@@ -9,6 +9,7 @@ import "io" for File, Directory
 class Ninja {
     static put(s) {
         // TODO: write to a buffer?
+        // should be an overridable callback thing
         System.write(s)
     }
 
