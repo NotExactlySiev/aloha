@@ -20,6 +20,11 @@ apt install ninja gcc-mipsel-gnu-linux binutils-mipsel-gnu-linux
 You also need Wren CLI, mkpsxiso and dumpsxiso.
 
 ### Building
+Dump the original disc image:
+```sh
+sh dump.sh
+```
+
 Generate the ninja build file:
 
 ```sh

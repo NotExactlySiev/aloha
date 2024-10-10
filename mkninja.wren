@@ -1,55 +1,11 @@
 import "io" for File, Directory
+import "./ninja" for Ninja
 
 // all paths are relative to the main project directory
 // TODO: add INCLUDE_ASM dependencies
 // TODO: include header dependencies
 // TODO: move out the Ninja and other classes to a
 //       separate file
-
-class Ninja {
-    static put(s) {
-        // TODO: write to a buffer?
-        // should be an overridable callback thing
-        System.write(s)
-    }
-
-    static nl() {
-        put("\n")
-    }
-
-    static build(rule, target, direct, indirect) {
-        put("build " + target + ": " + rule)
-        for (src in direct) {
-            put(" " + src)
-        }
-        if (indirect.count > 0){
-            put(" |")
-            for (src in indirect) {
-                put(" " + src)
-            }
-        }
-        nl()
-    }
-    
-    static build(rule, target, direct) {
-        build(rule, target, direct, [])
-    }
-
-    static set(varName, val) {
-        put(varName + " = " + val)
-        nl()
-    }
-
-    static param(varName, val) {
-        set("    " + varName, val)
-    }
-
-    static rule(name, cmd) {
-        put("rule " + name + "\n    command = " + cmd)
-        nl()
-    }
-}
-
 class SourceFile {
     construct new(name, path) {
         _name = name
@@ -164,6 +120,7 @@ Ninja.build("ccnat", "$jfcomp", [
     "$jfdir/comp.c",
     "$jfdir/decomp.c",
 ])
+Ninja.build("cc", "build/header.o", ["src/header.s"])
 
 var exePaths = []
 for (exe in execs) {
