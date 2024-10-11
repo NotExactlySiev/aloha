@@ -516,7 +516,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E06C);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E08C);
 
 void call_SpuSetVoiceAttr(SpuVoiceAttr* attr) {
-    func_8002C4A8(attr);
+    SpuSetVoiceAttr(attr);
 }
 
 extern int D_80047E08;
@@ -555,11 +555,11 @@ NOT_IMPL(func_8001E17C) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17
 
 // the rest are trivial again
 void func_8001E22C(s32 arg0) {
-    func_800316F0(1, arg0);
+    SpuSetKey(1, arg0);
 }
 
 void func_8001E250(s32 arg0) {
-    func_800316F0(0, arg0);
+    SpuSetKey(0, arg0);
 }
 
 void func_8001E274(void)
@@ -590,9 +590,9 @@ void func_8001E2FC(void)
     func_80030A98();
 }
 
-void func_8001E31C(void)
+void func_8001E31C(long n_clock)
 {
-    func_80030A44();
+    SpuSetNoiseClock(n_clock);
 }
 
 u32 call_PadRead(s32 id);

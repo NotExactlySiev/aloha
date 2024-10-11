@@ -85,7 +85,7 @@ u8 D_80047F9C[4];
 
 
 void sfx_tick(void) {
-    func_80031770(D_800521E0);
+    SpuGetAllKeysStatus(D_800521E0);
     u32 mask = 0;
     for (int i = 0; i < NCHANNELS; i++) {
         Channel *p = &channels[i];
