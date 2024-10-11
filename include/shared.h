@@ -134,9 +134,4 @@ extern struct {
 } jt;
 #undef UNK
 
-
-// TODO: this is stupid, move it
-// DON'T include this header in main, or this macro breaks things
-#define GetGraphType()  jt.GetGraphType()
-
 #endif

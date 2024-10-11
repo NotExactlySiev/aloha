@@ -9,8 +9,8 @@ void reboot(char *conf, char *exec);
 
 // libapi.h stuff
 void _boot(char *conf, char *exec);
-char *k_strcat (char *, char *);
-char *k_strcpy (/* char *, char * */);	/* To avoid conflicting */
+//char *k_strcat (char *, char *);
+//char *k_strcpy (/* char *, char * */);	/* To avoid conflicting */
 void EnterCriticalSection(void);
 
 extern u32 KER_DATE;
@@ -25,7 +25,7 @@ __asm__(".section .text\n\t"
 
 void reset(void)
 {
-    k_strcpy(kernelbuf, "PSDEMO");
+    strcpy(kernelbuf, "PSDEMO");
     reboot("PSEXE", "SYSTEM.CNF");
 }
 
@@ -43,12 +43,12 @@ void reboot(char* exec, char* conf)
         conf = "SYSTEM.CNF";
     }
     
-    k_strcpy(execAddr, "cdrom:");
-    k_strcat(execAddr, exec);
-    k_strcat(execAddr, ";1");
-    k_strcpy(confAddr, "cdrom:");
-    k_strcat(confAddr, conf);
-    k_strcat(confAddr, ";1");
+    strcpy(execAddr, "cdrom:");
+    strcat(execAddr, exec);
+    strcat(execAddr, ";1");
+    strcpy(confAddr, "cdrom:");
+    strcat(confAddr, conf);
+    strcat(confAddr, ";1");
     printf("def = %s conf = %s serial = %08x %08x\n", execAddr, confAddr, KER_DATE, CONSOLE_TYPE);
     EnterCriticalSection();
 

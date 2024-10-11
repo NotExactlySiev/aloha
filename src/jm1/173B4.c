@@ -1184,7 +1184,8 @@ extern SVECTOR D_801226E8[];   // rotation vectors
 // load level objects (section1)
 // this has to do with culling outside of camera objects
 // dunno how it works :/
-void func_800DA154(void *data)
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA154);
+void _func_800DA154(void *data)
 {
     SVECTOR *vecmin = SCRTCHPAD(0);
     SVECTOR *vecmax = SCRTCHPAD(8);

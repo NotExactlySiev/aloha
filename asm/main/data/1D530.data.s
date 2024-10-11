@@ -36996,26 +36996,28 @@ glabel D_80045E98
 /* 2F694 80046E94 */ .short 0x0000
 /* 2F696 80046E96 */ .short 0x0000
 
+/*
 glabel D_80046E98
-/* 2F698 80046E98 */ .word D_8001820C
-/* 2F69C 80046E9C */ .word _addque
-/* 2F6A0 80046EA0 */ .word _addque2
-/* 2F6A4 80046EA4 */ .word _clr
-/* 2F6A8 80046EA8 */ .word _ctl
-/* 2F6AC 80046EAC */ .word _cwb
-/* 2F6B0 80046EB0 */ .word _cwc
-/* 2F6B4 80046EB4 */ .word _drs
-/* 2F6B8 80046EB8 */ .word _dws
-/* 2F6BC 80046EBC */ .word _exeque
-/* 2F6C0 80046EC0 */ .word _getctl
-/* 2F6C4 80046EC4 */ .word _otc
-/* 2F6C8 80046EC8 */ .word _param
-/* 2F6CC 80046ECC */ .word _reset
-/* 2F6D0 80046ED0 */ .word _status
-/* 2F6D4 80046ED4 */ .word _sync
+    .word D_8001820C
+    .word _addque
+    .word _addque2
+    .word _clr
+    .word _ctl
+    .word _cwb
+    .word _cwc
+    .word _drs
+    .word _dws
+    .word _exeque
+    .word _getctl
+    .word _otc
+    .word _param
+    .word _reset
+    .word _status
+    .word _sync
 
 glabel D_80046ED8
-/* 2F6D8 80046ED8 */ .word D_80046E98
+    .word D_80046E98
+*/
 
 glabel D_80046EDC
 /* 2F6DC 80046EDC */ .word  printf
@@ -37113,6 +37115,9 @@ glabel D_80046FA4
 glabel D_80046FA8
 /* 2F7A8 80046FA8 */ .word 0x00000000
 
+/* this is libcd stuff. why are they here? */
+
+/*
 glabel D_80046FAC
 	.word D_800184D8+0xf0
 	.word D_800184D8+0xe8
@@ -37157,6 +37162,7 @@ glabel D_8004702C
 	.word D_800185D0+0x0
     .word D_800184D8+0x50
     .word D_800184D8+0x50
+*/
 
 glabel D_8004704C
 /* 2F84C 8004704C */ .word 0x00000000
@@ -37444,121 +37450,6 @@ glabel D_80047324
 glabel D_80047328
 /* 2FB28 80047328 */ .word 0x00000000
 /* 2FB2C 8004732C */ .word 0x00000000
-
-glabel D_80047330
-/* 2FB30 80047330 */ .word D_80018754
-/* 2FB34 80047334 */ .word 0x00000000
-/* 2FB38 80047338 */ .word setIntr
-/* 2FB3C 8004733C */ .word startIntr
-/* 2FB40 80047340 */ .word stopIntr
-/* 2FB44 80047344 */ .word 0x00000000
-
-glabel D_80047348
-/* 2FB48 80047348 */ .word D_80047330
-
-glabel D_8004734C
-/* 2FB4C 8004734C */ .short 0x0000
-
-glabel D_8004734E
-/* 2FB4E 8004734E */ .short 0x0000
-
-glabel D_80047350
-/* 2FB50 80047350 */ .word 0x00000000
-/* 2FB54 80047354 */ .word 0x00000000
-/* 2FB58 80047358 */ .word 0x00000000
-/* 2FB5C 8004735C */ .word 0x00000000
-/* 2FB60 80047360 */ .word 0x00000000
-/* 2FB64 80047364 */ .word 0x00000000
-/* 2FB68 80047368 */ .word 0x00000000
-/* 2FB6C 8004736C */ .word 0x00000000
-/* 2FB70 80047370 */ .word 0x00000000
-/* 2FB74 80047374 */ .word 0x00000000
-/* 2FB78 80047378 */ .word 0x00000000
-
-glabel D_8004737C
-/* 2FB7C 8004737C */ .word 0x00000000
-/* 2FB80 80047380 */ .word 0x00000000
-
-glabel D_80047384
-/* 2FB84 80047384 */ .word 0x00000000
-/* 2FB88 80047388 */ .word 0x00000000
-/* 2FB8C 8004738C */ .word 0x00000000
-/* 2FB90 80047390 */ .word 0x00000000
-/* 2FB94 80047394 */ .word 0x00000000
-/* 2FB98 80047398 */ .word 0x00000000
-/* 2FB9C 8004739C */ .word 0x00000000
-/* 2FBA0 800473A0 */ .word 0x00000000
-/* 2FBA4 800473A4 */ .word 0x00000000
-/* 2FBA8 800473A8 */ .word 0x00000000
-/* 2FBAC 800473AC */ .word 0x00000000
-
-glabel D_800473B0
-/* 2FBB0 800473B0 */ .word 0x1F801070
-
-glabel D_800473B4
-/* 2FBB4 800473B4 */ .word 0x1F801074
-
-glabel D_800473B8
-/* 2FBB8 800473B8 */ .word 0x00000000
-
-glabel D_800473BC
-/* 2FBBC 800473BC */ .short 0x0000
-/* 2FBBE 800473BE */ .short 0x0000
-
-glabel D_800473C0
-/* 2FBC0 800473C0 */ .word 0x00000000
-/* 2FBC4 800473C4 */ .word 0x00000000
-/* 2FBC8 800473C8 */ .word 0x00000000
-/* 2FBCC 800473CC */ .word 0x00000000
-/* 2FBD0 800473D0 */ .word 0x00000000
-/* 2FBD4 800473D4 */ .word 0x00000000
-/* 2FBD8 800473D8 */ .word 0x00000000
-/* 2FBDC 800473DC */ .word 0x00000000
-
-glabel D_800473E0
-/* 2FBE0 800473E0 */ .word 0x1F8010F4
-
-glabel D_800473E4
-/* 2FBE4 800473E4 */ .word 0x00000000
-/* 2FBE8 800473E8 */ .word 0x1F801110
-
-glabel D_800473EC
-/* 2FBEC 800473EC */ .word 0x1F801114
-
-glabel D_800473F0
-/* 2FBF0 800473F0 */ .short 0x0000
-/* 2FBF2 800473F2 */ .short 0x0000
-
-glabel D_800473F4
-/* 2FBF4 800473F4 */ .word 0x00000000
-
-glabel D_800473F8
-/* 2FBF8 800473F8 */ .word 0x00000000
-/* 2FBFC 800473FC */ .word 0x3A644924
-/* 2FC00 80047400 */ .word 0x79737620
-/* 2FC04 80047404 */ .word 0x632E636E
-/* 2FC08 80047408 */ .word 0x3120762C
-/* 2FC0C 8004740C */ .word 0x2035312E
-/* 2FC10 80047410 */ .word 0x35393931
-/* 2FC14 80047414 */ .word 0x2F35302F
-/* 2FC18 80047418 */ .word 0x30203831
-/* 2FC1C 8004741C */ .word 0x38343A36
-/* 2FC20 80047420 */ .word 0x2035303A
-/* 2FC24 80047424 */ .word 0x757A7573
-/* 2FC28 80047428 */ .word 0x70784520
-/* 2FC2C 8004742C */ .word 0x00002420
-
-glabel D_80047430
-/* 2FC30 80047430 */ .word 0x1F801814
-
-glabel D_80047434
-/* 2FC34 80047434 */ .word 0x1F801110
-
-glabel D_80047438
-/* 2FC38 80047438 */ .word 0x00000000
-
-glabel D_8004743C
-/* 2FC3C 8004743C */ .word 0x00000000
 
 glabel stacksize
 /* 2FC40 80047440 */ .word 0x00008000

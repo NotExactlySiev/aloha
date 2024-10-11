@@ -5,10 +5,15 @@
  * File:kernel.h 	Rev. 3
 */
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
+#ifndef _R3000_H
 #include <r3000.h>
+#endif
+
+#ifndef _ASM_H
 #include <asm.h>
+#endif
 
 /* don't change these macros and structures which is refereced in kernel code */ 
 
@@ -39,10 +44,10 @@
 #define SwCARD		(DescSW|0x01)	/* memory card */
 #define SwMATH          (DescSW|0x02)	/* libmath */
 
-#define RCntCNT0     	(DescRC|0x00)  	/* �\���s�N�Z�� */
-#define RCntCNT1  	(DescRC|0x01)  	/* �������� */
-#define RCntCNT2  	(DescRC|0x02)  	/* �V�X�e���N���b�N�W���� */
-#define RCntCNT3  	(DescRC|0x03)  	/* �������� �^�[�Q�b�g�l�͂P�ɌŒ� */
+#define RCntCNT0     	(DescRC|0x00)  	/* display pixel */
+#define RCntCNT1  	(DescRC|0x01)  	/* horizontal sync */
+#define RCntCNT2  	(DescRC|0x02)  	/* one-eighth of system clock */
+#define RCntCNT3  	(DescRC|0x03)  	/* vertical sync target value fixed to 1 */
 
 #define RCntMdINTR	0x1000
 #define RCntMdNOINTR	0x2000
@@ -85,7 +90,7 @@
 #define TcbStUNUSED	0x1000
 #define	TcbStACTIVE	0x4000
 
-#if defined(LANGUAGE_C)||defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+#if defined(_LANGUAGE_C)||defined(LANGUAGE_C)||defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 struct ToT {
 	unsigned long *head;
 	long size;
@@ -155,7 +160,12 @@ extern long SysClearRCnt[];
 #define NULL (0)
 #endif
 
+#if defined(_LANGUAGE_C)||defined(LANGUAGE_C)
+#define delete  erase
+#endif /* LANGUAGE_C */
+
 #endif /* LANGUAGE_C||_LANGUAGE_C_PLUS_PLUS||__cplusplus||c_plusplus */
+
 #endif /* _KERNEL_H */
 
 

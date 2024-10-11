@@ -1,5 +1,5 @@
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 /*
  * GTE inline functions(Simple)
@@ -146,6 +146,30 @@
 					gte_ldopv2(r2);		\
 					gte_op0();		\
 					gte_stlvnl(r3); }
+
+#define gte_OuterProduct12SVL(r1,r2,r3)				\
+				{	gte_ldopv1SV(r1);	\
+					gte_ldopv2SV(r2);	\
+					gte_op12();		\
+					gte_stlvnl(r3); }
+
+#define gte_OuterProduct0SVL(r1,r2,r3)				\
+				{	gte_ldopv1SV(r1);	\
+					gte_ldopv2SV(r2);	\
+					gte_op0();		\
+					gte_stlvnl(r3); }
+
+#define gte_OuterProduct12SV(r1,r2,r3)				\
+				{	gte_ldopv1SV(r1);	\
+					gte_ldopv2SV(r2);	\
+					gte_op12();		\
+					gte_stsv(r3); }
+
+#define gte_OuterProduct0SV(r1,r2,r3)				\
+				{	gte_ldopv1SV(r1);	\
+					gte_ldopv2SV(r2);	\
+					gte_op0();		\
+					gte_stsv(r3); }
 
 #define gte_Lzc(r1,r2)						\
 				{	gte_ldlzc(r1);		\
@@ -314,12 +338,18 @@
 					gte_rtv0();		\
 					gte_stlvnl(r3);	}
 
+#define gte_ApplyMatrixSV(r1,r2,r3)				\
+				{	gte_SetRotMatrix(r1);   \
+					gte_ldv0(r2);		\
+					gte_rtv0();		\
+					gte_stsv(r3);	}
+
 #define gte_CompMatrix(r1,r2,r3)				\
 				{	gte_MulMatrix0(r1,r2,r3);\
 					gte_SetTransMatrix(r1);	\
 					gte_ldlv0((char*)r2+20);\
 					gte_rt();		\
-					gte_stlvl((char*)r3+20);	}
+					gte_stlvnl((char*)r3+20);	}
 
 #define gte_ApplyRotMatrix(r1,r2)				\
 				{	gte_ldv0(r1);		\

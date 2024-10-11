@@ -1,10 +1,10 @@
 /*
  * Error codes
  * $RCSfile: errno.h,v $
- * $Id: errno.h,v 1.4 1995/04/04 12:28:55 kaol Exp $
+ * $Id: errno.h,v 1.3 1995/02/28 10:02:53 yoshi Exp $
  */
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.6$
  */
 
 #ifndef	_ERRNO_H

@@ -2,7 +2,7 @@
  * File:asm.h
 */
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 #ifndef _ASM_H
 #define _ASM_H
@@ -40,10 +40,10 @@
 #define R30 $30
 #define R31 $31
 
-#if defined(LANGUAGE_C)||defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+#if defined(_LANGUAGE_C)||defined(LANGUAGE_C)||defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 #else
 #define zero	$0	/* wired zero */
-#define AT	$at	/* assembler temp */
+#define AT	$1	/* assembler temp */
 #define v0	$2	/* return value */
 #define v1	$3
 #define a0	$4	/* argument registers */

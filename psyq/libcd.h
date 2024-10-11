@@ -1,6 +1,4 @@
-/*
- * $PSLibId: Runtime Library Version 3.3$
- */
+/* $PSLibId: Run-time Library Release 4.7$ */
 #ifndef _LIBCD_H_
 #define _LIBCD_H_
 /*
@@ -17,21 +15,20 @@
  *	CdlSetloc	B	Set position	
  *	CdlPlay		B	CD-DA Play
  *	CdlForward	B	Forward
- *	CdlBackword	B	Backword
+ *	CdlBackward	B	Backward
  *	CdlReadN	B	Read with retry
  *	CdlStanby	N	Standby
  *	CdlStop		N	Stop
  *	CdlPause	N	Pause
  *	CdlMute		B	Mute on
  *	CdlDemute	B	Mute off
- *	CdlBetfilter	B	Set SubHeader filter
+ *	CdlSetfilter	B	Set SubHeader filter
  *	CdlSetmode	B	Set mode
  *	CdlGetlocL	B	Get logical position
  *	CdlGetlocP	B	Get phisycal position
  *	CdlSeekL	N	Logical Seek
  *	CdlSeekP	N	Phisical Seek
  *	CdlReadS	B	Read without retry
- *	CdlReset	B	Reset
  *	------------------------------------------------------
  *			B: Blocking, N: Non-Blocking operation
  *		
@@ -42,7 +39,7 @@
  *	CdlSetloc	min,sec,sector	status
  *	CdlPlay       	-		status
  *	CdlForward	-		status
- *	CdlBackword	-		status
+ *	CdlBackward	-		status
  *	CdlReadN	-		status
  *	CdlStanby	-		status
  *	CdlStop		-		status
@@ -57,9 +54,11 @@
  *	CdlSeekL	-		status
  *	CdlSeekP	-		status
  *	CdlReadS	-		status
- *	CdlReset	-		status
  *	--------------------------------------------------------------
  */
+
+#include <types.h>
+
 /*
  * CD-ROM Basic System
  */
@@ -67,7 +66,8 @@
 /*
  * CD-ROM Mode (used int CdlSetmode)
  */
-#define CdlModeStream  0x120    /* 0: not streaming     1: streaming    */
+#define CdlModeStream  0x100    /* Normal Streaming                     */
+#define CdlModeStream2 0x120    /* SUB HEADER information includes      */
 #define CdlModeSpeed	0x80	/* 0: normal speed	1: double speed	*/
 #define CdlModeRT	0x40	/* 0: ADPCM off		1: ADPCM on	*/
 #define CdlModeSize1	0x20	/* 0: 2048 byte		1: 2340byte	*/
@@ -87,20 +87,26 @@
 #define CdlStatSeekError	0x04	/* seek error detected */
 #define CdlStatStandby		0x02	/* spindle motor rotating */
 #define CdlStatError		0x01	/* command error detected */
-	
+
+/*
+ * Macros for CdGetDiskType()
+ */
+#define CdlStatNoDisk	0
+#define CdlOtherFormat	1
+#define CdlCdromFormat	2
+
 /*
  * CD-ROM Primitive Commands
  */
-#define CdlNop		0x01	
-#define CdlSetloc	0x02	
-#define CdlPlay		0x03	
-#define CdlForward	0x04	
+#define CdlNop		0x01
+#define CdlSetloc	0x02
+#define CdlPlay		0x03
+#define CdlForward	0x04
 #define CdlBackward	0x05
 #define CdlReadN	0x06
 #define CdlStandby	0x07
 #define CdlStop		0x08
 #define CdlPause	0x09
-#define CdlReset	0x0a
 #define CdlMute		0x0b
 #define CdlDemute	0x0c
 #define CdlSetfilter	0x0d
@@ -108,6 +114,8 @@
 #define CdlGetparam	0x0f
 #define CdlGetlocL	0x10
 #define CdlGetlocP	0x11
+#define CdlGetTN	0x13
+#define CdlGetTD	0x14
 #define CdlSeekL	0x15
 #define CdlSeekP	0x16
 #define CdlReadS	0x1B
@@ -125,8 +133,12 @@
 /*
  * Library Macros
  */
+#ifndef btoi
 #define btoi(b)		((b)/16*10 + (b)%16)		/* BCD to u_char */
+#endif
+#ifndef itob
 #define itob(i)		((i)/10*16 + (i)%10)		/* u_char to BCD */
+#endif
 
 #define CdSeekL(p)	CdControl(CdlSeekL, (u_char *)p, 0)
 #define CdSeekP(p)	CdControl(CdlSeekP, (u_char *)p, 0)
@@ -137,12 +149,17 @@
 #define CdDeMute()	CdControl(CdlDemute,   0, 0)
 #define CdForward()	CdControl(CdlForward,  0, 0)
 #define CdBackward()	CdControl(CdlBackward, 0, 0)
-#define CdPlay()	CdControl(CdlPlay,     0, 0)
 
 /*
  *	Position
  */
 #define CdlMAXTOC	100
+
+/*
+ *	Callback
+ */
+
+typedef void (*CdlCB)(u_char,u_char *);
 
 /*
  *	Location
@@ -186,6 +203,14 @@ typedef struct {
 	char	name[16];	/* file name (body) */
 } CdlFILE;
 
+
+/*#define MULTI_INTERRUPT */
+#ifndef MULTI_INTERRUPT
+#define pauseMULI()
+#define restartMULI()
+#endif
+
+#ifndef _LIBDS_H_
 /*
  *	Streaming Structures
  */
@@ -202,7 +227,7 @@ typedef struct {
     u_long  dummy1;
     u_long  dummy2;
     CdlLOC  loc;
-} StHEADER;             /* CD-ROM STR ç\ë¢ëÃ */
+} StHEADER;             /* CD-ROM STR structure */
 
 #define  StFREE       0x0000
 #define  StREWIND     0x0001
@@ -226,13 +251,6 @@ typedef struct {
 #define  StMOVIE_HEIGHT   0x09
 
 
-/*#define MULTI_INTERRUPT */
-#ifndef MULTI_INTERRUPT
-#define pauseMULI()
-#define restartMULI()
-#endif
-
-
 /*
  *	Prototypes for Streaming
  */
@@ -242,19 +260,32 @@ extern "C" {
 void	StSetRing(u_long *ring_addr,u_long ring_size);
 void	StClearRing(void);
 void	StUnSetRing(void);
-u_long	StFreeRing();
 void	StSetStream(u_long mode,u_long start_frame,u_long end_frame,
-		    int (*func1)(),int (*func2)());
+		    void (*func1)(),void (*func2)());
 void	StSetEmulate(u_long *addr,u_long mode,u_long start_frame,
-		     u_long end_frame,int (*func1)(),int (*func2)());
+		     u_long end_frame,void (*func1)(),void (*func2)());
 u_long	StFreeRing(u_long *base);
 u_long	StGetNext(u_long **addr,u_long **header);
+u_long	StGetNextS(u_long **addr,u_long **header);
+u_short	StNextStatus(u_long **addr,u_long **header);
+void    StRingStatus(short *free_sectors,short *over_sectors);
 void	StSetMask(u_long mask,u_long start,u_long end);
 void	StCdInterrupt(void);
+int     StGetBackloc(CdlLOC *loc);
+int     StSetChannel(u_long channel);
+#if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+}
+#endif
+#endif	/* ifndef _LIBDS_H_ */
+
 
 /*
  *	Prototypes
  */
+#if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+extern "C" {
+#endif
+
 void CdFlush(void);
 CdlFILE *CdSearchFile(CdlFILE *fp, char *name);
 CdlLOC *CdIntToPos(int i, CdlLOC *p) ;
@@ -263,24 +294,35 @@ char *CdIntstr(u_char intr);
 int CdControl(u_char com, u_char *param, u_char *result);
 int CdControlB(u_char com, u_char *param, u_char *result);
 int CdControlF(u_char com, u_char *param);
-int CdDataCallback(void (*func)()) ;
 int CdGetSector(void *madr, int size);
+int CdGetSector2( void* madr, int size );
 int CdDataSync(int mode);
 int CdGetToc(CdlLOC *loc) ;
+int CdPlay(int mode, int *track, int offset);
 int CdMix(CdlATV *vol);
 int CdPosToInt(CdlLOC *p);
 int CdRead(int sectors, u_long *buf, int mode);
 int CdRead2(long mode);
+int CdReadFile(char *file, u_long *addr, int nbyte);
 int CdReadSync(int mode, u_char *result);
 int CdReady(int mode, u_char *result) ;
 int CdSetDebug(int level);
 int CdSync(int mode, u_char *result) ;
-u_long CdReadCallback(void (*func)());
-u_long CdReadyCallback(void (*func)());
-u_long CdSyncCallback(void (*func)());
+void (*CdDataCallback(void (*func)()));
+CdlCB CdReadCallback(CdlCB func);
+CdlCB CdReadyCallback(CdlCB func);
+CdlCB CdSyncCallback(CdlCB func);
 int CdInit(void);
+int CdReset(int mode);
 int CdStatus(void);
 int CdLastCom(void);
+CdlLOC *CdLastPos(void);
+int CdMode(void);
+int CdDiskReady( int mode );
+int CdGetDiskType( void );
+struct EXEC *CdReadExec(char *file);
+void CdReadBreak( void );
+
 #if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 }
 #endif

@@ -169,7 +169,9 @@ void func_80018AB4(void)
     
     // clear the screen with black
     //SetBlockFill(&tile);
-    setBlockFill(&tile);
+    //setBlockFill(&tile);
+    // switching to psyq 4.7, for some reason doesn't have this
+    setlen(&tile, 3),  setcode(&tile, 0x02);
 
     tile.r0 = 0; tile.g0 = 0; tile.b0 = 0;
     tile.x0 = 0; tile.y0 = 0;
@@ -618,7 +620,6 @@ GlobalData *getGameConfig(void)
 
 int main(int argc, char** argv)
 {
-    //s32 pad[22];
     s32 rc;
     
     printf("MAX ADR:%x\n", malloc(4));

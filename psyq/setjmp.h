@@ -1,5 +1,5 @@
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 /*
  * File:setjmp.h
@@ -25,7 +25,7 @@
 
 #define	JB_SIZE		12
 
-#if defined(LANGUAGE_C)||defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+#if defined(_LANGUAGE_C)||defined(LANGUAGE_C)||defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 typedef int jmp_buf[JB_SIZE];
 #if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 extern "C" {

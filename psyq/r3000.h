@@ -2,7 +2,7 @@
  * File:r3000.h
  */
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 #ifndef _R3000_H
 #define _R3000_H
@@ -231,7 +231,7 @@ extern int (*c0vec_tbl[])();
 }
 #endif
 #endif
-#endif /* LOCORE */
+#endif /* !LOCORE */
 
 #define BRK_KERNEL 	0xf1
 #define EXCEPT_NORM     1

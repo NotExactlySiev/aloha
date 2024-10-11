@@ -1,6 +1,4 @@
-/*
- * $PSLibId: Runtime Library Version 3.3$
- */
+/* $PSLibId: Run-time Library Release 4.7$ */
 #ifndef _LIBETC_H_
 #define _LIBETC_H_
 
@@ -9,6 +7,9 @@
  *
  * 			libetc.h: Pad Interface
  */
+
+#include <types.h>
+
 extern int PadIdentifier;
 /*
  * PAD I/O (SIO Pad)
@@ -50,7 +51,7 @@ extern int PadIdentifier;
 #define _PAD(x,y) ((y)<<((x)<<4))
 
 /* scratch pad address 0x1f800000 - 0x1f800400 */
-#define getScratchAddr(offset)  ((u_long *)(0x1f800000+offset*4))
+#define getScratchAddr(offset)  ((u_long *)(0x1f800000+(offset)*4))
 
 /*
  * Video Mode:	NTSC/PAL
@@ -64,22 +65,20 @@ extern int PadIdentifier;
 #if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 extern "C" {
 #endif
-
 int CheckCallback(void) ;
 void PadInit(int mode);
 int ResetCallback(void) ;
 int RestartCallback(void) ;
 int StopCallback(void) ;
 int VSync(int mode);
-int VSyncCallback(void (*f)()) ;
-int VSyncCallbacks(int ch, void (*f)()) ;
+int VSyncCallback(void (*f)(void)) ;
 long GetVideoMode (void);
 long SetVideoMode (long mode);
 u_long PadRead(int id);
 void PadStop(void);
-
 #if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 }
 #endif
 #endif /* _LIBETC_H_ */
+
 

@@ -1,5 +1,6 @@
 // caller functions for jumptable
 #include "common.h"
+#include <libgte.h>
 #include <libgpu.h>
 
 extern volatile s32 D_800234B0;
@@ -32,10 +33,12 @@ void call_SetDrawArea(DR_AREA *p, RECT *r) {
     SetDrawArea(p, r);
 }
 
-#undef GetGraphType
+// switching to newer psy-q, doesn't have this
+// TODO: get rid of this once all uses of it have been decompiled.
 int call_GetGraphType(void) {
-    return GetGraphType();
+    return 0;
 }
+
 
 DISPENV *call_SetDefDispEnv(DISPENV *env, int x, int y, int w, int h) {
     return SetDefDispEnv(env, x, y, w, h);

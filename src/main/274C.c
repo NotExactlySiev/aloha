@@ -3,6 +3,7 @@
 #include <libapi.h>
 #include <libspu.h>
 #include <libcd.h>
+#include <libgte.h>
 #include <libgpu.h>
 #include <libetc.h>
 #include <sys/file.h>
@@ -958,7 +959,49 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // mov_decode_fr
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // mov_wait_for_img
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // mov_play_file
+#include <libpress.h>
+
+extern CdlLOC D_8004801C;
+
+typedef struct {
+    RECT rect;
+    s16 x1;
+    s16 _pad0;
+    s16 y1;
+    s16 _pad1;
+    s16 x2;
+    s16 _pad2;
+    s16 y2;
+    s16 _pad3;
+    int mode;
+    int unk;
+    int ring_size;
+    u32 *buffers[2];
+    u32 *data_addr;
+    StHEADER *ring_addr;
+    int channel;
+} MovieArgs;
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // mov_play
+// FIXME: complete this functions
+/*
+int func_80022474(char *filename, MovieArgs *args, void *cb)
+{
+    printf("PLAY MOVIE: %s\n", filename);
+    printf("(%d,%d)-(%d,%d)\n", args->x1, args->y1, args->x2, args->y2);
+    printf("(%d,%d)-(%d,%d)\n", (args->rect).x,(args->rect).y,(args->rect).w,(args->rect).h);
+    printf("%p %p\n", args->buffers[0], args->buffers[1]);
+    printf("%p\n", args->data_addr);
+    //
+    call_wait_frame(); // argument?
+    call_SetDispMask(0);
+
+    CdlFILE f;
+    if (cd_fs_get_file(&f, filename) == 0) return -1;
+    D_8004801C = f.pos;
+}
+*/
+
 
 // ENDOF vid.c
 

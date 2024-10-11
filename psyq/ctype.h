@@ -3,7 +3,7 @@
  * character handling macro definitions
  */
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 
 #ifndef	_CTYPE_H
@@ -45,5 +45,5 @@ extern 	char	tolower(char);
 #define _toupper(c)	((unsigned char)(c)-'a'+'A')
 #define _tolower(c)	((unsigned char)(c)-'A'+'a')
 
-#endif	_CTYPE_H
+#endif	/* _CTYPE_H */
 

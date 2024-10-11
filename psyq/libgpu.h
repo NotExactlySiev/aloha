@@ -1,12 +1,6 @@
-/*
- * $PSLibId: Runtime Library Version 3.3$
- */
+/* $PSLibId: Run-time Library Release 4.7$ */
 #ifndef _LIBGPU_H_
 #define _LIBGPU_H_
-
-
-#include <libgte.h> // S: I had to add this myself
-
 /*
  *  (C) Copyright 1993-1995 Sony Corporation,Tokyo,Japan. All Rights Reserved
  *
@@ -23,33 +17,33 @@
  *      POLY_F4  | 6	|Flat   |   4   |OFF    | Flat Quadrangle
  *      POLY_FT4 |10	|Flat   |   4   |ON     | Flat Textured Quadrangle
  *      POLY_G4  | 9	|Gouraud|   4   |OFF    | Gouraud Quadrangle
- *      POLY_GT4 |12	|Gouraud|   4   |ON     | Gouraud Textured Quadrangle
+ *      POLY_GT4 |13	|Gouraud|   4   |ON     | Gouraud Textured Quadrangle
  *      ---------+------+-------+-------+-------+------------------------
- *      LINE_F2  | 4	|Flat   |   2   | -	| unconnected Flat Line 
- *      LINE_G2  | 5	|Gouraud|   2   | -	| unconnected Gouraud Line 
- *      LINE_F3  | 6	|Flat	|   3	| -	| 3-connected Flat Line
- *      LINE_G3  | 8	|Gouraud|   3	| -	| 3-connected Gouraud Line
- *      LINE_F4  | 7	|Flat	|   4	| -	| 4-connected Flat Line
- *      LINE_G4  |10	|Gouraud|   4	| -	| 4-connected Gouraud Line
- *      ---------+------+-------+-------+-------+------------------------
- *	BLK_FILL | 4	|Flat	|   1   |OFF	| Block Write
+ *      LINE_F2  | 4	|Flat   |   2   | -     | unconnected Flat Line 
+ *      LINE_G2  | 5	|Gouraud|   2   | -     | unconnected Gouraud Line 
+ *      LINE_F3  | 6	|Flat	|   3	| -     | 3-connected Flat Line
+ *      LINE_G3  | 8	|Gouraud|   3	| -     | 3-connected Gouraud Line
+ *      LINE_F4  | 7	|Flat	|   4	| -    	| 4-connected Flat Line
+ *      LINE_G4  |10	|Gouraud|   4	| -    	| 4-connected Gouraud Line
  *      ---------+------+-------+-------+-------+------------------------
  *      SPRT	 | 5	|Flat	|   1   |ON     | free size Sprite
  *      SPRT_16	 | 4	|Flat	|   1   |ON     | 16x16 Sprite
  *      SPRT_8	 | 4	|Flat	|   1   |ON     | 8x8 Sprite
  *      ---------+------+-------+-------+-------+------------------------
- *      TILE	 | 4	|Flat	|   1   |ON     | free size Sprite
- *      TILE_16	 | 3	|Flat	|   1   |ON     | 16x16 Sprite
- *      TILE_8	 | 3	|Flat	|   1   |ON     | 8x8 Sprite
- *      TILE_1	 | 3	|Flat	|   1   |ON     | 8x8 Sprite
+ *      TILE	 | 4	|Flat	|   1   |OFF    | free size Sprite
+ *      TILE_16	 | 3	|Flat	|   1   |OFF    | 16x16 Sprite
+ *      TILE_8	 | 3	|Flat	|   1   |OFF    | 8x8 Sprite
+ *      TILE_1	 | 3	|Flat	|   1   |OFF    | 1x1 Sprite
  *      ---------+------+-------+-------+-------+------------------------
  *      DR_TWIN	 | 3	|   -	|   -   | -     | Texture Window
  *      DR_AREA	 | 3	|   -	|   -   | -     | Drawing Area
  *      DR_OFFSET| 3	|   -	|   -   | -     | Drawing Offset
- *      DR_PRIO  | 3	|   -	|   -   | -     | Drawing Priority
  *      DR_MODE  | 3	|   -	|   -   | -     | Drawing Mode
- *      DR_ENV   |16	|   -	|   -	| -	| Drawing Environment
- *      DR_MOVE  | 6	|   -	|   -	| -	| MoveImage
+ *      DR_ENV   |16	|   -	|   -	| -     | Drawing Environment
+ *      DR_MOVE  | 6	|   -	|   -	| -     | MoveImage
+ *      DR_LOAD  |17	|   -	|   -	| -     | LoadImage
+ *      DR_TPAGE | 2    |   -   |   -   | -     | Drawing TPage
+ *      DR_STP   | 3    |   -   |   -   | -     | Drawing STP
  *
  *	*1: in long-word
  *
@@ -67,10 +61,13 @@
  *		 color	CLUT	CLUT	DIRECT
  */
 
+#include <libgte.h>
+#include <types.h>
+
 /*
  *	Externals
  */
-extern	int (*GPU_printf)();	/* printf() object */
+extern	int (*GPU_printf)(char *fmt, ...);	/* printf() object */
 
 /*
  *	Time-out Cycle
@@ -88,6 +85,9 @@ extern	int (*GPU_printf)();	/* printf() object */
 #define setVector(v, _x, _y, _z) \
 	(v)->vx = _x, (v)->vy = _y, (v)->vz = _z	
 
+#define applyVector(v, _x, _y, _z, op) \
+	(v)->vx op _x, (v)->vy op _y, (v)->vz op _z	
+
 #define copyVector(v0, v1) \
 	(v0)->vx = (v1)->vx, (v0)->vy = (v1)->vy, (v0)->vz = (v1)->vz 
 
@@ -96,6 +96,14 @@ extern	int (*GPU_printf)();	/* printf() object */
 	(v0)->vy += (v1)->vy,	\
 	(v0)->vz += (v1)->vz	
 	
+#define dumpVector(str, v)	\
+	GPU_printf("%s=(%d,%d,%d)\n", str, (v)->vx, (v)->vy, (v)->vz)
+
+#define dumpMatrix(x)	\
+	GPU_printf("\t%5d,%5d,%5d\n",(x)->m[0][0],(x)->m[0][1],(x)->m[0][2]),\
+	GPU_printf("\t%5d,%5d,%5d\n",(x)->m[1][0],(x)->m[1][1],(x)->m[1][2]),\
+	GPU_printf("\t%5d,%5d,%5d\n",(x)->m[2][0],(x)->m[2][1],(x)->m[2][2])
+
 #define setRECT(r, _x, _y, _w, _h) \
 	(r)->x = (_x),(r)->y = (_y),(r)->w = (_w),(r)->h = (_h)
 
@@ -103,10 +111,10 @@ extern	int (*GPU_printf)();	/* printf() object */
  *	Set Primitive Attributes
  */
 #define setTPage(p,tp,abr,x,y) \
-	((p)->tpage = GetTPage(tp,abr,x,y))
+	((p)->tpage = getTPage(tp,abr,x,y))
 
 #define setClut(p,x,y) \
-	((p)->clut = GetClut(x,y))
+	((p)->clut = getClut(x,y))
 					   
 /*
  * Set Primitive Colors
@@ -252,28 +260,64 @@ extern	int (*GPU_printf)();	/* printf() object */
 	((tge)?setcode(p, getcode(p)|0x01):setcode(p, getcode(p)&~0x01))
 
 #define getTPage(tp, abr, x, y) 					\
-	((GetGraphType()==1||GetGraphType()==2)?			\
-	 ((((tp)&0x3)<<9)|(((abr)&0x3)<<7)|(((y)&0x300)>>3)|(((x)&0x3ff)>>6)):\
 	 ((((tp)&0x3)<<7)|(((abr)&0x3)<<5)|(((y)&0x100)>>4)|(((x)&0x3ff)>>6)| \
-	 (((y)&0x200)<<2)))
+	 (((y)&0x200)<<2))
 
 #define getClut(x, y) \
-	((y<<6)|((x>>4)&0x3f))
+	(((y)<<6)|(((x)>>4)&0x3f))
 
 #define dumpTPage(tpage)						\
-	((GetGraphType()==1||GetGraphType()==2)?			\
-	GPU_printf("tpage: (%d,%d,%d,%d)\n",				\
-			   ((tpage)>>9)&0x003,((tpage)>>7)&0x003,	\
-			   ((tpage)<<6)&0x7c0,((tpage)<<3)&0x300):	\
 	GPU_printf("tpage: (%d,%d,%d,%d)\n",				\
 			   ((tpage)>>7)&0x003,((tpage)>>5)&0x003,	\
 			   ((tpage)<<6)&0x7c0,				\
-			   (((tpage)<<4)&0x100)+(((tpage)>>2)&0x200)))
-
+			   (((tpage)<<4)&0x100)+(((tpage)>>2)&0x200))
 
 #define dumpClut(clut) \
 	GPU_printf("clut: (%d,%d)\n", (clut&0x3f)<<4, (clut>>6))
 
+#define _get_mode(dfe, dtd, tpage)	\
+		((0xe1000000)|((dtd)?0x0200:0)| \
+		((dfe)?0x0400:0)|((tpage)&0x9ff))
+
+#define setDrawTPage(p, dfe, dtd, tpage)	\
+	setlen(p, 1),	\
+	((u_long *)(p))[1] = _get_mode(dfe, dtd, tpage)
+
+#define _get_tw(tw)	\
+		(tw ? ((0xe2000000)|((((tw)->y&0xff)>>3)<<15)| \
+		((((tw)->x&0xff)>>3)<<10)|(((~((tw)->h-1)&0xff)>>3)<<5)| \
+		(((~((tw)->w-1)&0xff)>>3))) : 0)
+
+#define setTexWindow(p, tw)			\
+	setlen(p, 2),				\
+	((u_long *)(p))[1] = _get_tw(tw),	\
+	((u_long *)(p))[2] = 0
+
+#define _get_len(rect)	\
+		(((screen_rect)->w*(screen_rect)->h+1)/2+4)
+
+#define setDrawLoad(pt, rect)					\
+	(_get_len(screen_rect) <= 16) ? (				\
+		(setlen(pt, _get_len(screen_rect))),			\
+		((pt)->code[0] = 0xa0000000),			\
+		((pt)->code[1] = *((u_long *)&(screen_rect)->x)),	\
+		((pt)->code[2] = *((u_long *)&(screen_rect)->w)),	\
+		((pt)->p[_get_len(screen_rect)-4] = 0x01000000)	\
+	) : ( \
+		(setlen(pt,0)) \
+	)
+
+#define setDrawStp(p, pbw) 				\
+        setlen(p, 2),					\
+        ((u_long *)p)[1] = 0xe6000000|(pbw?0x01:0),	\
+        ((u_long *)p)[2] = 0
+
+#define setDrawMode(p, dfe, dtd, tpage, tw) 		\
+        setlen(p, 2),					\
+        ((u_long *)p)[1] = _get_mode(dfe, dtd, tpage),	\
+        ((u_long *)p)[2] = _get_tw((RECT *)tw)
+
+	
 /*	Primitive 	Lentgh		Code				*/
 /*--------------------------------------------------------------------	*/
 /*									*/
@@ -294,14 +338,14 @@ extern	int (*GPU_printf)();	/* printf() object */
 #define setTile8(p)	setlen(p, 2),  setcode(p, 0x70)
 #define setTile16(p)	setlen(p, 2),  setcode(p, 0x78)
 #define setTile(p)	setlen(p, 3),  setcode(p, 0x60)
-#define setBlockFill(p)	setlen(p, 3),  setcode(p, 0x02)
 #define setLineF2(p)	setlen(p, 3),  setcode(p, 0x40)
 #define setLineG2(p)	setlen(p, 4),  setcode(p, 0x50)
-#define setLineF3(p)	setlen(p, 5),  setcode(p, 0x48),(p)->pad   = 0x55555555
-#define setLineG3(p)	setlen(p, 7),  setcode(p, 0x58),(p)->pad   = 0x55555555
-#define setLineF4(p)	setlen(p, 6),  setcode(p, 0x4c),(p)->pad   = 0x55555555
-#define setLineG4(p)	setlen(p, 9),  setcode(p, 0x5c),(p)->pad   = 0x55555555
-#define setDrawMove(p)	setlen(p, 5),  setcode(p, 0x01),(p)->code2 = 0x80000000
+#define setLineF3(p)	setlen(p, 5),  setcode(p, 0x48),(p)->pad = 0x55555555
+#define setLineG3(p)	setlen(p, 7),  setcode(p, 0x58),(p)->pad = 0x55555555, \
+			(p)->p2 = 0
+#define setLineF4(p)	setlen(p, 6),  setcode(p, 0x4c),(p)->pad = 0x55555555
+#define setLineG4(p)	setlen(p, 9),  setcode(p, 0x5c),(p)->pad = 0x55555555, \
+			(p)->p2 = 0, (p)->p3 = 0
 	
 /*
  * Rectangle:
@@ -310,6 +354,11 @@ typedef struct {
 	short x, y;		/* offset point on VRAM */
 	short w, h;		/* width and height */
 } RECT;
+
+typedef struct {
+	int x, y;		/* offset point on VRAM */
+	int w, h;		/* width and height */
+} RECT32;
 
 /*
  * Environment 
@@ -334,9 +383,17 @@ typedef struct {
 typedef struct {
 	RECT	disp;		/* display area */
 	RECT	screen;		/* display start point */
-	u_char	isinter;	/* interlace 0: off 1: on */
-	u_char	isrgb24;	/* RGB24 bit mode */
-	u_char	pad0, pad1;	/* reserved */
+	/* fix contributed by StiNKz */
+	/* SDK loads these bytes as a single word, */
+	/* which could cause crashes due to alignment issues */
+	union { 
+		u_long _data;
+		struct {
+			u_char	isinter;	/* interlace 0: off 1: on */
+			u_char	isrgb24;	/* RGB24 bit mode */
+			u_char	pad0, pad1;	/* reserved */
+		};
+	};
 } DISPENV;
 
 /*
@@ -506,16 +563,6 @@ typedef struct {
 } LINE_G4;				/* 3 connected Gouraud Line */
 
 /*
- * Block Fill Primitive Definitions
- */
-typedef struct {
-	u_long	tag;
-	u_char	r0, g0, b0, code;
-	u_short	x0, 	y0;
-	u_short	w, 	h;	
-} BLK_FILL;				/* Clear Frame Buffer */
-	       
-/*
  * Sprite Primitive Definitions
  */
 typedef struct {
@@ -579,11 +626,6 @@ typedef struct {
 typedef struct {
 	u_long	tag;
 	u_long	code[2];
-} DR_PRIO;				/* Priority */
-	       
-typedef struct {
-	u_long	tag;
-	u_long	code[2];
 } DR_TWIN;				/* Texture Window */
 	       
 typedef struct {
@@ -598,12 +640,24 @@ typedef struct {
 	       
 typedef struct {			/* MoveImage */
 	u_long	tag;
-	u_long	code;
-	u_long	code2;
-	short	sx, 	sy;
-	short	x0,	y0;
-	short	w,	h;
+	u_long	code[5];
 } DR_MOVE;
+
+typedef struct {			/* LoadImage */
+	u_long	tag;
+	u_long	code[3];
+	u_long	p[13];
+} DR_LOAD;
+
+typedef	struct {
+	u_long	tag;
+	u_long	code[1];
+} DR_TPAGE;				/* Drawing TPage */
+
+typedef struct {
+        u_long  tag;
+        u_long  code[2];
+} DR_STP;                               /* Drawing STP */
 
 /*
  *	Font Stream Parameters
@@ -656,11 +710,23 @@ typedef struct {
  */
 #if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 extern "C" {
+#ifndef _FNTPRINT_
+#define _FNTPRINT_
 extern int FntPrint(...);
+#endif /* _FNTPRINT_ */
+#ifndef _KANJIFNTPRINT_
+#define _KANJIFNTPRINT_
 extern int KanjiFntPrint(...);
+#endif /* _KANJIFNTPRINT_ */
 #else
+#ifndef _FNTPRINT_
+#define _FNTPRINT_
 extern int FntPrint();
+#endif /* _FNTPRINT_ */
+#ifndef _KANJIFNTPRINT_
+#define _KANJIFNTPRINT_
 extern int KanjiFntPrint();
+#endif /* _KANJIFNTPRINT_ */
 #endif
 	
 extern DISPENV *GetDispEnv(DISPENV *env);
@@ -673,34 +739,32 @@ extern TIM_IMAGE *ReadTIM(TIM_IMAGE *timimg);
 extern TMD_PRIM *ReadTMD(TMD_PRIM *tmdprim);
 extern int CheckPrim(char *s, u_long *p);
 extern int ClearImage(RECT *rect, u_char r, u_char g, u_char b);
+extern int ClearImage2(RECT *rect, u_char r, u_char g, u_char b);
 extern int DrawSync(int mode);
 extern int FntOpen(int x, int y, int w, int h, int isbg, int n);
 extern int GetGraphDebug(void) ;
 extern int GetTimSize(u_char *sjis);
 extern int IsEndPrim(void *p) ;
 extern int KanjiFntOpen(int x, int y, int w, int h, int dx, int dy, int cx, int cy, int isbg, int n);
+extern void KanjiFntClose(void);
 extern int Krom2Tim(u_char *sjis, u_long *taddr, int dx, int dy, int cdx, int cdy, u_int fg, u_int bg);
 extern int LoadImage(RECT *rect, u_long *p);
 extern int MargePrim(void *p0, void *p1);
 extern int MoveImage(RECT *rect, int x, int y);
 extern int OpenTIM(u_long *addr);
 extern int OpenTMD(u_long *tmd, int obj_no);
-extern int PutKanji(u_char *sjis);
 extern int ResetGraph(int mode);
 extern int SetGraphDebug(int level);
-extern int SetGraphQueue(int mode);
-extern int SetGraphReverse(int mode);
 extern int StoreImage(RECT *rect, u_long *p);
-extern int hankanjitrans(u_char scode);
-extern int kanjitrans(u_short scode);
 extern u_long *ClearOTag(u_long *ot, int n);
 extern u_long *ClearOTagR(u_long *ot, int n);
 extern u_long *FntFlush(int id);
 extern u_long *KanjiFntFlush(int id);
-extern u_long DrawSyncCallback(void (*func)());
+extern u_long DrawSyncCallback(void (*func)(void));
 extern u_short GetClut(int x, int y) ;
 extern u_short GetTPage(int tp, int abr, int x, int y) ;
 extern u_short LoadClut(u_long *clut, int x, int y);
+extern u_short LoadClut2(u_long *clut, int x, int y);
 extern u_short LoadTPage(u_long *pix, int tp, int abr, int x, int y, int w, int h);
 extern void *NextPrim(void *p) ;
 extern void AddPrim(void *ot, void *p) ;
@@ -708,6 +772,7 @@ extern void AddPrims(void *ot, void *p0, void *p1) ;
 extern void CatPrim(void *p0, void *p1) ;
 extern void DrawOTag(u_long *p);
 extern void DrawOTagIO(u_long *p);
+extern void DrawOTagEnv(u_long *p, DRAWENV *env);
 extern void DrawPrim(void *p);
 extern void DumpClut(u_short clut) ;
 extern void DumpDispEnv(DISPENV *env);
@@ -715,13 +780,15 @@ extern void DumpDrawEnv(DRAWENV *env);
 extern void DumpOTag(u_long *p);
 extern void DumpTPage(u_short tpage) ;
 extern void FntLoad(int tx, int ty);
-extern void KanjiFntLoad(int tx, int ty);
 extern void SetDispMask(int mask);
 extern void SetDrawArea(DR_AREA *p, RECT *r);
 extern void SetDrawEnv(DR_ENV *dr_env, DRAWENV *env);
+extern void SetDrawLoad(DR_LOAD *p, RECT *rect);
 extern void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw);
-extern void SetDrawMove(DR_MOVE *p) ;
+extern void SetDrawTPage(DR_TPAGE *p, int dfe, int dtd, int tpage);
+extern void SetDrawMove(DR_MOVE *p, RECT *rect, int x, int y) ;
 extern void SetDrawOffset(DR_OFFSET *p, u_short *ofs);
+extern void SetDrawStp(DR_STP *p, int pbw);
 extern void SetDumpFnt(int id);
 extern void SetLineF2(LINE_F2 *p) ;
 extern void SetLineF3(LINE_F3 *p) ;
@@ -737,7 +804,6 @@ extern void SetPolyG3(POLY_G3 *p) ;
 extern void SetPolyG4(POLY_G4 *p) ;
 extern void SetPolyGT3(POLY_GT3 *p) ;
 extern void SetPolyGT4(POLY_GT4 *p) ;
-extern void SetPriority(DR_PRIO *p, int pbc, int pbw);
 extern void SetSemiTrans(void *p, int abe) ;
 extern void SetShadeTex(void *p, int tge) ;
 extern void SetSprt(SPRT *p) ;
@@ -749,6 +815,19 @@ extern void SetTile1(TILE_1 *p) ;
 extern void SetTile16(TILE_16 *p) ;
 extern void SetTile8(TILE_8 *p) ;
 extern void TermPrim(void *p) ;
+extern u_long *BreakDraw(void);
+extern void ContinueDraw(u_long *insaddr, u_long *contaddr);
+extern int IsIdleGPU(int max_count);
+extern int GetODE(void);
+extern int LoadImage2(RECT *rect, u_long *p);
+extern int StoreImage2(RECT *rect, u_long *p);
+extern int MoveImage2(RECT *rect, int x, int y);
+extern int DrawOTag2(u_long *p);
+extern void GetDrawMode(DR_MODE *p);
+extern void GetTexWindow(DR_TWIN *p);
+extern void GetDrawArea(DR_AREA *p);
+extern void GetDrawOffset(DR_OFFSET *p);
+extern void GetDrawEnv2(DR_ENV *p);
 
 #if defined(_LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 }

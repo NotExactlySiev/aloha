@@ -4,7 +4,7 @@
  * rom monitor i/o
  */
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 
 #ifndef _ROMIO_H

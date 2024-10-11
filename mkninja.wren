@@ -19,12 +19,13 @@ class SourceFile {
 }
 
 class Executable {
-    construct new(fname, name, isComped) {
+    construct new(fname, name, isComped, libs) {
         _name = name
         _finalName = fname
         _isComped = isComped
         _source = []
         _header = []
+        _libs = libs
         _data = []
 
         scanDir("src/" + _name)
@@ -61,6 +62,9 @@ class Executable {
             Ninja.build("cc", buildDir + f.objName, [f.path], [])
             allDeps.add(buildDir + f.objName)
         }
+        for (f in _libs) {
+            allDeps.add("libs/" + f + ".a")
+        }
         var elfPath = "build/" + _name + ".elf"
         var symbolsFile = "symbols." + _name + ".ld"
         Ninja.build("link", elfPath, allDeps, ["shared.ld", symbolsFile])
@@ -83,14 +87,15 @@ class Executable {
 }
 
 var execs = [
-    Executable.new("SCUS_941.03", "main", false),
-    Executable.new("JM1/MAIN.PEX", "jm1", true),
-    Executable.new("SELECT.PEX", "select", true),
-    Executable.new("GAMEOVER.PEX", "gameover", true),
+    Executable.new("SCUS_941.03", "main", false,
+        ["libcd", "libds", "libcard", "libgpu", "libetc", "libc", "libapi"]),
+    Executable.new("JM1/MAIN.PEX", "jm1", true, []),
+    Executable.new("SELECT.PEX", "select", true, []),
+    Executable.new("GAMEOVER.PEX", "gameover", true, []),
 ]
 
 // TODO: check for the compiler
-Ninja.set("cross", "mipsel-unknown-linux-gnu-")
+Ninja.set("cross", "mipsel-unknown-none-elf-")
 Ninja.set("jfdir", "tools/jfcomp")
 Ninja.set("jfcomp", "$jfdir/jfcomp")
 Ninja.set("makeiso", "mkpsxiso")

@@ -1,3 +1,12 @@
+;
+; $PSLibId: Run-time Library Release 4.7$
+;
+
+;
+;	gtenom.h
+;	Copyright(C) 1995,1996,1997 Sony Computer Entertainment Inc.
+;	All rights reserved.
+;
 
 read_sz_fifo3			macro	reg1,reg2,reg3
 				mfc2	reg1,r17

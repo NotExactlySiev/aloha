@@ -13,6 +13,9 @@ SECTIONS
     .None __addr : AT(__romPos) SUBALIGN(4)
     {
         *(.rodata*);
+        
+        *(.rdata*);     /* wait why is this different for libgpu.a? */
+
         *(.text);
         *(.data*);
         . = ALIGN(0x800);

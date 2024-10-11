@@ -2,7 +2,7 @@
  * File:rand.h
  */
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 
 #ifndef _RAND_H

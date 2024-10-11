@@ -3,18 +3,18 @@
 
 /*****************************************************************
  * -*- c -*-
- * $RCSfile: string.h,v $
+ * $RCSfile$
  *
  * Copyright (C) 1994, 1995 by Sony Computer Entertainment Inc.
  * All Rights Reserved.
  *
  * Sony Computer Entertainment Inc. R & D Division
  *
- * $Id: string.h,v 1.1 1995/04/04 12:30:26 kaol Exp $
+ * $Id$
  *
  *****************************************************************/
 /*
- * $PSLibId: Runtime Library Version 3.3$
+ * $PSLibId: Run-time Library Release 4.7$
  */
 
 #include <strings.h>

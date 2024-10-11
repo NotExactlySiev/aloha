@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include <shared.h>
-
+#include <libgte.h>
 #include <libgpu.h>
 
 //extern u32 D_80060000[];
