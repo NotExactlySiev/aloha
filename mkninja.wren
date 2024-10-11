@@ -15,7 +15,7 @@ class SourceFile {
     name { _name }
     path { _path }
     objName { _name[0..-2] + "o" }
-    objPath { _path[0..-2] + "o" }
+    // finalName finalPath? finalPath goes in build/
 }
 
 class Executable {
@@ -42,7 +42,6 @@ class Executable {
     }
 
     scanDir(path) {
-        //System.print("Scanning " + path)
         if (!Directory.exists(path)) return
         var lst = Directory.list(path)
         for (ent in lst) {
