@@ -63,7 +63,7 @@ class Executable {
             allDeps.add(buildDir + f.objName)
         }
         for (f in _libs) {
-            allDeps.add("libs/" + f + ".a")
+            allDeps.add("psyq/libs/" + f + ".a")
         }
         var elfPath = "build/" + _name + ".elf"
         var symbolsFile = "symbols." + _name + ".ld"
@@ -100,7 +100,7 @@ Ninja.set("jfdir", "tools/jfcomp")
 Ninja.set("jfcomp", "$jfdir/jfcomp")
 Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
-Ninja.set("cflags", "-Wall -Iinclude -Ipsyq -Iassets -Iassets/gameover -O1 -G0 -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic")
+Ninja.set("cflags", "-Wall -Iinclude -Ipsyq/include -Iassets -Iassets/gameover -O1 -G0 -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic")
 Ninja.set("ldflags", "--no-check-sections -nostdlib -s")
 Ninja.set("cflagsnat", "-O2")
 
