@@ -630,8 +630,20 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E438);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E5BC);
 
-//
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E608);
+extern int D_80047E0C;
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E608);
+// try_DecDCTReset
+void func_8001E608(int mode)
+{
+    if (mode == 0) {
+        if (D_80047E0C == 0) {
+            D_80047E0C = 1;
+        } else {
+            mode = 0;
+        }
+    }
+    my_DecDCTReset(mode);
+}
 
 // sfx.c
 
@@ -982,9 +994,9 @@ typedef struct {
     int channel;
 } MovieArgs;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // mov_play
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // mov_play
 // FIXME: complete this functions
-/*
+
 int func_80022474(char *filename, MovieArgs *args, void *cb)
 {
     printf("PLAY MOVIE: %s\n", filename);
@@ -992,6 +1004,7 @@ int func_80022474(char *filename, MovieArgs *args, void *cb)
     printf("(%d,%d)-(%d,%d)\n", (args->rect).x,(args->rect).y,(args->rect).w,(args->rect).h);
     printf("%p %p\n", args->buffers[0], args->buffers[1]);
     printf("%p\n", args->data_addr);
+    return 0;
     //
     call_wait_frame(); // argument?
     call_SetDispMask(0);
@@ -1000,7 +1013,7 @@ int func_80022474(char *filename, MovieArgs *args, void *cb)
     if (cd_fs_get_file(&f, filename) == 0) return -1;
     D_8004801C = f.pos;
 }
-*/
+
 
 
 // ENDOF vid.c
