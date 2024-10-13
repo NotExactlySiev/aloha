@@ -12,27 +12,29 @@ int func_80023EC0() { return 0; }*/
 #include <libpress.h>
 
 #define LOG     printf("called %s\n", __func__)
-/*
-//void my_DecDCTReset(int mode) { LOG; DecDCTReset(mode); }
-//int DecDCTBufSize() { return 0; }
-//int my_DecDCTvlc(u_long *bs, u_long *buf) { LOG; return 0; }
-int my_DecDCTvlc(u_long *bs, u_long *buf) { LOG; return DecDCTvlc(bs, buf); }
-void my_DecDCTin(u_long *buf, int mode) { LOG; DecDCTin(buf, mode); }
-void my_DecDCTout(u_long *buf, int size) { LOG; DecDCTout(buf, size); }
-int my_DecDCTinSync() { LOG; return 0; }
-int my_DecDCToutSync() { LOG; return 0; }
-int my_DecDCTinCallback() { LOG; return 0; }
+
+void my_DecDCTReset(int mode) { LOG; DecDCTReset(mode); }
+int my_DecDCTvlc(u_long *bs, u_long *buf) { 
+    LOG; printf("calling vlc now!\n");
+    return 0;
+    return DecDCTvlc(bs, buf);
+}
+//void my_DecDCTin(u_long *buf, int mode) { LOG; DecDCTin(buf, mode); }
+//void my_DecDCTout(u_long *buf, int size) { LOG; DecDCTout(buf, size); }
+//int my_DecDCTinSync() { LOG; return 0; }
+//int my_DecDCToutSync() { LOG; return 0; }
+//int my_DecDCTinCallback() { LOG; return 0; }
 int my_DecDCToutCallback(void (*func)()) { LOG; return DecDCToutCallback(func); }
-*/
+
 // FIXME: fix this shit
-void my_DecDCTReset(int mode) { LOG; }
-int my_DecDCTvlc(u_long *bs, u_long *buf) { LOG; return 0; }
+//void my_DecDCTReset(int mode) { LOG; }
+//int my_DecDCTvlc(u_long *bs, u_long *buf) { LOG; return 0; }
 void my_DecDCTin(u_long *buf, int mode) { LOG; }
 void my_DecDCTout(u_long *buf, int size) { LOG; }
 int my_DecDCTinSync() { LOG; return 0; }
 int my_DecDCToutSync() { LOG; return 0; }
 int my_DecDCTinCallback() { LOG; return 0; }
-int my_DecDCToutCallback(void (*func)()) { LOG; }
+//int my_DecDCToutCallback(void (*func)()) { LOG; }
 
 /*
 INCLUDE_ASM("asm/main/nonmatchings/libpress", func_80023D38);   // my_DecDCTReset

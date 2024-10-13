@@ -474,10 +474,13 @@ long func_8001DED0(SpuCommonAttr *attr)
     SpuSetCommonAttr(attr);
 }
 
+// unused?
+/*
 void func_8001DEF0(int val)
 {
-    func_8003111C(val, 0xFFFFFF);
+    SpuSetReverbVoice(val, 0xFFFFFF);
 }
+*/
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF14);
 
@@ -554,40 +557,15 @@ void func_8001E0CC(SpuVoiceAttr* arg0) {
 NOT_IMPL(func_8001E17C) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17C);
 
 // the rest are trivial again
-void func_8001E22C(s32 arg0) {
-    SpuSetKey(1, arg0);
+void spu_set_key_on(u32 mask) {
+    SpuSetKey(SPU_ON, mask);
 }
 
-void func_8001E250(s32 arg0) {
-    SpuSetKey(0, arg0);
-}
-
-void func_8001E274(void)
-{
-    func_800309F4();
-}
-
-void func_8001E294(void)
-{
-    func_800313A0();
-}
-
-void func_8001E2B4(void)
-{
-    func_80031074();
-}
-
-void func_8001E2D4(void)
-{
-    func_800309C0();
+void spu_set_key_off(u32 mask) {
+    SpuSetKey(SPU_OFF, mask);
 }
 
 void func_8001E2F4(void) {
-}
-
-void func_8001E2FC(void)
-{
-    func_80030A98();
 }
 
 void func_8001E31C(long n_clock)
@@ -954,26 +932,9 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
     jt_set(&func_800218A0, 0x344);
 }*/
 
-// FILE vid.c
-
-// 8 loading and playing video
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);       // mov_setup_mdec
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021F7C);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021FD0);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);       // 
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022260);       // mov_load_frame
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // mov_decode_frame
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // mov_wait_for_img
+// FILE movie.c
 
 #include <libpress.h>
-
-extern CdlLOC D_8004801C;
 
 typedef struct {
     RECT rect;
@@ -994,24 +955,111 @@ typedef struct {
     int channel;
 } MovieArgs;
 
+typedef struct {
+    // rename these to something better later
+    void *ptrs[2];
+    int i;
+    u32 *img_data;
+    RECT img_rects[2];
+    int curr_rect;
+    RECT rect;  // macroblock rect
+    u32 img_loaded;
+} Decoder;
+
+// 8 loading and playing video
+
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);       // mov_setup_mdec
+void func_80021EF4(Decoder *dec, MovieArgs *args)
+{
+    *dec = (Decoder) {
+        .ptrs[0] = args->buffers[0],
+        .ptrs[1] = args->buffers[1],
+        .i = 0,
+        .curr_rect = 0,
+        .img_loaded = 0,
+        .img_data = args->data_addr,
+        .img_rects[0] = {
+            .x = args->x1,
+            .y = args->y1,
+            .w = 960,
+            .h = 240,
+        },
+        .img_rects[0] = {
+            .x = args->x2,
+            .y = args->y2,
+            .w = 960,
+            .h = 240,
+        },
+        .rect = {
+            .x = args->x1,
+            .y = args->y1,
+            .w = 24,
+            .h = 240,
+        },
+    };
+}
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021F7C);
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021FD0);
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);       // 
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022260);       // mov_load_frame
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // mov_decode_frame
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // mov_wait_for_img
+
+extern CdlLOC D_8004801C;
+extern Decoder D_80052218;
+void func_80022260(void);
+
 //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // mov_play
 // FIXME: complete this functions
-
 int func_80022474(char *filename, MovieArgs *args, void *cb)
 {
+    DISPENV dispenv;
+    DRAWENV drawenv;
     printf("PLAY MOVIE: %s\n", filename);
     printf("(%d,%d)-(%d,%d)\n", args->x1, args->y1, args->x2, args->y2);
     printf("(%d,%d)-(%d,%d)\n", (args->rect).x,(args->rect).y,(args->rect).w,(args->rect).h);
     printf("%p %p\n", args->buffers[0], args->buffers[1]);
     printf("%p\n", args->data_addr);
+    
     return 0;
     //
     call_wait_frame(); // argument?
     call_SetDispMask(0);
-
+    
     CdlFILE f;
-    if (cd_fs_get_file(&f, filename) == 0) return -1;
+    if (cd_fs_get_file(&f, filename) == 0)
+        return -1;
     D_8004801C = f.pos;
+    func_80021EF4(&D_80052218, args);
+    func_80021FD0(&D_8004801C, args, func_80022260);
+    func_8002237C(&D_80052218);
+    while (1) {
+        DecDCTin(D_80052218.ptrs[D_80052218.i], 3);
+        DecDCTout(D_80052218.img_data, D_80052218.rect.w * D_80052218.rect.h / 2);
+        func_8002237C(&D_80052218);
+        func_800223EC(&D_80052218);
+        // callback here
+        // test and break here
+        call_VSync();
+        int other = D_80052218.i != 1;
+        call_SetDefDispEnv(&dispenv, D_80052218.img_rects[other].x, D_80052218.img_rects[other].y, D_80052218.img_rects[other].w, D_80052218.img_rects[other].h);
+        if (get_tv_system == MODE_PAL)
+            dispenv.screen.y += 24;
+        SetDefDrawEnv(&drawenv, D_80052218.img_rects[other].x, D_80052218.img_rects[other].y, D_80052218.img_rects[other].w, D_80052218.img_rects[other].h);
+        dispenv.screen = args->rect;
+        dispenv.isrgb24 = 1;
+        dispenv.disp.w = (2 * dispenv.disp.w) / 3;
+        call_PutDispEnv(&dispenv);
+        PutDrawEnv(&drawenv);
+        call_SetDispMask(1);
+    }
+    return 0;
 }
 
 

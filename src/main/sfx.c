@@ -331,10 +331,10 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
     if (cent > 127)
         cent = 0;
     func_8001FBE4();
-    func_8003111C(D_80047E10);
+    u32 mask = 1 << channel;
+    SpuSetReverbVoice(D_80047E10, mask);
     temp_s1->unk0 = D_80047E10;
     
-    u32 mask = 1 << channel;
     int right = pan > 64 ? 64 : pan;
     int left = pan > 64 ? 127 - pan : 64;
 
@@ -355,7 +355,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
     temp_s1->vol = vol;
     temp_s1->pan = pan;
     temp_s1->epoch = (temp_s1->epoch + 0x20) & 0x7FE0;
-    func_8001E22C(mask);
+    spu_set_key_on(mask);
     return 0;
 }
 
@@ -376,7 +376,7 @@ void func_8001F4F0(u32 mask)
         .volume.right = 0,
         .voice = mask,
     });
-    func_8001E22C(mask);
+    spu_set_key_on(mask);
 }
 
 void func_8001F578(u32 mask)
@@ -390,7 +390,7 @@ void func_8001F578(u32 mask)
             p->unk6 = 2;
         }
     }
-    func_8001E250(mask);
+    spu_set_key_off(mask);
 }
 
 s32 func_8001F64C(u32 arg0, s32 arg1, s16 arg2, s16 arg3, u16 arg4, s32 prio);
