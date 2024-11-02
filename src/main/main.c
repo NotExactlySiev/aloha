@@ -653,7 +653,6 @@ int main(int argc, char** argv)
     //getGameConfig()->debug_features = 1;
     // give printf
     jt_set(printf, 1001);
-    //CdSetDebug(2);
 
     // run the game
     setNextFile(0);

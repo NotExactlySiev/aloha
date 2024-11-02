@@ -249,12 +249,12 @@ void func_8001BA50(void) {
 // I have no idea why but these actually use div for dividing by constants
 // and do some other weird stuff that doesn't make any sense
 
-inline int bcd(int x)
+static inline int bcd(int x)
 { 
     return ((x / 10) << 4) + (x % 10);
 }
 
-inline int unbcd(int x)
+static inline int unbcd(int x)
 {
     return ((x >> 4)*10 + x&0xF);
 }
@@ -620,7 +620,8 @@ void func_8001E608(int mode)
             mode = 0;
         }
     }
-    my_DecDCTReset(mode);
+    //my_DecDCTReset(mode);
+    DecDCTReset(mode);
 }
 
 // sfx.c
@@ -808,12 +809,12 @@ int func_80020E30(void)
 
 void func_80020E40(void)
 {
-    func_8001F4F0(0xFFFFFF);
+    func_8001F4F0(SPU_ALLCH);
 }
 
 void func_80020E64(void)
 {
-    func_8001F578(0xFFFFFF);
+    func_8001F578(SPU_ALLCH);
 }
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020E88);
@@ -947,7 +948,7 @@ typedef struct {
     s16 y2;
     s16 _pad3;
     int mode;
-    int unk;
+    int frame_count;
     int ring_size;
     u32 *buffers[2];
     u32 *data_addr;
@@ -966,10 +967,7 @@ typedef struct {
     u32 img_loaded;
 } Decoder;
 
-// 8 loading and playing video
-
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021EF4);       // mov_setup_mdec
-void func_80021EF4(Decoder *dec, MovieArgs *args)
+void init_decoder(Decoder *dec, MovieArgs *args)
 {
     *dec = (Decoder) {
         .ptrs[0] = args->buffers[0],
@@ -984,7 +982,7 @@ void func_80021EF4(Decoder *dec, MovieArgs *args)
             .w = 960,
             .h = 240,
         },
-        .img_rects[0] = {
+        .img_rects[1] = {
             .x = args->x2,
             .y = args->y2,
             .w = 960,
@@ -999,36 +997,88 @@ void func_80021EF4(Decoder *dec, MovieArgs *args)
     };
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021F7C);
+void func_80021F7C(CdlLOC *loc, u32 mode)
+{
+    while (CdControl(CdlSeekL, (u8*) loc, NULL) == 0);
+    while (CdRead2(mode | CdlModeStream) == 0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021FD0);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);       // 
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022260);       // mov_load_frame
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002237C);       // mov_decode_frame
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800223EC);       // mov_wait_for_img
+extern int D_80048014;  // movie_fading_out
+extern int D_80048024;  // movie_over
+extern int D_80048034;  // movie_frame_count
 
 extern CdlLOC D_8004801C;
 extern Decoder D_80052218;
 void func_80022260(void);
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022474);       // mov_play
-// FIXME: complete this functions
-int func_80022474(char *filename, MovieArgs *args, void *cb)
+void func_80021FD0(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 {
+    func_8001E608(0);
+    D_80048024 = 0;
+    DecDCToutCallback(cb);
+    StSetRing(args->ring_addr, args->ring_size);
+    StSetChannel(args->channel);
+    D_80048034 = args->frame_count;
+    StSetStream(1, 1, -1, NULL, NULL);
+    func_80021F7C(loc, args->mode);
+    D_80048014 = 0;
+}
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);       // 
+
+void func_80022260(void)
+{
+    extern u_long StCdIntrFlag;
+    if (StCdIntrFlag) {
+        StCdInterrupt();
+        StCdIntrFlag = 0;
+    }
+
+    LoadImage(&D_80052218.rect, D_80052218.img_data);
+    D_80052218.rect.x += D_80052218.rect.w;
+    RECT curr_img = D_80052218.img_rects[D_80052218.curr_rect];
+    if (D_80052218.rect.x < curr_img.x + curr_img.w) {
+        DecDCTout(D_80052218.img_data, D_80052218.rect.w * D_80052218.rect.h / 2);
+    } else {
+        D_80052218.img_loaded = 1;
+        D_80052218.curr_rect = D_80052218.curr_rect != 1;
+        D_80052218.rect.x = D_80052218.img_rects[D_80052218.curr_rect].x;
+        D_80052218.rect.y = D_80052218.img_rects[D_80052218.curr_rect].y;
+    }
+}
+
+void func_8002237C(Decoder *dec)
+{
+    uint *bs = 0;
+    while ((bs = func_80022074(dec)) == 0);
+    dec->i = dec->i != 1;
+    DecDCTvlc(bs, dec->ptrs[dec->i]);
+    StFreeRing(bs);
+}
+
+void func_800223EC(Decoder *dec)
+{
+    int timeout = 0x800000;
+    while (dec->img_loaded == 0) {
+        timeout -= 1;
+        if (timeout == 0) {
+            // what?
+            printf("timeout!!\n");
+            dec->img_loaded = 1;
+            dec->curr_rect = !dec->curr_rect;
+            dec->rect.x = dec->img_rects[dec->curr_rect].x;
+            dec->rect.y = dec->img_rects[dec->curr_rect].y;
+        }
+    }
+    dec->img_loaded = 0;
+}
+
+int func_80022474(char *filename, MovieArgs *args, int (*cb)(void))
+{
+    int ret = 0;
     DISPENV dispenv;
     DRAWENV drawenv;
-    printf("PLAY MOVIE: %s\n", filename);
-    printf("(%d,%d)-(%d,%d)\n", args->x1, args->y1, args->x2, args->y2);
-    printf("(%d,%d)-(%d,%d)\n", (args->rect).x,(args->rect).y,(args->rect).w,(args->rect).h);
-    printf("%p %p\n", args->buffers[0], args->buffers[1]);
-    printf("%p\n", args->data_addr);
-    
-    return 0;
-    //
+
     call_wait_frame(); // argument?
     call_SetDispMask(0);
     
@@ -1036,20 +1086,32 @@ int func_80022474(char *filename, MovieArgs *args, void *cb)
     if (cd_fs_get_file(&f, filename) == 0)
         return -1;
     D_8004801C = f.pos;
-    func_80021EF4(&D_80052218, args);
+    init_decoder(&D_80052218, args);
     func_80021FD0(&D_8004801C, args, func_80022260);
-    func_8002237C(&D_80052218);
+    func_8002237C(&D_80052218); // fill one buffer
     while (1) {
         DecDCTin(D_80052218.ptrs[D_80052218.i], 3);
         DecDCTout(D_80052218.img_data, D_80052218.rect.w * D_80052218.rect.h / 2);
-        func_8002237C(&D_80052218);
+        func_8002237C(&D_80052218); // and the other one
         func_800223EC(&D_80052218);
-        // callback here
-        // test and break here
-        call_VSync();
-        int other = D_80052218.i != 1;
+
+        // TODO: this breaks it for some reason?? can't skip
+        /*
+        if (cb && ((*cb)() == 1)) {
+            ret = 1;
+            break;
+        }
+        */
+        
+        if (D_80048024 == 1) {
+            ret = 0;
+            break;
+        }
+        
+        int other = D_80052218.curr_rect != 1;
+        call_VSync();        
         call_SetDefDispEnv(&dispenv, D_80052218.img_rects[other].x, D_80052218.img_rects[other].y, D_80052218.img_rects[other].w, D_80052218.img_rects[other].h);
-        if (get_tv_system == MODE_PAL)
+        if (get_tv_system() == MODE_PAL)
             dispenv.screen.y += 24;
         SetDefDrawEnv(&drawenv, D_80052218.img_rects[other].x, D_80052218.img_rects[other].y, D_80052218.img_rects[other].w, D_80052218.img_rects[other].h);
         dispenv.screen = args->rect;
@@ -1059,7 +1121,23 @@ int func_80022474(char *filename, MovieArgs *args, void *cb)
         PutDrawEnv(&drawenv);
         call_SetDispMask(1);
     }
-    return 0;
+
+    // done
+    CdSync(0, NULL);
+    u8 cdparam[8] = { CdlModeSpeed };
+    u8 buffer[SECTOR_BYTES];
+
+    while (CdControlB(CdlSetmode, cdparam, NULL) != 1);
+    if (CdReady(1, NULL) == 1) {
+        CdGetSector(buffer, 512);
+    }
+
+    DecDCToutCallback(0);
+    CdDataCallback(0);
+    CdReadyCallback(0);
+    StUnSetRing();
+    while (CdControlB(CdlPause, NULL, NULL) != 1);
+    return ret;
 }
 
 
