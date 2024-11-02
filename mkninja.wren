@@ -90,7 +90,7 @@ var execs = [
     Executable.new("SCUS_941.03", "main", false,
         ["libpress", "libcd", "libds", "libcard", "libgpu", "libspu", "libetc", "libc", "libapi"]),
     Executable.new("JM1/MAIN.PEX", "jm1", true, []),
-    Executable.new("SELECT.PEX", "select", true, []),
+    Executable.new("SELECT.PEX", "select", true, ["libc"]),
     Executable.new("GAMEOVER.PEX", "gameover", true, []),
 ]
 

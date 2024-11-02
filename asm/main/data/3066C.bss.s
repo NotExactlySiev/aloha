@@ -44,6 +44,7 @@ glabel D_80047FAC
 
 /* MORE BSS BROUGHT OVER FROM THE SYMBOL FILE */
 
+
 glabel D_80048004
     .space 0x8
 
@@ -62,11 +63,21 @@ glabel D_80048024
 glabel D_80048034
     .space 0x8
 
+
+
+
 glabel D_8004803C
+    .space 0x8
+/*
     .space 0x50a4
+*/
+
 
 glabel D_8004D0E0
+/*
     .space 0xc18
+*/
+    .space 0x18
 
 glabel D_8004DCF8
     .space 0x88
@@ -175,8 +186,10 @@ glabel D_8005237C
 glabel D_80052380
     .space 0x4
 
+/* psyq things
 glabel D_80052384
     .space 0x12f8
+
 
 glabel D_8005367C
     .space 0x4
@@ -309,6 +322,7 @@ glabel D_8005474F
 
 glabel D_80054750
     .space 0x4
+*/
 
 glabel D_80054754
     .space 0x4
@@ -361,5 +375,6 @@ glabel D_8005491C
 glabel D_80054920
     .space 0x4
 
+/* this is supposed to be the top of heap */
 glabel D_80054924
     .space 0x4

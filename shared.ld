@@ -16,7 +16,7 @@ SECTIONS
         
         *(.rdata*);     /* wait why is this different for libgpu.a? */
 
-        *(.text);
+        *(.text*);
         *(.data*);
         . = ALIGN(0x800);
     }
