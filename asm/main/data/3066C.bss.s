@@ -44,51 +44,23 @@ glabel D_80047FAC
 
 /* MORE BSS BROUGHT OVER FROM THE SYMBOL FILE */
 
-
 glabel D_80048004
     .space 0x8
 
 glabel D_8004800C
     .space 0x8
 
-glabel D_80048014
-    .space 0x8
-
-glabel D_8004801C
-    .space 0x8
-
-glabel D_80048024
-    .space 0x10
-
-glabel D_80048034
-    .space 0x8
-
-
-
-
 glabel D_8004803C
     .space 0x8
-/*
-    .space 0x50a4
-*/
-
 
 glabel D_8004D0E0
-/*
-    .space 0xc18
-*/
     .space 0x18
 
 glabel D_8004DCF8
     .space 0x88
 
-
-
 glabel D_800521F8
     .space 0x20
-
-glabel D_80052218
-    .space 0x8
 
 glabel D_80052220
     .space 0x4
@@ -186,144 +158,6 @@ glabel D_8005237C
 glabel D_80052380
     .space 0x4
 
-/* psyq things
-glabel D_80052384
-    .space 0x12f8
-
-
-glabel D_8005367C
-    .space 0x4
-
-glabel D_80053680
-    .space 0x4
-
-glabel D_80053684
-    .space 0x8
-
-glabel D_8005368C
-    .space 0x8
-
-glabel D_80053694
-    .space 0x4
-
-glabel D_80053698
-    .space 0x4
-
-glabel D_8005369C
-    .space 0x4
-
-glabel D_800536A0
-    .space 0x4
-
-glabel D_800536A4
-    .space 0x4
-
-glabel D_800536A8
-    .space 0x4
-
-glabel D_800536AC
-    .space 0x4
-
-glabel D_800536B0
-    .space 0x4
-
-glabel D_800536B4
-    .space 0x4
-
-glabel D_800536B8
-    .space 0x4
-
-glabel D_800536BC
-    .space 0x4
-
-glabel D_800536C0
-    .space 0x4
-
-glabel D_800536C4
-    .space 0x4
-
-glabel D_800536C8
-    .space 0x4
-
-glabel D_800536CC
-    .space 0xfb4
-
-glabel D_80054680
-    .space 0x50
-
-glabel D_800546D0
-    .space 0x4
-
-glabel D_800546D4
-    .space 0x4
-
-glabel D_800546D8
-    .space 0x4
-
-glabel D_800546DC
-    .space 0x4
-
-glabel D_800546E0
-    .space 0x4
-
-glabel D_800546E4
-    .space 0x4
-
-glabel D_800546E8
-    .space 0x4
-
-glabel D_800546EC
-    .space 0x4
-
-glabel D_800546F0
-    .space 0x4
-
-glabel D_800546F4
-    .space 0x4
-
-glabel D_800546F8
-    .space 0x4
-
-glabel D_800546FC
-    .space 0x4
-
-glabel D_80054700
-    .space 0x4
-
-glabel D_80054704
-    .space 0x4
-
-glabel D_80054708
-    .space 0x4
-
-glabel D_8005470C
-    .space 0x4
-
-glabel D_80054710
-    .space 0x4
-
-glabel D_80054714
-    .space 0x4
-
-glabel D_80054718
-    .space 0x30
-
-glabel D_80054748
-    .space 0x4
-
-glabel D_8005474C
-    .space 0x2
-
-glabel D_8005474E
-    .space 0x1
-
-glabel D_8005474F
-    .space 0x1
-
-glabel D_80054750
-    .space 0x4
-*/
-
 glabel D_80054754
     .space 0x4
 
@@ -375,6 +209,6 @@ glabel D_8005491C
 glabel D_80054920
     .space 0x4
 
-/* this is supposed to be the top of heap */
+/* this is supposed to be the bottom of heap */
 glabel D_80054924
     .space 0x4
