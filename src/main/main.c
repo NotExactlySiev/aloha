@@ -450,37 +450,29 @@ s32 get_tv_system(void)
 
 void read_version(void)
 {
+    int rc;
     u8 buf[1024];
-    s32 i;
-    s32 tmp;
-    u8 *p;
-
     do {
-        tmp = cd_file_read("COUNTRY.TXT", (u32*) buf, 0x400);
-    } while (tmp == -1);
+        rc = cd_file_read("COUNTRY.TXT", buf, sizeof(buf));
+    } while (rc == -1);
     
     game_region = 0;
     tv_system = MODE_NTSC;
-    if (tmp == -2) return; 
+    if (rc == -2)
+        return;
     
-    if (buf[0] == 'P') tv_system = MODE_PAL;
+    if (buf[0] == 'P')
+        tv_system = MODE_PAL;
     
-    if (buf[1] == 'U') {
+    if (buf[1] == 'U')
         game_region = 1;
-    }
-    else if (buf[1] == 'E') {
+    else if (buf[1] == 'E')
         game_region = 2;
-    }
     
     if (buf[1] == 'Z') {
         game_region = 3;
-        i = 0;
-        p = &buf[2];
-        do {
-            version_string[i] = *p;
-            i += 1;
-            p += 1;
-        } while (i < 12);
+        for (int i = 0; i < 12; i++)
+            version_string[i] = buf[2 + i];
         strcpy("EXACT01", &version_string[12]);
         g_GameIsZ = 1;
     }
@@ -502,10 +494,10 @@ void game_init(void)
 {
     // setup events and handlers
     ResetCallback();
-    StopRCnt(0xF2000000);
-    StopRCnt(0xF2000001);
-    StopRCnt(0xF2000002);
-    StopRCnt(0xF2000003);
+    StopRCnt(RCntCNT0);
+    StopRCnt(RCntCNT1);
+    StopRCnt(RCntCNT2);
+    StopRCnt(RCntCNT3);
     VSyncCallbacks(0, 0);
     vblank_event = enable_vblank_event(regular_run_tasks);
     regular_active(1);
@@ -629,8 +621,6 @@ GlobalData *getGameConfig(void)
 
 int main(int argc, char** argv)
 {
-    s32 rc;
-    
     printf("MAX ADR:%x\n", malloc(4));
     D_80047E6C = 1;
 
@@ -640,10 +630,8 @@ int main(int argc, char** argv)
     exception_event = enable_exception_event(exception_handler);
     func_80020FC0(&D_80034344);
 
-    // play some sound
-    //rc = cd_file_read("SYS_SE.VAB", &tmpfilebuf, 0);
     while (1) {
-        rc = cd_file_read("SYS_SE.VAB", &tmpfilebuf, 0);
+        int rc = cd_file_read("SYS_SE.VAB", &tmpfilebuf, 0);
         if (rc > 0 && tmpfilebuf == 0x56414270) break;
         printf("VAB file Reload\n");
     }
@@ -658,9 +646,7 @@ int main(int argc, char** argv)
     }
 
     // # custom stuff:
-    // debug mode
     //getGameConfig()->debug_features = 1;
-    // give printf
     jt_set(printf, 1001);
 
     // run the game
