@@ -138,7 +138,7 @@ static void dct_out_callback(void)
     }
 }
 
-static void prepare_frame(Decoder *dec)
+static void prepare_frame(Decoder *dec) 
 {
     uint *bs = 0;
     while ((bs = next_frame(dec)) == 0);
@@ -153,7 +153,7 @@ static void wait_for_decode(Decoder *dec)
     while (dec->img_loaded == 0) {
         timeout -= 1;
         if (timeout == 0) {
-            // what?
+            // the decode chain is dead. swap it yourself
             dec->img_loaded = 1;
             dec->curr_rect = !dec->curr_rect;
             dec->rect.x = dec->img_rects[dec->curr_rect].x;
@@ -163,7 +163,6 @@ static void wait_for_decode(Decoder *dec)
     dec->img_loaded = 0;
 }
 
-// FIXME: this doesn't work sometimes
 int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
 {
     int ret = 0;
@@ -171,7 +170,7 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
     DRAWENV drawenv;
 
     curr_frame = 0;
-    call_wait_frame(); // argument?
+    call_wait_frame();
     call_SetDispMask(0);
     
     CdlFILE f;
@@ -187,22 +186,23 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
         prepare_frame(&decoder); // and the other one
         wait_for_decode(&decoder);
 
-        // TODO: this breaks it for some reason?? can't skip
-        /*
         if (cb && ((*cb)() == 1)) {
             ret = 1;
             break;
         }
-        */
         
         if (finished == 1) {
-            printf("oh it's over!\n");
             ret = 0;
             break;
         }
-        
+
+        // FIXME: if you remove this printf, the function breaks :/ it'll never
+        // swap buffer and keep timing out on wait_for_decode. the thread
+        // synchronization is broken in ways beyond my comprehension.
+        printf("");
+
         int other = decoder.curr_rect != 1;
-        call_VSync();        
+        call_VSync();
         call_SetDefDispEnv(&dispenv, decoder.img_rects[other].x, decoder.img_rects[other].y, decoder.img_rects[other].w, decoder.img_rects[other].h);
         if (get_tv_system() == MODE_PAL)
             dispenv.screen.y += 24;
@@ -215,15 +215,14 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
         call_SetDispMask(1);
     }
 
+    // cleanup
     CdSync(0, NULL);
     u8 cdparam[8] = { CdlModeSpeed };
     u8 buffer[SECTOR_BYTES];
-
     while (CdControlB(CdlSetmode, cdparam, NULL) != 1);
     if (CdReady(1, NULL) == 1) {
         CdGetSector(buffer, 512);
     }
-
     DecDCToutCallback(0);
     CdDataCallback(0);
     CdReadyCallback(0);
