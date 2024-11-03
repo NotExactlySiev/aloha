@@ -6,9 +6,6 @@
 #include "cd/cd.h"
 #include "movie.h"
 
-// private
-// TODO: make this stuff static
-
 typedef struct {
     // rename these to something better later
     void *ptrs[2];
@@ -20,12 +17,15 @@ typedef struct {
     u32 img_loaded;
 } Decoder;
 
-int D_80048014;  // movie_fading_out
-int D_80048024;  // movie_over
-int D_80048034;  // movie_frame_count
-CdlLOC movie_loc;
-Decoder decoder;
+static int D_80048014;  // movie_fading_out
+static int D_80048024;  // movie_over
+static int D_80048034;  // movie_frame_count
+static int D_8004803C;
+static CdlLOC movie_loc;
+static Decoder decoder;
 
+static int D_80047E5C = 0; // movie_width
+static int D_80047E60 = 0; // movie_width
 
 void init_decoder(Decoder *dec, MovieArgs *args)
 {
@@ -76,7 +76,47 @@ void func_80021FD0(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
     D_80048014 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80022074);       // 
+u32 *func_80022074(Decoder *dec)
+{
+    u32 *addr;
+    StHEADER *hdr;
+    int timeout = 0x800000;
+    while (1) {
+        timeout -= 1;
+        if (StGetNext(&addr, &hdr) == 0) break;
+        if (timeout == 0) return NULL;
+    }
+
+    if (addr[0] != hdr->dummy1 || addr[1] != hdr->dummy2)
+        return NULL;
+    
+    if (hdr->width != D_80047E5C || hdr->height != D_80047E60) {
+        // first frame (always?)
+        ClearImage(&(RECT) { 0, 0, 640, 480 }, 0, 0, 0);
+        D_80047E5C = hdr->width;
+        D_80047E60 = hdr->height;
+    }
+
+    dec->img_rects[0].w = dec->img_rects[1].w = D_80047E5C * 3 / 2;
+    dec->img_rects[0].h = dec->img_rects[1].h = D_80047E60;
+    dec->rect.h = D_80047E60;
+
+    if (D_8004803C++ < hdr->frameCount) {
+        D_8004803C = hdr->frameCount;
+    }
+
+    if (D_80048034 <= D_8004803C + 3 && !D_80048014) {
+        fade_out(4, 0, 0);
+        sndqueue_exec_all();
+        D_80048014 = 1;
+    }
+
+    if (D_8004803C >= D_80048034)
+        D_80048024 = 1;
+
+    return addr;
+}
+
 
 void func_80022260(void)
 {
@@ -115,7 +155,6 @@ void func_800223EC(Decoder *dec)
         timeout -= 1;
         if (timeout == 0) {
             // what?
-            printf("timeout!!\n");
             dec->img_loaded = 1;
             dec->curr_rect = !dec->curr_rect;
             dec->rect.x = dec->img_rects[dec->curr_rect].x;

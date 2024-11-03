@@ -25,6 +25,8 @@ int sfx_get_pan(uint handle);
 int sfx_get_vol(uint handle);
 int sfx_is_valid(u32 handle);
 void func_8001FBE4(void);
+void spu_set_key_on(u32 mask);
+void spu_set_key_off(u32 mask);
 
 typedef struct {
     int unk0;

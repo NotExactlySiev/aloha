@@ -2,98 +2,10 @@
 
 .section .data
 
-glabel D_80046EDC
-/* 2F6DC 80046EDC */ .word  printf
-
-glabel D_80046EE0
-/* 2F6E0 80046EE0 */ .word 0x00000000
-
-glabel D_80046EE4
-/* 2F6E4 80046EE4 */ .word 0x00000000
-
-glabel D_80046EE8
-/* 2F6E8 80046EE8 */ .word 0x00000000
-
-glabel D_80046EEC
-/* 2F6EC 80046EEC */ .word 0x00000001
-
-glabel D_80046EF0
-/* 2F6F0 80046EF0 */ .word 0x00000000
-
-glabel D_80046EF4
-/* 2F6F4 80046EF4 */ .word 0x1F801810
-
-glabel D_80046EF8
-/* 2F6F8 80046EF8 */ .word 0x1F801814
-
-glabel D_80046EFC
-/* 2F6FC 80046EFC */ .word 0x1F8010A0
-
-glabel D_80046F00
-/* 2F700 80046F00 */ .word 0x1F8010A4
-
-glabel D_80046F04
-/* 2F704 80046F04 */ .word 0x1F8010A8
-
-glabel D_80046F08
-/* 2F708 80046F08 */ .word 0x1F8010E0
-
-glabel D_80046F0C
-/* 2F70C 80046F0C */ .word 0x1F8010E4
-
-glabel D_80046F10
-/* 2F710 80046F10 */ .word 0x1F8010E8
-
-glabel D_80046F14
-/* 2F714 80046F14 */ .word 0x1F8010F0
-
-glabel D_80046F18
-/* 2F718 80046F18 */ .word 0x00000000
-
-glabel D_80046F1C
-/* 2F71C 80046F1C */ .word 0x00000000
-
-
-glabel D_80047318
-/* 2FB18 80047318 */ .word 0x00000000
-
-glabel D_8004731C
-/* 2FB1C 8004731C */ .word 0x00000000
-
-glabel D_80047320
-/* 2FB20 80047320 */ .word 0x00000000
-
-glabel D_80047324
-/* 2FB24 80047324 */ .word 0x00000000
-
-glabel D_80047328
-/* 2FB28 80047328 */ .word 0x00000000
-/* 2FB2C 8004732C */ .word 0x00000000
-
 glabel stacksize
 /* 2FC40 80047440 */ .word 0x00008000
 /* 2FC44 80047444 */ .word 0x00800000
 
-glabel D_80047D24
-/* 30524 80047D24 */ .word 0x07070707
-/* 30528 80047D28 */ .word 0x07070707
-/* 3052C 80047D2C */ .word 0x07070707
-/* 30530 80047D30 */ .word 0x07070707
-
-glabel D_80047D48
-/* 30548 80047D48 */ .word 0xFFFFFFFE
-
-glabel D_80047D4C
-/* 3054C 80047D4C */ .word 0x00000000
-
-glabel D_80047D50
-/* 30550 80047D50 */ .word 0x00000000
-
-glabel D_80047D58
-/* 30558 80047D58 */ .word 0x00000000
-
-glabel D_80047D64
-/* 30564 80047D64 */ .word 0x00000000
 
 glabel D_80047D74
 /* 30574 80047D74 */ .word 0x00000000
@@ -122,33 +34,6 @@ glabel D_80047D98
 /* 30598 80047D98 */ .word 0x00000007
 /* 3059C 80047D9C */ .word 0x00000000
 
-glabel fade_out_active
-/* 305B4 80047DB4 */ .word 0x00000000
-
-glabel fading_out
-/* 305B8 80047DB8 */ .word 0x00000000
-
-glabel fade_in_active
-/* 305BC 80047DBC */ .word 0x00000000
-
-glabel fading_in
-/* 305C0 80047DC0 */ .word 0x00000000
-
-glabel fade_in_step
-/* 305C4 80047DC4 */ .word 0x00000000
-
-glabel fade_out_step
-/* 305C8 80047DC8 */ .word 0x00000000
-
-glabel fade_out_dest
-/* 305CC 80047DCC */ .word 0x00000000
-
-glabel fade_in_dest
-/* 305D0 80047DD0 */ .word 0x00000400
-
-/* unused? */
-/* 305F8 80047DF8 */ .word 0x6F726463
-/* 305FC 80047DFC */ .word 0x005C3A6D
 
 glabel D_80047E00
 /* 30600 80047E00 */ .word 0xFFFFFFFF
@@ -219,11 +104,7 @@ glabel D_80047E50
 glabel D_80047E54
 /* 30654 80047E54 */ .word 0x00000000
 
-glabel D_80047E5C
-/* 3065C 80047E5C */ .word 0x00000000
 
-glabel D_80047E60
-/* 30660 80047E60 */ .word 0x00000000
 
 glabel D_80047E64
 /* 30664 80047E64 */ .word 0x00000000

@@ -53,14 +53,18 @@ extern void* cd_result;     // result
 extern u8 cd_status;
 extern int pvd_is_cached;
 extern s32 D_800548EC;
-extern s32 fade_out_active;
-extern s32 fading_out;
-extern s32 fade_in_active;
-extern s32 fading_in;
-extern s32 fade_in_step;
-extern s32 fade_out_step;
-extern s32 fade_out_dest;
-extern s32 fade_in_dest;
+
+int fade_out_active = 0;
+int fading_out = 0;
+int fade_in_active = 0;
+int fading_in = 0;
+int fade_in_step = 0;
+int fade_out_step = 0;
+int fade_out_dest = 0;
+int fade_in_dest = 1024;
+
+char D_80047DF8[] = "cdrom:\\";     // unused
+
 extern s32 D_80047D78;
 extern SpuVolume D_80047D8C;
 extern s32 fade_out_task;

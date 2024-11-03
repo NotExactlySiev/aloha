@@ -11,6 +11,15 @@
 #include <shared.h>
 #include <libapi.h>
 
+// stuff from 1D530.data.s
+int D_80047D48 = -2;
+int D_80047D4C = 0;
+int D_80047D50 = 0;
+int D_80047D58 = 0;
+int D_80047D64 = 0;
+
+
+// over
 
 #define DFILE(ptr, name)    { (void*) (ptr | 1), name }
 file_t g_Files[42] = {
