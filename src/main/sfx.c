@@ -40,22 +40,18 @@ typedef struct {
 } Channel;
 
 typedef struct {
-    VabHdr header;          // [0   20)
-    ProgAtr progattrs[128]; // [20  820)
-    VagAtr toneattrs[][16]; // [820 A20 etc.)
+    VabHdr header;
+    ProgAtr progattrs[128];
+    VagAtr toneattrs[][16];
 } VabRealHeader;
-
-typedef struct {
-    int x[2];
-} P2;
 
 typedef struct {
     VabHdr hdr;
     ProgAtr *progs;
     VagAtr  *tones;
-    P2 *p2;
+    u32 p2;     // spu_addr
     u16 *offsets;
-    u16 nprogs;     // real, with and without tones
+    u16 nprogs;
     u16 ntones;
     u16 nvags;
     char a;
@@ -168,7 +164,6 @@ void sfx_init(void)
     D_80047FAC = regular_add_tmp(sfx_tick, 1);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", load_metadata);
 static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     // TODO: refactor this insanity
     u16 vagoff;
@@ -249,8 +244,9 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     
     loaded_vabs[idx].a = 1;
     loaded_vabs[idx].b = 0;
-    loaded_vabs[idx].hdr.fsize -= 
-        sizeof(VabRealHeader) + sizeof(VagAtr[16]) * (arg->header.ps+1);
+    loaded_vabs[idx].hdr.fsize -= sizeof(VabRealHeader) 
+                                + sizeof(VagAtr[16]) * arg->header.ps
+                                + sizeof(u16[256]);
     D_80047F9C[vabs_count++] = idx;
 
     return idx;
@@ -259,8 +255,10 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
 // upload_vab
 int func_8001EEA4(VabRealHeader *header, void *data, short idx)
 {
-    if (data == 0)
-        data = &header->toneattrs[header->header.ps + 1];
+    if (data == 0) {
+        data = &header->toneattrs[header->header.ps];
+        data += 512;    // past the sizes
+    }
     VabFile *v = &loaded_vabs[idx];
     if (v->a == 0)  // not in the array
         return -2;
@@ -271,7 +269,7 @@ int func_8001EEA4(VabRealHeader *header, void *data, short idx)
     if (ptr == -1)
         return -1;
     v->p2 = ptr; // TODO: this field is the spu address
-    call_SpuSetIRQAddr(ptr);
+    call_SpuSetTransferStartAddr(ptr);
     call_SpuWrite(data, v->hdr.fsize);
     call_SpuIsTransferCompleted(1);
     v->b = 1;   // TODO: this field is is_uploaded
@@ -279,6 +277,7 @@ int func_8001EEA4(VabRealHeader *header, void *data, short idx)
 
 }
 
+// free_vab
 int func_8001EFAC(s16 idx)
 {
     if (vabs_count == 0) return -1;
@@ -360,7 +359,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
         .volume.left = left * vol * 2,
         .volume.right = right * vol * 2,
         .sample_note = vag->shift | (vag->center << 8),
-        .addr = (u32) &vab->p2[vab->offsets[vag->vag - 1]],
+        .addr = vab->p2 + 8 * vab->offsets[vag->vag - 1],
         .adsr1 = vag->adsr1,
         .adsr2 = vag->adsr2,
         .voice = mask,
@@ -437,7 +436,7 @@ int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     ProgAtr *prog = &vp->progs[prog_idx];
     u8 ntones = prog->tones;
     if ((tone_idx >= ntones) || (ntones == 0)) return -1;
-                    
+
     int channel = -1;
 
     // TODO: is just a clamp
@@ -543,8 +542,6 @@ int sfx_is_valid(u32 handle)
     return -1;
 }
 
-
-
 int func_8001FBC0(int val)
 {
     int ret = D_80047E10;
@@ -568,10 +565,9 @@ int sfx_is_active(u32 handle)
 
 int sfx_load_vab(short index, VabRealHeader *header, void *data)
 {
-    printf("Load VAB: %p %p: ", header, data);
     index = load_metadata(header, index);
-    printf("Loaded in %d\n", index);
     if (index == -1)
         return -1;
+
     return func_8001EEA4(header, data, index);
 }

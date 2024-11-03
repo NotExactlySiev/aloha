@@ -529,35 +529,26 @@ long call_SpuIsTransferCompleted(long flag)
     return SpuIsTransferCompleted(flag);
 }
 
-
-//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuGetTransferMode);
 long call_SpuGetTransferMode(void)
 {
     return SpuGetTransferMode();
 }
 
-// call_SpuWrite
-//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuWrite);
 unsigned long call_SpuWrite(unsigned char *addr, unsigned long size)
 {
     return SpuWrite(addr, size);
 }
 
-// call_SpuSetIRQAddr
-//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuSetIRQAddr);
-unsigned long call_SpuSetIRQAddr(unsigned long addr)
+unsigned long call_SpuSetTransferStartAddr(unsigned long addr)
 {
-    return SpuSetIRQAddr(addr);
+    return SpuSetTransferStartAddr(addr);
 }
 
-// call_SpuGetKeyStatus
-//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuGetKeyStatus);
 long call_SpuGetKeyStatus(unsigned long voice_bit)
 {
     return SpuGetKeyStatus(voice_bit);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuGetAllKeysStatus);
 void call_SpuGetAllKeysStatus(char *status)
 {
     SpuGetAllKeysStatus(status);
