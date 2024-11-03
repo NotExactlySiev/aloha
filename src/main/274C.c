@@ -461,8 +461,29 @@ void fade_unpause(void) {
     fade_paused = 0;
 }
 
-// play movie
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D2AC);
+#include "movie.h"
+// FIXME: the world 1 intro movie doesn't play correctly
+int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
+{
+    func_8001D104();
+    func_8001A77C();
+    sndqueue_exec_all();
+    call_DrawSync(0);
+    func_8001C374();
+    sndqueue_add_try(CdlPause, 0, 0);
+    sndqueue_add_try(0xFE, 4, 0);
+    sndqueue_exec_all();
+    int rc = play_movie_str(filename, args, cb);
+    set_mono(is_mono);
+    SpuVolume vol;
+    func_8001CD0C(&vol);
+    set_vol_full(&vol);
+    sndqueue_add_try(0xF9, D_80047EA4, 0);
+    sndqueue_add_try(0xFE, 0, 0);
+    sndqueue_exec_all();
+    func_8001A380();
+    return rc;
+}
 
 // trivial and caller sound functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DD7C);
