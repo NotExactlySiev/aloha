@@ -40,9 +40,9 @@ typedef struct {
 } Channel;
 
 typedef struct {
-    VabHdr header;
-    ProgAtr progattrs[128];
-    VagAtr toneattrs[][16];
+    VabHdr header;          // [0   20)
+    ProgAtr progattrs[128]; // [20  820)
+    VagAtr toneattrs[][16]; // [820 A20 etc.)
 } VabRealHeader;
 
 typedef struct {
@@ -168,8 +168,8 @@ void sfx_init(void)
     D_80047FAC = regular_add_tmp(sfx_tick, 1);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_load_vab);
-s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
+//INCLUDE_ASM("asm/main/nonmatchings/274C", load_metadata);
+static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     // TODO: refactor this insanity
     u16 vagoff;
     u16 vcount;
@@ -256,14 +256,28 @@ s16 sfx_load_vab(VabRealHeader *arg, s16 idx) {
     return idx;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001EEA4);
-/*int func_8001EEA4(VabRealHeader *buf, void *ptr, s16 idx)
+// upload_vab
+int func_8001EEA4(VabRealHeader *header, void *data, short idx)
 {
-    if (ptr == 0) {
-        ptr = 
-    }
-    return -2;
-}*/
+    if (data == 0)
+        data = &header->toneattrs[header->header.ps + 1];
+    VabFile *v = &loaded_vabs[idx];
+    if (v->a == 0)  // not in the array
+        return -2;
+    if (v->b == 1)  // already uploaded
+        return 1;
+    
+    u32 ptr = SpuMalloc(v->hdr.fsize);
+    if (ptr == -1)
+        return -1;
+    v->p2 = ptr; // TODO: this field is the spu address
+    call_SpuSetIRQAddr(ptr);
+    call_SpuWrite(data, v->hdr.fsize);
+    call_SpuIsTransferCompleted(1);
+    v->b = 1;   // TODO: this field is is_uploaded
+    return 0;
+
+}
 
 int func_8001EFAC(s16 idx)
 {
@@ -340,7 +354,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
     int right = pan > 64 ? 64 : pan;
     int left = pan > 64 ? 127 - pan : 64;
 
-    func_8001E0CC(&(SpuVoiceAttr) {
+    set_voice_attr(&(SpuVoiceAttr) {
         .mask = 0x600E3,
         .note = (note << 8) | cent,
         .volume.left = left * vol * 2,
@@ -372,7 +386,7 @@ void func_8001F4F0(u32 mask)
             p->unk6 = 2;
         }
     }
-    func_8001E0CC(&(SpuVoiceAttr){
+    set_voice_attr(&(SpuVoiceAttr){
         .mask = 3,
         .volume.left = 0,
         .volume.right = 0,
@@ -550,4 +564,15 @@ void func_8001FBE4(void)
 int sfx_is_active(u32 handle)
 {
     return channels[handle & 0x1F].active == 1;
+}
+
+// the real sfx_load_vab
+int sfx_load_vab(short index, VabRealHeader *header, void *data)
+{
+    printf("Load VAB: %p %p: ", header, data);
+    index = load_metadata(header, index);
+    printf("Loaded in %d\n", index);
+    if (index == -1)
+        return -1;
+    return func_8001EEA4(header, data, index);
 }

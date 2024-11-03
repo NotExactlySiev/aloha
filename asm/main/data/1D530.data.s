@@ -7,24 +7,6 @@ glabel stacksize
 /* 2FC44 80047444 */ .word 0x00800000
 
 
-glabel D_80047D74
-/* 30574 80047D74 */ .word 0x00000000
-
-glabel D_80047D78
-/* 30578 80047D78 */ .word 0x00000000
-
-glabel D_80047D7C
-/* 3057C 80047D7C */ .word 0x00000000
-
-glabel D_80047D80
-/* 30580 80047D80 */ .word 0x00000001
-
-glabel D_80047D84
-/* 30584 80047D84 */ .word 0x00000001
-
-glabel D_80047D8C
-/* 3058C 80047D8C */ .word 0x00000000
-
 glabel D_80047D90
 /* 30590 80047D90 */ .byte 0x3B
 /* 30591 80047D91 */ .byte 0x31

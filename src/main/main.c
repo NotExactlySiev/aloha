@@ -647,7 +647,7 @@ int main(int argc, char** argv)
         if (rc > 0 && tmpfilebuf == 0x56414270) break;
         printf("VAB file Reload\n");
     }
-    func_80020D5C(0, &tmpfilebuf, 0);
+    sfx_load_vab(0, &tmpfilebuf, 0);
     
     // fade logo?
     func_8001926C();

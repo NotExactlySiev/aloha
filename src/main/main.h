@@ -51,7 +51,7 @@ void reboot(char*, char*);
 long call_SpuMalloc(long size);
 long call_SpuMallocWithStartAddr(unsigned long addr, long size);
 void call_SpuFree(unsigned long addr);
-void func_8001E0CC(SpuVoiceAttr* arg0);
+void set_voice_attr(SpuVoiceAttr* arg0);
 
 extern u32 tmpfilebuf;
 extern u8 kernelbuf[8];

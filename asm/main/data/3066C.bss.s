@@ -6,9 +6,6 @@
 
 /* this is actually in the final file (initialized to 0) */
 
-glabel D_80047E8C
-/* 30674 80047E8C */ .space 0x08
-
 glabel vol_full
 /* 30684 80047E9C */ .space 0x02
 

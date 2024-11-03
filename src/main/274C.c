@@ -523,54 +523,71 @@ void call_SpuFree(unsigned long addr)
 }
 
 // call_SpuIsTransferCompleted
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DFEC);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuIsTransferCompleted);
+long call_SpuIsTransferCompleted(long flag)
+{
+    return SpuIsTransferCompleted(flag);
+}
 
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E00C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuGetTransferMode);
+long call_SpuGetTransferMode(void)
+{
+    return SpuGetTransferMode();
+}
 
 // call_SpuWrite
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E02C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuWrite);
+unsigned long call_SpuWrite(unsigned char *addr, unsigned long size)
+{
+    return SpuWrite(addr, size);
+}
 
 // call_SpuSetIRQAddr
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E04C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuSetIRQAddr);
+unsigned long call_SpuSetIRQAddr(unsigned long addr)
+{
+    return SpuSetIRQAddr(addr);
+}
 
 // call_SpuGetKeyStatus
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E06C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuGetKeyStatus);
+long call_SpuGetKeyStatus(unsigned long voice_bit)
+{
+    return SpuGetKeyStatus(voice_bit);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E08C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuGetAllKeysStatus);
+void call_SpuGetAllKeysStatus(char *status)
+{
+    SpuGetAllKeysStatus(status);
+}
 
-void call_SpuSetVoiceAttr(SpuVoiceAttr* attr) {
+void call_SpuSetVoiceAttr(SpuVoiceAttr *attr) {
     SpuSetVoiceAttr(attr);
 }
 
 extern int D_80047E08;
 
-void func_8001E0CC(SpuVoiceAttr* arg0) {
-    SpuVoiceAttr attr;
-    s32 left;
-    s32 right;
-    u32 val;
-
+void set_voice_attr(SpuVoiceAttr *arg) {
     if (D_80047E08 == 1) {
-        __builtin_memcpy(&attr, arg0, sizeof(SpuVoiceAttr));
-        left = attr.volume.left;
-        right = attr.volume.right;
+        // make it mono
+        SpuVoiceAttr attr = *arg;
+        int left = attr.volume.left;
+        int right = attr.volume.right;
         if (left < 0) {
             left = -left;
         }
         if (right < 0) {
             right = -right;
         }
-        val = left + right;
-        // what is this doing?
-        val = (val + (val >> 0x1F)) >> 1;
+        int val = (left + right) / 2;
         attr.volume.right = val;
         attr.volume.left = val;
         call_SpuSetVoiceAttr(&attr);
-        return;
     }
     else {
-        call_SpuSetVoiceAttr(arg0);
+        call_SpuSetVoiceAttr(arg);
     }
 }
 
@@ -814,8 +831,9 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002092C);
 // close memory card events
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020C8C);
 
-// play audio?
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020D5C);
+// this is the actual sfx_load_vab. the other one should be private
+// implementing it in sfx.c
+//INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_load_vab);
 
 // trivial or easy functions related to audio
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DC4);
@@ -928,7 +946,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
 /*void func_80021D54(void)
 {
     fnptr = 0;
-    jt_set(&func_80020D5C, 0x300);
+    jt_set(&sfx_load_vab, 0x300);
     jt_set(&func_80020DC4, 0x301);
     jt_set(&func_80020DE8, 0x302);
     jt_set(&func_80020E30, 0x303);
