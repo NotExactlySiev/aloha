@@ -21,4 +21,4 @@ typedef struct {
     int channel;
 } MovieArgs;
 
-int func_80022474(char *filename, MovieArgs *args, int (*cb)(void));
+int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void));

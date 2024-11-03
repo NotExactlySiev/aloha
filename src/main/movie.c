@@ -7,9 +7,9 @@
 #include "movie.h"
 
 typedef struct {
-    // rename these to something better later
-    void *ptrs[2];
-    int i;
+    // TODO: rename these to something better later
+    void *vlc_buffers[2];
+    int curr_buffer;
     u32 *img_data;
     RECT img_rects[2];
     int curr_rect;
@@ -17,22 +17,21 @@ typedef struct {
     u32 img_loaded;
 } Decoder;
 
-static int D_80048014;  // movie_fading_out
-static int D_80048024;  // movie_over
-static int D_80048034;  // movie_frame_count
-static int D_8004803C;
-static CdlLOC movie_loc;
 static Decoder decoder;
+static CdlLOC movie_loc;
+static int width = 0;
+static int height = 0;
+static int frame_count;
+static int curr_frame;
+static int fading_out;
+static int finished;
 
-static int D_80047E5C = 0; // movie_width
-static int D_80047E60 = 0; // movie_width
-
-void init_decoder(Decoder *dec, MovieArgs *args)
+static void init_decoder(Decoder *dec, MovieArgs *args)
 {
     *dec = (Decoder) {
-        .ptrs[0] = args->buffers[0],
-        .ptrs[1] = args->buffers[1],
-        .i = 0,
+        .vlc_buffers[0] = args->buffers[0],
+        .vlc_buffers[1] = args->buffers[1],
+        .curr_buffer = 0,
         .curr_rect = 0,
         .img_loaded = 0,
         .img_data = args->data_addr,
@@ -57,26 +56,26 @@ void init_decoder(Decoder *dec, MovieArgs *args)
     };
 }
 
-void func_80021F7C(CdlLOC *loc, u32 mode)
+static void seek_and_stream(CdlLOC *loc, u32 mode)
 {
     while (CdControl(CdlSeekL, (u8*) loc, NULL) == 0);
     while (CdRead2(mode | CdlModeStream) == 0);
 }
 
-void func_80021FD0(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
+static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 {
     func_8001E608(0);
-    D_80048024 = 0;
+    finished = 0;
     DecDCToutCallback(cb);
     StSetRing(args->ring_addr, args->ring_size);
     StSetChannel(args->channel);
-    D_80048034 = args->frame_count;
+    frame_count = args->frame_count;
     StSetStream(1, 1, -1, NULL, NULL);
-    func_80021F7C(loc, args->mode);
-    D_80048014 = 0;
+    seek_and_stream(loc, args->mode);
+    fading_out = 0;
 }
 
-u32 *func_80022074(Decoder *dec)
+static u32 *next_frame(Decoder *dec)
 {
     u32 *addr;
     StHEADER *hdr;
@@ -90,35 +89,35 @@ u32 *func_80022074(Decoder *dec)
     if (addr[0] != hdr->dummy1 || addr[1] != hdr->dummy2)
         return NULL;
     
-    if (hdr->width != D_80047E5C || hdr->height != D_80047E60) {
+    if (hdr->width != width || hdr->height != height) {
         // first frame (always?)
         ClearImage(&(RECT) { 0, 0, 640, 480 }, 0, 0, 0);
-        D_80047E5C = hdr->width;
-        D_80047E60 = hdr->height;
+        width = hdr->width;
+        height = hdr->height;
     }
 
-    dec->img_rects[0].w = dec->img_rects[1].w = D_80047E5C * 3 / 2;
-    dec->img_rects[0].h = dec->img_rects[1].h = D_80047E60;
-    dec->rect.h = D_80047E60;
+    dec->img_rects[0].w = dec->img_rects[1].w = width * 3 / 2;
+    dec->img_rects[0].h = dec->img_rects[1].h = height;
+    dec->rect.h = height;
 
-    if (D_8004803C++ < hdr->frameCount) {
-        D_8004803C = hdr->frameCount;
+    if (curr_frame++ < hdr->frameCount) {
+        curr_frame = hdr->frameCount;
     }
 
-    if (D_80048034 <= D_8004803C + 3 && !D_80048014) {
+    if ((frame_count <= curr_frame + 3) && !fading_out) {
         fade_out(4, 0, 0);
         sndqueue_exec_all();
-        D_80048014 = 1;
+        fading_out = 1;
     }
 
-    if (D_8004803C >= D_80048034)
-        D_80048024 = 1;
+    if (curr_frame >= frame_count)
+        finished = 1;
 
     return addr;
 }
 
 
-void func_80022260(void)
+static void dct_out_callback(void)
 {
     extern u_long StCdIntrFlag;
     if (StCdIntrFlag) {
@@ -139,16 +138,16 @@ void func_80022260(void)
     }
 }
 
-void func_8002237C(Decoder *dec)
+static void prepare_frame(Decoder *dec)
 {
     uint *bs = 0;
-    while ((bs = func_80022074(dec)) == 0);
-    dec->i = dec->i != 1;
-    DecDCTvlc(bs, dec->ptrs[dec->i]);
+    while ((bs = next_frame(dec)) == 0);
+    dec->curr_buffer = dec->curr_buffer != 1;
+    DecDCTvlc(bs, dec->vlc_buffers[dec->curr_buffer]);
     StFreeRing(bs);
 }
 
-void func_800223EC(Decoder *dec)
+static void wait_for_decode(Decoder *dec)
 {
     int timeout = 0x800000;
     while (dec->img_loaded == 0) {
@@ -165,12 +164,13 @@ void func_800223EC(Decoder *dec)
 }
 
 // FIXME: this doesn't work sometimes
-int func_80022474(char *filename, MovieArgs *args, int (*cb)(void))
+int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
 {
     int ret = 0;
     DISPENV dispenv;
     DRAWENV drawenv;
 
+    curr_frame = 0;
     call_wait_frame(); // argument?
     call_SetDispMask(0);
     
@@ -179,13 +179,13 @@ int func_80022474(char *filename, MovieArgs *args, int (*cb)(void))
         return -1;
     movie_loc = f.pos;
     init_decoder(&decoder, args);
-    func_80021FD0(&movie_loc, args, func_80022260);
-    func_8002237C(&decoder); // fill one buffer
+    start_stream(&movie_loc, args, dct_out_callback);
+    prepare_frame(&decoder); // fill one buffer
     while (1) {
-        DecDCTin(decoder.ptrs[decoder.i], 3);
+        DecDCTin(decoder.vlc_buffers[decoder.curr_buffer], 3);
         DecDCTout(decoder.img_data, decoder.rect.w * decoder.rect.h / 2);
-        func_8002237C(&decoder); // and the other one
-        func_800223EC(&decoder);
+        prepare_frame(&decoder); // and the other one
+        wait_for_decode(&decoder);
 
         // TODO: this breaks it for some reason?? can't skip
         /*
@@ -195,7 +195,8 @@ int func_80022474(char *filename, MovieArgs *args, int (*cb)(void))
         }
         */
         
-        if (D_80048024 == 1) {
+        if (finished == 1) {
+            printf("oh it's over!\n");
             ret = 0;
             break;
         }
