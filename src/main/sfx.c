@@ -249,8 +249,8 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     
     loaded_vabs[idx].a = 1;
     loaded_vabs[idx].b = 0;
-    //loaded_vabs[idx].hdr.fsize -= sizeof(VabRealHeader) + (arg->header.ps) * 16 * sizeof(VagAtr);
-    loaded_vabs[idx].hdr.fsize -= 0xA20 + (arg->header.ps) * 16 * sizeof(VagAtr);
+    loaded_vabs[idx].hdr.fsize -= 
+        sizeof(VabRealHeader) + sizeof(VagAtr[16]) * (arg->header.ps+1);
     D_80047F9C[vabs_count++] = idx;
 
     return idx;
@@ -566,7 +566,6 @@ int sfx_is_active(u32 handle)
     return channels[handle & 0x1F].active == 1;
 }
 
-// the real sfx_load_vab
 int sfx_load_vab(short index, VabRealHeader *header, void *data)
 {
     printf("Load VAB: %p %p: ", header, data);
