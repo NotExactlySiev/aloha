@@ -17,6 +17,8 @@ int D_80047FEC;
 int D_80047FF4;
 int D_80047FFC;
 
+static char D_800521F8[32];
+
 int func_8001FC5C(void)
 {
     if (TestEvent(D_80047FB4) == 1) return 4;
@@ -66,10 +68,6 @@ int func_80020000(int val)
 {
     return func_8001FDF4(val);
 }
-
-// 15 memory card file system functions
-
-extern char D_800521F8[32];
 
 // static?
 int mc_addr_prefix(u32 mtidx, char* src, char* dst)
@@ -192,7 +190,6 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002092C);
 
 // close memory card events
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020C8C);
 void func_80020C8C(void)
 {
     EnterCriticalSection();

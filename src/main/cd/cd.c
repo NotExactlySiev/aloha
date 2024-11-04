@@ -18,7 +18,7 @@ int cd_fs_get_file(CdlFILE *file, char *filename) {
         *dst++ = '\\';
     }
     
-    if (strnchr(upper, ';') == 0) {
+    if (strchr(upper, ';') == 0) {
         strcat(upper, ";1", dst);
     } else {
         strcpy(upper, dst);

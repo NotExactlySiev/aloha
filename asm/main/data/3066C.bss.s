@@ -53,9 +53,6 @@ glabel D_8004D0E0
 glabel D_8004DCF8
     .space 0x88
 
-glabel D_800521F8
-    .space 0x20
-
 glabel D_80052220
     .space 0x4
 
