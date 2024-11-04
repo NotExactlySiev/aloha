@@ -490,7 +490,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DD7C);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DE98);   // snd_mute
 
-long func_8001DED0(SpuCommonAttr *attr)
+long call_SpuSetCommonAttr(SpuCommonAttr *attr)
 {
     SpuSetCommonAttr(attr);
 }
@@ -503,9 +503,29 @@ void func_8001DEF0(int val)
 }
 */
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF14);
+// set_reverb
+void func_8001DF14(long mode, short depth)
+{
+    SpuReverbAttr attr = {
+        .mask = 7,
+        .mode = mode,
+        .depth.left = depth,
+        .depth.right = depth,
+    };
+    SpuSetReverb(0);
+    SpuSetReverbModeParam(&attr);
+    SpuSetReverb(0);
+    SpuSetReverbDepth(&attr);
+    SpuSetReverb(0);
+    SpuClearReverbWorkArea(mode);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DF78);
+extern int D_80047E08;
+
+void func_8001DF78(int val)
+{
+    D_80047E08 = val;
+}
 
 long call_SpuMalloc(long size)
 {
@@ -555,8 +575,6 @@ void call_SpuGetAllKeysStatus(char *status)
 void call_SpuSetVoiceAttr(SpuVoiceAttr *attr) {
     SpuSetVoiceAttr(attr);
 }
-
-extern int D_80047E08;
 
 void set_voice_attr(SpuVoiceAttr *arg) {
     if (D_80047E08 == 1) {
@@ -621,7 +639,6 @@ extern u8* font_ptr8;
 extern u8* font_ptr16;
 
 // 4 font and type functions
-//MATCHING with 4.3 -O1
 void func_8001E38C(void) {
     jt_set(func_8001E438, 0xD0);
     jt_set(func_8001E5BC, 0xD1);
@@ -635,9 +652,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E438);
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E5BC);
 
-extern int D_80047E0C;
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E608);
-// try_DecDCTReset
+extern int D_80047E0C;  // is mdec initialized?
 void func_8001E608(int mode)
 {
     if (mode == 0) {
@@ -647,13 +662,10 @@ void func_8001E608(int mode)
             mode = 0;
         }
     }
-    //my_DecDCTReset(mode);
     DecDCTReset(mode);
 }
 
-// sfx.c
-
-// mc.c
+// card.c
 
 // 3 event test functions
 int D_80047FB4;
@@ -802,7 +814,6 @@ int func_800202A0(int fd, void *buf, int len)   // mc_write_block
 // read with fine size
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);   //
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800203AC);
 // read full?
 int func_800203AC(long fd, void *buf, long len)
 {
@@ -810,7 +821,6 @@ int func_800203AC(long fd, void *buf, long len)
     return len;
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020414);   // mc_seek
 long func_80020414(long fd, long a, long b)
 {
     return lseek(fd, a, b);
@@ -820,7 +830,6 @@ long func_80020414(long fd, long a, long b)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020434);   // 
 //func_80020434
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800205C4);   // mc_file_find
 struct DIRENTRY *func_800205C4(int mtidx, char *filename, struct DirEntry *out)
 {
     int rc = mc_addr_prefix(mtidx, filename, D_800521F8);
@@ -830,7 +839,6 @@ struct DIRENTRY *func_800205C4(int mtidx, char *filename, struct DirEntry *out)
     return firstfile2(D_800521F8, out);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020610);   // mc_file_next
 struct DIRENTRY *func_80020610(struct DIRENTRY *dir)
 {
     return nextfile(dir);
@@ -874,15 +882,47 @@ void func_80020E64(void)
     func_8001F578(SPU_ALLCH);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020E88);
+// FIXME: the pan appears to be... backwards? sfx issue?
+extern short D_80047E24;
+extern short D_80047E26;
+extern int D_80047E48;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020EB4);
+void func_80020E88(void)
+{
+    D_80047E26 = 0;
+    func_80020EF0(0, 0);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020EF0);
+void func_80020EB4(void)
+{
+    D_80047E26 = D_80047E24;
+    func_80020EF0(D_80047E24, D_80047E48);
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F48);
+// set sound mono?
+void func_80020EF0(short arg0, short arg1)
+{
+    short val = (arg0 * arg1) / 1024;
+    call_SpuSetCommonAttr(&(SpuCommonAttr) {
+        .mask = 3,
+        .mvol.left = val,
+        .mvol.right = val,
+    });
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020F9C);
+int func_80020F48(short val)
+{
+    short old = D_80047E24;
+    D_80047E24 = val;
+    D_80047E26 = val;
+    func_80020EF0(val, D_80047E48);
+    return old;
+}
+
+void func_80020F9C(long mode, short depth)
+{
+    func_8001DF14(mode, depth);
+}
 
 // 3 audio_list functions
 extern int D_80047E50;  // is a pointer?
