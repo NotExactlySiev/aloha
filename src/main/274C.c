@@ -313,6 +313,7 @@ void func_8001BD00(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int 
 
 }
 
+// play type == 0 music. what is that?
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
 
 void func_8001C20C(CdlLOC* loc) {
@@ -723,20 +724,74 @@ void func_80020F9C(long mode, short depth)
     func_8001DF14(mode, depth);
 }
 
-// 3 audio_list functions
-extern int D_80047E50;  // is a pointer?
+// music.c
+
+typedef struct {
+    u8 id;
+    u8 type;
+    u32 size;
+    u32 unk0;
+    u32 unk1;
+    u8 file;     // CdlFILTER
+    u8 chan;
+    CdlLOC loc;
+    char name[12];
+} MusicTrack;
+
+typedef struct {
+    u16 count;
+    u16 _pad;   // TODO: not needed?    
+    MusicTrack tracks[];
+} MusicList;
+
+extern int D_80047E4C;          // music should repeat?
+extern MusicList *D_80047E50;   // bgm_list_ptr
 // audio_list_set_ptr
-void func_80020FC0(int val)
+void func_80020FC0(MusicList *val)
 {
     D_80047E50 = val;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020FD0);   // audio_list_find
+MusicTrack *func_80020FD0(u8 id)
+{
+    u16 count = D_80047E50->count;
+    MusicTrack *p = &D_80047E50->tracks[0];
+    while (count--) {
+        if (p->id == id)
+            return p;
+        p = &p->name[p->size - 22];  // why is the next one there?
+    }
+    return NULL;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021028);   // audio_list_play
+// music_play
+int func_80021028(u8 id)
+{
+    if (D_80047E50 == NULL)
+        return 0;
+
+    MusicTrack *t = func_80020FD0(id);
+    if (t == NULL)
+        return 0;
+    
+    switch (t->type) {
+    case 0:
+        // is this branch EVER taken?
+        while (1)
+            printf("FIXME!!! congrats, you found something that takes this branch. now figure out what this music format is and how it's different from the regular XADPCM and what this function does.\n");
+        // music_play_???
+        func_8001C03C(t->file, D_80047E4C);
+        return 1;
+    case 1:
+        // music_play_str
+        func_8001BD00(t->name, t->file, t->chan, &t->loc, t->loc.track, D_80047E4C);
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 //
-extern int D_80047E4C;
 void func_800210D4(int val)
 {
     D_80047E4C = val;
@@ -776,6 +831,9 @@ void execute_compressed(void *addr, u32 stack)
     Exec(&header, 1, 0);
 }
 
+// more memory card functions
+
+// card read callback
 void func_800218A0(void (*fn)(void))
 {
     fnptr = fn;
@@ -788,14 +846,15 @@ void func_800218B0(void)
     }
 }
 
-// 6 memory card functions
+// read async?
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
 
+// read async some other way
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);   // mc_init_file
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);   // mc_delete?
 
 // jmptable setter 0x300-0x344
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
