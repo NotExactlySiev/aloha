@@ -20,7 +20,7 @@ int D_80047D64 = 0;
 
 // over
 
-#define DMUSIC(n,i,c,...)   { .name = n, .type = 1, .id = i, .size = 0x24, .unk0 = 16, .unk1 = 0, .file = 01, .chan = c, .loc = __VA_ARGS__ }
+#define DMUSIC(n,i,c,...)   { .name = n, .type = 1, .id = i, .size = 0x24, .unk0 = 16, .unk1 = 0, .file = 1, .chan = c, .loc = __VA_ARGS__ }
 MusicList D_80034344 = {
     .count = 66,
     .tracks = {

@@ -378,7 +378,12 @@ s32 set_mono(s32 arg0) {
     return ret;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
+// TODO: the assembly for this is weird
+void func_8001CD0C(SpuVolume *out)
+{
+    *out = vol_full;
+}
 
 s32 func_8001CD30(s32 arg0) {
     s32 temp_s0;
@@ -428,8 +433,9 @@ void func_8001CEA0(void) {
     sndqueue_add_try(SNQ_SET_PAUSED, 0, 0);
 }
 
-extern int bgm_counter;  // cntr
-extern int bgm_target;  // tgt
+extern int D_80047E00;  // bgm regular task handle
+extern int bgm_counter;
+extern int bgm_target;
 
 // bgm_tick 
 void func_8001CEC8(void)
@@ -444,7 +450,16 @@ void func_8001CEC8(void)
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D0AC);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D0AC);
+void func_8001D0AC(int delay)
+{
+    bgm_counter = 0;
+    bgm_finished = 0;
+    bgm_target = delay;
+    if (D_80047E00 < 0) {
+        D_80047E00 = regular_add_tmp(func_8001CEC8, 0);
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D104);
 
@@ -665,7 +680,10 @@ void func_8001E608(int mode)
 }
 
 // trivial or easy functions related to audio
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DC4);
+int func_80020DC4(s16 idx)
+{
+    return func_8001EFAC(idx);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DE8);
 
