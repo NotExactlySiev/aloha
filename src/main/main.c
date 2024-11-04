@@ -97,7 +97,7 @@ void file_execute_loop(void)
         if (g_CurrFile == -1) g_CurrFile = 0;
 
         addr = g_Files[g_CurrFile].header;
-        //printf("now executing: %s\n", g_Files[g_CurrFile].addr);
+        printf("now executing: %s\n", g_Files[g_CurrFile].addr);
         if (addr != NULL) {
             // if addr isn't NULL, it's compressed
             if ((u32) addr & 1) {

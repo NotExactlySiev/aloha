@@ -522,8 +522,6 @@ void call_SpuFree(unsigned long addr)
     SpuFree(addr);
 }
 
-// call_SpuIsTransferCompleted
-//INCLUDE_ASM("asm/main/nonmatchings/274C", call_SpuIsTransferCompleted);
 long call_SpuIsTransferCompleted(long flag)
 {
     return SpuIsTransferCompleted(flag);
@@ -724,6 +722,7 @@ int func_80020000(int val)
 
 extern char D_800521F8[32];
 
+// static?
 int mc_addr_prefix(u32 mtidx, char* src, char* dst)
 {
     int rc = func_80020000(mtidx);
@@ -741,10 +740,12 @@ int mc_addr_prefix(u32 mtidx, char* src, char* dst)
     return 1;
 }
 
+// this is actually just mc_file_exists
 int func_800200C8(int mtidx, char *filename)
 {
     int rc = mc_addr_prefix(mtidx, filename, D_800521F8);
-    if (rc != 0) return rc;
+    if (rc != 1)
+        return rc;
 
     struct DIRENTRY ent;
     struct DIRENTRY *p = firstfile2(D_800521F8, &ent);
@@ -770,6 +771,7 @@ int mc_file_open(s32 mtidx, char* file, u32 mode)
 {
     if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
         return -1;
+    //printf("opening %s\n", D_800521F8);
     return open(D_800521F8, mode);
 }
 
@@ -797,17 +799,42 @@ int func_800202A0(int fd, void *buf, int len)   // mc_write_block
     return rounded;
 }
 
+// read with fine size
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);   //
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800203AC);   // mc_read_try
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800203AC);
+// read full?
+int func_800203AC(long fd, void *buf, long len)
+{
+    while (read(fd, buf, (len + 127) & ~127) != 0);
+    return len;
+}
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020414);   // mc_seek
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020414);   // mc_seek
+long func_80020414(long fd, long a, long b)
+{
+    return lseek(fd, a, b);
+}
 
+// frames write thing
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020434);   // 
+//func_80020434
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800205C4);   // mc_file_find
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800205C4);   // mc_file_find
+struct DIRENTRY *func_800205C4(int mtidx, char *filename, struct DirEntry *out)
+{
+    int rc = mc_addr_prefix(mtidx, filename, D_800521F8);
+    if (rc != 1)
+        return -1;
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020610);   // mc_file_next
+    return firstfile2(D_800521F8, out);
+}
+
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020610);   // mc_file_next
+struct DIRENTRY *func_80020610(struct DIRENTRY *dir)
+{
+    return nextfile(dir);
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020630);   // mc_format
 
