@@ -450,7 +450,6 @@ void func_8001CEC8(void)
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D0AC);
 void func_8001D0AC(int delay)
 {
     bgm_counter = 0;
@@ -461,17 +460,31 @@ void func_8001D0AC(int delay)
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D104);
+void func_8001D104(void)
+{
+    if (D_80047E00 > -1) {
+        regular_clear_tmps(D_80047E00);
+        D_80047E00 = -1;
+    }
+}
 
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D13C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D248);
+void func_8001D248(void)
+{
+    D_800548EC = 0;
+    sndqueue_add_try(0xFE, 0, 0);
+    func_8001C2F4();
+    sndqueue_exec_all();
+}
 
-void fade_pause(void) {
+void fade_pause(void)
+{
     fade_paused = 1;
 }
 
-void fade_unpause(void) {
+void fade_unpause(void)
+{
     fade_paused = 0;
 }
 
@@ -502,7 +515,17 @@ int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
 // trivial and caller sound functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DD7C);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DE98);   // snd_mute
+long call_SpuSetCommonAttr(SpuCommonAttr *attr);
+// snd_mute
+void func_8001DE98(void)
+{
+    call_SpuSetCommonAttr(&(SpuCommonAttr){
+        .mask = 3,
+        .mvol.right = 0,
+        .mvolmode.right = 0,
+    });
+    SpuQuit();
+}
 
 long call_SpuSetCommonAttr(SpuCommonAttr *attr)
 {

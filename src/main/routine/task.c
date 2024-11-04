@@ -67,7 +67,6 @@ void regular_remove(s32 arg0)
     regular_active(1);
 }
 
-
 void regular_clear_tmps(int i)
 {
     regular_active(0);
