@@ -117,7 +117,7 @@ void func_8001A380(void)
 int func_8001D13C();
 int func_8001C734();
 int func_8001DB04();
-int func_8001C03C();
+int music_play_cdda();
 int func_8001C20C();
 int func_8001C2F4();
 int func_8001C31C();
@@ -127,7 +127,7 @@ int func_8001CD0C();
 int func_8001CD30();
 int func_8001CD68();
 int func_8001CDF0();
-int func_8001BD00();
+int music_play_str();
 int func_8001AE90();
 int func_8001D248();
 int func_8001CE28();
@@ -227,7 +227,7 @@ void func_8001A3B8(void) {
     jt_set(&cd_file_read_fast, 0x115);
     jt_set(&cd_seek_file, 0x116);
     jt_set(&func_8001DB04, 0x117);
-    jt_set(&func_8001C03C, 0x120);
+    jt_set(&music_play_cdda, 0x120);
     jt_set(&func_8001C20C, 0x121);
     jt_set(&func_8001C2F4, 0x122);
     jt_set(&func_8001C31C, 0x123);
@@ -243,7 +243,7 @@ void func_8001A3B8(void) {
     jt_set(&func_8001CDF0, 0x12D);
     jt_set(&fade_pause, 0x12E);
     jt_set(&fade_unpause, 0x12F);
-    jt_set(&func_8001BD00, 0x130);
+    jt_set(&music_play_str, 0x130);
     jt_set(&func_8001AE90, 0x138);
     jt_set(&func_8001D248, 0x139);
     jt_set(&func_8001CE28, 0x13A);

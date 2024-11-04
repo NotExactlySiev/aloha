@@ -11,6 +11,4 @@ CONSOLE_TYPE = 0xbfc00104;
 jmptable = 0x80010000;
 jt = jmptable;
 g_GameConfig = 80014000;
-ww_second = ww_global_loc + 1;
-ww_sector = ww_global_loc + 2;
 tmpfilebuf = 0x80100000;

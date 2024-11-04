@@ -4,13 +4,13 @@
 #include <libspu.h>
 #include <libetc.h>
 #include "cd/cd.h"
-
+#include "music.h"
 #include "main.h"
 
 int (*fnptr)() = 0;
 s32 is_mono = 0;
 CdlFILE D_80048068;
-CdlLOC ww_global_loc;
+CdlLOC cdda_loc;
 
 s32 fe_value;
 
@@ -201,6 +201,8 @@ int func_8001B94C(void)
     return ret;
 }
 
+NOT_IMPL(func_8001B9D8);    // CD-DA stuff
+/*
 void func_8001B9D8(void)
 {
     func_8001D104();
@@ -214,6 +216,7 @@ void func_8001B9D8(void)
     D_800548EC = 1;
     D_80047DE4 = 1;
 }
+*/
 
 extern s8 D_80047EC4[];
 
@@ -270,9 +273,9 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
 }
 
 // uses unbcd
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001BD00);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", music_play_str);
 // plays background music
-void func_8001BD00(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
+void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
 {
     if (fe_value == 3) {
         func_8001A380();
@@ -304,7 +307,7 @@ void func_8001BD00(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int 
     D_80047EEC *= get_tv_system() == MODE_PAL ? 203 : 200;
     D_80047EEC /= 200;
     printf("bgm is %d frames long\n", D_80047EEC);
-    D_80047EC4[0] = arg3;
+    D_80047EC4[0] = arg3;   // mode
     sndqueue_add_try(0xFB, 0, 0);
     sndqueue_add_try(0xFA, 0, 0);
     func_8001BA50();
@@ -313,15 +316,15 @@ void func_8001BD00(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int 
 
 }
 
-// play type == 0 music. what is that?
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001C03C);
+NOT_IMPL(music_play_cdda);
 
-void func_8001C20C(CdlLOC* loc) {
+// music_play_cdda_from_loc
+void func_8001C20C(CdlLOC *loc) {
     D_80047D78 = 0;
     D_80047F24 = 0;
-    ww_global_loc.minute = loc->minute;
-    ww_global_loc.second = loc->second;
-    ww_global_loc.sector = loc->sector;
+    cdda_loc.minute = loc->minute;
+    cdda_loc.second = loc->second;
+    cdda_loc.sector = loc->sector;
     D_80047EAC = CdPosToInt(loc);
     sndqueue_add_try(SNQ_SET_SCALED, &D_80047D8C, 0);
     sndqueue_add_try(SNQ_SET_FE, 0, 0);
@@ -726,33 +729,16 @@ void func_80020F9C(long mode, short depth)
 
 // music.c
 
-typedef struct {
-    u8 id;
-    u8 type;
-    u32 size;
-    u32 unk0;
-    u32 unk1;
-    u8 file;     // CdlFILTER
-    u8 chan;
-    CdlLOC loc;
-    char name[12];
-} MusicTrack;
-
-typedef struct {
-    u16 count;
-    u16 _pad;   // TODO: not needed?    
-    MusicTrack tracks[];
-} MusicList;
-
 extern int D_80047E4C;          // music should repeat?
 extern MusicList *D_80047E50;   // bgm_list_ptr
 // audio_list_set_ptr
-void func_80020FC0(MusicList *val)
+void music_set_list(MusicList *val)
 {
     D_80047E50 = val;
 }
 
-MusicTrack *func_80020FD0(u8 id)
+// static
+MusicTrack *get_track_by_id(u8 id)
 {
     u16 count = D_80047E50->count;
     MusicTrack *p = &D_80047E50->tracks[0];
@@ -765,12 +751,12 @@ MusicTrack *func_80020FD0(u8 id)
 }
 
 // music_play
-int func_80021028(u8 id)
+int music_play(u8 id)
 {
     if (D_80047E50 == NULL)
         return 0;
 
-    MusicTrack *t = func_80020FD0(id);
+    MusicTrack *t = get_track_by_id(id);
     if (t == NULL)
         return 0;
     
@@ -779,12 +765,12 @@ int func_80021028(u8 id)
         // is this branch EVER taken?
         while (1)
             printf("FIXME!!! congrats, you found something that takes this branch. now figure out what this music format is and how it's different from the regular XADPCM and what this function does.\n");
-        // music_play_???
-        func_8001C03C(t->file, D_80047E4C);
+        // music_play_??? cdda?
+        music_play_cdda(t->file, D_80047E4C);
         return 1;
     case 1:
         // music_play_str
-        func_8001BD00(t->name, t->file, t->chan, &t->loc, t->loc.track, D_80047E4C);
+        music_play_str(t->name, t->file, t->chan, &t->loc, t->loc.track, D_80047E4C);
         return 1;
     default:
         return 0;
@@ -878,8 +864,8 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
     jt_set(&func_80021310, 0x30E);
     jt_set(&func_80021600, 0x30F);
     jt_set(&execute_compressed, 0x320);
-    jt_set(&func_80020FC0, 0x330);
-    jt_set(&func_80021028, 0x331);
+    jt_set(&music_set_list, 0x330);
+    jt_set(&music_play, 0x331);
     jt_set(&func_800210D4, 0x332);
     jt_set(&func_800218DC, 0x340);
     jt_set(&func_800219DC, 0x341);
