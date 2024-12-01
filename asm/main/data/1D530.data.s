@@ -20,9 +20,6 @@ glabel D_80047D98
 glabel D_80047E00
 /* 30600 80047E00 */ .word 0xFFFFFFFF
 
-glabel D_80047E04
-/* 30604 80047E04 */ .word 0x00000000
-
 glabel D_80047E08
 /* 30608 80047E08 */ .word 0x00000000
 

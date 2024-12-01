@@ -511,10 +511,41 @@ int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
     return rc;
 }
 
-// trivial and caller sound functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DD7C);
-
 long call_SpuSetCommonAttr(SpuCommonAttr *attr);
+
+#define SPU_MALLOC_NUM  16
+u8 D_8004DCF8[SPU_MALLOC_RECSIZ * (SPU_MALLOC_NUM + 1)];
+int D_80047E04 = 0;
+void func_8001DD7C(void)
+{
+    // static var?
+    if (D_80047E04 == 1)
+        return;
+    
+    D_80047E04 = 1;
+    SpuInit();
+    SpuInitMalloc(SPU_MALLOC_NUM, D_8004DCF8);
+    SpuSetIRQ(0);
+    SpuSetTransferMode(0);
+    func_8001DF14(5, 0x1800);
+    SpuReserveReverbWorkArea(1);
+    SpuClearReverbWorkArea(5);
+    call_SpuSetCommonAttr(&(SpuCommonAttr){
+        .mask = 0x3C0F,
+        .cd.mix = 1,
+    });
+    SpuSetVoiceAttr(&(SpuVoiceAttr){
+        .voice = SPU_ALLCH,
+        .mask = 0xFF83,
+        .a_mode = 1,
+        .s_mode = 1,
+        .r_mode = 3,
+        .ar = 0x1F,
+        .rr = 0x1F,
+    });
+    spu_set_key_off(SPU_ALLCH);
+}
+
 // snd_mute
 void func_8001DE98(void)
 {
