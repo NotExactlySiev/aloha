@@ -7,7 +7,6 @@
 #include "music.h"
 #include "main.h"
 
-int (*fnptr)() = 0;
 s32 is_mono = 0;
 CdlFILE D_80048068;
 CdlLOC cdda_loc;
@@ -201,7 +200,7 @@ int func_8001B94C(void)
     return ret;
 }
 
-NOT_IMPL(func_8001B9D8);    // CD-DA stuff
+NOT_IMPL(func_8001B9D8);    // CD MUSIC
 /*
 void func_8001B9D8(void)
 {
@@ -316,10 +315,10 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
 
 }
 
-NOT_IMPL(music_play_cdda);
+NOT_IMPL(music_play_cdda);  // CD MUSIC
 
 // music_play_cdda_from_loc
-void func_8001C20C(CdlLOC *loc) {
+void func_8001C20C(CdlLOC *loc) {   // CD MUSIC
     D_80047D78 = 0;
     D_80047F24 = 0;
     cdda_loc.minute = loc->minute;
@@ -743,12 +742,13 @@ void func_80020EB4(void)
     func_80020EF0(D_80047E24, D_80047E48);
 }
 
-// set sound mono?
+// set_master_volume
 void func_80020EF0(short arg0, short arg1)
 {
+    printf("VOL %d\t%d\n", arg0, arg1);
     short val = (arg0 * arg1) / 1024;
     call_SpuSetCommonAttr(&(SpuCommonAttr) {
-        .mask = 3,
+        .mask = SPU_COMMON_MVOLL | SPU_COMMON_MVOLR,
         .mvol.left = val,
         .mvol.right = val,
     });
@@ -824,10 +824,9 @@ void func_800210D4(int val)
     D_80047E4C = val;
 }
 
-//
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210E4);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800211F0);
+// volume tween stuff 
+NOT_IMPL(func_800210E4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210E4);
+NOT_IMPL(func_800211F0) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800211F0);
 
 extern int D_80047E54;
 void func_800212FC(void)
@@ -840,12 +839,13 @@ void func_80021310(void)
     D_80047E54 = 0;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021320);
+NOT_IMPL(func_80021320) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021320);
+NOT_IMPL(func_80021490) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021490);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021490);
-
+// defult sound
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021600);
 
+// get flgs
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021740);
 
 void execute_compressed(void *addr, u32 stack)
@@ -857,31 +857,6 @@ void execute_compressed(void *addr, u32 stack)
     flush_cache_safe();
     Exec(&header, 1, 0);
 }
-
-// more memory card functions
-
-// card read callback
-void func_800218A0(void (*fn)(void))
-{
-    fnptr = fn;
-}
-
-void func_800218B0(void)
-{
-    if (fnptr != 0) {
-        (*fnptr)();
-    }
-}
-
-// read async?
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
-
-// read async some other way
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);   // mc_init_file
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D08);   // mc_delete?
 
 // jmptable setter 0x300-0x344
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);

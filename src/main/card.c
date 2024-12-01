@@ -3,6 +3,8 @@
 #include <libapi.h>
 #include <libetc.h>
 #include <sys/file.h>
+#include <file.h>
+#include <libmcrd.h>
 
 // 3 event test functions
 int D_80047FB4;
@@ -18,6 +20,7 @@ int D_80047FF4;
 int D_80047FFC;
 
 static char D_800521F8[32];
+int (*fnptr)() = 0;
 
 int func_8001FC5C(void)
 {
@@ -179,7 +182,26 @@ struct DIRENTRY *func_80020610(struct DIRENTRY *dir)
     return nextfile(dir);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020630);   // mc_format
+extern int D_80047E18;
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020630);   // mc_format
+int func_80020630(long mtidx)
+{
+    if (func_80020000(mtidx) == -2)
+        return -1;
+    
+    char c = (mtidx & 0xF);
+    if (c > 9)
+        c += 'a' - '9' - 1;
+
+    D_800521F8[0] = 'b';
+    D_800521F8[1] = 'u';
+    D_800521F8[2] = '0' + ((mtidx >> 8) & 1);
+    D_800521F8[3] = '0' + c;
+    D_800521F8[4] = ':';
+    D_800521F8[5] = 0;
+    D_80047E18 = 1;
+    return _card_format(D_800521F8);
+}
 
 // 2 big almost identical functions
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
@@ -188,6 +210,117 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
 
 // init memory card (events and jmptable)
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002092C);
+
+
+// misc functions (part of misc_ maybe?)
+
+// card read callback
+void func_800218A0(void (*fn)(void))
+{
+    fnptr = fn;
+}
+
+void func_800218B0(void)
+{
+    if (fnptr != 0) {
+        (*fnptr)();
+    }
+}
+
+// read file
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
+int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len)
+{
+    printf("read bu%d:/%s: %d bytes at %d\n", mtidx, filename, len, offset);
+    if (func_800200C8(mtidx, filename) == 0)
+        return 0;
+    
+    int fd = mc_file_open(mtidx, filename, O_RDONLY | O_NOWAIT);
+    if (fd == -1)
+        return 0;
+    
+    func_80020414(fd, offset + 0x200, SEEK_SET);
+    func_800203AC(fd, dst, len);
+    int rc;
+    while ((rc = func_8001FC5C()) == McErrNone) {
+        sndqueue_exec();
+        func_800218B0();
+    }
+    mc_file_close(fd);
+    // huh??
+    return len & -(uint) (rc == McErrNotFormat);
+}
+
+typedef struct {
+    u8 magic[2];
+    u8 iconflag;
+    u8 blocksize;
+    u8 title[64];
+    u8 reserved[12];
+    u8 pocketstation[16];
+    u16 palette[16];
+} McTitleFrame;
+
+// write file
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
+int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, char *title)
+{
+    printf("write bu%d:/%s: %d bytes at %d\n", mtidx, filename, len, offset);
+    if (func_800200C8(mtidx, filename) == 0)
+        return 0;
+
+    int fd = mc_file_open(mtidx, filename, O_RDWR | O_NOWAIT);
+    if (fd == -1)
+        return 0;
+    
+    McTitleFrame header;
+    func_80020414(fd, 0, SEEK_SET);
+    func_800203AC(fd, &header, 128);
+    while (func_8001FC5C() == 0) {
+        sndqueue_exec();
+        func_800218B0();
+    }
+
+    int header_len = 0;
+    if (header.magic[0] == 'S' && header.magic[1] == 'C') {
+        header_len = 128 * ((header.iconflag & 0xF) + 1);
+        if (title) {
+            memset(header.title, 64, 0);
+            strcpy(title, header.title);
+            func_80020414(fd, 0, SEEK_SET);
+            func_800202A0(fd, &header, 128);
+            while (func_8001FC5C() == 0) {
+                sndqueue_exec();
+                func_800218B0();
+            }
+        }
+    }
+    offset += header_len;
+    func_80020414(fd, offset, SEEK_SET);
+    func_800202A0(fd, src, len);
+    int rc;
+    while ((rc = func_8001FC5C()) == 0) {
+        sndqueue_exec();
+        func_800218B0();
+    }
+
+    mc_file_close(fd);
+    // huh??
+    return len & -(uint) (rc == McErrNotFormat);
+}
+
+INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);   // mc_init_file
+
+// TODO: this might return void
+// never called?
+// mc_delete?
+int func_80021D08(uint mtidx, char *filename)
+{
+    int rc = func_80020000(mtidx);
+    if (rc != 1)
+        rc = mc_file_delete(mtidx, filename);
+    return rc;    
+}
 
 // close memory card events
 void func_80020C8C(void)
