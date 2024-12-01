@@ -698,27 +698,6 @@ u32 call_PadRead(s32 id)
     return PadRead(id);
 }
 
-// FILE font.c
-
-void func_8001E438();
-void func_8001E5BC();
-extern u8* font_ptr8;
-extern u8* font_ptr16;
-
-// 4 font and type functions
-void func_8001E38C(void) {
-    jt_set(func_8001E438, 0xD0);
-    jt_set(func_8001E5BC, 0xD1);
-    font_ptr8 = 0;
-    font_ptr16 = 0;
-}
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E3D4);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E438);
-
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E5BC);
-
 extern int D_80047E0C;  // is mdec initialized?
 void func_8001E608(int mode)
 {

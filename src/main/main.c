@@ -719,7 +719,7 @@ int main(int argc, char** argv)
     }
 
     // # custom stuff:
-    //getGameConfig()->debug_features = 1;
+    getGameConfig()->debug_features = 1;
     jt_set(printf, 1001);
 
     // run the game
