@@ -447,7 +447,9 @@ void func_8001CEC8(void)
         bgm_finished = 1;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
+// CD MUSIC
+NOT_IMPL(func_8001CF38) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
+
 
 void func_8001D0AC(int delay)
 {
@@ -467,7 +469,33 @@ void func_8001D104(void)
     }
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D13C);
+extern s32 _sndqueue_empty;
+extern u8 D_80047D94;
+extern s32 D_80047DE0;
+extern u8 cd_status;
+
+// TODO: make an enum for these flags
+// cd_flags
+u32 func_8001D13C(void)
+{
+    u32 ret = 0;
+    if (D_80047DE0 == 1)
+        ret |= 0x80000000;
+    ret |= (fe_value & 0x7F) << 24;
+    ret |= D_80047D94 << 16;
+    if (fade_out_active == 1 || fade_in_active == 1)
+        ret |= 0x8000;
+    if (fading_out == 1 || fading_in == 1)
+        ret |= 0x4000;
+    if (_sndqueue_empty == 1)
+        ret |= 0x2000;
+    if (D_800548EC == 1)
+        ret |= 0x1000;
+    if (func_8001CE18() == 1)
+        ret |= 0x0800;
+    ret |= cd_status;
+    return ret;
+}
 
 void func_8001D248(void)
 {
@@ -717,9 +745,17 @@ int func_80020DC4(s16 idx)
     return func_8001EFAC(idx);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020DE8);
-
 extern int D_80047E20;
+
+int func_80020DE8(int mono)
+{
+    int ret = D_80047E20;
+    set_mono(mono);
+    func_8001DF78(mono);
+    D_80047E20 = mono;
+    return ret;
+}
+
 int func_80020E30(void)
 {
     return D_80047E20;
@@ -852,11 +888,32 @@ void func_80021310(void)
 NOT_IMPL(func_80021320) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021320);
 NOT_IMPL(func_80021490) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021490);
 
+void func_80021600(void);
 // defult sound
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021600);
 
-// get flgs
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021740);
+extern int D_80047E28;
+extern int D_80047E30;
+// audio_flags
+u32 func_80021740(void)
+{
+    u32 ret = 0;
+    u32 cd_flags = func_8001D13C();
+    if (D_80047E30 == 1 || D_80047E28 == 1)
+        ret |= 1 << 0;
+    if (cd_flags & 0x1000)
+        ret |= 1 << 3;
+    if (cd_flags & 0x8000)
+        ret |= 1 << 1;
+    
+    for (int i = 0; i < 24; i++) {
+        if (sfx_is_active(i)) {
+            ret |= 1 << 2;
+            break;
+        }
+    }
+    return ret;
+}
 
 void execute_compressed(void *addr, u32 stack)
 {
@@ -868,34 +925,43 @@ void execute_compressed(void *addr, u32 stack)
     Exec(&header, 1, 0);
 }
 
-// jmptable setter 0x300-0x344
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021D54);
-// first decomp the functions that are referenced
-/*void func_80021D54(void)
+// sfx.h
+int sfx_load_vab(short index, void *header, void *data);    // opaque vab ptr
+int func_80020DC4(s16 idx);
+
+// card.h
+extern int (*_mc_callback)();
+int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len);
+int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, char *title);
+int func_80021BCC(); // TODO: complete signature
+int func_80021D08(uint mtidx, char *filename);
+void func_800218A0(void (*fn)(void));
+
+void misc_init(void)
 {
-    fnptr = 0;
-    jt_set(&sfx_load_vab, 0x300);
-    jt_set(&func_80020DC4, 0x301);
-    jt_set(&func_80020DE8, 0x302);
-    jt_set(&func_80020E30, 0x303);
-    jt_set(&func_80020E40, 0x304);
-    jt_set(&func_80020F48, 0x305);
-    jt_set(&func_80020F9C, 0x307);
-    jt_set(&func_80020E88, 0x308);
-    jt_set(&func_80020EB4, 0x309);
-    jt_set(&func_80021320, 0x30A);
-    jt_set(&func_80021490, 0x30B);
-    jt_set(&func_80021740, 0x30C);
-    jt_set(&func_800212FC, 0x30D);
-    jt_set(&func_80021310, 0x30E);
-    jt_set(&func_80021600, 0x30F);
-    jt_set(&execute_compressed, 0x320);
-    jt_set(&music_set_list, 0x330);
-    jt_set(&music_play, 0x331);
-    jt_set(&func_800210D4, 0x332);
-    jt_set(&func_800218DC, 0x340);
-    jt_set(&func_800219DC, 0x341);
-    jt_set(&func_80021BCC, 0x342);
-    jt_set(&func_80021D08, 0x343);
-    jt_set(&func_800218A0, 0x344);
-}*/
+    _mc_callback = 0;  // WHY DO YOU ACCESS THIS FROM HERE AAAA
+    jt_set(sfx_load_vab, 0x300);
+    jt_set(func_80020DC4, 0x301);
+    jt_set(func_80020DE8, 0x302);
+    jt_set(func_80020E30, 0x303);
+    jt_set(func_80020E40, 0x304);
+    jt_set(func_80020F48, 0x305);
+    jt_set(func_80020F9C, 0x307);
+    jt_set(func_80020E88, 0x308);
+    jt_set(func_80020EB4, 0x309);
+    jt_set(func_80021320, 0x30A);
+    jt_set(func_80021490, 0x30B);
+    jt_set(func_80021740, 0x30C);
+    jt_set(func_800212FC, 0x30D);
+    jt_set(func_80021310, 0x30E);
+    jt_set(func_80021600, 0x30F);
+    jt_set(execute_compressed, 0x320);
+    jt_set(music_set_list, 0x330);
+    jt_set(music_play, 0x331);
+    jt_set(func_800210D4, 0x332);
+    jt_set(func_800218DC, 0x340);
+    jt_set(func_800219DC, 0x341);
+    jt_set(func_80021BCC, 0x342);
+    jt_set(func_80021D08, 0x343);
+    jt_set(func_800218A0, 0x344);
+}

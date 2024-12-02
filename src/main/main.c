@@ -408,7 +408,7 @@ void func_80019680(void)
     func_8002092C();
 
     // init playing audio effects and control
-    func_80021D54();
+    misc_init();
 
     // jt vab stuff?
     sfx_init();

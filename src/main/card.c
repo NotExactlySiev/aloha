@@ -20,7 +20,7 @@ int D_80047FF4;
 int D_80047FFC;
 
 static char D_800521F8[32];
-int (*fnptr)() = 0;
+int (*_mc_callback)() = 0;
 
 int func_8001FC5C(void)
 {
@@ -217,13 +217,13 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002092C);
 // card read callback
 void func_800218A0(void (*fn)(void))
 {
-    fnptr = fn;
+    _mc_callback = fn;
 }
 
 void func_800218B0(void)
 {
-    if (fnptr != 0) {
-        (*fnptr)();
+    if (_mc_callback != 0) {
+        (*_mc_callback)();
     }
 }
 
