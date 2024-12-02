@@ -3,7 +3,9 @@
 u8 *func_8001E438(u32 sjis, int set);
 void *func_8001E5BC(void *ptr, int set);
 extern u8 (*font_ptr8)[128][8];
-extern u8 *font_ptr16;
+extern u8 (*font_ptr16)[94][32];    // I think?
+// or u8 *(*font_ptr16)[94][32] maybe?
+
 // default fonts
 extern u8 D_80031A14[94][15];
 extern u8 D_80032A4C[128][8];
@@ -36,38 +38,47 @@ static u16 func_8001E3D4(u16 sjis)
 }
 
 // fnt_get
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E438);
 u8 *func_8001E438(u32 c, int set)
 {
-    // TODO: this should be a switch?
-    if (set == 8) {
-        // japanese
-        // TODO
-    } else if (set < 9) {
-        if (set == 4) {
-            if (font_ptr8) {
-                return (*font_ptr8)[c & 0xFF];
-            } else {
-                return D_80032A4C[c & 0xFF];
+    switch (set) {
+    case 4:
+        if (font_ptr8)
+            return (*font_ptr8)[c & 0xFF];
+        else
+            return D_80032A4C[c & 0xFF];
+    
+    case 8:     // japanese
+        // TODO: this one is definitely wrong
+        if (font_ptr16) {
+            if (c - 0x8141 < 0x37E) {
+                c = func_8001E3D4(c) - 0x2120;
+                return (*font_ptr16)[(c >> 8) - 1][(c & 0xFF) + 93];  // HUH??
+            }
+        } else {
+            if (c >> 8 == 0) {
+                if (c > 0x60)
+                    c += 1;
+                c += 0x821F;
             }
         }
-    } else {
-        // ascii
-        if (set == 108) {
-            c -= 0x21;
-            if (c > 93) {
-                return D_80032A4C[0x7E];
-            } else {
-                return D_80031A14[c];
-            }
-        }
+        u8 *ret = Krom2RawAdd(c);
+        if (ret != (u8 *) -1)
+            return ret;
+        else
+            return D_80032A4C[0x7A];
+
+    case 108:   // ascii
+        c -= 0x21;
+        if (c > 93)
+            return D_80032A4C[0x7E];
+        else
+            return D_80031A14[c];
     }
 }
 
 // fnt_set_tiles
 void *func_8001E5BC(void *ptr, int set)
 {
-    printf("setting the font!!!!! %p\n", ptr);
     void *ret = -1;
     if (set == 4) {
         ret = font_ptr8;
