@@ -715,7 +715,7 @@ void func_8001E31C(long n_clock)
 
 u32 call_PadRead(s32 id);
 
-void func_8001E33C(void)
+void pad_init(void)
 {
     PadInit(0);
     jt_set(call_PadRead, 0xf0);
@@ -740,7 +740,7 @@ void func_8001E608(int mode)
 }
 
 // trivial or easy functions related to audio
-int func_80020DC4(s16 idx)
+int sfx_free_vab(s16 idx)
 {
     return func_8001EFAC(idx);
 }
@@ -837,7 +837,6 @@ MusicTrack *get_track_by_id(u8 id)
     return NULL;
 }
 
-// music_play
 int music_play(u8 id)
 {
     if (D_80047E50 == NULL)
@@ -848,17 +847,14 @@ int music_play(u8 id)
         return 0;
     
     switch (t->type) {
-    case 0:
-        // is this branch EVER taken?
-        while (1)
-            printf("FIXME!!! congrats, you found something that takes this branch. now figure out what this music format is and how it's different from the regular XADPCM and what this function does.\n");
-        // music_play_??? cdda?
+    case MUSIC_TYPE_CDDA:
         music_play_cdda(t->file, D_80047E4C);
         return 1;
-    case 1:
-        // music_play_str
+
+    case MUSIC_TYPE_STR:
         music_play_str(t->name, t->file, t->chan, &t->loc, t->loc.track, D_80047E4C);
         return 1;
+
     default:
         return 0;
     }
@@ -885,6 +881,7 @@ void func_80021310(void)
     D_80047E54 = 0;
 }
 
+// TODO: these are required
 NOT_IMPL(func_80021320) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021320);
 NOT_IMPL(func_80021490) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021490);
 
@@ -927,7 +924,7 @@ void execute_compressed(void *addr, u32 stack)
 
 // sfx.h
 int sfx_load_vab(short index, void *header, void *data);    // opaque vab ptr
-int func_80020DC4(s16 idx);
+int sfx_free_vab(s16 idx);
 
 // card.h
 extern int (*_mc_callback)();
@@ -941,7 +938,7 @@ void misc_init(void)
 {
     _mc_callback = 0;  // WHY DO YOU ACCESS THIS FROM HERE AAAA
     jt_set(sfx_load_vab, 0x300);
-    jt_set(func_80020DC4, 0x301);
+    jt_set(sfx_free_vab, 0x301);
     jt_set(func_80020DE8, 0x302);
     jt_set(func_80020E30, 0x303);
     jt_set(func_80020E40, 0x304);

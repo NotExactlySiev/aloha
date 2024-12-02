@@ -84,6 +84,7 @@ int call_DrawSync(int mode) {
     return DrawSync(mode);
 }
 
+// TODO: this is not correct. check ghidra
 int call_ResetGraph(int mode) {
     return ResetGraph(mode);
 }
@@ -105,6 +106,7 @@ void wait_frame(void) {
     while (curr == get_vsync_event_cnt());
 }
 
+// TODO: this is not correct. check ghidra
 int call_SetGraphDebug(int level) {
     return SetGraphDebug(level);
 }
@@ -133,7 +135,7 @@ long call_GetVideoMode(void) {
     return GetVideoMode();
 }
 
-void jt_series_gpu(void) {
+void gpu_init(void) {
     jt_set(call_ResetGraph, 0x180);
     jt_set(call_wait_frame, 0x181);
     jt_set(call_SetGraphDebug, 0x182);

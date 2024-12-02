@@ -218,7 +218,7 @@ void func_80018A8C(s32 arg0)
         D_80047D4C = 0;
 }
 
-void func_80018AB4(void)
+void show_logo(void)
 {
     DRAWENV drawenv;
     DISPENV dispenv;
@@ -375,46 +375,29 @@ void func_8001926C(void)
     PutDispEnv(&dispenv);
 }
 
-// setup_thing (setup_video?)
-void func_80019680(void)
+void init_everything(void)
 {
-    // setup audio and cd
-    func_8001A3B8();
-
-    // set tv system
+    cd_init();
     read_version();
+
     wait_frame(0);
     SetVideoMode(get_tv_system() != 0);
+
     wait_frame(0);
+    call_ResetGraph(0);
+    call_SetGraphDebug(0);
+    call_SetDispMask(0);
 
-    // setup graphics
-    ResetGraph(0);
-    SetGraphDebug(0);
-    SetDispMask(0);
-
-    // spu set default
+    // spu set defaults
     func_8001DD7C();
 
-    // gpu jt stuff
-    jt_series_gpu();
-
-    // show logo
-    func_80018AB4();
-    
-    // init pad
-    func_8001E33C();
-
-    // init mc
-    func_8002092C();
-
-    // init playing audio effects and control
+    gpu_init();
+    show_logo();
+    pad_init();
+    mc_init();
     misc_init();
-
-    // jt vab stuff?
     sfx_init();
-
-    // init font and characters
-    func_8001E38C();
+    fnt_init();
 }
 
 void game_shutdown(void)
@@ -576,7 +559,7 @@ void game_init(void)
     regular_active(1);
 
     // setup IO
-    func_80019680();
+    init_everything();
     ChangeClearPAD(0);
 
     // set basic jt functions

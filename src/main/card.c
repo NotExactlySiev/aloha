@@ -209,7 +209,7 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
 
 // init memory card (events and jmptable)
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002092C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", mc_init);
 
 
 // misc functions (part of misc_ maybe?)

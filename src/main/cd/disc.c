@@ -168,9 +168,9 @@ extern int sndqueue_is_running;
 
 // jmptable setter 0x100-0x140
 // cd_init
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001A3B8);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", cd_init);
 // FIXME: complete this
-void func_8001A3B8(void) {
+void cd_init(void) {
     static int D_80047D74 = 0;  // cd subsystem initialized
     if (D_80047D74 == 1)
         return;

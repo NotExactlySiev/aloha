@@ -10,7 +10,7 @@ extern u8 D_80032A4C[128][8];
 
 // 4 font and type functions
 // fnt_init
-void func_8001E38C(void) {
+void fnt_init(void) {
     jt_set(func_8001E438, 0xD0);
     jt_set(func_8001E5BC, 0xD1);
     font_ptr8 = 0;
