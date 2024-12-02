@@ -164,9 +164,34 @@ long func_80020414(long fd, long a, long b)
     return lseek(fd, a, b);
 }
 
-// frames write thing
+typedef struct {
+    u8 magic[2];
+    u8 iconflag;
+    u8 blocksize;
+    u8 title[64];
+    u8 reserved[12];
+    u8 pocketstation[16];
+    u16 palette[16];
+} McTitleFrame;
+
+typedef struct {
+    McTitleFrame titleframe;
+    u8 frames[3][128];
+} McFileHeader;
+
+// make the header. static
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020434);   // 
 //func_80020434
+/*
+int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 *palette, u8 frame0[128], u8 frame1[128], u8 frame2[128])
+{
+    //
+    // so much of this is redundent lol
+    int totalsize = 0x80;
+    if (iconflag == 0x11)
+        totalsize = 
+}
+*/
 
 struct DIRENTRY *func_800205C4(int mtidx, char *filename, struct DirEntry *out)
 {
@@ -183,7 +208,6 @@ struct DIRENTRY *func_80020610(struct DIRENTRY *dir)
 }
 
 extern int D_80047E18;
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020630);   // mc_format
 int func_80020630(long mtidx)
 {
     if (func_80020000(mtidx) == -2)
@@ -215,11 +239,12 @@ INCLUDE_ASM("asm/main/nonmatchings/274C", mc_init);
 // misc functions (part of misc_ maybe?)
 
 // card read callback
-void func_800218A0(void (*fn)(void))
+void mc_set_callback(void (*fn)(void))
 {
     _mc_callback = fn;
 }
 
+// static
 void func_800218B0(void)
 {
     if (_mc_callback != 0) {
@@ -250,16 +275,6 @@ int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len)
     // huh??
     return len & -(uint) (rc == McErrNotFormat);
 }
-
-typedef struct {
-    u8 magic[2];
-    u8 iconflag;
-    u8 blocksize;
-    u8 title[64];
-    u8 reserved[12];
-    u8 pocketstation[16];
-    u16 palette[16];
-} McTitleFrame;
 
 // write file
 //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
@@ -309,7 +324,36 @@ int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, ch
     return len & -(uint) (rc == McErrNotFormat);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021BCC);   // mc_init_file
+extern u8 D_80032E5C[3][128];   // frames
+extern u16 D_80032FDC[];        // palette
+
+// mc_init_file
+int func_80021BCC(uint mtidx, char *filename, int len, char *title)
+{
+    int rc = func_80020000(mtidx);
+    if (rc != 1)
+        return rc;
+    
+    int fd = mc_file_create(mtidx, filename, len + sizeof(McFileHeader));
+    if (fd == 0)
+        return -3;
+    
+    fd = mc_file_open(mtidx, filename, O_RDWR | O_NOWAIT);
+    if (fd < -1)
+        return -3;
+    
+    McFileHeader header;
+    func_80020414(fd, 0, SEEK_SET);
+    // TODO: #define number of frames = 3
+    func_80020434(&header, 0x10 + 3, len + sizeof(McFileHeader), title, D_80032FDC, D_80032E5C[0], D_80032E5C[1], D_80032E5C[2]);
+    func_800202A0(fd, &header, sizeof(McFileHeader));
+    while (func_8001FC5C() == 0) {
+        sndqueue_exec();
+        func_800218B0();
+    }
+    mc_file_close(fd);
+    return len;
+}
 
 // TODO: this might return void
 // never called?

@@ -932,7 +932,7 @@ int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len);
 int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, char *title);
 int func_80021BCC(); // TODO: complete signature
 int func_80021D08(uint mtidx, char *filename);
-void func_800218A0(void (*fn)(void));
+void mc_set_callback(void (*fn)(void));
 
 void misc_init(void)
 {
@@ -960,5 +960,5 @@ void misc_init(void)
     jt_set(func_800219DC, 0x341);
     jt_set(func_80021BCC, 0x342);
     jt_set(func_80021D08, 0x343);
-    jt_set(func_800218A0, 0x344);
+    jt_set(mc_set_callback, 0x344);
 }
