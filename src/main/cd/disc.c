@@ -182,7 +182,7 @@ void cd_init(void) {
     D_80047D74 = 1;
     D_80047D78 = 0;
     D_80047D7C = 1;
-    /*
+    /* TODO
     fade_out_active = 0;
     fade_in_active = 0;
     fading_out = 0;
