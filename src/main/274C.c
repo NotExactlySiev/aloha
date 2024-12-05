@@ -76,7 +76,7 @@ void fade_out_routine(void)
         set_vol_scaled(&vol_full, vol_scale);
         vol_scale -= fade_out_step;
     } else {
-        regular_clear_tmps(fade_out_task);
+        tasks_remove_reserved(fade_out_task);
         vol_scale = fade_out_dest;
         fading_out = 0;
         fade_in_active = 0;
@@ -93,7 +93,7 @@ void fade_in_routine(void)
         set_vol_scaled(&vol_full, vol_scale);
         vol_scale += fade_in_step;
     } else {
-        regular_clear_tmps(fade_in_task);
+        tasks_remove_reserved(fade_in_task);
         vol_scale = fade_in_dest;
         fading_in = 0;
         fade_in_active = 0;
@@ -107,7 +107,7 @@ s32 fade_out(s32 duration, s32 dstvol, void* callback)
 {
     if (fade_out_active == 1) return 0;
 
-    if (MODE_PAL == get_tv_system()) {
+    if (MODE_PAL == get_video_mode()) {
         duration = (duration * 5) / 6 - 1;
     }
     fade_out_active = 1;
@@ -116,7 +116,7 @@ s32 fade_out(s32 duration, s32 dstvol, void* callback)
     fade_out_step = VOL_FULL / duration;
     fade_in_dest = dstvol;
     fade_out_callback = callback;
-    fade_out_task = regular_add_tmp(fade_out_routine, 1);
+    fade_out_task = tasks_add_reserved(fade_out_routine, 1);
     if (fade_out_task < 0) {
         fade_out_active = 0;
         fade_in_active = 0;
@@ -131,7 +131,7 @@ s32 fade_in(s32 duration, s32 dstvol, void* callback)
 {
     if (fade_in_active == 1) return 0;
 
-    if (MODE_PAL == get_tv_system()) {
+    if (MODE_PAL == get_video_mode()) {
         duration = (duration * 5) / 6 - 1;
         //if (duration < 1) duration = 1;
     }
@@ -141,7 +141,7 @@ s32 fade_in(s32 duration, s32 dstvol, void* callback)
     fade_in_step = VOL_FULL / duration;
     fade_in_dest = dstvol;
     fade_in_callback = callback;
-    fade_in_task = regular_add_tmp(fade_in_routine, 1);
+    fade_in_task = tasks_add_reserved(fade_in_routine, 1);
     if (fade_in_task < 0) {
         fade_out_active = 0;
         fade_in_active = 0;
@@ -633,7 +633,7 @@ void execute_compressed(void *addr, u32 stack)
 {
     EXEC header;
     __builtin_memcpy(&header, addr+16, 0x3c);
-    lz1_decode(addr + 0x804, (void*) header.t_addr);
+    decode_lz1(addr + 0x804, (void*) header.t_addr);
     header.s_addr = stack;
     flush_cache_safe();
     Exec(&header, 1, 0);

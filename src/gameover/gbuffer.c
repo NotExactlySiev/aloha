@@ -45,7 +45,7 @@ void gbuffer_init(void)
 
         draw->dtd = 0;
         draw->dfe = 0;
-        tv_standard = jt.get_tv_system();
+        tv_standard = jt.get_video_mode();
         disp->screen.x = 4;
         disp->screen.y = tv_standard == MODE_PAL ? 36 : 12;
         disp->screen.w = 248;

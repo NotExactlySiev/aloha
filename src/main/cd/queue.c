@@ -229,7 +229,7 @@ s32 _sndqueue_exec()
             if (fade_out_active == 1) {
                 // turn fadeout on
                 if (fade_in_active == 1) {
-                    regular_clear_tmps(fade_in_task);
+                    tasks_remove_reserved(fade_in_task);
                     fade_in_active = 0;
                     fading_in = 0;
                     if (fade_in_callback != 0) (*fade_in_callback)();
@@ -237,7 +237,7 @@ s32 _sndqueue_exec()
                 }
             } else {
                 // turn fadeout off
-                if (-1 < fade_out_task) regular_clear_tmps(fade_out_task);
+                if (-1 < fade_out_task) tasks_remove_reserved(fade_out_task);
                 vol_scale = 1024;
                 fade_paused = 0;
             }
@@ -248,7 +248,7 @@ s32 _sndqueue_exec()
             if (fade_in_active == 1) {
                 // turn fadein on
                 if (fade_out_active == 1) {
-                    regular_clear_tmps(fade_out_task);
+                    tasks_remove_reserved(fade_out_task);
                     fade_out_active = 0;
                     fading_out = 0;
                     if (fade_out_callback != 0) (*fade_out_callback)();
@@ -256,7 +256,7 @@ s32 _sndqueue_exec()
                 }
             } else {
                 // turn fadein off
-                if (-1 < fade_in_task) regular_clear_tmps(fade_in_task);
+                if (-1 < fade_in_task) tasks_remove_reserved(fade_in_task);
                 vol_scale = 1024;
                 fade_paused = 0;
             }

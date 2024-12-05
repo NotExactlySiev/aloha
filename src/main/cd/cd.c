@@ -142,7 +142,7 @@ s32 execute_uncompressed(char* file, s32 param) {
         return -1;
 
     flush_cache_safe();
-    setNextFile(0);
+    set_next_exec(0);
     Exec(&header, 1, 0);
     return 0;
 }

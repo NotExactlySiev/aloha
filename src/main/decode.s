@@ -8,7 +8,7 @@
 	
 
 # Handwritten function
-glabel rle_decode
+glabel decode_rle
 	addu       $t0, $a0, $zero
 	addu       $t1, $a1, $zero
 	addu       $t2, $a2, $zero
@@ -61,7 +61,7 @@ glabel rle_decode
 .endm
 
 # Handwritten function
-glabel lz1_decode
+glabel decode_lz1
 	nop
 	addu       $t6, $ra, $zero
 	addu       $t4, $a0, $zero    # src

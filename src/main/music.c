@@ -78,7 +78,7 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
     int second;
     int minute;
 
-    seconds = get_tv_system() == MODE_PAL ? 203 : 200;
+    seconds = get_video_mode() == MODE_PAL ? 203 : 200;
     sector = ((arg0 % 2048) * seconds) / 200;
     second = sector / 75;
     
@@ -111,7 +111,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     D_80047ECC.file = file;
     D_80047ECC.chan = chan;
     
-    if (get_tv_system() == MODE_PAL) {
+    if (get_video_mode() == MODE_PAL) {
         unbcd(loc->minute) * 60;
         while (1);
     } else {
@@ -119,7 +119,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
         D_80047EEC = seconds * 60 + (unbcd(loc->track) * 60) / 100;
     }
 
-    D_80047EEC *= get_tv_system() == MODE_PAL ? 203 : 200;
+    D_80047EEC *= get_video_mode() == MODE_PAL ? 203 : 200;
     D_80047EEC /= 200;
     printf("bgm is %d frames long\n", D_80047EEC);
     D_80047EC4[0] = arg3;   // mode
@@ -278,14 +278,14 @@ void func_8001D0AC(int delay)
     bgm_finished = 0;
     bgm_target = delay;
     if (D_80047E00 < 0) {
-        D_80047E00 = regular_add_tmp(func_8001CEC8, 0);
+        D_80047E00 = tasks_add_reserved(func_8001CEC8, 0);
     }
 }
 
 void func_8001D104(void)
 {
     if (D_80047E00 > -1) {
-        regular_clear_tmps(D_80047E00);
+        tasks_remove_reserved(D_80047E00);
         D_80047E00 = -1;
     }
 }

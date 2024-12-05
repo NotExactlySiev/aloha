@@ -204,7 +204,7 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
         int other = decoder.curr_rect != 1;
         call_VSync();
         call_SetDefDispEnv(&dispenv, decoder.img_rects[other].x, decoder.img_rects[other].y, decoder.img_rects[other].w, decoder.img_rects[other].h);
-        if (get_tv_system() == MODE_PAL)
+        if (get_video_mode() == MODE_PAL)
             dispenv.screen.y += 24;
         SetDefDrawEnv(&drawenv, decoder.img_rects[other].x, decoder.img_rects[other].y, decoder.img_rects[other].w, decoder.img_rects[other].h);
         dispenv.screen = args->rect;

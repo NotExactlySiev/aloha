@@ -12,7 +12,7 @@
 #define    SET_POLYS_COL(c,n)    { DrawSync(0); wait_frame(0); for (i = 0; i < n; i += 1)                     \
             { polys[i].r0 = c; polys[i].g0 = c; polys[i].b0 = c;           \
             DrawPrim(&polys[i]); } }
-#define    LOAD_PRS(p,W,H)    lz1_decode(((u8*) p)+4, (u8* )0x80060000);    \
+#define    LOAD_PRS(p,W,H)    decode_lz1(((u8*) p)+4, (u8* )0x80060000);    \
             rect.x = 640; rect.y = 256; rect.w = 256; rect.h = 1;                 \
             LoadImage(&rect, (void*) 0x80060014);  DrawSync(0);                   \
             rect.x = 640; rect.y = 0; rect.w = W; rect.h = H;                 \
@@ -41,12 +41,12 @@ typedef struct {
 } file_t;
 
 // TODO: these should be in headers for their own files
-int regular_add(void*, short);
-int regular_add_tmp(void*, short);
-void regular_remove(int);
-void regular_run_tasks(void);
-void rle_decode(s32, u8*, u8*);
-void lz1_decode(void*, void*);
+int tasks_add(void*, short);
+int tasks_add_reserved(void*, short);
+void tasks_remove(int);
+void tasks_tick(void);
+void decode_rle(s32, u8*, u8*);
+void decode_lz1(void*, void*);
 void reboot(char*, char*);
 long call_SpuMalloc(long size);
 long call_SpuMallocWithStartAddr(unsigned long addr, long size);
@@ -90,8 +90,8 @@ typedef struct {
 void file_execute_loop(void);               
 char* get_file_addr(s32 idx);
 s32 func_80018A6C(void);
-s32 func_80018A7C(void);
-void func_80018A8C(s32 arg0);
+s32 get_D_80047D4C(void);
+void set_D_80047D4C(s32 arg0);
 void show_logo(void);
 void func_8001926C(void);
 void init_everything(void);
@@ -109,7 +109,7 @@ void jt_set(void*, s32);
 #endif
 void vblank_disable(void);
 s32 vblank_enable(void);
-s32 get_tv_system(void);
+s32 get_video_mode(void);
 void read_version(void);
 s32 get_region(void);
 char *get_version_string(void);
@@ -120,7 +120,7 @@ void func_80019D0C(void);
 void exception_handler(void);
 s32 enable_exception_event(void*);
 u32 func_80019DCC(void);
-void setNextFile(s32);
-s32 getNextFile(void);
-GlobalData *getGameConfig(void);
+void set_next_exec(s32);
+s32 get_next_exec(void);
+GlobalData *globals(void);
 int main(int, char**);

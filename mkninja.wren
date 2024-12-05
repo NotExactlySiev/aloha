@@ -14,7 +14,7 @@ class SourceFile {
 
     name { _name }
     path { _path }
-    objName { _name[0..-2] + "o" }
+    objName { _name + ".o" }
     // finalName finalPath? finalPath goes in build/
 }
 

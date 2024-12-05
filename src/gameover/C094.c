@@ -262,7 +262,7 @@ void func_800EC098(void)
     func_800EBEA8();
     D_800ED3E4 = 0x2D;
 
-    if (jt.get_tv_system() == MODE_PAL) {
+    if (jt.get_video_mode() == MODE_PAL) {
         D_800ED424 = 9;
         D_800ED384 = 1000;
     } else {

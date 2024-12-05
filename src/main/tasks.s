@@ -3,16 +3,16 @@
 
 .section .text, "ax"
 
-glabel regular_run_tasks
+glabel tasks_tick
     addi       $sp, $sp, -12
 
-    lui        $t0, %hi(D_800234B4)
-    addiu      $t0, $t0, %lo(D_800234B4)
+    lui        $t0, %hi(tasks_enabled)
+    addiu      $t0, $t0, %lo(tasks_enabled)
     lw         $t1, 0x0($t0)
 
     /* add one to counter */
-    lui        $v1, %hi(D_800234B0)
-    addiu      $v1, $v1, %lo(D_800234B0)
+    lui        $v1, %hi(vsync_counter)
+    addiu      $v1, $v1, %lo(vsync_counter)
     lw         $v0, 0x0($v1)
     sw         $ra, 0x8($sp) /* reordered */
     addiu      $v0, $v0, 0x1
@@ -55,14 +55,15 @@ glabel regular_run_tasks
     jr        $ra
     addi      $sp, $sp, 12
 
+
 glabel D_80023370
-    .fill 32, 8, 0
+    .fill 40, 8, 0
 
-glabel D_80023470
-    .fill 8, 8, 0
+/*glabel D_80023470*/
+/*    .fill 8, 8, 0*/
 
-glabel D_800234B0
+glabel vsync_counter
     .word 0
 
-glabel D_800234B4
+glabel tasks_enabled
     .word 0

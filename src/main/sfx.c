@@ -161,7 +161,7 @@ void sfx_init(void)
     jt_set(func_8001F17C, 0x31B);
     jt_set(func_8001E744, 0x31C);
     jt_set(call_SpuClearReverbWorkArea, 0x31D); // oh wait this isn't private?
-    D_80047FAC = regular_add_tmp(sfx_tick, 1);
+    D_80047FAC = tasks_add_reserved(sfx_tick, 1);
 }
 
 static s16 load_metadata(VabRealHeader *arg, s16 idx) {

@@ -30,7 +30,7 @@ void stars_init(void)
         stars[i].r = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
         stars[i].g = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
         stars[i].b = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].speed = random_range(STARS_SPEED_MIN, jt.get_tv_system() == MODE_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
+        stars[i].speed = random_range(STARS_SPEED_MIN, jt.get_video_mode() == MODE_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
     }
 }
 
@@ -44,7 +44,7 @@ void stars_update(void)
         stars[i].r = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
         stars[i].g = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
         stars[i].b = random_range(STARS_COLOR_MIN, STARS_COLOR_MAX);
-        stars[i].speed = random_range(STARS_SPEED_MIN, jt.get_tv_system() == MODE_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
+        stars[i].speed = random_range(STARS_SPEED_MIN, jt.get_video_mode() == MODE_NTSC ? STARS_SPEED_MAX_NTSC : STARS_SPEED_MAX_PAL); 
     }
 }
 

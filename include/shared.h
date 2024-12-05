@@ -44,7 +44,7 @@ extern struct {
     s32         (*execs_get_next)(void);
     GlobalData* (*global_ptr)(void);       // TODO: this should be a struct
     char*       (*execs_get_path)(s32);
-    s32         (*get_tv_system)(void);
+    s32         (*get_video_mode)(void);
     s32         (*get_region)(void);
     UNK(9, 10);
     char*       (*get_version_string)(void);

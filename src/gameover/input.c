@@ -18,7 +18,7 @@ static s32 das_state = -1;
 // set up DAS times based on framerate
 void input_das_setup(void)
 {
-    if (jt.get_tv_system() == MODE_PAL) {
+    if (jt.get_video_mode() == MODE_PAL) {
         initial_delay = 8;
         repeat_delay = 3;
     } else {

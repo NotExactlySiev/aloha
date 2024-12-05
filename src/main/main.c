@@ -141,7 +141,7 @@ file_t g_Files[42] = {
 };
 
 s32 g_CurrFile = 0;
-s32 g_NextFile = 0;
+s32 next_exec = 0;
 s32 game_region = 0;
 u32 tv_system = MODE_NTSC;
 s32 g_GameIsZ = 0;
@@ -189,7 +189,7 @@ void file_execute_loop(void)
             // otherwise it's uncompressed and execute it normally
             execute_uncompressed(g_Files[g_CurrFile].addr, 0);
         }
-        g_CurrFile = getNextFile();
+        g_CurrFile = get_next_exec();
         
     }
 }
@@ -205,12 +205,12 @@ s32 func_80018A6C(void)
     return D_80047D50;
 }
 
-s32 func_80018A7C(void)
+s32 get_D_80047D4C(void)
 {
     return D_80047D4C;
 }
 
-void func_80018A8C(s32 arg0)
+void set_D_80047D4C(s32 arg0)
 {
     if (arg0 != 0)
         D_80047D4C = 1;
@@ -241,7 +241,7 @@ void show_logo(void)
     drawenv.dtd = 1;
     drawenv.dfe = 1;
     dispenv.pad0 = 0;
-    if (get_tv_system() == 1) {
+    if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y += 24;
     }
@@ -332,7 +332,7 @@ void func_8001926C(void)
     drawenv.dtd = 1;
     drawenv.dfe = 1;
     dispenv.pad0 = 0;
-    if (get_tv_system() == 1) {
+    if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
     }
@@ -355,7 +355,7 @@ void func_8001926C(void)
     SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
     SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
     dispenv.pad0 = 0;
-    if (get_tv_system() == 1) {
+    if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
     }
@@ -363,7 +363,7 @@ void func_8001926C(void)
     drawenv.r0 = 0;
     drawenv.g0 = 0;
     drawenv.b0 = 0;
-    
+
     DrawSync(0);
     wait_frame(0);
     PutDrawEnv(&drawenv);
@@ -381,7 +381,7 @@ void init_everything(void)
     read_version();
 
     wait_frame(0);
-    SetVideoMode(get_tv_system() != 0);
+    SetVideoMode(get_video_mode() != 0);
 
     wait_frame(0);
     call_ResetGraph(0);
@@ -457,24 +457,7 @@ void jt_clear(void)
     flush_cache_safe();
 }
 
-
-#ifdef LOG_JT
-
-#undef jt_set
-void jt_set(void* func, s32 idx)
-{
-    _jt_set(func, idx, "UNK");
-}
-#define jt_set(func, idx)   _jt_set(func, idx, #func)
-
-void _jt_set(void* func, s32 idx, const char* name)
-#else
-void jt_set(void* func, s32 idx)
-#endif
-{
-#ifdef LOG_JT
-    printf("Set %X (%d) to %08X: %s\n", idx, idx, func, name);
-#endif
+void jt_set(void* func, s32 idx) {
     void** jmptable = (void**) &jt;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();
@@ -492,14 +475,14 @@ s32 vblank_enable(void)
 {
     s32 ret = 0;
     if (D_80047D64 != 0) {
-        vblank_event = enable_vblank_event(regular_run_tasks);
+        vblank_event = enable_vblank_event(tasks_tick);
         ret = vblank_event;
         D_80047D64 = 0;
     }
     return ret;
 }
 
-s32 get_tv_system(void)
+s32 get_video_mode(void)
 {
     return tv_system;
 }
@@ -555,30 +538,26 @@ void game_init(void)
     StopRCnt(RCntCNT2);
     StopRCnt(RCntCNT3);
     VSyncCallbacks(0, 0);
-    vblank_event = enable_vblank_event(regular_run_tasks);
-    regular_active(1);
+    vblank_event = enable_vblank_event(tasks_tick);
+    tasks_set_enabled(1);
 
-    // setup IO
+    // subsystems
     init_everything();
     ChangeClearPAD(0);
 
-    // set basic jt functions
-#ifdef LOG_JT
-    jt_set(_jt_set, 1);
-#else
+    // basic engine calls
     jt_set(jt_set, 1);
-#endif
-    jt_set(regular_add, 224);
-    jt_set(regular_remove, 225);
-    jt_set(rle_decode, 192);
-    jt_set(lz1_decode, 193);
-    jt_set(setNextFile, 3);
-    jt_set(getNextFile, 4);
-    jt_set(getGameConfig, 5);
-    jt_set(get_tv_system, 7);
+    jt_set(tasks_add, 224);
+    jt_set(tasks_remove, 225);
+    jt_set(decode_rle, 192);
+    jt_set(decode_lz1, 193);
+    jt_set(set_next_exec, 3);
+    jt_set(get_next_exec, 4);
+    jt_set(globals, 5);
+    jt_set(get_video_mode, 7);
     jt_set(get_region, 8);
-    jt_set(func_80018A7C, 9);
-    jt_set(func_80018A8C, 10);
+    jt_set(get_D_80047D4C, 9);
+    jt_set(set_D_80047D4C, 10);
     jt_set(get_version_string, 11);
 
     // clear global space
@@ -660,17 +639,17 @@ u32 func_80019DCC(void)
   return 0x10002;
 }
 
-void setNextFile(s32 id)
+void set_next_exec(s32 id)
 {
-    g_NextFile = id;    
+    next_exec = id;    
 }
 
-s32 getNextFile(void)
+s32 get_next_exec(void)
 {
-    return g_NextFile;
+    return next_exec;
 }
 
-GlobalData *getGameConfig(void)
+GlobalData *globals(void)
 {
     return (GlobalData*) 0x80014000;
 }
@@ -702,11 +681,11 @@ int main(int argc, char** argv)
     }
 
     // # custom stuff:
-    getGameConfig()->debug_features = 1;
+    globals()->debug_features = 1;
     jt_set(printf, 1001);
 
     // run the game
-    setNextFile(0);
+    set_next_exec(0);
     file_execute_loop();
 
     // shutdowns

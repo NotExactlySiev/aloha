@@ -3,7 +3,7 @@
 #include <libgte.h>
 #include <libgpu.h>
 
-extern volatile s32 D_800234B0;
+extern volatile s32 vsync_counter;
 
 int call_StoreImage(RECT *rect, u_long *p) {
     return StoreImage(rect, p);
@@ -98,7 +98,7 @@ int call_VSync(int mode) {
 }
 
 int get_vsync_event_cnt(void) {
-    return D_800234B0;
+    return vsync_counter;
 }
 
 void wait_frame(void) {
