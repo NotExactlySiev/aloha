@@ -11,6 +11,8 @@
 #include <shared.h>
 #include <libapi.h>
 #include "music.h"
+#include "tasks.h"
+#include "decode.h"
 // stuff from 1D530.data.s
 int D_80047D48 = -2;
 int D_80047D4C = 0;
@@ -190,7 +192,6 @@ void file_execute_loop(void)
             execute_uncompressed(g_Files[g_CurrFile].addr, 0);
         }
         g_CurrFile = get_next_exec();
-        
     }
 }
 
@@ -216,6 +217,62 @@ void set_D_80047D4C(s32 arg0)
         D_80047D4C = 1;
     else
         D_80047D4C = 0;
+}
+
+// move logo.c to another file?
+static inline sleep_frames(int n)
+{
+    for (int i = 0; i < n; i++)
+        wait_frame(0);
+}
+
+// draw_polys
+static inline SET_POLYS_COL(u8 c, POLY_FT4 *p, int n)
+{
+    DrawSync(0);
+    wait_frame(0);
+    for (int i = 0; i < n; i++) {
+        setRGB0(&p[i], c, c, c);
+        DrawPrim(&p[i]);
+    }
+}
+
+#define LOGO_FADE_STEP  4
+
+static inline void FADE_IN(POLY_FT4 *p, int n)
+{
+    for (u8 col = 0; col < 128; col += LOGO_FADE_STEP) 
+        SET_POLYS_COL(col, p, n);
+}
+
+static inline void FADE_OUT(POLY_FT4 *p, int n)
+{
+    for (u8 col = 128; col > 0; col -= LOGO_FADE_STEP) 
+        SET_POLYS_COL(col, p, n);
+}
+
+static inline void MAKE_QUADS(POLY_FT4 *polys, int n, int x, int y, int w, int h, int u, int v, int tw, int th, int td)
+{
+    int left = x;
+    int tex_x = 0x280;
+    for (int i = 0; i < n; i++) { 
+        SetPolyFT4(&polys[i]);
+        SetShadeTex(&polys[i], 0);
+        polys[i].tpage = GetTPage(1, 1, tex_x, 0);
+        polys[i].clut = GetClut(0x280, 0x100);
+        setUVWH(polys+i, u, v, tw, th);
+        setXYWH(polys+i, left, y, w, h);
+        left += w; tex_x += td;
+    }
+}
+
+static inline void LOAD_PRS(u8 *dst, short w, short h)
+{
+    decode_lz1(dst+4, (u8* )0x80060000);
+    LoadImage(&(RECT){ 640, 256, 256, 1 }, (void*) 0x80060014);
+    DrawSync(0);
+    LoadImage(&(RECT){ 640, 0, w, h }, (void*) 0x80060220);
+    DrawSync(0);
 }
 
 void show_logo(void)
@@ -268,22 +325,23 @@ void show_logo(void)
     if (tmp >= 0) {       
         // TODO: maybe a #define POLYCOUNT 4 so I don't have to 
         // repeat 4? just put POLYCOUNT in the macros 
-        MAKE_QUADS(64, 0, 128, 480, 0, 0, 128, 480, 64, 4);
+        MAKE_QUADS(polys, 4, 64, 0, 128, 480, 0, 0, 128, 480, 64);
         LOAD_PRS(&tmpfilebuf, 256, 240);
-        SLEEP_FRAMES(10);
+        //SLEEP_FRAMES(10);
+        sleep_frames(10);
         
         wait_frame(0);
         SetDispMask(1); // set disp mask to show it
         
-        FADE_IN(4,4);
+        FADE_IN(polys,4);
         
         DrawSync(0);
         wait_frame(0);
         
-        SET_POLYS_COL(128,4);
-        SLEEP_FRAMES(300);
+        SET_POLYS_COL(128, polys, 4);
+        sleep_frames(300);
         
-        FADE_OUT(4,4);
+        FADE_OUT(polys, 4);
     }
     
     wait_frame(0);
@@ -294,25 +352,25 @@ void show_logo(void)
     } while (D_80047D48 == -1);
 
     if (D_80047D48 == -2) {
-        MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
+        MAKE_QUADS(polys, 4, 64, 192, 128, 96, 0, 0, 128, 96, 64);
         LOAD_PRS(&D_80032FFC, 256, 96);
-        SLEEP_FRAMES(10);
+        sleep_frames(10);
         
         wait_frame(0);
         SetDispMask(1);
         
-        FADE_IN(4,4);
+        FADE_IN(polys, 4);
     } else {
         if (get_region() == 1) { y = 120; h = 240; } 
         else { y = 0; h = 480; }
-        MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
+        MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
         LOAD_PRS(&tmpfilebuf, 320, 240);
-        SLEEP_FRAMES(10);
+        sleep_frames(10);
         
         wait_frame(0);
         SetDispMask(1);
         
-        FADE_IN(4,5);
+        FADE_IN(polys, 5);
     }
 }
 
@@ -340,14 +398,14 @@ void func_8001926C(void)
     PutDispEnv(&dispenv);
 
     if (D_80047D48 == -2) {
-        MAKE_QUADS(64, 192, 128, 96, 0, 0, 128, 96, 64, 4);
-        FADE_OUT(4,4);
+        MAKE_QUADS(polys, 64, 4, 192, 128, 96, 0, 0, 128, 96, 64);
+        FADE_OUT(polys, 4);
     } else {
         if (get_region() == 1) { y = 120; h = 240; } 
         else { y = 0; h = 480; }
         
-        MAKE_QUADS(0, y, 128, h, 0, 0, 128, 240, 64, 5);
-        FADE_OUT(4,5);
+        MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
+        FADE_OUT(polys, 5);
     }
     
     wait_frame(0);

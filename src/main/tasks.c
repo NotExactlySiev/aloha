@@ -26,7 +26,6 @@ int tasks_add(TaskFunc fn, s16 arg1)
     return -1;
 }
 
-// engine only (TODO: _reserved you idiot)
 int tasks_add_reserved(TaskFunc fn, s16 arg1)
 {
     for (int i = 32; i < 40; i++) {

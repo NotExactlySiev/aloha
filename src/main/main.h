@@ -2,29 +2,7 @@
 #include "shared.h"
 #include <kernel.h>
 
-//#define LOG_JT
-
 #define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
-
-#define    SLEEP_FRAMES(f)    for (i = 0; i < f; i++) wait_frame(0);
-
-// TODO: why are these in the header?
-#define    SET_POLYS_COL(c,n)    { DrawSync(0); wait_frame(0); for (i = 0; i < n; i += 1)                     \
-            { polys[i].r0 = c; polys[i].g0 = c; polys[i].b0 = c;           \
-            DrawPrim(&polys[i]); } }
-#define    LOAD_PRS(p,W,H)    decode_lz1(((u8*) p)+4, (u8* )0x80060000);    \
-            rect.x = 640; rect.y = 256; rect.w = 256; rect.h = 1;                 \
-            LoadImage(&rect, (void*) 0x80060014);  DrawSync(0);                   \
-            rect.x = 640; rect.y = 0; rect.w = W; rect.h = H;                 \
-            LoadImage(&rect, (void*) 0x80060220);  DrawSync(0)
-#define    FADE_IN(step,n)   for (col = 0; col < 128; col += step) SET_POLYS_COL(col,n);
-#define    FADE_OUT(step,n)   for (col = 128; col > 0; col -= step) SET_POLYS_COL(col,n);
-#define    MAKE_QUADS(x, y, w, h, u, v, tw, th, td, n)    left = x; tex_x = 0x280;                   \
-            for (i=0; i < n; i++) { SetPolyFT4(&polys[i]); SetShadeTex(&polys[i], 0);     \
-            polys[i].tpage = GetTPage(1, 1, tex_x, 0); polys[i].clut = GetClut(0x280, 0x100);                \
-            setUVWH(polys+i, u, v, tw, th);  \
-            setXYWH(polys+i, left, y, w, h); \
-            left += w; tex_x += td; }
 
 typedef struct {
     char magic[16];     // 0x10 0x00
@@ -41,12 +19,6 @@ typedef struct {
 } file_t;
 
 // TODO: these should be in headers for their own files
-int tasks_add(void*, short);
-int tasks_add_reserved(void*, short);
-void tasks_remove(int);
-void tasks_tick(void);
-void decode_rle(s32, u8*, u8*);
-void decode_lz1(void*, void*);
 void reboot(char*, char*);
 long call_SpuMalloc(long size);
 long call_SpuMallocWithStartAddr(unsigned long addr, long size);
@@ -101,12 +73,7 @@ void disable_vblank_event(s32);
 void nop(void);
 void flush_cache_safe(void);
 void jt_clear(void);
-#ifdef  LOG_JT
-void _jt_set(void*, s32, const char*);
-#define     jt_set(func, idx)   _jt_set(func, idx, #func)
-#else
 void jt_set(void*, s32);
-#endif
 void vblank_disable(void);
 s32 vblank_enable(void);
 s32 get_video_mode(void);
