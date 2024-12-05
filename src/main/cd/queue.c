@@ -7,7 +7,6 @@ extern SpuVolume vol_full;
 extern int D_80047EEC; // SpuVolume ptr?
 extern CdlFILTER D_80047ECC;
 extern int D_8004D0E0;
-extern s8 D_80047EC4[8];
 
 // what's the header situattion?
 #define SNQ_FINISHED    -1
@@ -27,10 +26,9 @@ typedef struct {
     u32    arg1;
 } snd_task_t;
 
-
 snd_task_t _sndqueue[256];
-s8 D_80047EC4[8];
 
+s8 D_80047EC4[8];
 s8 sndqueue_com = SNQ_FINISHED;
 s8 D_80047D94 = SNQ_FINISHED;
 s32 _sndqueue_empty = 0;
@@ -307,8 +305,6 @@ done:
     return 0;
 }
 
-
-
 // TODO: sound lol
 int sndqueue_exec_all(void)
 {
@@ -319,6 +315,3 @@ int sndqueue_exec_all(void)
     CdSync(0, 0);
     return ret;
 }
-
-
-// endof queue.c

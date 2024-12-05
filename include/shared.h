@@ -34,7 +34,7 @@ typedef struct {
 } GlobalData;
 #undef UNK
 
-#define UNK(a,b)    void* unk##a[b - a + 1]
+#define UNK(a,b)    void *unk##a[b - a + 1]
 extern struct {
     // General Functions
     void        (*nop)(void);
@@ -42,11 +42,12 @@ extern struct {
     s32         (*is_game_running)(void);
     void        (*execs_set_next)(s32);
     s32         (*execs_get_next)(void);
-    GlobalData* (*global_ptr)(void);       // TODO: this should be a struct
+    GlobalData* (*globals)(void);
     char*       (*execs_get_path)(s32);
     s32         (*get_video_mode)(void);
     s32         (*get_region)(void);
-    UNK(9, 10);
+    int         (*get_D_80047D4C)(void);
+    void        (*set_D_80047D4C)(int);
     char*       (*get_version_string)(void);
     UNK(12, 191);
     void        (*decompress_rle)(u32,void* src,void* dst);
@@ -55,8 +56,9 @@ extern struct {
     u32         (*routine_task_add)(void* callback, u16 interval);
     void        (*routine_task_remove)(u32 taskid);
     UNK(226, 239);
-    u32         (*PadRead)();    
-    UNK(241, 255);
+    u32         (*PadRead)();
+    UNK(241, 254);
+    u32         (*get_engine_version)(void);
 
     // CD functions
     UNK(256, 257);
@@ -111,8 +113,8 @@ extern struct {
     // Memory Card Functions
     UNK(640, 767);
 
-    // More MC/Audio stuff
-    void (*play_vab)(s32, void*, s32);  // audio play by addr? play file?
+    // Misc. Functions
+    void (*play_vab)(s32, void*, s32);
     UNK(769, 772);
     s32         (*audio_unk_volume)(s16);
     UNK(774, 779);

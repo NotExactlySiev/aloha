@@ -1,3 +1,5 @@
+jt = 0x80010000;
+
 SECTIONS
 {
     __romPos = 0;

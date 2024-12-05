@@ -19,7 +19,7 @@ s32 D_80047EAC;
 s32 D_80047F24;
 
 
-extern SpuVolume vol_full;
+SpuVolume vol_full;
 
 
 void cd_ready_callback(s32 status, u32 *result);

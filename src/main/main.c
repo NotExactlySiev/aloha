@@ -219,7 +219,7 @@ void set_D_80047D4C(s32 arg0)
         D_80047D4C = 0;
 }
 
-// move logo.c to another file?
+// move splash.c to another file?
 static inline sleep_frames(int n)
 {
     for (int i = 0; i < n; i++)
@@ -629,7 +629,7 @@ void game_init(void)
     func_80020000(0);
 }
 
-s32 get_D_80047E6C(void)
+s32 get_engine_running(void)
 {
     return D_80047E6C;
 }
@@ -637,9 +637,9 @@ s32 get_D_80047E6C(void)
 void* jt_reset(void)
 {
     jt_clear();
-    jt_set(func_80019DCC, 0xFF);
-    jt_set(get_D_80047E6C, 0x2);
-    jt_set(get_file_addr, 0x6);
+    jt_set(get_engine_version, 255);
+    jt_set(get_engine_running, 2);
+    jt_set(get_file_addr, 6);
     return game_init;
 }
 
@@ -656,9 +656,7 @@ void func_80019D0C(void)
         D_80047D58 = 1;
         jt_reset();
         tcb->regs[2] = (int) game_init;
-    }
-    else
-    {
+    } else {
         tcb->regs[2] = 0;
     }
 }
@@ -692,7 +690,7 @@ s32 enable_exception_event(void* handler)
     return event;
 }
 
-u32 func_80019DCC(void)
+u32 get_engine_version(void)
 {
   return 0x10002;
 }

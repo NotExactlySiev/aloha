@@ -60,7 +60,7 @@ typedef struct {
 
 Channel channels[NCHANNELS];
 char D_800521E0[NCHANNELS];
-extern int D_80047FAC;
+int D_80047FAC;
 
 VabFile loaded_vabs[MAX_VABS];
 ProgAtr loaded_progs[MAX_PROGS];

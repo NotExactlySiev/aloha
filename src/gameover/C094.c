@@ -330,7 +330,7 @@ void render_routine(void)
 
 void func_800EC358(void)
 {
-    GlobalData* global = jt.global_ptr();
+    GlobalData* global = jt.globals();
     
     global->unk500 = 0;
     global->unk504 = 3;
@@ -338,7 +338,6 @@ void func_800EC358(void)
     global->unk509 = 0;
     global->unk50A = 0;
     global->unk50B = 0;
-    
 }
 
 
@@ -355,7 +354,7 @@ int main(void)
     jt.audio_unk2();
     
     input_das_setup();
-    GlobalData* global = jt.global_ptr();
+    GlobalData* global = jt.globals();
     jt.set_global_volume(&(SpuVolume){ 0x7FFF, 0x7FFF });
     jt.audio_unk_volume(0x3000);
     jt.audio_unk3(0);    // mc_set_some_var

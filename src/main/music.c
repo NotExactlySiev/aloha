@@ -20,6 +20,10 @@ extern s32 D_80047EA4;
 extern s32 D_80047EAC;
 
 s32 fe_value;
+int D_80047E00 = -1;  // bgm regular task handle
+int bgm_counter;
+int bgm_target;
+int bgm_finished;
 
 NOT_IMPL(func_8001B9D8);    // CD MUSIC
 /*
@@ -87,7 +91,6 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
     loc->second = bcd(second % 60);
 }
 
-// uses unbcd
 //INCLUDE_ASM("asm/main/nonmatchings/274C", music_play_str);
 // plays background music
 void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
@@ -150,8 +153,6 @@ void func_8001C20C(CdlLOC *loc) {   // CD MUSIC
     sndqueue_add_try(SNQ_SET_FULL, &vol_full, 0);
     func_8001B9D8();
 }
-
-// end of music.c is either here...
 
 void func_8001C2F4(void) {
     sndqueue_add_try(CdlPause, 0, 0);
@@ -253,10 +254,6 @@ void func_8001CEA0(void) {
     sndqueue_add_try(SNQ_SET_PAUSED, 0, 0);
 }
 
-extern int D_80047E00;  // bgm regular task handle
-extern int bgm_counter;
-extern int bgm_target;
-
 // bgm_tick 
 void func_8001CEC8(void)
 {
@@ -289,5 +286,3 @@ void func_8001D104(void)
         D_80047E00 = -1;
     }
 }
-
-// ...or it's here.

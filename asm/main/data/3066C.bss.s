@@ -6,7 +6,7 @@
 
 /* this is actually in the final file (initialized to 0) */
 
-glabel vol_full
+/*glabel vol_full*/
 /* 30684 80047E9C */ .space 0x02
 
 glabel D_80047E9E
@@ -21,23 +21,6 @@ glabel D_80047ECC
 glabel D_80047ECD
 /* 306B5 80047ECD */ .space 0x07
 
-glabel bgm_counter
-/* 3072C 80047F44 */ .space 0x08
-
-glabel bgm_target
-/* 30734 80047F4C */ .space 0x08
-
-glabel bgm_finished
-/* 3073C 80047F54 */ .space 0x08
-
-glabel font_ptr8
-/* 30744 80047F5C */ .space 0x08
-
-glabel font_ptr16
-/* 3074C 80047F64 */ .space 0x08
-
-glabel D_80047FAC
-/* 30794 80047FAC */ .space 0x08
 
 /* MORE BSS BROUGHT OVER FROM THE SYMBOL FILE */
 

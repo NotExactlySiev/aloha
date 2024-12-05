@@ -1,8 +1,5 @@
 __addr  = 0x800E0000;
 
-jmptable = 0x80010000;
-jt = jmptable;
-
 D_8012DF68 = D_8012DF64+4;
 D_8012DF6A = D_8012DF64+6;
 D_8012DF6C = D_8012DF64+8;

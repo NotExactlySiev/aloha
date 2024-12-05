@@ -8,7 +8,6 @@ tmpfilebuf = 0x80100000;
 TIMER_REGS = 0x1f801100;
 KER_DATE = 0xbfc00100;
 CONSOLE_TYPE = 0xbfc00104;
-jmptable = 0x80010000;
-jt = jmptable;
+
 g_GameConfig = 80014000;
 tmpfilebuf = 0x80100000;

@@ -2,9 +2,8 @@
 
 u8 *func_8001E438(u32 sjis, int set);
 void *func_8001E5BC(void *ptr, int set);
-extern u8 (*font_ptr8)[128][8];
-extern u8 (*font_ptr16)[94][32];    // I think?
-// or u8 *(*font_ptr16)[94][32] maybe?
+u8 (*font_ptr8)[128][8];
+u8 (*font_ptr16)[94][32];    // I think?
 
 // default fonts
 extern u8 D_80031A14[94][15];

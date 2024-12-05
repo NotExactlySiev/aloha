@@ -11,9 +11,6 @@ D_800E7738 = 0x800E7738;
 
 DATA_OFFSET = 0;
 
-jt = 0x80010000;
-
-
 D_801256EC = debug_text_ot + 0x4;
 D_801256F4 = debug_text_ot + 0xC;
 
