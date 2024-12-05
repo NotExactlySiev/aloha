@@ -2,6 +2,9 @@
 #include <libspu.h>
 #include <libsnd.h>
 #include "main.h"
+#include "tasks.h"
+#include "spu.h"
+#include "sfx.h"
 
 #define NCHANNELS   24
 
@@ -9,24 +12,6 @@
 #define MAX_PROGS   512
 #define MAX_TONES   256
 #define MAX_VAGS    256
-
-int func_8001F9EC(u32 handle, u16 pan, u16 vol);
-void func_8001F17C(u32 id, int arg2);
-int func_8001FBC0(int val);
-void func_8001F578(u32 mask);
-void func_8001F5DC(int id);
-void func_8001F610(int id, short pan, short vol);
-int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio);
-void func_8001F8D4(u32 handle);
-void func_8001F918(u32 handle);
-int sfx_set_pan(u32 handle, u16 pan);
-int sfx_set_vol(u32 handle, u16 vol);
-int sfx_get_pan(uint handle);
-int sfx_get_vol(uint handle);
-int sfx_is_valid(u32 handle);
-void func_8001FBE4(void);
-void spu_set_key_on(u32 mask);
-void spu_set_key_off(u32 mask);
 
 typedef struct {
     int unk0;
@@ -39,11 +24,11 @@ typedef struct {
     char active;
 } Channel;
 
-typedef struct {
+struct VabRealHeader {
     VabHdr header;
     ProgAtr progattrs[128];
     VagAtr toneattrs[][16];
-} VabRealHeader;
+};
 
 typedef struct {
     VabHdr hdr;
@@ -58,23 +43,23 @@ typedef struct {
     char b;
 } VabFile;
 
-Channel channels[NCHANNELS];
-char D_800521E0[NCHANNELS];
-int D_80047FAC;
+static Channel channels[NCHANNELS];
+static char D_800521E0[NCHANNELS];
+static int tick_task;
 
-VabFile loaded_vabs[MAX_VABS];
-ProgAtr loaded_progs[MAX_PROGS];
-VagAtr loaded_tones[MAX_TONES];
-u16 loaded_offsets[MAX_VAGS];
+static VabFile loaded_vabs[MAX_VABS];
+static ProgAtr loaded_progs[MAX_PROGS];
+static VagAtr loaded_tones[MAX_TONES];
+static u16 loaded_offsets[MAX_VAGS];
 
-ProgAtr *vab_progs_next;
-VagAtr *vab_tones_next;
-u16 *vab_offsets_next;
+static ProgAtr *vab_progs_next;
+static VagAtr *vab_tones_next;
+static u16 *vab_offsets_next;
 
-int vabs_count;
-int progs_count;
-int tones_count;
-int vags_count;
+static int vabs_count;
+static int progs_count;
+static int tones_count;
+static int vags_count;
 
 extern int D_80047E10;
 extern int D_80047E14;
@@ -82,14 +67,14 @@ extern int D_80047E14;
 u8 D_80047F9C[4];
 
 
-void sfx_tick(void) {
+static void sfx_tick(void) {
     SpuGetAllKeysStatus(D_800521E0);
     u32 mask = 0;
     for (int i = 0; i < NCHANNELS; i++) {
         Channel *p = &channels[i];
         if (p->active != 1) continue;
         if ((u16) p->time < 0x7FFFU) {
-            p->time++;    // timer
+            p->time++;
         }
 
         char stat = D_800521E0[i];
@@ -104,12 +89,11 @@ void sfx_tick(void) {
     }
     
     if (mask)
-        func_8001F578(mask);    // free these
+        sfx_release(mask);    // free these
     //func_8001E2F4();    // is a nop
 }
 
-// sfx_get_mask?
-u32 func_8001E744(void)
+u32 sfx_get_mask(void)
 {
     u32 ret = 0;
     for (int i = 0; i < NCHANNELS; i++) {
@@ -145,23 +129,22 @@ void sfx_init(void)
         channels[i].unk0 = 0;
     }
 
-    jt_set(func_8001FBC0, 0x306);
-    jt_set(func_8001F5DC, 0x310);
-    jt_set(func_8001F610, 0x311);
-    jt_set(func_8001F64C, 0x312);
-
-    jt_set(func_8001F8D4, 0x313);
+    jt_set(snd_set_reverb, 0x306);
+    jt_set(sfx_play_simple, 0x310);
+    jt_set(sfx_play, 0x311);
+    jt_set(sfx_play_modulated, 0x312);
+    jt_set(sfx_kill, 0x313);
     jt_set(sfx_set_pan, 0x314);
     jt_set(sfx_set_vol, 0x315);
-    jt_set(func_8001F9EC, 0x316);
+    jt_set(sfx_set_both, 0x316);
     jt_set(sfx_get_pan, 0x317);
     jt_set(sfx_get_vol, 0x318);
     jt_set(sfx_is_valid, 0x319);
-    jt_set(func_8001F918, 0x31A);
-    jt_set(func_8001F17C, 0x31B);
-    jt_set(func_8001E744, 0x31C);
+    jt_set(sfx_release, 0x31A);
+    jt_set(sfx_set_prog_attr, 0x31B);
+    jt_set(sfx_get_mask, 0x31C);
     jt_set(call_SpuClearReverbWorkArea, 0x31D); // oh wait this isn't private?
-    D_80047FAC = tasks_add_reserved(sfx_tick, 1);
+    tick_task = tasks_add_reserved(sfx_tick, 1);
 }
 
 static s16 load_metadata(VabRealHeader *arg, s16 idx) {
@@ -173,7 +156,6 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     u16* vag_sizes;
     u8 ntones;
     ProgAtr *progattrs;
-    u32 size;
 
     u32 ui;
 
@@ -200,7 +182,6 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
 
     ui = arg->header.ps;
     loaded_vabs[idx].progs = vab_progs_next;
-    size = arg->header.fsize;
     int tone_off = 0;
     for (int i = 0; i < ui; i++) {
         if (progattrs[i].tones == 0)    // empty ones don't count
@@ -302,7 +283,7 @@ int func_8001EFAC(s16 idx)
     return idx;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F17C);
+INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_set_prog_attr);
 
 // NOTE: I wouldn't bet my life on the correctness of this function. but it seems
 // to be behaving just like the original as far as I can tell.
@@ -374,7 +355,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
     return 0;
 }
 
-void func_8001F4F0(u32 mask)
+void sfx_kill_voices(u32 mask)
 {
     for (int i = 0; i < NCHANNELS; i++) {
         Channel *p = &channels[i];
@@ -394,7 +375,7 @@ void func_8001F4F0(u32 mask)
     spu_set_key_on(mask);
 }
 
-void func_8001F578(u32 mask)
+void sfx_release_voices(u32 mask)
 {
     for (int i = 0; i < NCHANNELS; i++) {
         Channel *p = &channels[i];
@@ -408,21 +389,22 @@ void func_8001F578(u32 mask)
     spu_set_key_off(mask);
 }
 
-s32 func_8001F64C(u32 arg0, s32 arg1, s16 arg2, s16 arg3, u16 arg4, s32 prio);
+int sfx_play_modulated(u32 arg0, s32 arg1, s16 arg2, s16 arg3, u16 arg4, s32 prio);
 
-void func_8001F5DC(int id)
+void sfx_play_simple(int id)
 {
-    func_8001F64C(id, 0x3F, 100, 0, 0, -1);
+    sfx_play_modulated(id, 0x3F, 100, 0, 0, -1);
 }
 
-void func_8001F610(int id, short pan, short vol)
+void sfx_play(int id, short pan, short vol)
 {
-    func_8001F64C(id, pan, vol, 0x3C, 0, -1);
+    sfx_play_modulated(id, pan, vol, 0x3C, 0, -1);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F64C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_play_modulated);
 // FIXME: this is not entirely correct, even though it works
-int func_8001F64C(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
+// sfx_play_modulated
+int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     u32 vab_idx = id >> 0x18;
     u32 prog_idx = (id >> 8) & 0x7F;
     u32 tone_idx = id & 0xF;
@@ -499,30 +481,30 @@ found:
 }
 
 // TODO: "handle" macros
-void func_8001F8D4(u32 handle)
+void sfx_kill(u32 handle)
 {
     if (sfx_is_valid(handle) == -1) return;
-    func_8001F4F0(1 << (handle & 0x1F));
+    sfx_kill_voices(1 << (handle & 0x1F));
 }
 
-void func_8001F918(u32 handle)
+void sfx_release(u32 handle)
 {
     if (sfx_is_valid(handle) == -1) return;
-    func_8001F578(1 << (handle & 0x1F));
+    sfx_release_voices(1 << (handle & 0x1F));
 }
 
 int sfx_set_pan(u32 handle, u16 pan)
 {
-    return func_8001F9EC(handle, pan, channels[handle & 0x1F].vol);
+    return sfx_set_both(handle, pan, channels[handle & 0x1F].vol);
 }
 
 int sfx_set_vol(u32 handle, u16 vol)
 {
-    return func_8001F9EC(handle, channels[handle & 0x1F].pan, vol);
+    return sfx_set_both(handle, channels[handle & 0x1F].pan, vol);
 }
 
 // function for the two above (not private)
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001F9EC);
+INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_set_both);
 
 // TODO: these types are all messed up
 int sfx_get_pan(uint handle)
@@ -542,7 +524,7 @@ int sfx_is_valid(u32 handle)
     return -1;
 }
 
-int func_8001FBC0(int val)
+int snd_set_reverb(int val)
 {
     int ret = D_80047E10;
     D_80047E10 = val;

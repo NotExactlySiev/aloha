@@ -625,7 +625,7 @@ void game_init(void)
     func_80020F9C(5, 0);
 
     // audio stuff? no idea
-    func_8001FBC0(0);
+    snd_set_reverb(0);
     func_80020000(0);
 }
 
