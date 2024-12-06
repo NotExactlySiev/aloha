@@ -66,13 +66,17 @@ extern int D_80047E14;
 
 u8 D_80047F9C[4];
 
-
 static void sfx_tick(void) {
     SpuGetAllKeysStatus(D_800521E0);
     u32 mask = 0;
     for (int i = 0; i < NCHANNELS; i++) {
         Channel *p = &channels[i];
-        if (p->active != 1) continue;
+        if (p->active != 1) {
+            printf("    ");
+            continue;
+        }
+
+        printf("%03d ", p->time);
         if ((u16) p->time < 0x7FFFU) {
             p->time++;
         }
@@ -87,9 +91,9 @@ static void sfx_tick(void) {
             p->unk2 = 0;
         }
     }
-    
+    printf("\n");
     if (mask)
-        sfx_release(mask);    // free these
+        sfx_release_voices(mask);
     //func_8001E2F4();    // is a nop
 }
 
@@ -129,7 +133,7 @@ void sfx_init(void)
         channels[i].unk0 = 0;
     }
 
-    jt_set(snd_set_reverb, 0x306);
+    jt_set(sfx_set_reverb, 0x306);  // deferred (why?)
     jt_set(sfx_play_simple, 0x310);
     jt_set(sfx_play, 0x311);
     jt_set(sfx_play_modulated, 0x312);
@@ -300,7 +304,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
         vol = -255;
     }    
     if ((u8) temp_s1->active == 1) return -2;
-    
+
     VabFile *vab = &loaded_vabs[vab_idx];
     VagAtr *vag = &vab->tones[tone_idx + vab->progs[prog_idx].reserved2];
 
@@ -524,7 +528,7 @@ int sfx_is_valid(u32 handle)
     return -1;
 }
 
-int snd_set_reverb(int val)
+int sfx_set_reverb(int val)
 {
     int ret = D_80047E10;
     D_80047E10 = val;

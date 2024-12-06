@@ -4,7 +4,7 @@ typedef struct VabRealHeader VabRealHeader;
 
 int sfx_set_both(u32 handle, u16 pan, u16 vol);
 void sfx_set_prog_attr(u32 id, int arg2);
-int snd_set_reverb(int val);
+int sfx_set_reverb(int val);
 int sfx_set_pan(u32 handle, u16 pan);
 int sfx_set_vol(u32 handle, u16 vol);
 int sfx_get_pan(uint handle);

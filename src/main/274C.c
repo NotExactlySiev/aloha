@@ -296,7 +296,7 @@ int sfx_free_vab(s16 idx)
 
 extern int D_80047E20;
 
-int func_80020DE8(int mono)
+int snd_set_stereo(int mono)
 {
     int ret = D_80047E20;
     set_mono(mono);
@@ -325,13 +325,13 @@ extern short D_80047E24;
 extern short D_80047E26;
 extern int D_80047E48;
 
-void func_80020E88(void)
+void snd_set_vol_to_min(void)
 {
     D_80047E26 = 0;
     func_80020EF0(0, 0);
 }
 
-void func_80020EB4(void)
+void snd_set_vol_to_max(void)
 {
     D_80047E26 = D_80047E24;
     func_80020EF0(D_80047E24, D_80047E48);
@@ -340,7 +340,6 @@ void func_80020EB4(void)
 // set_master_volume
 void func_80020EF0(short arg0, short arg1)
 {
-    printf("VOL %d\t%d\n", arg0, arg1);
     short val = (arg0 * arg1) / 1024;
     call_SpuSetCommonAttr(&(SpuCommonAttr) {
         .mask = SPU_COMMON_MVOLL | SPU_COMMON_MVOLR,
@@ -349,7 +348,7 @@ void func_80020EF0(short arg0, short arg1)
     });
 }
 
-int func_80020F48(short val)
+int snd_set_volume(short val)
 {
     short old = D_80047E24;
     D_80047E24 = val;
@@ -358,7 +357,7 @@ int func_80020F48(short val)
     return old;
 }
 
-void func_80020F9C(long mode, short depth)
+void snd_set_reverb(long mode, short depth)
 {
     func_8001DF14(mode, depth);
 }
@@ -410,7 +409,7 @@ int music_play(u8 id)
 }
 
 //
-void func_800210D4(int val)
+void music_set_repeat(int val)
 {
     D_80047E4C = val;
 }
@@ -420,28 +419,68 @@ NOT_IMPL(func_800210E4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210E
 NOT_IMPL(func_800211F0) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800211F0);
 
 extern int D_80047E54;
-void func_800212FC(void)
+void snd_fade_pause(void)
 {
     D_80047E54 = 1;
 }
 
-void func_80021310(void)
+void snd_fade_unpause(void)
 {
     D_80047E54 = 0;
 }
 
 // TODO: these are required
-NOT_IMPL(func_80021320) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021320);
-NOT_IMPL(func_80021490) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021490);
-
-void func_80021600(void);
-// defult sound
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80021600);
+NOT_IMPL(snd_fade_out) //INCLUDE_ASM("asm/main/nonmatchings/274C", snd_fade_out);
+NOT_IMPL(snd_fade_in) //INCLUDE_ASM("asm/main/nonmatchings/274C", snd_fade_in);
 
 extern int D_80047E28;
 extern int D_80047E30;
+
+extern int D_8004800C;
+extern int D_80047E34;
+extern int D_80048004;
+extern int D_80047E2C;
+// defult sound
+//INCLUDE_ASM("asm/main/nonmatchings/274C", snd_reset);
+void snd_reset(void)
+{
+    sfx_set_reverb(0);
+    func_8001CD30(0);
+    func_80020E40();
+    func_8001CEA0();
+    func_8001C2F4();
+    func_8001D248();
+    func_8001AE90();
+    sndqueue_exec_all();
+    func_8001C34C();
+    snd_set_vol_to_min();
+    func_80020E64();
+    D_80047E54 = 0;
+    if (D_80047E30 == 1) {
+        tasks_remove_reserved(D_80047E34);
+        D_8004800C = 0;
+        D_80047E34 = -1;
+    }
+    if (D_80047E28 == 1) {
+        tasks_remove_reserved(D_80047E2C);
+        D_80048004 = 0;
+        D_80047E2C = -1;
+    }
+    D_80047E28 = 0;
+    D_80047E30 = 0;
+    snd_set_vol_to_max();
+    D_80047E48 = 1024;
+    func_80020EF0(D_80047E26, D_80047E48);
+
+    SpuVolume vol;
+    func_8001CD0C(&vol);
+    set_vol_full(&vol);
+    sndqueue_exec_all();
+}
+
+
 // audio_flags
-u32 func_80021740(void)
+u32 snd_status(void)
 {
     u32 ret = 0;
     u32 cd_flags = func_8001D13C();
@@ -484,23 +523,23 @@ void misc_init(void)
     _mc_callback = 0;  // WHY DO YOU ACCESS THIS FROM HERE AAAA
     jt_set(sfx_load_vab, 0x300);
     jt_set(sfx_free_vab, 0x301);
-    jt_set(func_80020DE8, 0x302);
+    jt_set(snd_set_stereo, 0x302);
     jt_set(snd_get_stereo, 0x303);
     jt_set(func_80020E40, 0x304);
-    jt_set(func_80020F48, 0x305);
-    jt_set(func_80020F9C, 0x307);
-    jt_set(func_80020E88, 0x308);
-    jt_set(func_80020EB4, 0x309);
-    jt_set(func_80021320, 0x30A);
-    jt_set(func_80021490, 0x30B);
-    jt_set(func_80021740, 0x30C);
-    jt_set(func_800212FC, 0x30D);
-    jt_set(func_80021310, 0x30E);
-    jt_set(func_80021600, 0x30F);
+    jt_set(snd_set_volume, 0x305);
+    jt_set(snd_set_reverb, 0x307);
+    jt_set(snd_set_vol_to_min, 0x308);
+    jt_set(snd_set_vol_to_max, 0x309);
+    jt_set(snd_fade_out, 0x30A);
+    jt_set(snd_fade_in, 0x30B);
+    jt_set(snd_status, 0x30C);
+    jt_set(snd_fade_pause, 0x30D);
+    jt_set(snd_fade_unpause, 0x30E);
+    jt_set(snd_reset, 0x30F);
     jt_set(execute_compressed, 0x320);
     jt_set(music_set_list, 0x330);
     jt_set(music_play, 0x331);
-    jt_set(func_800210D4, 0x332);
+    jt_set(music_set_repeat, 0x332);
     jt_set(func_800218DC, 0x340);
     jt_set(func_800219DC, 0x341);
     jt_set(func_80021BCC, 0x342);

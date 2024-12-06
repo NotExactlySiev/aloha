@@ -622,10 +622,10 @@ void game_init(void)
     memset((void*) 0x80014000, 0x4000, 0);
 
     // set reverb
-    func_80020F9C(5, 0);
+    snd_set_reverb(5, 0);
 
     // audio stuff? no idea
-    snd_set_reverb(0);
+    sfx_set_reverb(0);
     func_80020000(0);
 }
 
@@ -747,7 +747,7 @@ int main(int argc, char** argv)
     // shutdowns
     wait_frame(0);
     SetDispMask(0);
-    func_80021600();
+    snd_reset();
     game_shutdown();
     ResetGraph(3);
     reset();
