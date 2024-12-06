@@ -72,11 +72,11 @@ static void sfx_tick(void) {
     for (int i = 0; i < NCHANNELS; i++) {
         Channel *p = &channels[i];
         if (p->active != 1) {
-            printf("    ");
+            //printf("|    ");
             continue;
         }
 
-        printf("%03d ", p->time);
+        //printf("| %02d ", p->time);
         if ((u16) p->time < 0x7FFFU) {
             p->time++;
         }
@@ -91,7 +91,7 @@ static void sfx_tick(void) {
             p->unk2 = 0;
         }
     }
-    printf("\n");
+    //printf("\n");
     if (mask)
         sfx_release_voices(mask);
     //func_8001E2F4();    // is a nop

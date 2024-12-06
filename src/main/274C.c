@@ -1,7 +1,6 @@
 #include "common.h"
 #include <kernel.h>
 #include <libapi.h>
-#include <libspu.h>
 #include <libetc.h>
 #include "cd/cd.h"
 #include "music.h"
@@ -10,6 +9,7 @@
 #include "spu.h"
 #include "sfx.h"
 #include "decode.h"
+#include "sound.h"
 
 s32 is_mono = 0;
 CdlFILE D_80048068;
@@ -294,74 +294,6 @@ int sfx_free_vab(s16 idx)
     return func_8001EFAC(idx);
 }
 
-extern int D_80047E20;
-
-int snd_set_stereo(int mono)
-{
-    int ret = D_80047E20;
-    set_mono(mono);
-    func_8001DF78(mono);
-    D_80047E20 = mono;
-    return ret;
-}
-
-int snd_get_stereo(void)
-{
-    return D_80047E20;
-}
-
-void func_80020E40(void)
-{
-    sfx_kill_voices(SPU_ALLCH);
-}
-
-void func_80020E64(void)
-{
-    sfx_release_voices(SPU_ALLCH);
-}
-
-// FIXME: the pan appears to be... backwards? sfx issue?
-extern short D_80047E24;
-extern short D_80047E26;
-extern int D_80047E48;
-
-void snd_set_vol_to_min(void)
-{
-    D_80047E26 = 0;
-    func_80020EF0(0, 0);
-}
-
-void snd_set_vol_to_max(void)
-{
-    D_80047E26 = D_80047E24;
-    func_80020EF0(D_80047E24, D_80047E48);
-}
-
-// set_master_volume
-void func_80020EF0(short arg0, short arg1)
-{
-    short val = (arg0 * arg1) / 1024;
-    call_SpuSetCommonAttr(&(SpuCommonAttr) {
-        .mask = SPU_COMMON_MVOLL | SPU_COMMON_MVOLR,
-        .mvol.left = val,
-        .mvol.right = val,
-    });
-}
-
-int snd_set_volume(short val)
-{
-    short old = D_80047E24;
-    D_80047E24 = val;
-    D_80047E26 = val;
-    func_80020EF0(val, D_80047E48);
-    return old;
-}
-
-void snd_set_reverb(long mode, short depth)
-{
-    func_8001DF14(mode, depth);
-}
-
 // music.c
 
 extern int D_80047E4C;          // music should repeat?
@@ -414,91 +346,8 @@ void music_set_repeat(int val)
     D_80047E4C = val;
 }
 
-// volume tween stuff 
-NOT_IMPL(func_800210E4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800210E4);
-NOT_IMPL(func_800211F0) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800211F0);
 
-extern int D_80047E54;
-void snd_fade_pause(void)
-{
-    D_80047E54 = 1;
-}
-
-void snd_fade_unpause(void)
-{
-    D_80047E54 = 0;
-}
-
-// TODO: these are required
-NOT_IMPL(snd_fade_out) //INCLUDE_ASM("asm/main/nonmatchings/274C", snd_fade_out);
-NOT_IMPL(snd_fade_in) //INCLUDE_ASM("asm/main/nonmatchings/274C", snd_fade_in);
-
-extern int D_80047E28;
-extern int D_80047E30;
-
-extern int D_8004800C;
-extern int D_80047E34;
-extern int D_80048004;
-extern int D_80047E2C;
-// defult sound
-//INCLUDE_ASM("asm/main/nonmatchings/274C", snd_reset);
-void snd_reset(void)
-{
-    sfx_set_reverb(0);
-    func_8001CD30(0);
-    func_80020E40();
-    func_8001CEA0();
-    func_8001C2F4();
-    func_8001D248();
-    func_8001AE90();
-    sndqueue_exec_all();
-    func_8001C34C();
-    snd_set_vol_to_min();
-    func_80020E64();
-    D_80047E54 = 0;
-    if (D_80047E30 == 1) {
-        tasks_remove_reserved(D_80047E34);
-        D_8004800C = 0;
-        D_80047E34 = -1;
-    }
-    if (D_80047E28 == 1) {
-        tasks_remove_reserved(D_80047E2C);
-        D_80048004 = 0;
-        D_80047E2C = -1;
-    }
-    D_80047E28 = 0;
-    D_80047E30 = 0;
-    snd_set_vol_to_max();
-    D_80047E48 = 1024;
-    func_80020EF0(D_80047E26, D_80047E48);
-
-    SpuVolume vol;
-    func_8001CD0C(&vol);
-    set_vol_full(&vol);
-    sndqueue_exec_all();
-}
-
-
-// audio_flags
-u32 snd_status(void)
-{
-    u32 ret = 0;
-    u32 cd_flags = func_8001D13C();
-    if (D_80047E30 == 1 || D_80047E28 == 1)
-        ret |= 1 << 0;
-    if (cd_flags & 0x1000)
-        ret |= 1 << 3;
-    if (cd_flags & 0x8000)
-        ret |= 1 << 1;
-    
-    for (int i = 0; i < 24; i++) {
-        if (sfx_is_active(i)) {
-            ret |= 1 << 2;
-            break;
-        }
-    }
-    return ret;
-}
+// misc
 
 void execute_compressed(void *addr, u32 stack)
 {

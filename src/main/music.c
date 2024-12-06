@@ -203,7 +203,7 @@ void func_8001CD0C(SpuVolume *out)
     *out = vol_full;
 }
 
-s32 func_8001CD30(s32 arg0) {
+s32 cd_set_reverb(s32 arg0) {
     s32 temp_s0;
 
     temp_s0 = D_80047EA4;

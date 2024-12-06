@@ -124,7 +124,7 @@ int func_8001C31C();
 int func_8001C34C();
 int func_8001C374();
 int func_8001CD0C();
-int func_8001CD30();
+int cd_set_reverb();
 int func_8001CD68();
 int func_8001CDF0();
 int music_play_str();
@@ -238,7 +238,7 @@ void cd_init(void) {
     jt_set(&fade_in, 0x128);
     jt_set(&set_vol_full, 0x129);
     jt_set(&func_8001CD0C, 0x12A);
-    jt_set(&func_8001CD30, 0x12B);
+    jt_set(&cd_set_reverb, 0x12B);
     jt_set(&func_8001CD68, 0x12C);
     jt_set(&func_8001CDF0, 0x12D);
     jt_set(&fade_pause, 0x12E);
