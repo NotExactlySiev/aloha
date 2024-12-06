@@ -33,8 +33,8 @@ void func_8001B9D8(void)
     if (fe_value == 3) {
         func_8001A380();
     }
-    func_8001C2F4();
-    sndqueue_add_try(0xFE, 1, 0);
+    cd_pause();
+    cd_command(0xFE, 1, 0);
     D_80047DE8 = 0;
     D_80047F24 = 1;
     D_800548EC = 1;
@@ -45,20 +45,20 @@ void func_8001B9D8(void)
 extern s8 D_80047EC4[];
 
 void func_8001BA50(void) {
-    func_8001CEA0();
-    sndqueue_add_try(0xFC, &D_80047D8C, 0);
-    sndqueue_add_try(0xFE, NULL, 0);
-    func_8001C34C();
-    func_8001C2F4();
-    sndqueue_add_try(CdlSetmode, &D_80047EC4, 0);
-    sndqueue_add_try(CdlSetfilter, &D_80047ECC, 0);
-    sndqueue_add_try(CdlSeekL, &D_8004D0E0, 0);
-    sndqueue_add_try(CdlPause, NULL, 0);
-    sndqueue_add_try(CdlReadS, &D_8004D0E0, 0);
-    func_8001C374();
-    sndqueue_add_try(SNQ_SET_SCALED, &vol_full, 0);
-    sndqueue_add_try(SNQ_FUNC9, D_80047EEC, 0);
-    sndqueue_add_try(SNQ_SET_FE, 2, 0);
+    music_really_unpause();
+    cd_command(0xFC, &D_80047D8C, 0);
+    cd_command(0xFE, NULL, 0);
+    cd_mute();
+    cd_pause();
+    cd_command(CdlSetmode, &D_80047EC4, 0);
+    cd_command(CdlSetfilter, &D_80047ECC, 0);
+    cd_command(CdlSeekL, &D_8004D0E0, 0);
+    cd_command(CdlPause, NULL, 0);
+    cd_command(CdlReadS, &D_8004D0E0, 0);
+    cd_demute();
+    cd_command(SNQ_SET_SCALED, &vol_full, 0);
+    cd_command(SNQ_FUNC9, D_80047EEC, 0);
+    cd_command(SNQ_SET_FE, 2, 0);
     D_80047DE4 = 1;
 }
 
@@ -126,8 +126,8 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     D_80047EEC /= 200;
     printf("bgm is %d frames long\n", D_80047EEC);
     D_80047EC4[0] = arg3;   // mode
-    sndqueue_add_try(0xFB, 0, 0);
-    sndqueue_add_try(0xFA, 0, 0);
+    cd_command(0xFB, 0, 0);
+    cd_command(0xFA, 0, 0);
     func_8001BA50();
     D_80047F24 = 2;
     D_800548EC = 1;
@@ -137,48 +137,48 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
 NOT_IMPL(music_play_cdda);  // CD MUSIC
 
 // music_play_cdda_from_loc
-void func_8001C20C(CdlLOC *loc) {   // CD MUSIC
+void music_play_cdda_from_loc(CdlLOC *loc) {   // CD MUSIC
     D_80047D78 = 0;
     D_80047F24 = 0;
     cdda_loc.minute = loc->minute;
     cdda_loc.second = loc->second;
     cdda_loc.sector = loc->sector;
     D_80047EAC = CdPosToInt(loc);
-    sndqueue_add_try(SNQ_SET_SCALED, &D_80047D8C, 0);
-    sndqueue_add_try(SNQ_SET_FE, 0, 0);
-    func_8001C374();
-    sndqueue_add_try(CdlSeekP, loc, 0);
-    sndqueue_add_try(CdlPlay, 0, 0);
-    sndqueue_add_try(SNQ_FADE_OUT, 0, 0);
-    sndqueue_add_try(SNQ_SET_FULL, &vol_full, 0);
+    cd_command(SNQ_SET_SCALED, &D_80047D8C, 0);
+    cd_command(SNQ_SET_FE, 0, 0);
+    cd_demute();
+    cd_command(CdlSeekP, loc, 0);
+    cd_command(CdlPlay, 0, 0);
+    cd_command(SNQ_FADE_OUT, 0, 0);
+    cd_command(SNQ_SET_FULL, &vol_full, 0);
     func_8001B9D8();
 }
 
-void func_8001C2F4(void) {
-    sndqueue_add_try(CdlPause, 0, 0);
+void cd_pause(void) {
+    cd_command(CdlPause, 0, 0);
 }
 
-void func_8001C31C(void) {
-    sndqueue_add_try(CdlPlay, 0, 0);
-    func_8001C374();
+void cd_play(void) {
+    cd_command(CdlPlay, 0, 0);
+    cd_demute();
 }
 
-void func_8001C34C(void) {
-    sndqueue_add_try(CdlMute, 0, 0);
+void cd_mute(void) {
+    cd_command(CdlMute, 0, 0);
 }
 
-void func_8001C374(void) {
-    sndqueue_add_try(CdlDemute, 0, 0);
+void cd_demute(void) {
+    cd_command(CdlDemute, 0, 0);
 }
 
-s32 set_mono(s32 arg0) {
+s32 cd_set_stereo(s32 arg0) {
     CdlATV vol;
     s32 ret;
     
     ret = is_mono;
     is_mono = arg0;
     
-    sndqueue_exec_all();
+    cd_flush();
     
     if (arg0 == 0) {
         vol.val0 = 0x80;
@@ -196,9 +196,9 @@ s32 set_mono(s32 arg0) {
     return ret;
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CD0C);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", cd_get_vol);
 // TODO: the assembly for this is weird
-void func_8001CD0C(SpuVolume *out)
+void cd_get_vol(SpuVolume *out)
 {
     *out = vol_full;
 }
@@ -207,12 +207,12 @@ s32 cd_set_reverb(s32 arg0) {
     s32 temp_s0;
 
     temp_s0 = D_80047EA4;
-    sndqueue_add_try(SNQ_SET_REVERB, arg0, 0);
+    cd_command(SNQ_SET_REVERB, arg0, 0);
     return temp_s0;
 }
 
-void func_8001CD68(void) {
-    sndqueue_add_try(CdlStop, 0, 0);
+void cd_stop(void) {
+    cd_command(CdlStop, 0, 0);
 }
 
 // these two are unused?
@@ -221,37 +221,37 @@ s32 func_8001CD90(void) {
     s32 temp_s0;
 
     temp_s0 = fe_value;
-    sndqueue_add_try(SNQ_SET_FE, 5, 0);
+    cd_command(SNQ_SET_FE, 5, 0);
     return temp_s0;
 }
 
 void func_8001CDC8(s32 arg0) {
-    sndqueue_add_try(SNQ_SET_FE, arg0, 0);
+    cd_command(SNQ_SET_FE, arg0, 0);
 }
 */
 
-void func_8001CDF0(void) {
-    sndqueue_add_try(SNQ_FUNC8, 0, 0);
+void cd_fade_wait(void) {
+    cd_command(SNQ_FUNC8, 0, 0);
 }
 
 s32 func_8001CE18(void) {
     return bgm_finished;
 }
 
-void func_8001CE28(void) {
-    func_8001C2F4();
-    sndqueue_add_try(SNQ_SET_PAUSED, 1, 0);
+void music_pause(void) {
+    cd_pause();
+    cd_command(SNQ_SET_PAUSED, 1, 0);
 }
 
-void func_8001CE58(void) {
+void music_unpause(void) {
     if (bgm_paused == 1) {
-        sndqueue_add_try(CdlReadS, 0, 0);
-        sndqueue_add_try(SNQ_SET_PAUSED, 0, 0);
+        cd_command(CdlReadS, 0, 0);
+        cd_command(SNQ_SET_PAUSED, 0, 0);
     }
 }
 
-void func_8001CEA0(void) {
-    sndqueue_add_try(SNQ_SET_PAUSED, 0, 0);
+void music_really_unpause(void) {
+    cd_command(SNQ_SET_PAUSED, 0, 0);
 }
 
 // bgm_tick 

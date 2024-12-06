@@ -4,8 +4,8 @@
 void snd_reset(void);
 int snd_set_stereo(int mono);
 int snd_get_stereo(void);
-void func_80020E40(void);
-void func_80020E64(void);
+void sfx_kill_all(void);
+void sfx_release_all(void);
 void snd_set_vol_to_min(void);
 void snd_set_vol_to_max(void);
 int snd_set_volume(short val);

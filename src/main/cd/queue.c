@@ -48,7 +48,7 @@ s32 bgm_paused = 0;
 extern s32 cd_busy;   // step1
 extern void* cd_arg;     // param
 extern void* cd_result;     // result
-extern u8 cd_status;
+extern u8 cd_last_status;
 extern int pvd_is_cached;
 extern s32 D_800548EC;
 
@@ -108,18 +108,18 @@ s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2)
     return 1;
 }
 
-void sndqueue_add_try(u8 arg0, u32 arg1, u32 arg2)
+void cd_command(u8 arg0, u32 arg1, u32 arg2)
 {
     if (sndqueue_is_running == 0) {
         while (_sndqueue_size > 192)
-            sndqueue_exec();
+            cd_run_block();
     }
     sndqueue_add(arg0, arg1, arg2);
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", sndqueue_exec);
+INCLUDE_ASM("asm/main/nonmatchings/274C", cd_run_block);
 // execute one block of command
-s32 _sndqueue_exec()
+s32 _cd_run_block()
 {
     s32 rc;
 
@@ -177,13 +177,13 @@ s32 _sndqueue_exec()
     }
     // ... more shit
     CdSync(0, 0);
-    rc = cd_get_status(&cd_status);
+    rc = cd_get_status(&cd_last_status);
     if (rc == 1) {
-        if (cd_status & CdlStatShellOpen) {
+        if (cd_last_status & CdlStatShellOpen) {
             cd_busy = 1;
             goto flush_cache;
         }
-        if (cd_status & CdlStatSeek)
+        if (cd_last_status & CdlStatSeek)
             goto done;
     }
 
@@ -197,8 +197,8 @@ s32 _sndqueue_exec()
             D_80047DD8 = 0;
             sndqueue_com = CdlNop;
             cd_arg = 0;
-            cd_result = &cd_status;
-            cd_busy = (1 != cd_get_status(&cd_status));
+            cd_result = &cd_last_status;
+            cd_busy = (1 != cd_get_status(&cd_last_status));
             _sndqueue_empty = 1;
             goto done;
         }
@@ -216,7 +216,7 @@ s32 _sndqueue_exec()
             fe_value = newval;
             next = D_80047F34 + 1;
         } else if (sndqueue_com == SNQ_SET_FULL) {
-            set_vol_full(t->arg0);
+            cd_set_vol(t->arg0);
             next = D_80047F34 + 1;
         } else if (sndqueue_com == SNQ_SET_SCALED) {
             set_vol_scaled(t->arg0, vol_scale);
@@ -306,11 +306,11 @@ done:
 }
 
 // TODO: sound lol
-int sndqueue_exec_all(void)
+int cd_flush(void)
 {
     s32 ret = 0;
     if (_sndqueue_empty == 0) do {
-        ret = sndqueue_exec();
+        ret = cd_run_block();
     } while (_sndqueue_empty == 0 && ret != -1);
     CdSync(0, 0);
     return ret;

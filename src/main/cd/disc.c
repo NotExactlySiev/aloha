@@ -16,7 +16,7 @@ CdlLOC pvd_loc = { 0, 2, 22, 0 };
 s32 cd_busy = 0;   // step1
 void* cd_arg;     // param
 void* cd_result;     // result
-u8 cd_status = 0;
+u8 cd_last_status = 0;
 
 // update_state, gets called with the return value of CdSync(1,0)
 void func_80019F4C(s32 arg0) {
@@ -114,41 +114,33 @@ void func_8001A380(void)
 }
 
 // TODO: move these to their appropriate headers
-int func_8001D13C();
+int cd_status();
 int func_8001C734();
-int func_8001DB04();
+int iso_never_called();
 int music_play_cdda();
-int func_8001C20C();
-int func_8001C2F4();
-int func_8001C31C();
-int func_8001C34C();
-int func_8001C374();
-int func_8001CD0C();
-int cd_set_reverb();
-int func_8001CD68();
-int func_8001CDF0();
+int music_play_cdda_from_loc();
+int cd_play();
+int cd_demute();
+int cd_stop();
+int cd_fade_wait();
 int music_play_str();
-int func_8001AE90();
-int func_8001D248();
-int func_8001CE28();
-int func_8001CE58();
-int func_8001CEA0();
+
+int music_stop();
+int music_pause();
+int music_unpause();
+int music_really_unpause();
 int func_8001BB50();
-int func_8001D13C();
+int cd_status();
 int func_8001CF38();
-int sndqueue_add_try();
-int sndqueue_exec();
-int sndqueue_exec_all();
 int cd_read_full();
-int cd_file_read();
-int cd_fs_get_file_size();
-int execute_uncompressed();
+int iso_read();
+int iso_file_size();
+int iso_exec();
 int cd_seek_safe();
-int cd_file_read_fast();
-int cd_seek_file();
+int iso_read_fast();
+int iso_seek();
 int fade_out();
 int fade_in();
-int set_vol_full();
 int fade_pause();
 int fade_unpause();
 int play_movie();
@@ -165,6 +157,17 @@ SpuVolume D_80047D8C = {0};
 extern int bgm_paused;
 extern CdlLOC D_8005475C[];
 extern int sndqueue_is_running;
+
+// cd.h
+void cd_command(u8 arg0, u32 arg1, u32 arg2);
+int cd_run_block(void);
+int cd_flush(void);
+void cd_pause(void);
+void cd_mute(void);
+void cd_set_vol(SpuVolume *vol);
+SpuVolume *cd_get_vol(SpuVolume *vol);
+int cd_set_reverb(int arg0);
+void cd_fade_stop(void);
 
 // jmptable setter 0x100-0x140
 // cd_init
@@ -213,45 +216,45 @@ void cd_init(void) {
     SpuSetCommonAttr(&attr);
     func_8001A380();
     sndqueue_reset();
-    set_mono(0);
-    jt_set(&func_8001D13C, 0x100);
-    jt_set(&sndqueue_add_try, 0x101);
-    jt_set(&sndqueue_exec, 0x102);
-    jt_set(&sndqueue_exec_all, 0x103);
-    jt_set(&func_8001C734, 0x104);
-    jt_set(&cd_read_full, 0x110);
-    jt_set(&cd_file_read, 0x111);
-    jt_set(&cd_fs_get_file_size, 0x112);
-    jt_set(&execute_uncompressed, 0x113);
-    jt_set(&cd_seek_safe, 0x114);
-    jt_set(&cd_file_read_fast, 0x115);
-    jt_set(&cd_seek_file, 0x116);
-    jt_set(&func_8001DB04, 0x117);
-    jt_set(&music_play_cdda, 0x120);
-    jt_set(&func_8001C20C, 0x121);
-    jt_set(&func_8001C2F4, 0x122);
-    jt_set(&func_8001C31C, 0x123);
-    jt_set(&func_8001C34C, 0x124);
-    jt_set(&func_8001C374, 0x125);
-    jt_set(set_mono, 0x126);
-    jt_set(&fade_out, 0x127);
-    jt_set(&fade_in, 0x128);
-    jt_set(&set_vol_full, 0x129);
-    jt_set(&func_8001CD0C, 0x12A);
-    jt_set(&cd_set_reverb, 0x12B);
-    jt_set(&func_8001CD68, 0x12C);
-    jt_set(&func_8001CDF0, 0x12D);
-    jt_set(&fade_pause, 0x12E);
-    jt_set(&fade_unpause, 0x12F);
-    jt_set(&music_play_str, 0x130);
-    jt_set(&func_8001AE90, 0x138);
-    jt_set(&func_8001D248, 0x139);
-    jt_set(&func_8001CE28, 0x13A);
-    jt_set(&func_8001CE58, 0x13B);
-    jt_set(&func_8001CEA0, 0x13C);
-    jt_set(&play_movie, 0x140);
-    jt_set(&func_8001BB50, 0x150);
-    jt_set(&func_8001CF38, 0x151);
+    cd_set_stereo(0);
+    jt_set(cd_status, 0x100);
+    jt_set(cd_command, 0x101);
+    jt_set(cd_run_block, 0x102);
+    jt_set(cd_flush, 0x103);
+    jt_set(func_8001C734, 0x104);
+    jt_set(cd_read_full, 0x110);
+    jt_set(iso_read, 0x111);
+    jt_set(iso_file_size, 0x112);
+    jt_set(iso_exec, 0x113);
+    jt_set(cd_seek_safe, 0x114);
+    jt_set(iso_read_fast, 0x115);
+    jt_set(iso_seek, 0x116);
+    jt_set(iso_never_called, 0x117);
+    jt_set(music_play_cdda, 0x120);
+    jt_set(music_play_cdda_from_loc, 0x121);
+    jt_set(cd_pause, 0x122);
+    jt_set(cd_play, 0x123);
+    jt_set(cd_mute, 0x124);
+    jt_set(cd_demute, 0x125);
+    jt_set(cd_set_stereo, 0x126);
+    jt_set(fade_out, 0x127);
+    jt_set(fade_in, 0x128);
+    jt_set(cd_set_vol, 0x129);
+    jt_set(cd_get_vol, 0x12A);
+    jt_set(cd_set_reverb, 0x12B);
+    jt_set(cd_stop, 0x12C);
+    jt_set(cd_fade_wait, 0x12D);
+    jt_set(fade_pause, 0x12E);
+    jt_set(fade_unpause, 0x12F);
+    jt_set(music_play_str, 0x130);
+    jt_set(cd_fade_stop, 0x138);
+    jt_set(music_stop, 0x139);
+    jt_set(music_pause, 0x13A);
+    jt_set(music_unpause, 0x13B);
+    jt_set(music_really_unpause, 0x13C);
+    jt_set(play_movie, 0x140);      // movie_play
+    jt_set(func_8001BB50, 0x150);   // movie_int_to_pos?
+    jt_set(func_8001CF38, 0x151);   // movie_get_loc?
 }
 
 // clears all cd callbacks
@@ -266,7 +269,7 @@ void func_8001A74C(void)
 static inline void sync_and_check(void)
 {
     CdSync(0, NULL);
-    while (cd_get_status(&cd_status) != 1);
+    while (cd_get_status(&cd_last_status) != 1);
 }
 
 
@@ -275,14 +278,14 @@ void func_8001A77C(void)
     u8 buf[2048];
 
     sync_and_check();
-    if (!(cd_status & CdlStatShellOpen))
+    if (!(cd_last_status & CdlStatShellOpen))
         // not open, everything is fine
         return;
     
     do {
-        while (cd_status & CdlStatShellOpen) {
+        while (cd_last_status & CdlStatShellOpen) {
             //CdSync(0, NULL);
-            //CdControl(0U, NULL, &cd_status);
+            //CdControl(0U, NULL, &cd_last_status);
             sync_and_check();   // this is exactly the same as above
             sync_and_check();
         }

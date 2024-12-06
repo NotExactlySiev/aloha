@@ -10,8 +10,8 @@ extern int D_80047E20;
 int snd_set_stereo(int mono)
 {
     int ret = D_80047E20;
-    set_mono(mono);
-    func_8001DF78(mono);
+    cd_set_stereo(mono);
+    spu_set_stereo(mono);
     D_80047E20 = mono;
     return ret;
 }
@@ -21,12 +21,12 @@ int snd_get_stereo(void)
     return D_80047E20;
 }
 
-void func_80020E40(void)
+void sfx_kill_all(void)
 {
     sfx_kill_voices(SPU_ALLCH);
 }
 
-void func_80020E64(void)
+void sfx_release_all(void)
 {
     sfx_release_voices(SPU_ALLCH);
 }
@@ -206,15 +206,15 @@ void snd_reset(void)
 {
     sfx_set_reverb(0);
     cd_set_reverb(0);
-    func_80020E40();
-    func_8001CEA0();
-    func_8001C2F4();
-    func_8001D248();
-    func_8001AE90();
-    sndqueue_exec_all();
-    func_8001C34C();
+    sfx_kill_all();
+    music_really_unpause();
+    cd_pause();
+    music_stop();
+    cd_fade_stop();
+    cd_flush();
+    cd_mute();
     snd_set_vol_to_min();
-    func_80020E64();
+    sfx_release_all();
     fade_paused = 0;
     if (fading_in == 1) {
         tasks_remove_reserved(fade_in_task);
@@ -233,15 +233,15 @@ void snd_reset(void)
     set_volume(D_80047E26, fade_amount);
 
     SpuVolume vol;
-    func_8001CD0C(&vol);
-    set_vol_full(&vol);
-    sndqueue_exec_all();
+    cd_get_vol(&vol);
+    cd_set_vol(&vol);
+    cd_flush();
 }
 
 u32 snd_status(void)
 {
     u32 ret = 0;
-    u32 cd_flags = func_8001D13C();
+    u32 cd_flags = cd_status();
     if (fading_in == 1 || fading_out == 1)
         ret |= 1 << 0;
     if (cd_flags & 0x1000)

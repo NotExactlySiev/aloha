@@ -148,5 +148,5 @@ int iso_get_file(CdlFILE *file, char *filename)
 
 
 // TODO: I don't think this is ever called. keeping around for now
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001DB04);
-NOT_IMPL(func_8001DB04)
+//INCLUDE_ASM("asm/main/nonmatchings/274C", iso_never_called);
+NOT_IMPL(iso_never_called)

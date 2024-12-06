@@ -28,7 +28,7 @@ SpuVolume vol_full;
 
 void cd_ready_callback(s32 status, u32 *result);
 s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2);
-void func_8001C374(void);
+void cd_demute(void);
 
 // functions
 
@@ -51,7 +51,7 @@ void set_vol_scaled(SpuVolume *vol, s32 scale)
 }
 
 // this one ignores fading effects
-void set_vol_full(SpuVolume *vol) {
+void cd_set_vol(SpuVolume *vol) {
     set_vol_scaled(vol, VOL_FULL);
     vol_full = *vol;
 }
@@ -127,7 +127,7 @@ s32 fade_out(s32 duration, s32 dstvol, void* callback)
         return 0;
     }
 
-    sndqueue_add_try(SNQ_FADE_OUT, 1, 0);
+    cd_command(SNQ_FADE_OUT, 1, 0);
     return 1;
 }
 
@@ -152,15 +152,15 @@ s32 fade_in(s32 duration, s32 dstvol, void* callback)
         return 0;
     }
 
-    sndqueue_add_try(SNQ_FADE_IN, 1, 0);
+    cd_command(SNQ_FADE_IN, 1, 0);
     return 1;
 }
 
-void func_8001AE90(void)
+void cd_fade_stop(void)
 {
-    sndqueue_add_try(0xFA, 0, 0);
-    sndqueue_add_try(0xFB, 0, 0);
-    sndqueue_exec_all();
+    cd_command(0xFA, 0, 0);
+    cd_command(0xFB, 0, 0);
+    cd_flush();
     fade_paused = 0;
 }
 
@@ -180,12 +180,12 @@ int func_8001B94C(void)
     D_800548EC = 0;
     ret = 0;
     if (fe_value != 3) {
-        func_8001C2F4();
-        sndqueue_add_try(0xE, &D_80047DA0, 0);
-        func_8001C34C();
-        sndqueue_add_try(0xFC, &D_80047D8C, 0);
-        sndqueue_add_try(0xFE, 3, 0);
-        ret = sndqueue_exec_all();
+        cd_pause();
+        cd_command(0xE, &D_80047DA0, 0);
+        cd_mute();
+        cd_command(0xFC, &D_80047D8C, 0);
+        cd_command(0xFE, 3, 0);
+        ret = cd_flush();
     }
     return ret;
 }
@@ -193,11 +193,11 @@ int func_8001B94C(void)
 extern s32 _sndqueue_empty;
 extern u8 D_80047D94;
 extern s32 D_80047DE0;
-extern u8 cd_status;
+extern u8 cd_last_status;
 
 // TODO: make an enum for these flags
 // cd_flags
-u32 func_8001D13C(void)
+u32 cd_status(void)
 {
     u32 ret = 0;
     if (D_80047DE0 == 1)
@@ -214,16 +214,16 @@ u32 func_8001D13C(void)
         ret |= 0x1000;
     if (func_8001CE18() == 1)
         ret |= 0x0800;
-    ret |= cd_status;
+    ret |= cd_last_status;
     return ret;
 }
 
-void func_8001D248(void)
+void music_stop(void)
 {
     D_800548EC = 0;
-    sndqueue_add_try(0xFE, 0, 0);
-    func_8001C2F4();
-    sndqueue_exec_all();
+    cd_command(0xFE, 0, 0);
+    cd_pause();
+    cd_flush();
 }
 
 void fade_pause(void)
@@ -242,20 +242,20 @@ int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
 {
     func_8001D104();
     func_8001A77C();
-    sndqueue_exec_all();
+    cd_flush();
     call_DrawSync(0);
-    func_8001C374();
-    sndqueue_add_try(CdlPause, 0, 0);
-    sndqueue_add_try(0xFE, 4, 0);
-    sndqueue_exec_all();
+    cd_demute();
+    cd_command(CdlPause, 0, 0);
+    cd_command(0xFE, 4, 0);
+    cd_flush();
     int rc = play_movie_str(filename, args, cb);
-    set_mono(is_mono);
+    cd_set_stereo(is_mono);
     SpuVolume vol;
-    func_8001CD0C(&vol);
-    set_vol_full(&vol);
-    sndqueue_add_try(0xF9, D_80047EA4, 0);
-    sndqueue_add_try(0xFE, 0, 0);
-    sndqueue_exec_all();
+    cd_get_vol(&vol);
+    cd_set_vol(&vol);
+    cd_command(0xF9, D_80047EA4, 0);
+    cd_command(0xFE, 0, 0);
+    cd_flush();
     func_8001A380();
     return rc;
 }
@@ -374,7 +374,7 @@ void misc_init(void)
     jt_set(sfx_free_vab, 0x301);
     jt_set(snd_set_stereo, 0x302);
     jt_set(snd_get_stereo, 0x303);
-    jt_set(func_80020E40, 0x304);
+    jt_set(sfx_kill_all, 0x304);
     jt_set(snd_set_volume, 0x305);
     jt_set(snd_set_reverb, 0x307);
     jt_set(snd_set_vol_to_min, 0x308);

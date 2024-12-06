@@ -64,7 +64,7 @@ extern struct {
     UNK(256, 257);
     s32         (*snd_queue_exec)(void);
     UNK(259, 272);
-    s32         (*cd_file_read)(const char* addr, void* buf, s32 mode);
+    s32         (*iso_read)(const char* addr, void* buf, s32 mode);
     UNK(274, 294);
     s32         (*sound_fade_out)(s32 duration, s32, s32);
     s32         (*sound_fade_in)(s32 duration, s32, s32);

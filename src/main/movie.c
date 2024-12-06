@@ -106,7 +106,7 @@ static u32 *next_frame(Decoder *dec)
 
     if ((frame_count <= curr_frame + 3) && !fading_out) {
         fade_out(4, 0, 0);
-        sndqueue_exec_all();
+        cd_flush();
         fading_out = 1;
     }
 

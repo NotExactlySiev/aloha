@@ -156,10 +156,10 @@ s32 exception_event;          // 80047e7c
 char version_string[20];
 
 
-s32     cd_file_read(const char* addr, void* buf, s32 mode);
+s32     iso_read(const char* addr, void* buf, s32 mode);
 void    wait_frame();   // TODO: args?
 void    execute_compressed(u32* addr, u32 stack);
-s32     execute_uncompressed(char* file, s32 param);
+s32     iso_exec(char* file, s32 param);
 
 // boot.h
 void reset(void);
@@ -177,19 +177,19 @@ void file_execute_loop(void)
             // if addr isn't NULL, it's compressed
             if ((u32) addr & 1) {
                 addr = (u32*) ((u32) addr & ~0xF);
-                while (cd_file_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
+                while (iso_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
                     printf("Exec File Read Error\n");
                 }
 
                 while (addr[0] != 0x582D5350 || addr[1] != 0x45584520) {
-                    cd_file_read(g_Files[g_CurrFile].addr, addr, 0);
+                    iso_read(g_Files[g_CurrFile].addr, addr, 0);
                     printf("Exec File Read Error\n");
                 }
             }
             execute_compressed(addr, 0);
         } else {
             // otherwise it's uncompressed and execute it normally
-            execute_uncompressed(g_Files[g_CurrFile].addr, 0);
+            iso_exec(g_Files[g_CurrFile].addr, 0);
         }
         g_CurrFile = get_next_exec();
     }
@@ -319,7 +319,7 @@ void show_logo(void)
     DrawSync(0);
     
     do {
-        tmp = cd_file_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
+        tmp = iso_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
     } while (tmp == -1);
 
     if (tmp >= 0) {       
@@ -348,7 +348,7 @@ void show_logo(void)
     SetDispMask(0);
     
     do {
-        D_80047D48 = cd_file_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
+        D_80047D48 = iso_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
     } while (D_80047D48 == -1);
 
     if (D_80047D48 == -2) {
@@ -460,8 +460,8 @@ void init_everything(void)
 
 void game_shutdown(void)
 {
-    func_8001CD68();
-    sndqueue_exec_all();
+    cd_stop();
+    cd_flush();
     func_8001A74C();
     func_80020C8C();
     func_8001DE98();
@@ -550,7 +550,7 @@ void read_version(void)
     int rc;
     u8 buf[1024];
     do {
-        rc = cd_file_read("COUNTRY.TXT", buf, sizeof(buf));
+        rc = iso_read("COUNTRY.TXT", buf, sizeof(buf));
     } while (rc == -1);
     
     game_region = 0;
@@ -722,7 +722,7 @@ int main(int argc, char** argv)
     music_set_list(&D_80034344);
 
     while (1) {
-        int rc = cd_file_read("SYS_SE.VAB", &tmpfilebuf, 0);
+        int rc = iso_read("SYS_SE.VAB", &tmpfilebuf, 0);
         if (rc > 0 && tmpfilebuf == 0x56414270) break;
         printf("VAB file Reload\n");
     }

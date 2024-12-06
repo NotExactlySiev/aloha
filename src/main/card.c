@@ -268,7 +268,7 @@ int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len)
     func_800203AC(fd, dst, len);
     int rc;
     while ((rc = func_8001FC5C()) == McErrNone) {
-        sndqueue_exec();
+        cd_run_block();
         func_800218B0();
     }
     mc_file_close(fd);
@@ -292,7 +292,7 @@ int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, ch
     func_80020414(fd, 0, SEEK_SET);
     func_800203AC(fd, &header, 128);
     while (func_8001FC5C() == 0) {
-        sndqueue_exec();
+        cd_run_block();
         func_800218B0();
     }
 
@@ -305,7 +305,7 @@ int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, ch
             func_80020414(fd, 0, SEEK_SET);
             func_800202A0(fd, &header, 128);
             while (func_8001FC5C() == 0) {
-                sndqueue_exec();
+                cd_run_block();
                 func_800218B0();
             }
         }
@@ -315,7 +315,7 @@ int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, ch
     func_800202A0(fd, src, len);
     int rc;
     while ((rc = func_8001FC5C()) == 0) {
-        sndqueue_exec();
+        cd_run_block();
         func_800218B0();
     }
 
@@ -348,7 +348,7 @@ int func_80021BCC(uint mtidx, char *filename, int len, char *title)
     func_80020434(&header, 0x10 + 3, len + sizeof(McFileHeader), title, D_80032FDC, D_80032E5C[0], D_80032E5C[1], D_80032E5C[2]);
     func_800202A0(fd, &header, sizeof(McFileHeader));
     while (func_8001FC5C() == 0) {
-        sndqueue_exec();
+        cd_run_block();
         func_800218B0();
     }
     mc_file_close(fd);

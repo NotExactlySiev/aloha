@@ -5,7 +5,7 @@
 #include "cd.h"
 #include "../main.h"
 
-static int cd_file_read_prv(int fast, char *filename, void *buf, int n);
+static int iso_read_prv(int fast, char *filename, void *buf, int n);
 
 int cd_fs_get_file(CdlFILE *file, char *filename) {
     char upper[128];
@@ -34,11 +34,11 @@ int cd_fs_get_file(CdlFILE *file, char *filename) {
 
 
 NOT_IMPL(cd_fs_get_file_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
-NOT_IMPL(cd_fs_get_file_size) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_size);   // iso_get_file_size
+NOT_IMPL(iso_file_size) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_file_size);   // iso_get_file_size
 
 // helper functions for cd stuff
 NOT_IMPL(cd_seek_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
-NOT_IMPL(cd_seek_file) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_file);   // cd_seek_file
+NOT_IMPL(iso_seek) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_seek);   // iso_seek
 NOT_IMPL(cd_read_full) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
 
 
@@ -55,18 +55,18 @@ s32 func_8001C734(s32 mode, u8* result) {   // pause
 
 
 // cd filesystem io
-int cd_file_read(char *filename, u8 *buf, int n)
+int iso_read(char *filename, u8 *buf, int n)
 {
-    return cd_file_read_prv(0, filename, buf, n);
+    return iso_read_prv(0, filename, buf, n);
 }
 
 // with rounding, fast. not used?
-int cd_file_read_fast(char *filename, u8 *buf, int n)
+int iso_read_fast(char *filename, u8 *buf, int n)
 {
-    return cd_file_read_prv(1, filename, buf, n);
+    return iso_read_prv(1, filename, buf, n);
 }
 
-static int cd_file_read_prv(int fast, char *filename, void *buf, int n)
+static int iso_read_prv(int fast, char *filename, void *buf, int n)
 {
     // what even is this function...
     u32 *dst = buf;
@@ -135,7 +135,7 @@ static int cd_file_read_prv(int fast, char *filename, void *buf, int n)
 
 NOT_IMPL(cd_fs_load_exe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);
 
-s32 execute_uncompressed(char* file, s32 param) {
+s32 iso_exec(char* file, s32 param) {
     EXEC header;
     
     if (cd_fs_load_exe(file, param, &header) != 0)

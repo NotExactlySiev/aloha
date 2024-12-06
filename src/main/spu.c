@@ -77,7 +77,7 @@ void func_8001DF14(long mode, short depth)
 
 extern int D_80047E08;
 
-void func_8001DF78(int val)
+void spu_set_stereo(int val)
 {
     D_80047E08 = val;
 }

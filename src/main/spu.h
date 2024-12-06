@@ -6,7 +6,7 @@ void func_8001DD7C(void);
 void func_8001DE98(void);
 long call_SpuSetCommonAttr(SpuCommonAttr *attr);
 void func_8001DF14(long mode, short depth);
-void func_8001DF78(int val);
+void spu_set_stereo(int val);
 long call_SpuMalloc(long size);
 long call_SpuMallocWithStartAddr(unsigned long addr, long size);
 void call_SpuFree(unsigned long addr);
