@@ -1,12 +1,14 @@
 #include "common.h"
 #include "../main.h"
 #include "../movie.h"
+#include "../spu.h"
 #include "cd.h"
 #include <libcd.h>
 #include <libspu.h>
 
 s32 vblank_enable(void); // TODO: goes in a module header
 
+// this should be cd.c, the main cd driver file
 
 // general state
 extern int D_80047DD8;
@@ -98,7 +100,7 @@ s32 cd_get_status(u8* result)
     return CdControl(CdlNop, 0, result);
 }
 
-void cd_read_callback(void) {}
+void cd_read_callback(u8 status, u8 *result) {}
 
 // must have been some debug thing?
 // or get next free? returning 0 always clears it
@@ -181,7 +183,7 @@ void cd_init(void) {
     CdInit();
     CdSetDebug(0);
     
-    D_80047E8C = func_8001A378(&D_8005475C);
+    D_80047E8C = func_8001A378(D_8005475C);
     D_80047D74 = 1;
     D_80047D78 = 0;
     D_80047D7C = 1;

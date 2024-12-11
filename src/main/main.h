@@ -14,21 +14,11 @@ typedef struct {
 
 
 typedef struct {
-    void* header;
-    char* addr;
+    void *header;
+    char *addr;
 } file_t;
 
-// TODO: these should be in headers for their own files
-void reboot(char*, char*);
-long call_SpuMalloc(long size);
-long call_SpuMallocWithStartAddr(unsigned long addr, long size);
-void call_SpuFree(unsigned long addr);
-void set_voice_attr(SpuVoiceAttr* arg0);
-
 extern u32 tmpfilebuf;
-extern u8 kernelbuf[8];
-extern void* jmptable[1024];
-extern u8 g_GameConfig[1280];
 
 // These are probably extern:
 extern u8 D_80032FFC;          // builtin intro prs image

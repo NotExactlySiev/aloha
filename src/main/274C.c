@@ -26,7 +26,7 @@ s32 D_80047F24;
 SpuVolume vol_full;
 
 
-void cd_ready_callback(s32 status, u32 *result);
+//void cd_ready_callback(s32 status, u32 *result);
 s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2);
 void cd_demute(void);
 

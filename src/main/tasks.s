@@ -59,9 +59,6 @@ glabel tasks_tick
 glabel D_80023370
     .fill 40, 8, 0
 
-/*glabel D_80023470*/
-/*    .fill 8, 8, 0*/
-
 glabel vsync_counter
     .word 0
 

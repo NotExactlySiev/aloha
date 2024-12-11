@@ -1,7 +1,7 @@
 #include <libcd.h>
 #define SECTOR_BYTES     (SECTOR_SIZE * sizeof(int))
 extern CdlLOC pvd_loc;
-void cd_ready_callback(s32 status, u32 *result);
+void cd_ready_callback(u8 status, u8 *result);
 
 int try_CdControl(u_char com, void *param, u_char *result);
 int try_CdControlB(u_char com, void *param, u_char *result);
