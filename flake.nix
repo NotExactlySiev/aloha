@@ -4,7 +4,7 @@
   # TODO: add my super awesome Nix build of PCSX-Redux
 
   inputs = {
-    nixpkgs.url = "nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
   outputs = { self, nixpkgs }:
