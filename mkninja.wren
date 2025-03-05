@@ -1,6 +1,8 @@
 import "io" for File, Directory
 import "./ninja" for Ninja
 
+var LINKER_SHARED = "linker/shared.ld"
+
 // all paths are relative to the main project directory
 // TODO: add INCLUDE_ASM dependencies
 // TODO: include header dependencies
@@ -66,8 +68,8 @@ class Executable {
             allDeps.add("psyq/libs/" + f + ".a")
         }
         var elfPath = "build/" + _name + ".elf"
-        var symbolsFile = "symbols." + _name + ".ld"
-        Ninja.build("link", elfPath, allDeps, ["shared.ld", symbolsFile])
+        var symbolsFile = "linker/symbols." + _name + ".ld"
+        Ninja.build("link", elfPath, allDeps, [LINKER_SHARED, symbolsFile])
         Ninja.param("modid", _name)
         var exeName = "build/" + _name + ".exe"
 
@@ -106,7 +108,7 @@ Ninja.set("cflagsnat", "-O2")
 
 Ninja.rule("ccnat", "gcc $cflagsnative $in -o $out")
 Ninja.rule("cc", "${cross}gcc $cflags -c $in -o $out")
-Ninja.rule("link", "${cross}ld $ldflagas -Map=build/$modid.map -T symbols.$modid.ld -T shared.ld $in -o $out")
+Ninja.rule("link", "${cross}ld $ldflagas -Map=build/$modid.map -T linker/symbols.$modid.ld -T " + LINKER_SHARED + " $in -o $out")
 Ninja.rule("objcopy", "${cross}objcopy -O binary $in $out")
 Ninja.rule("copy", "cp $in $out")
 Ninja.rule("decomp", "$jfcomp decomp $in $out")
