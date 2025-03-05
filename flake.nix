@@ -28,6 +28,7 @@
           packages = [
             crossPkgs.buildPackages.gcc-unwrapped
             crossPkgs.buildPackages.binutils-unwrapped
+            (pkgs.callPackage ./wren.nix {})
           ];
         };
       });
