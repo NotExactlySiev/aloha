@@ -28,10 +28,15 @@ SECTIONS
 
     __size = __romPos - __exec_start;
 
+    __bss_start = .;
+
     .bss (NOLOAD) : SUBALIGN(4)
     {
         *(.bss*);
     }
+
+    __bss_end = .;
+    __heap_base = __bss_end;
 
 
     /DISCARD/ :

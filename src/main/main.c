@@ -148,7 +148,7 @@ s32 game_region = 0;
 u32 tv_system = MODE_NTSC;
 s32 g_GameIsZ = 0;
 
-void* D_80048044;       // hold return for _start
+void* saved_ra;       // hold return for _start
 s32 D_80047E6C;         // 80047e6c
 s32 D_80047E70;         // 80047e70
 s32 vblank_event;          // 80047e74

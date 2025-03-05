@@ -2,7 +2,7 @@
 
 .section .data
 
-glabel stacksize
+glabel stack_size
 /* 2FC40 80047440 */ .word 0x00008000
 /* 2FC44 80047444 */ .word 0x00800000
 

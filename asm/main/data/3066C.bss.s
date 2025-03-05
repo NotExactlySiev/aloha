@@ -173,7 +173,3 @@ glabel D_8005491C
 
 glabel D_80054920
     .space 0x4
-
-/* this is supposed to be the bottom of heap */
-glabel D_80054924
-    .space 0x4
