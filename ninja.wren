@@ -1,7 +1,7 @@
 class Ninja {
     static put(s) {
         // TODO: write to a buffer?
-        // should be an overridable callback thing
+        // should be an overridable callback thing (interface method)
         System.write(s)
     }
 

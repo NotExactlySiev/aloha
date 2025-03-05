@@ -111,7 +111,9 @@ Ninja.rule("objcopy", "${cross}objcopy -O binary $in $out")
 Ninja.rule("copy", "cp $in $out")
 Ninja.rule("decomp", "$jfcomp decomp $in $out")
 Ninja.rule("comp", "$jfcomp comp $in $out")
+Ninja.param("description", "Compressing $out")
 Ninja.rule("mkiso", "$makeiso -y $in -o $out")
+Ninja.param("description", "Generating Disc Image")
 
 Ninja.build("phony", "tools", ["$jfcomp"])
 Ninja.build("ccnat", "$jfcomp", [
