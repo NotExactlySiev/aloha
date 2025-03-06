@@ -407,7 +407,6 @@ void sfx_play(int id, short pan, short vol)
 
 //INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_play_modulated);
 // FIXME: this is not entirely correct, even though it works
-// sfx_play_modulated
 int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     u32 vab_idx = id >> 0x18;
     u32 prog_idx = (id >> 8) & 0x7F;
@@ -456,7 +455,7 @@ int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
             }
         }
 
-        if (max_index == -1) continue;        
+        if (max_index == -1) continue;
         channel = max_index;
         goto found;
     }
