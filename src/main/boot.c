@@ -54,7 +54,7 @@ void reboot(char* exec, char* conf)
     printf("def = %s conf = %s serial = %08x %08x\n", execAddr, confAddr, BIOS_HEADER.kernel_date, BIOS_HEADER.console_type);
     EnterCriticalSection();
 
-    if ((BIOS_HEADER.console_type) && (BIOS_HEADER.kernel_date == 0x19940728)) {
+    if ((BIOS_HEADER.console_type == 0x2000) && (BIOS_HEADER.kernel_date == 0x19940728)) {
         (*((boot_f) 0xbfc0e228))(confAddr, execAddr);
     } else {
         _boot(confAddr, execAddr);
