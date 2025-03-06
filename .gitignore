@@ -3,6 +3,7 @@ build.ninja
 us.xml
 original/*
 asm/**/nonmatchings
+!asm/main/nonmatchings
 execs/*
 assets/*
 build/disc
