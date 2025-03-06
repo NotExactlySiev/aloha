@@ -23,7 +23,7 @@ extern u32 tmpfilebuf;
 // These are probably extern:
 extern u8 D_80032FFC;          // builtin intro prs image
 extern u8 D_80033000;          // builtin logo data, const
-extern s32 D_80047D4C;         // 80047d4c
+extern s32 widescreen;         // 80047d4c
 extern s32 D_80047D50;         // 80047d50
 extern s32 D_80047D58;         // 80047d58
 extern s32 D_80047D64;
@@ -52,8 +52,8 @@ typedef struct {
 void file_execute_loop(void);               
 char* get_file_addr(s32 idx);
 s32 func_80018A6C(void);
-s32 get_D_80047D4C(void);
-void set_D_80047D4C(s32 arg0);
+s32 get_widescreen(void);
+void set_widescreen(s32 arg0);
 void show_logo(void);
 void func_8001926C(void);
 void init_everything(void);
@@ -69,7 +69,7 @@ s32 vblank_enable(void);
 s32 get_video_mode(void);
 void read_version(void);
 s32 get_region(void);
-char *get_version_string(void);
+char *get_mc_file_name(void);
 void game_init(void);
 s32 get_engine_running(void);
 void* jt_reset(void);

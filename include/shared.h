@@ -46,9 +46,9 @@ extern struct {
     char*       (*execs_get_path)(s32);
     s32         (*get_video_mode)(void);
     s32         (*get_region)(void);
-    int         (*get_D_80047D4C)(void);
-    void        (*set_D_80047D4C)(int);
-    char*       (*get_version_string)(void);
+    int         (*get_widescreen)(void);  // WIDESCREEN?????!!!!
+    void        (*set_widescreen)(int); // title sets it to EA in globals
+    char*       (*get_mc_file_name)(void);
     UNK(12, 191);
     void        (*decompress_rle)(u32,void* src,void* dst);
     void        (*decompress_lz1)(void* src,void* dst);

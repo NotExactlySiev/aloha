@@ -18,7 +18,7 @@ u32 saved_ra;
 
 // stuff from 1D530.data.s
 int D_80047D48 = -2;
-int D_80047D4C = 0;
+int widescreen = 0;
 int D_80047D50 = 0;
 int D_80047D58 = 0;
 int D_80047D64 = 0;
@@ -149,13 +149,13 @@ s32 g_CurrFile = 0;
 s32 next_exec = 0;
 s32 game_region = 0;
 u32 tv_system = MODE_NTSC;
-s32 g_GameIsZ = 0;
+s32 dev_mode = 0;
 
 s32 D_80047E6C;         // 80047e6c
 s32 D_80047E70;         // 80047e70
 s32 vblank_event;          // 80047e74
 s32 exception_event;          // 80047e7c
-char version_string[20];
+char mc_file_name[20];
 
 
 s32     iso_read(const char* addr, void* buf, s32 mode);
@@ -208,17 +208,17 @@ s32 func_80018A6C(void)
     return D_80047D50;
 }
 
-s32 get_D_80047D4C(void)
+s32 get_widescreen(void)
 {
-    return D_80047D4C;
+    return widescreen;
 }
 
-void set_D_80047D4C(s32 arg0)
+void set_widescreen(s32 arg0)
 {
     if (arg0 != 0)
-        D_80047D4C = 1;
+        widescreen = 1;
     else
-        D_80047D4C = 0;
+        widescreen = 0;
 }
 
 // move splash.c to another file?
@@ -555,7 +555,7 @@ void read_version(void)
         rc = iso_read("COUNTRY.TXT", buf, sizeof(buf));
     } while (rc == -1);
     
-    game_region = 0;
+    game_region = REGION_NONE;
     tv_system = MODE_NTSC;
     if (rc == -2)
         return;
@@ -564,16 +564,17 @@ void read_version(void)
         tv_system = MODE_PAL;
     
     if (buf[1] == 'U')
-        game_region = 1;
+        game_region = REGION_USA;
     else if (buf[1] == 'E')
-        game_region = 2;
+        game_region = REGION_EUROPE;
     
+    // in dev mode, the MC file uses a custom name read from COUNTRY.TXT
     if (buf[1] == 'Z') {
-        game_region = 3;
+        game_region = REGION_DEBUG;
         for (int i = 0; i < 12; i++)
-            version_string[i] = buf[2 + i];
-        strcpy("EXACT01", &version_string[12]);
-        g_GameIsZ = 1;
+            mc_file_name[i] = buf[2 + i];
+        strcpy("EXACT01", &mc_file_name[12]);
+        dev_mode = 1;
     }
 }
 
@@ -582,11 +583,12 @@ s32 get_region(void)
     return game_region;
 }
 
-char *get_version_string(void)
+// this is the save file name for the debug version
+char *get_mc_file_name(void)
 {
-    if (g_GameIsZ == 0)
+    if (dev_mode == 0)
         return 0;    
-    return version_string;
+    return mc_file_name;
 }
 
 void game_init(void)
@@ -616,9 +618,9 @@ void game_init(void)
     jt_set(globals, 5);
     jt_set(get_video_mode, 7);
     jt_set(get_region, 8);
-    jt_set(get_D_80047D4C, 9);
-    jt_set(set_D_80047D4C, 10);
-    jt_set(get_version_string, 11);
+    jt_set(get_widescreen, 9);
+    jt_set(set_widescreen, 10);
+    jt_set(get_mc_file_name, 11);
 
     // clear global space
     memset((void*) 0x80014000, 0x4000, 0);
