@@ -523,8 +523,45 @@ int sfx_set_vol(u32 handle, u16 vol)
     return sfx_set_both(handle, channels[handle & 0x1F].pan, vol);
 }
 
-// function for the two above (not private)
-INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_set_both);
+int sfx_set_both(u32 handle, u16 pan, u16 vol)
+{
+    int idx = handle & 0x1F;
+    if (channels[idx].active == 0) return -1;
+    if (channels[idx].epoch != (handle & 0x7FE0)) return -1;
+
+    // why are these constants so weird
+    const u16 MIDDLE = 126/2-1;
+
+    //s16 pan_ = pan;
+    s16 vol_ = vol;
+
+    if ((s16) pan < 0)
+        pan = 0;
+    if ((s16) pan > 126)
+        pan = 126;
+
+    if (vol_ > 127)
+        vol_ = 127;
+    if (vol_ < -127)
+        vol_ = -127;
+
+    channels[idx].vol = vol_;
+    channels[idx].pan = pan;
+
+    u16 right = pan > MIDDLE ? MIDDLE : pan;
+    u16 left = pan < MIDDLE ? MIDDLE : (126 - pan);
+    
+    set_voice_attr(&(SpuVoiceAttr){
+        .voice = 1 << idx,
+        .mask = 3,
+        .volume = {
+            .left = 2 * left * vol_,
+            .right = 2 * right * vol_,
+        },
+    });
+
+    return handle;
+}
 
 // TODO: these types are all messed up
 int sfx_get_pan(uint handle)
