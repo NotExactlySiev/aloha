@@ -50,7 +50,9 @@ int strlen(char *str)
     return i;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_leaf);
+// unused
+// basename
+//INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_leaf);
 
 int memcmp(int n, u8 *a, u8 *b)
 {

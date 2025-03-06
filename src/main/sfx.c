@@ -287,7 +287,24 @@ int func_8001EFAC(s16 idx)
     return idx;
 }
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_set_prog_attr);
+void sfx_set_prog_attr(u32 id, int attr)
+{
+        if (attr < 0)
+            attr = 0;
+        else if (attr > 2)
+            attr = 2;
+        
+        u32 vab_idx = id >> 0x18;
+        u32 prog_idx = (id >> 8) & 0x7F;
+
+        if (vab_idx >= MAX_VABS) return;
+        VabFile *vab = &loaded_vabs[vab_idx];
+        
+        if (vab->a == 0) return;
+        if (prog_idx >= vab->nprogs) return;
+        
+        vab->progs[prog_idx].attr = attr;
+}
 
 // NOTE: I wouldn't bet my life on the correctness of this function. but it seems
 // to be behaving just like the original as far as I can tell.
