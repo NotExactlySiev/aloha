@@ -7,7 +7,6 @@
 
 // shared data provided by the main executable
 
-
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
     uint best_times[6][3][3];
@@ -18,7 +17,27 @@ typedef struct {
     s8  unkE7;
     s8  unkE8;  // played before?
     s8  unkE9;
+    UNK(0xEA, 0xFF);
+} SavedData;
+#undef UNK
+
+
+#define UNK(a,b)    u8 unk##a[b - a + 1]
+typedef struct {
+    SavedData curr;
+    SavedData saved[3];
+    SavedData backup;
+/*
+    uint best_times[6][3][3];
+    UNK(0xD8, 0xE3);
+    s8  unkE4;
+    s8  unkE5;
+    s8  unkE6;
+    s8  unkE7;
+    s8  unkE8;  // played before?
+    s8  unkE9;
     UNK(0xEA, 0x4FF);
+*/
     s32  unk500;
     s32  unk504;
     s8   unk508;
