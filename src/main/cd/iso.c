@@ -34,7 +34,7 @@ static int get_root_loc(CdlLOC *loc)
 
 // never called
 //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D740);
-NOT_IMPL(func_8001D740)
+NOT_IMPL_FN(func_8001D740)
 
 
 static int read_sectors(CdlLOC *loc, u8 *buf, u32 nsectors) {
@@ -149,4 +149,4 @@ int iso_get_file(CdlFILE *file, char *filename)
 
 // TODO: I don't think this is ever called. keeping around for now
 //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_never_called);
-NOT_IMPL(iso_never_called)
+NOT_IMPL_FN(iso_never_called)

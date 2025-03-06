@@ -40,9 +40,17 @@ void func_80019F4C(s32 arg0) {
     lock = 0;
 }
 
-
-// this break the cd queue abstraction by calling queue_add_unsafe
-INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
+//INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
+void cd_ready_callback(u8 status, u8 *result)
+{
+    extern s32 fe_value;
+    cd_last_status = result[0];
+    if ((cd_last_status & CdlStatSeek == 0) && fe_value == 1) {
+        // more CD-DA stuff that's never ran
+        // this break the cd queue abstraction by calling queue_add_unsafe
+        NOT_IMPL("handling cd callback for CD-DA")
+    }
+}
 
 
 int try_CdControl(u_char com, void *param, u_char *result) {

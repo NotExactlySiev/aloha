@@ -33,13 +33,13 @@ int cd_fs_get_file(CdlFILE *file, char *filename) {
 }
 
 
-NOT_IMPL(cd_fs_get_file_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
-NOT_IMPL(iso_file_size) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_file_size);   // iso_get_file_size
+NOT_IMPL_FN(cd_fs_get_file_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
+NOT_IMPL_FN(iso_file_size) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_file_size);   // iso_get_file_size
 
 // helper functions for cd stuff
-NOT_IMPL(cd_seek_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
-NOT_IMPL(iso_seek) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_seek);   // iso_seek
-NOT_IMPL(cd_read_full) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
+NOT_IMPL_FN(cd_seek_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
+NOT_IMPL_FN(iso_seek) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_seek);   // iso_seek
+NOT_IMPL_FN(cd_read_full) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
 
 
 s32 func_8001C734(s32 mode, u8* result) {   // pause
@@ -133,7 +133,7 @@ static int iso_read_prv(int fast, char *filename, void *buf, int n)
 }
 
 
-NOT_IMPL(cd_fs_load_exe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);
+NOT_IMPL_FN(cd_fs_load_exe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);
 
 s32 iso_exec(char* file, s32 param) {
     EXEC header;

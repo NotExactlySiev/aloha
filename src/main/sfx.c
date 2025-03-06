@@ -532,13 +532,12 @@ int sfx_set_both(u32 handle, u16 pan, u16 vol)
     // why are these constants so weird
     const u16 MIDDLE = 126/2-1;
 
-    //s16 pan_ = pan;
-    s16 vol_ = vol;
-
     if ((s16) pan < 0)
         pan = 0;
     if ((s16) pan > 126)
         pan = 126;
+
+    s16 vol_ = vol;
 
     if (vol_ > 127)
         vol_ = 127;

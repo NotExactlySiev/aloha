@@ -25,7 +25,7 @@ int bgm_counter;
 int bgm_target;
 int bgm_finished;
 
-NOT_IMPL(func_8001B9D8);    // CD MUSIC
+NOT_IMPL_FN(func_8001B9D8);    // CD MUSIC
 /*
 void func_8001B9D8(void)
 {
@@ -134,7 +134,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
 
 }
 
-NOT_IMPL(music_play_cdda);  // CD MUSIC
+NOT_IMPL_FN(music_play_cdda);  // CD MUSIC
 
 // music_play_cdda_from_loc
 void music_play_cdda_from_loc(CdlLOC *loc) {   // CD MUSIC
@@ -266,7 +266,7 @@ void func_8001CEC8(void)
 }
 
 // CD MUSIC
-NOT_IMPL(func_8001CF38) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
+NOT_IMPL_FN(func_8001CF38) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
 
 
 void func_8001D0AC(int delay)

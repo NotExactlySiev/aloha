@@ -12,6 +12,10 @@ typedef struct EXEC EXEC;
 #define SCREEN_HEIGHT   240
 
 #define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))
-#define NOT_IMPL(fn)  int fn() { printf("called non-implemented function " #fn "\n"); while (1); }
+#define NOT_IMPL_FN(fn)  int fn() { printf("called non-implemented function " #fn "\n"); while (1); }
+#define NOT_IMPL(s)     \
+    printf(__FILE__ ":%d %s: not implemented: " s "\n", __LINE__, __func__); \
+    while (1);
+
 
 #endif
