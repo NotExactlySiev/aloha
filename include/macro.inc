@@ -30,7 +30,7 @@
     glabel \label
     addiu      $t2, $zero, \table
     jr         $t2
-    addiu     $t1, $zero, \code
+    addiu      $t1, $zero, \code
     nop
   .endm
 
@@ -43,6 +43,29 @@
     nop
   .endm
 
+/* I don't know what this is, I can't figure out what it is. but it's always
+ * this exact value in the files I've disassembled so far. it's just a trap.
+ */
   .macro tge a, b, c
-    .word 0x70170000
+    .word       0x00001770
+  .endm
+
+  .macro MVMVA sf,mx,v,cv,lm
+    cop2        0x0400012|(\sf<<19)|(\mx<<17)|(\v<<15)|(\cv<<13)|(\lm<<10)
+  .endm
+
+  .macro GPF sf
+    cop2        0x0190003D | \sf<<19
+  .endm
+
+  .macro GPL sf
+    cop2        0x01A0003E | \sf<<19
+  .endm
+
+  .macro INTPL
+    cop2        0x0980011
+  .endm
+
+  .macro RTPS
+    cop2        0x0180001
   .endm
