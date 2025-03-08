@@ -234,7 +234,10 @@ void text_put_char(u16 c);
 void text_put_str(char *str);
 
 typedef struct {
-    u32 flags;
+    u8 flags;
+    u8 dest;
+    u8 unk0;
+    u8 unk1;
     // I think this is padding lol?
 /*
     u8 field1_0x1;
@@ -253,7 +256,7 @@ typedef union {
 } MenuItemDisplay;
 
 typedef struct {
-    int items_type;
+    int items_type; // just type, dictates more than items
     RECT offset;    // where entries start
     u8 field2_0xc;
     u8 field3_0xd;
@@ -277,6 +280,18 @@ typedef struct {
     MenuItem items[];
 } MenuPage;
 
+enum {
+    PAGE_MAIN = 0,
+    PAGE_LOAD = 1,
+    PAGE_SAVE = 2,
+    PAGE_SETTINGS = 3,
+    PAGE_CONFIRM_LOAD = 4,
+    PAGE_CONFIRM_SAVE = 5,
+    PAGE_ERROR_ = 6,
+    PAGE_SETTINGS_TEST = 7,
+    PAGE_SETTINGS_WIDE = 8,
+    PAGES_COUNT
+};
 
 // settings handlers
 int func_800E1E28();
@@ -284,125 +299,253 @@ int func_800E1E60();
 int func_800E1E98();
 int func_800E1ED0();
 int func_800E1F28();
-
-extern MenuPage *D_800EB8CC[];
-
+int func_800E1928();
+int func_800E1A88();
 int func_800E11D0();
 int func_800E10B8();
 int func_800E15FC();
+int func_800E1BCC();
 
-// main page (0)
+int func_800E0E04();
+int func_800E0D78();
+int func_800E0DB8();
+int func_800E1C24();
+int func_800E1D48();
+int func_800E1DB8();
+int func_800E0CD8();
+
+// TODO: move this back in when everything is decomped. the address is needed
 MenuPage D_800EB468 = {
-    .items_type = 3,
-    .offset = { 9, 10, 21, 5 },
-    .field8_0x12 = 8,
-    .rect = { 0x30, 0x6E, 0xC8, 0x3C },
-    .field11_0x1c = 0,
-    .nselections = 5,
-    .panel_x = 0,
-    .panel_y = 0,
-    .panel_sprite_id = -1,
-    .panel_clut_thing = -1,
-    .items_sprites = (short[]){
-        8, 9, 10, 11, 12,
+        .items_type = 3,
+        .offset = { 9, 10, 21, 5 },
+        .field8_0x12 = 8,
+        .rect = { 0x30, 0x6E, 0xC8, 0x3C },
+        .field11_0x1c = 0,
+        .nselections = 5,
+        .panel_x = 0,
+        .panel_y = 0,
+        .panel_sprite_id = -1,
+        .panel_clut_thing = -1,
+        .items_sprites = (short[]){
+            8, 9, 10, 11, 12,
+        },
+        .items = {
+            { 0x80, 0, 0xFE, 0x01, NULL, func_800E11D0, func_800E10B8 },
+            { 0x80, 0, 0xFE, 0x02, NULL, NULL, NULL },
+            { 0x43, 1, 0xFE, 0x00, func_800E15FC, func_800E11D0, func_800E10B8 },
+            { 0x43, 2, 0xFE, 0x00, func_800E15FC, NULL, NULL },
+            { 0x03, 3, 0xFE, 0x00, NULL, NULL, NULL },
+        },
+    };
+
+
+MenuPage *D_800EB8CC[PAGES_COUNT] = {
+    [PAGE_MAIN] = &D_800EB468,
+
+    [PAGE_LOAD] = &(MenuPage){
+        .items_type = 0,
+        .offset = { 9, 11, 16, 5 },
+        .field8_0x12 = 8,
+        .rect = { 0x40, 0x60, 0xA0, 0x54 },
+        .field11_0x1c = 0,
+        .nselections = 5,
+        .panel_x = 0x5D,
+        .panel_y = 0x6C,
+        .panel_sprite_id = 10,
+        .panel_clut_thing = 2,
+        .items_strings = (char*[]){
+            "   DATA 1",
+            "   DATA 2",
+            "   DATA 3",
+            "   NEW DATA",
+            "   EXIT",
+        },
+        .items = {
+            { 0x00, 4, 0, 0, NULL, NULL, NULL },
+            { 0x00, 4, 0, 0, NULL, NULL, NULL },
+            { 0x00, 4, 0, 0, NULL, NULL, NULL },
+            { 0x01, 4, 0, 0, NULL, NULL, NULL },
+            { 0x02, 0, 0, 0, NULL, NULL, NULL },
+        },
     },
 
-    .items = {
-        { 0x01FE0080, NULL, func_800E11D0, func_800E10B8 },
-        { 0x02FE0080, NULL, NULL, NULL },
-        { 0x00FE0143, func_800E15FC, func_800E11D0, func_800E10B8 },
-        { 0x00FE0243, func_800E15FC, NULL, NULL },
-        { 0x00FE0803, NULL, NULL, NULL },
-    }
-};
-
-// load page (1)
-// TODO: test
-MenuPage D_800EB4EC = {
-    .items_type = 0,
-    .offset = { 9, 11, 16, 5 },
-    .field8_0x12 = 8,
-    .rect = { 0x40, 0x60, 0xA0, 0x54 },
-    .field11_0x1c = 0,
-    .nselections = 5,
-    .panel_x = 0x5D,
-    .panel_y = 0x6C,
-    .panel_sprite_id = 10,
-    .panel_clut_thing = 2,
-    .items_strings = (char*[]){
-        "   DATA 1",
-        "   DATA 2",
-        "   DATA 3",
-        "   NEW DATA",
-        "   EXIT",
+    [PAGE_SAVE] = &(MenuPage){
+        .items_type = 0,
+        .offset = { 9, 12, 16, 4 },
+        .field8_0x12 = 8,
+        .rect = { 0x40, 0x6C, 0xA0, 0x48 },
+        .field11_0x1c = 0,
+        .nselections = 4,
+        .panel_x = 0x5C,
+        .panel_y = 0x78,
+        .panel_sprite_id = 11,
+        .panel_clut_thing = 2,
+        .items_strings = (char*[]){
+            "   DATA 1",
+            "   DATA 2",
+            "   DATA 3",
+            "   EXIT",
+        },
+        .items = {
+            { 0x00, 5, 0, 0, NULL, NULL, NULL },
+            { 0x00, 5, 0, 0, NULL, NULL, NULL },
+            { 0x00, 5, 0, 0, NULL, NULL, NULL },
+            { 0x02, 0, 0, 0, NULL, NULL, NULL },
+        },
     },
 
-    .items = {
-        { 0x400, NULL, NULL, NULL },
-        { 0x400, NULL, NULL, NULL },
-        { 0x400, NULL, NULL, NULL },
-        { 0x401, NULL, NULL, NULL },
-        { 0x002, NULL, NULL, NULL },
-    },
-};
-
-// save page (2)
-MenuPage D_800EB570 = {
-    .items_type = 0,
-    .offset = { 9, 12, 16, 4 },
-    .field8_0x12 = 8,
-    .rect = { 0x40, 0x6C, 0xA0, 0x48 },
-    .field11_0x1c = 0,
-    .nselections = 4,
-    .panel_x = 0x5C,
-    .panel_y = 0x78,
-    .panel_sprite_id = 11,
-    .panel_clut_thing = 2,
-    .items_strings = (char*[]){
-        "   DATA 1",
-        "   DATA 2",
-        "   DATA 3",
-        "   EXIT",
-    },
-
-    .items = {
-        { 0x500, NULL, NULL, NULL },
-        { 0x500, NULL, NULL, NULL },
-        { 0x500, NULL, NULL, NULL },
-        { 0x002, NULL, NULL, NULL },
-    },
-};
-
-// settings page (3)
-MenuPage D_800EB5E4 = {
-    .items_type = 0,
-    .offset = { 5, 10, 29, 6 },
-    .field8_0x12 = 8,
-    .rect = { 32, 0x60, 0xE8, 0x54 },
-    .field11_0x1c = 0,
-    .nselections = 6,
-    .panel_x = 0x5B,
-    .panel_y = 0x6C,
-    .panel_sprite_id = 12,
-    .panel_clut_thing = 2,
-    .items_strings = (char*[]){
-        // these are reused
-        "   VIEW CTRL",
-        "   PAD MODE",
-        "   SP.ITEM",
-        "   SOUND TYPE",
-        "   MOVIE",
-        "   EXIT",
+    [PAGE_SETTINGS] = &(MenuPage){
+        .items_type = 0,
+        .offset = { 5, 10, 29, 6 },
+        .field8_0x12 = 8,
+        .rect = { 32, 0x60, 0xE8, 0x54 },
+        .field11_0x1c = 0,
+        .nselections = 6,
+        .panel_x = 0x5B,
+        .panel_y = 0x6C,
+        .panel_sprite_id = 12,
+        .panel_clut_thing = 2,
+        .items_strings = (char*[]){
+            "   VIEW CTRL",
+            "   PAD MODE",
+            "   SP.ITEM",
+            "   SOUND TYPE",
+            "   MOVIE",
+            "   EXIT",
+        },
+        .items = {
+            { 0x60, 0, 0, 0, func_800E1E28, func_800E1E28, func_800E1E28 },
+            { 0x60, 0, 0, 0, func_800E1E60, func_800E1E60, func_800E1E60 },
+            { 0x60, 0, 0, 0, func_800E1E98, func_800E1E98, func_800E1E98 },
+            { 0x60, 0, 0, 0, func_800E1ED0, func_800E1ED0, func_800E1ED0 },
+            { 0x60, 0, 0, 0, func_800E1F28, func_800E1F28, func_800E1F28 },
+            { 0x02 },
+        },
     },
 
-    .items = {
-        { 0x60, func_800E1E28, func_800E1E28, func_800E1E28 },
-        { 0x60, func_800E1E60, func_800E1E60, func_800E1E60 },
-        { 0x60, func_800E1E98, func_800E1E98, func_800E1E98 },
-        { 0x60, func_800E1ED0, func_800E1ED0, func_800E1ED0 },
-        { 0x60, func_800E1F28, func_800E1F28, func_800E1F28 },
-        { 0x02 },
-    }
+    [PAGE_CONFIRM_LOAD] = &(MenuPage){
+        .items_type = 1,
+        .offset = { 13, 5, 8, 2 },
+        .field8_0x12 = 8,
+        .rect = { 0x28, 12, 0xD0, 0x3C },
+        .field11_0x1c = 0,
+        .nselections = 2,
+        .panel_x = 0x5C,
+        .panel_y = 0x18,
+        .panel_sprite_id = 10,
+        .panel_clut_thing = 2,
+        .items_strings = (short[]){
+            16, 17
+        },
+        .items = {
+            { 0x41, 0xFF, 0xFF, 0, func_800E1928, NULL, NULL },
+            { 0x02, 0xFF, 0xFF, 0, NULL, NULL, NULL },
+        },
+    },
+
+    [PAGE_CONFIRM_SAVE] = &(MenuPage){
+        .items_type = 1,
+        .offset = { 13, 5, 8, 2 },
+        .field8_0x12 = 8,
+        .rect = { 0x28, 12, 0xD0, 0x3C },
+        .field11_0x1c = 0,
+        .nselections = 2,
+        .panel_x = 0x5C,
+        .panel_y = 0x18,
+        .panel_sprite_id = 11,
+        .panel_clut_thing = 2,
+        .items_strings = (short[]){
+            16, 17  // also reused with the other dialog
+        },
+        .items = {
+            { 0x41, 0xFF, 0xFF, 0, func_800E1A88, NULL, NULL },
+            { 0x02, 0xFF, 0xFF, 0, NULL, NULL, NULL },
+        },
+    },
+
+    [PAGE_ERROR_] = &(MenuPage){
+        .items_type = 1,
+        .offset = { 13, 6, 31, 2 },
+        .field8_0x12 = 8,
+        .rect = { 16, 12, 256, 0x54 },
+        .field11_0x1c = 0,
+        .nselections = 2,
+        .panel_x = 0x5C,
+        .panel_y = 0x18,
+        .panel_sprite_id = -1,
+        .panel_clut_thing = -1,
+        .items_strings = (short[]){
+            16, 17  // also reused with the other dialog
+        },
+        .items = {
+            { 0x41, 0xFF, 0xFF, 0, func_800E1BCC, NULL, NULL },
+            { 0x02, 0xFF, 0xFF, 0, NULL, NULL, NULL },
+        },
+    },
+
+    [PAGE_SETTINGS_TEST] = &(MenuPage){
+        .items_type = 0,
+        .offset = { 5, 8, 29, 8 },
+        .field8_0x12 = 8,
+        .rect = { 32, 0x48, 0xE8, 0x6C },
+        .field11_0x1c = 1,
+        .nselections = 8,
+        .panel_x = 0x5B,
+        .panel_y = 0x54,
+        .panel_sprite_id = 12,
+        .panel_clut_thing = 2,
+        .items_strings = (char*[]){
+            "   MOVIE TEST",
+            "   MUSIC TEST",
+            "   VIEW CTRL",
+            "   PAD MODE",
+            "   SP.ITEM",
+            "   SOUND TYPE",
+            "   MOVIE",
+            "   EXIT",
+        },
+        .items = {
+            { 0x60, 0, 0, 0, func_800E0E04, func_800E0D78, func_800E0DB8 },
+            { 0x60, 0, 0, 0, func_800E1C24, func_800E1D48, func_800E1DB8 },
+            { 0x60, 0, 0, 0, func_800E1E28, func_800E1E28, func_800E1E28 },
+            { 0x60, 0, 0, 0, func_800E1E60, func_800E1E60, func_800E1E60 },
+            { 0x60, 0, 0, 0, func_800E1E98, func_800E1E98, func_800E1E98 },
+            { 0x60, 0, 0, 0, func_800E1ED0, func_800E1ED0, func_800E1ED0 },
+            { 0x60, 0, 0, 0, func_800E1F28, func_800E1F28, func_800E1F28 },
+            { 0x02 },
+        },
+    },
+
+    [PAGE_SETTINGS_WIDE] = &(MenuPage){
+        .items_type = 0,
+        .offset = { 5, 9, 29, 7 },
+        .field8_0x12 = 8,
+        .rect = { 32, 0x54, 0xE8, 0x60 },
+        .field11_0x1c = 1,
+        .nselections = 7,
+        .panel_x = 0x5B,
+        .panel_y = 0x60,
+        .panel_sprite_id = 12,
+        .panel_clut_thing = 2,
+        .items_strings = (char*[]){
+            "   TV   MODE",
+            "   VIEW CTRL",
+            "   PAD  MODE",
+            "   SP.  ITEM",
+            "   SOUNDTYPE",
+            "   MOVIE",
+            "   EXIT",
+        },
+        .items = {
+            { 0x60, 0, 0, 0, func_800E0CD8, func_800E0CD8, func_800E0CD8 },
+            { 0x60, 0, 0, 0, func_800E1E28, func_800E1E28, func_800E1E28 },
+            { 0x60, 0, 0, 0, func_800E1E60, func_800E1E60, func_800E1E60 },
+            { 0x60, 0, 0, 0, func_800E1E98, func_800E1E98, func_800E1E98 },
+            { 0x60, 0, 0, 0, func_800E1ED0, func_800E1ED0, func_800E1ED0 },
+            { 0x60, 0, 0, 0, func_800E1F28, func_800E1F28, func_800E1F28 },
+            { 0x02 },
+        },
+    },
 };
 
 // progress enum's strings
@@ -436,6 +579,7 @@ static inline void text_put_progress(SavedData *save)
 // draw_menu
 void func_800E2438(int page_id, uint selected, u8 attr)
 {
+    //printf("drawing %d\n", page_id);
     MenuPage *page = D_800EB8CC[page_id];
     text_set_attr(attr);
     if (D_800F4E38 < 8)
@@ -461,13 +605,14 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         }
     }
     text_set_attr(0);
+    
     switch (page_id) {
-    case 0:
+    case PAGE_MAIN:
         func_800E1418();
         func_800E12B4(selected == 0);
         break;
 
-    case 1:
+    case PAGE_LOAD:
         func_800E1384();
         text_set_pos(page->offset.x, page->offset.y - 1);
         text_set_attr(2);
@@ -492,7 +637,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         break;
 
     // full repeat of the one above
-    case 2:
+    case PAGE_SAVE:
         func_800E1384();
         text_set_pos(page->offset.x, page->offset.y - 1);
         text_set_attr(2);
@@ -516,7 +661,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         }
         break;
     
-    case 3:
+    case PAGE_SETTINGS:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
         if (D_801A0FD8->curr.unkE3 == 0)
@@ -554,7 +699,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
             text_put_str("OFF");
         break;
 
-    case 4:
+    case PAGE_CONFIRM_LOAD:
         text_set_pos(page->offset.x - 1, page->offset.y - 2);
         text_set_attr(2);
         text_put_progress(&D_801A0FD8->curr);
@@ -564,7 +709,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         break;
 
     // so much repeat AAAAH
-    case 5:
+    case PAGE_CONFIRM_SAVE:
         text_set_pos(page->offset.x - 1, page->offset.y - 2);
         text_set_attr(2);
         text_put_progress(&D_801A0FD8->curr);
@@ -574,7 +719,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         text_put_char('1' + D_800F4CC0);
         break;
     
-    case 6:
+    case PAGE_ERROR_:
         func_800E6B90(&(RECT){
             .x = 0,
             .y = 0,
@@ -588,7 +733,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         }, page->rect.x + 16, page->rect.y + 12);
         break;
     
-    case 7:
+    case PAGE_SETTINGS_TEST:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
         text_put_str(D_800EB1D8[D_800F4E68]);
@@ -634,7 +779,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
             text_put_str("OFF");
         break;
     
-    case 8:
+    case PAGE_SETTINGS_WIDE:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
         if (jt.get_widescreen == 0)
