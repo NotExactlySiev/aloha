@@ -129,8 +129,12 @@ extern struct {
     UNK(640, 767);
 
     // Misc. Functions
-    void (*play_vab)(s32, void*, s32);
-    UNK(769, 772);
+
+    void        (*sfx_load_vab)(short index, void *header, void *data);
+    int         (*sfx_free_vab)(s16);
+    int         (*snd_set_stereo)(int);
+    int         (*snd_get_stereo)(void);
+    void        (*sfx_kill_all)(void);
     s32         (*snd_set_volume)(s16);
     UNK(774, 779);
     u32         (*unk_flags)(void);

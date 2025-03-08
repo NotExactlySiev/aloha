@@ -1,6 +1,8 @@
 #include "common.h"
 #include "shared.h"
 
+extern GlobalData *glob;
+
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0920);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E09EC);
@@ -201,15 +203,36 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1D48);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1DB8);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1E28);
+void toggle_view_ctrl(void)
+{
+    glob->curr.unkE3 = !glob->curr.unkE3;
+    func_800E0B54(0x2600);
+}
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1E60);
+void toggle_pad_mode(void)
+{
+    glob->curr.unkE5 = !glob->curr.unkE5;
+    func_800E0B54(0x2600);
+}
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1E98);
+void toggle_sp_item(void)
+{
+    glob->curr.unkE6 = !glob->curr.unkE6;
+    func_800E0B54(0x2600);
+}
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1ED0);
+void toggle_sound_type(void)
+{
+    glob->curr.unkE7 = !glob->curr.unkE7;
+    jt.snd_set_stereo(glob->curr.unkE7);
+    func_800E0B54(0x2600);
+}
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1F28);
+void toggle_movie(void)
+{
+    glob->curr.unkE8 = !glob->curr.unkE8;
+    func_800E0B54(0x2600);
+}
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1F60);
 
@@ -219,13 +242,13 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E2234);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E22D8);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C0);
+// unused
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C0);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C8);
 
 #include <libgpu.h>
 
-extern GlobalData *D_801A0FD8;
 
 u8 text_set_attr(u8 attr);
 void text_set_pos(int x, int y);
@@ -287,18 +310,12 @@ enum {
     PAGE_SETTINGS = 3,
     PAGE_CONFIRM_LOAD = 4,
     PAGE_CONFIRM_SAVE = 5,
-    PAGE_ERROR_ = 6,
+    PAGE_YES_NO = 6,
     PAGE_SETTINGS_TEST = 7,
     PAGE_SETTINGS_WIDE = 8,
     PAGES_COUNT
 };
 
-// settings handlers
-int func_800E1E28();
-int func_800E1E60();
-int func_800E1E98();
-int func_800E1ED0();
-int func_800E1F28();
 int func_800E1928();
 int func_800E1A88();
 int func_800E11D0();
@@ -414,11 +431,11 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
             "   EXIT",
         },
         .items = {
-            { 0x60, 0, 0, 0, func_800E1E28, func_800E1E28, func_800E1E28 },
-            { 0x60, 0, 0, 0, func_800E1E60, func_800E1E60, func_800E1E60 },
-            { 0x60, 0, 0, 0, func_800E1E98, func_800E1E98, func_800E1E98 },
-            { 0x60, 0, 0, 0, func_800E1ED0, func_800E1ED0, func_800E1ED0 },
-            { 0x60, 0, 0, 0, func_800E1F28, func_800E1F28, func_800E1F28 },
+            { 0x60, 0, 0, 0, toggle_view_ctrl, toggle_view_ctrl, toggle_view_ctrl },
+            { 0x60, 0, 0, 0, toggle_pad_mode, toggle_pad_mode, toggle_pad_mode },
+            { 0x60, 0, 0, 0, toggle_sp_item, toggle_sp_item, toggle_sp_item },
+            { 0x60, 0, 0, 0, toggle_sound_type, toggle_sound_type, toggle_sound_type },
+            { 0x60, 0, 0, 0, toggle_movie, toggle_movie, toggle_movie },
             { 0x02 },
         },
     },
@@ -463,7 +480,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
     },
 
-    [PAGE_ERROR_] = &(MenuPage){
+    [PAGE_YES_NO] = &(MenuPage){
         .items_type = 1,
         .offset = { 13, 6, 31, 2 },
         .field8_0x12 = 8,
@@ -507,11 +524,11 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .items = {
             { 0x60, 0, 0, 0, func_800E0E04, func_800E0D78, func_800E0DB8 },
             { 0x60, 0, 0, 0, func_800E1C24, func_800E1D48, func_800E1DB8 },
-            { 0x60, 0, 0, 0, func_800E1E28, func_800E1E28, func_800E1E28 },
-            { 0x60, 0, 0, 0, func_800E1E60, func_800E1E60, func_800E1E60 },
-            { 0x60, 0, 0, 0, func_800E1E98, func_800E1E98, func_800E1E98 },
-            { 0x60, 0, 0, 0, func_800E1ED0, func_800E1ED0, func_800E1ED0 },
-            { 0x60, 0, 0, 0, func_800E1F28, func_800E1F28, func_800E1F28 },
+            { 0x60, 0, 0, 0, toggle_view_ctrl, toggle_view_ctrl, toggle_view_ctrl },
+            { 0x60, 0, 0, 0, toggle_pad_mode, toggle_pad_mode, toggle_pad_mode },
+            { 0x60, 0, 0, 0, toggle_sp_item, toggle_sp_item, toggle_sp_item },
+            { 0x60, 0, 0, 0, toggle_sound_type, toggle_sound_type, toggle_sound_type },
+            { 0x60, 0, 0, 0, toggle_movie, toggle_movie, toggle_movie },
             { 0x02 },
         },
     },
@@ -538,11 +555,11 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
         .items = {
             { 0x60, 0, 0, 0, func_800E0CD8, func_800E0CD8, func_800E0CD8 },
-            { 0x60, 0, 0, 0, func_800E1E28, func_800E1E28, func_800E1E28 },
-            { 0x60, 0, 0, 0, func_800E1E60, func_800E1E60, func_800E1E60 },
-            { 0x60, 0, 0, 0, func_800E1E98, func_800E1E98, func_800E1E98 },
-            { 0x60, 0, 0, 0, func_800E1ED0, func_800E1ED0, func_800E1ED0 },
-            { 0x60, 0, 0, 0, func_800E1F28, func_800E1F28, func_800E1F28 },
+            { 0x60, 0, 0, 0, toggle_view_ctrl, toggle_view_ctrl, toggle_view_ctrl },
+            { 0x60, 0, 0, 0, toggle_pad_mode, toggle_pad_mode, toggle_pad_mode },
+            { 0x60, 0, 0, 0, toggle_sp_item, toggle_sp_item, toggle_sp_item },
+            { 0x60, 0, 0, 0, toggle_sound_type, toggle_sound_type, toggle_sound_type },
+            { 0x60, 0, 0, 0, toggle_movie, toggle_movie, toggle_movie },
             { 0x02 },
         },
     },
@@ -617,18 +634,18 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         text_set_pos(page->offset.x, page->offset.y - 1);
         text_set_attr(2);
         text_put_str("   NOW    ");
-        text_put_progress(&D_801A0FD8->curr);
+        text_put_progress(&glob->curr);
 
         for (int i = 0; i < 3; i++) {
             text_set_attr(selected == i);
             text_set_pos(page->offset.x + 10, page->offset.y + i);
             // TODO: fix this control flow
-            if (D_801A0FD8->unk512 == 0) {
-                if (D_801A0FD8->slot_state[i] == 0) {
+            if (glob->unk512 == 0) {
+                if (glob->slot_state[i] == 0) {
                     text_put_str("NO FILE");
                     continue;
-                } else if (D_801A0FD8->slot_state[i] != -1) {
-                    text_put_progress(&D_801A0FD8->saved[i]);
+                } else if (glob->slot_state[i] != -1) {
+                    text_put_progress(&glob->saved[i]);
                     continue;
                 }
             }
@@ -642,18 +659,18 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         text_set_pos(page->offset.x, page->offset.y - 1);
         text_set_attr(2);
         text_put_str("   NOW    ");
-        text_put_progress(&D_801A0FD8->curr);
+        text_put_progress(&glob->curr);
 
         for (int i = 0; i < 3; i++) {
             text_set_attr(selected == i);
             text_set_pos(page->offset.x + 10, page->offset.y + i);
             // TODO: fix this control flow
-            if (D_801A0FD8->unk512 == 0) {
-                if (D_801A0FD8->slot_state[i] == 0) {
+            if (glob->unk512 == 0) {
+                if (glob->slot_state[i] == 0) {
                     text_put_str("NO FILE");
                     continue;
-                } else if (D_801A0FD8->slot_state[i] != -1) {
-                    text_put_progress(&D_801A0FD8->saved[i]);
+                } else if (glob->slot_state[i] != -1) {
+                    text_put_progress(&glob->saved[i]);
                     continue;
                 }
             }
@@ -664,21 +681,21 @@ void func_800E2438(int page_id, uint selected, u8 attr)
     case PAGE_SETTINGS:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
-        if (D_801A0FD8->curr.unkE3 == 0)
+        if (glob->curr.unkE3 == 0)
             text_put_str("REVERSE");
         else
             text_put_str("NORMAL");
         
         text_set_attr(selected == 1);
         text_set_pos(page->offset.x + 15, page->offset.y + 1);
-        if (D_801A0FD8->curr.unkE5 == 0)
+        if (glob->curr.unkE5 == 0)
             text_put_str("\xB1 JUMP \xB3 SHOT");
         else
             text_put_str("\xB1 SHOT \xB3 JUMP");
 
         text_set_attr(selected == 2);
         text_set_pos(page->offset.x + 15, page->offset.y + 2);
-        if (D_801A0FD8->curr.unkE6 == 0)
+        if (glob->curr.unkE6 == 0)
             text_put_char(0xB2);
         else
             text_put_char(0xB4);
@@ -686,14 +703,14 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 
         text_set_attr(selected == 3);
         text_set_pos(page->offset.x + 15, page->offset.y + 3);
-        if (D_801A0FD8->curr.unkE7 == 0)
+        if (glob->curr.unkE7 == 0)
             text_put_str("STEREO");
         else
             text_put_str("MONO");
 
         text_set_attr(selected == 4);
         text_set_pos(page->offset.x + 15, page->offset.y + 4);
-        if (D_801A0FD8->curr.unkE8 == 0)
+        if (glob->curr.unkE8 == 0)
             text_put_str("ON");
         else
             text_put_str("OFF");
@@ -702,24 +719,24 @@ void func_800E2438(int page_id, uint selected, u8 attr)
     case PAGE_CONFIRM_LOAD:
         text_set_pos(page->offset.x - 1, page->offset.y - 2);
         text_set_attr(2);
-        text_put_progress(&D_801A0FD8->curr);
+        text_put_progress(&glob->curr);
         text_put_str(" >");
         text_set_pos(page->offset.x + 6, page->offset.y - 1);
-        text_put_progress(&D_801A0FD8->saved[D_800F4CC0]);
+        text_put_progress(&glob->saved[D_800F4CC0]);
         break;
 
     // so much repeat AAAAH
     case PAGE_CONFIRM_SAVE:
         text_set_pos(page->offset.x - 1, page->offset.y - 2);
         text_set_attr(2);
-        text_put_progress(&D_801A0FD8->curr);
+        text_put_progress(&glob->curr);
         text_put_str(" >");
         text_set_pos(page->offset.x + 6, page->offset.y - 1);
         text_put_str("DATA ");
         text_put_char('1' + D_800F4CC0);
         break;
     
-    case PAGE_ERROR_:
+    case PAGE_YES_NO:
         func_800E6B90(&(RECT){
             .x = 0,
             .y = 0,
@@ -740,25 +757,25 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 
         text_set_attr(selected == 1);
         text_set_pos(page->offset.x + 15, page->offset.y + 1);
-        text_put_str(D_800EB054[D_801A0FD8->unk513]);
+        text_put_str(D_800EB054[glob->unk513]);
 
         text_set_attr(selected == 2);
         text_set_pos(page->offset.x + 15, page->offset.y + 2);
-        if (D_801A0FD8->curr.unkE3 == 0)
+        if (glob->curr.unkE3 == 0)
             text_put_str("REVERSE");
         else
             text_put_str("NORMAL");
         
         text_set_attr(selected == 3);
         text_set_pos(page->offset.x + 15, page->offset.y + 3);
-        if (D_801A0FD8->curr.unkE5 == 0)
+        if (glob->curr.unkE5 == 0)
             text_put_str("\xB1 JUMP \xB3 SHOT");
         else
             text_put_str("\xB1 SHOT \xB3 JUMP");
 
         text_set_attr(selected == 4);
         text_set_pos(page->offset.x + 15, page->offset.y + 4);
-        if (D_801A0FD8->curr.unkE6 == 0)
+        if (glob->curr.unkE6 == 0)
             text_put_char(0xB2);
         else
             text_put_char(0xB4);
@@ -766,14 +783,14 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 
         text_set_attr(selected == 5);
         text_set_pos(page->offset.x + 15, page->offset.y + 5);
-        if (D_801A0FD8->curr.unkE7 == 0)
+        if (glob->curr.unkE7 == 0)
             text_put_str("STEREO");
         else
             text_put_str("MONO");
 
         text_set_attr(selected == 6);
         text_set_pos(page->offset.x + 15, page->offset.y + 6);
-        if (D_801A0FD8->curr.unkE8 == 0)
+        if (glob->curr.unkE8 == 0)
             text_put_str("ON");
         else
             text_put_str("OFF");
@@ -789,21 +806,21 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 
         text_set_attr(selected == 1);
         text_set_pos(page->offset.x + 15, page->offset.y + 1);
-        if (D_801A0FD8->curr.unkE3 == 0)
+        if (glob->curr.unkE3 == 0)
             text_put_str("REVERSE");
         else
             text_put_str("NORMAL");
         
         text_set_attr(selected == 2);
         text_set_pos(page->offset.x + 15, page->offset.y + 2);
-        if (D_801A0FD8->curr.unkE5 == 0)
+        if (glob->curr.unkE5 == 0)
             text_put_str("\xB1 JUMP \xB3 SHOT");
         else
             text_put_str("\xB1 SHOT \xB3 JUMP");
 
         text_set_attr(selected == 3);
         text_set_pos(page->offset.x + 15, page->offset.y + 3);
-        if (D_801A0FD8->curr.unkE6 == 0)
+        if (glob->curr.unkE6 == 0)
             text_put_char(0xB2);
         else
             text_put_char(0xB4);
@@ -811,14 +828,14 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 
         text_set_attr(selected == 4);
         text_set_pos(page->offset.x + 15, page->offset.y + 4);
-        if (D_801A0FD8->curr.unkE7 == 0)
+        if (glob->curr.unkE7 == 0)
             text_put_str("STEREO");
         else
             text_put_str("MONO");
 
         text_set_attr(selected == 5);
         text_set_pos(page->offset.x + 15, page->offset.y + 5);
-        if (D_801A0FD8->curr.unkE8 == 0)
+        if (glob->curr.unkE8 == 0)
             text_put_str("ON");
         else
             text_put_str("OFF");
@@ -836,7 +853,8 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C48);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C68);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3D9C);
+// unused
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3D9C);
 
 void func_800E6D1C(char*, int, RECT*);
 
@@ -933,13 +951,8 @@ void text_put_str(char *str)
         text_put_char(c);
 }
 
-// bg_init
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8084);
-//extern void* D_800E7FA0;
-
 #include <libgte.h>
 #include <libetc.h>
-
 
 extern int D_800F4DE4;
 extern int D_800F4DE8;
@@ -948,11 +961,9 @@ extern int D_800F4DEC;
 extern VECTOR D_800F05E0;
 extern SVECTOR D_800F4DF0;
 
-
-
+// bg_init
 void func_800E8084(void)
 {
-
     InitGeom();
     SetGeomScreen(0x80);
     SetGeomOffset(0xA0, 0x78);
@@ -974,6 +985,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8278);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E82A8);
 
+// assembly function, rendering
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E83BC);
 
 // movie.c
