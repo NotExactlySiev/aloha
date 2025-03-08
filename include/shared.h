@@ -4,13 +4,17 @@
 #include <libgpu.h>
 #include <libspu.h>
 #include "common.h"
+// for MovieArgs
+#include "movie_args.h"
 
 // shared data provided by the main executable
 
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
     uint best_times[6][3][3];
-    UNK(0xD8, 0xE3);
+    UNK(0xD8, 0xE1);
+    u8  unkE2;
+    u8  unkE3;
     s8  unkE4;
     s8  unkE5;
     s8  unkE6;
@@ -27,24 +31,16 @@ typedef struct {
     SavedData curr;
     SavedData saved[3];
     SavedData backup;
-/*
-    uint best_times[6][3][3];
-    UNK(0xD8, 0xE3);
-    s8  unkE4;
-    s8  unkE5;
-    s8  unkE6;
-    s8  unkE7;
-    s8  unkE8;  // played before?
-    s8  unkE9;
-    UNK(0xEA, 0x4FF);
-*/
-    s32  unk500;
-    s32  unk504;
-    s8   unk508;
-    s8   unk509;
-    s8   unk50A;
-    s8   unk50B;
-    UNK(0x50C, 0x513);
+    s32 unk500;
+    s32 unk504;
+    s8  unk508;
+    s8  unk509;
+    s8  unk50A;
+    s8  unk50B;
+    UNK(0x50C, 0x50E); 
+    s8  slot_state[3];
+    u8  unk512;
+    u8  unk513;
     s8  world;
     s8  stage;  // next one to play
     s8  unk516;
@@ -90,7 +86,7 @@ extern struct {
     void        (*set_global_volume)(SpuVolume*);
     void        (*get_global_volume)(SpuVolume*);
     UNK(299, 319);
-    s32         (*play_movie)(char*, void*, void* callback);
+    s32         (*play_movie)(char *filename, MovieArgs *args, int (*cb)(void));
     UNK(321, 383);
 
     // GPU Functions
@@ -135,12 +131,12 @@ extern struct {
     // Misc. Functions
     void (*play_vab)(s32, void*, s32);
     UNK(769, 772);
-    s32         (*audio_unk_volume)(s16);
+    s32         (*snd_set_volume)(s16);
     UNK(774, 779);
     u32         (*unk_flags)(void);
     void        (*audio_unk_set)(void);
     void        (*audio_unk_reset)(void);
-    void        (*audio_unk2)(void);
+    void        (*snd_reset)(void);
     void        (*execute_compressed)(void* addr, u32 arg);
     void        (*audio_unk0)(s32 arg0, s16 arg1, s16 arg2);
     void        (*audio_unk1)(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
