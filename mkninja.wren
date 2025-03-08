@@ -118,6 +118,9 @@ Ninja.rule("comp", "$jfcomp comp $in $out")
 Ninja.param("description", "Compressing $out")
 Ninja.rule("mkiso", "$makeiso -y $in -o $out")
 Ninja.param("description", "Generating Disc Image")
+Ninja.rule("REGENERATE", "wren_cli $in > $out")
+Ninja.param("description", "Updating build.ninja")
+Ninja.param("generator", "1")
 
 Ninja.build("phony", "tools", ["$jfcomp"])
 Ninja.build("ccnat", "$jfcomp", [
@@ -134,3 +137,4 @@ for (exe in execs) {
 }
 
 Ninja.build("mkiso", "build/aloha.bin", ["us.xml"], exePaths)
+Ninja.build("REGENERATE", "build.ninja", ["mkninja.wren"], ["ninja.wren"])
