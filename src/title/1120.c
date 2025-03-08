@@ -605,7 +605,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         }
     }
     text_set_attr(0);
-    
+
     switch (page_id) {
     case PAGE_MAIN:
         func_800E1418();
@@ -861,6 +861,37 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 // a ton of functions inside this one
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E4250);
 
+extern char *D_800F4F20;
+
+void func_800E76D4(void)
+{
+    switch (jt.get_region()) {
+    case REGION_DEBUG:
+        D_800F4F20 = "BISCPS-10007EXACT02";
+        char *name = jt.get_mc_file_name();
+        if (name)
+            D_800F4F20 = name;
+        break;
+
+    case REGION_USA:    D_800F4F20 = "BASCUS-94103EXACT01"; break;
+    case REGION_EUROPE: D_800F4F20 = "BESCES-00003EXACT01"; break;
+    default:            D_800F4F20 = "BISCPS-10007EXACT02"; break;
+    }
+}
+
+extern void (*D_800F4DDC)(void);
+
+void func_800E77A8(void (*cb)(void))
+{
+    D_800F4DDC = cb;
+}
+
+void func_800E77B8(void)
+{
+    if (D_800F4DDC)
+        D_800F4DDC();
+}
+
 extern u8 D_800F4D8E;
 extern int D_800F4EE8;
 extern int D_800F4EF0; 
@@ -916,6 +947,7 @@ extern int D_800F4DEC;
 
 extern VECTOR D_800F05E0;
 extern SVECTOR D_800F4DF0;
+
 
 
 void func_800E8084(void)
