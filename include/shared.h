@@ -126,7 +126,10 @@ extern struct {
     UNK(512, 639);
 
     // Memory Card Functions
-    UNK(640, 767);
+    UNK(640, 642);
+    int         (*mc_make_header)(void *dst, u8 flags, int size, char *title, u16 *palette, void *icon0, void *icon1, void *icon2);
+    
+    UNK(644, 767);
 
     // Misc. Functions
 

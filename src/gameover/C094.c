@@ -351,12 +351,12 @@ int main(void)
     gbuffer_init();    // set up graphics env
     func_800EC098();    // set up some constants
     
-    jt.audio_unk2();
+    jt.snd_reset();
     
     input_das_setup();
     GlobalData* global = jt.globals();
     jt.set_global_volume(&(SpuVolume){ 0x7FFF, 0x7FFF });
-    jt.audio_unk_volume(0x3000);
+    jt.snd_set_volume(0x3000);
     jt.audio_unk3(0);    // mc_set_some_var
 
     // play some audio thing
@@ -383,7 +383,7 @@ int main(void)
         gbuffer_draw();            // render graphics
     } while (stage != 4);
     
-    jt.audio_unk2();
+    jt.snd_reset();
 
     choice = 0;
     
