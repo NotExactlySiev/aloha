@@ -11,11 +11,11 @@
 
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
-    uint best_times[6][3][3];
+    u32 best_times[6][3][3];
     UNK(0xD8, 0xE1);
     u8  unkE2;
     u8  unkE3;
-    s8  unkE4;
+    u8  unkE4;
     s8  unkE5;
     s8  unkE6;
     s8  unkE7;
@@ -24,7 +24,6 @@ typedef struct {
     UNK(0xEA, 0xFF);
 } SavedData;
 #undef UNK
-
 
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
@@ -37,14 +36,16 @@ typedef struct {
     s8  unk509;
     s8  unk50A;
     s8  unk50B;
-    UNK(0x50C, 0x50E); 
+    UNK(0x50C, 0x50D);
+    u8  intro_played;
     s8  slot_state[3];
     u8  unk512;
-    u8  unk513;
-    s8  world;
-    s8  stage;  // next one to play
+    u8  unk513;    // index 0-69
+    u8  world;
+    u8  stage;  // next one to play
     s8  unk516;
-    s8  debug_features;
+    u8  debug_features;
+    u8  unk518;
     s8  unk519; // have beaten the game?
 } GlobalData;
 #undef UNK
@@ -129,7 +130,11 @@ extern struct {
     UNK(640, 642);
     int         (*mc_make_header)(void *dst, u8 flags, int size, char *title, u16 *palette, void *icon0, void *icon1, void *icon2);
     
-    UNK(644, 767);
+    UNK(644, 645);
+
+    void        (*mc_set_callback_a)(void*);
+    
+    UNK(647, 767);
 
     // Misc. Functions
 
@@ -150,7 +155,9 @@ extern struct {
     UNK(787, 816);
     s32         (*audio_play_by_id)(s32);
     void        (*audio_unk3)(s32);
-    UNK(819, 1000);
+    UNK(819, 835);
+    void        (*mc_set_callback_b)(void*);
+    UNK(837, 1000);
 
     // added block for my own new functions
     void        (*printf)(const char* fmt, ...);

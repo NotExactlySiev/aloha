@@ -5,9 +5,6 @@
 
 .section .text, "ax"
 
-	
-
-# Handwritten function
 glabel decode_rle
 	addu       $t0, $a0, $zero
 	addu       $t1, $a1, $zero

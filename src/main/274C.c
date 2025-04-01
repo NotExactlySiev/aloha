@@ -393,5 +393,5 @@ void misc_init(void)
     jt_set(func_800219DC, 0x341);
     jt_set(func_80021BCC, 0x342);
     jt_set(func_80021D08, 0x343);
-    jt_set(mc_set_callback, 0x344);
+    jt_set(mc_set_callback, 0x344);     // THERE ARE TWO CALLBACKS WTF
 }

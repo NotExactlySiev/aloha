@@ -264,6 +264,7 @@ int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len)
     if (fd == -1)
         return 0;
     
+    // skip over the header and icons
     func_80020414(fd, offset + 0x200, SEEK_SET);
     func_800203AC(fd, dst, len);
     int rc;

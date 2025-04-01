@@ -3,23 +3,65 @@
 
 extern GlobalData *glob;
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0920);
+// load level vab
+extern const char *D_800EB8F0[6][3];
+void func_800E0920(void)
+{
+    u32 *buffer = (u32 *) 0x80060000;
+    jt.iso_read(D_800EB8F0[glob->world][glob->stage], buffer, 0);
+    while (buffer[0] != 0x56414270) {
+        jt.iso_read(D_800EB8F0[glob->world][glob->stage], buffer, 0);
+        printf("VAB file Reload\n");
+    }
+    jt.sfx_load_vab(1, buffer, 0);
+}
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E09EC);
+#include <libgpu.h>
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0A60);
+typedef struct {
+    DISPENV disp;
+    DRAWENV draw;
+    u_long ot[1];
+    u8 unk[32];
+} FGBuffer;
 
+extern int D_800F4CC8;  // fg buffer index
+extern FGBuffer D_800F4F28[2];
+extern FGBuffer *D_800F4E10;    // current
+
+// swap both buffers
+void func_800E09EC(void)
+{
+    func_800E5818();
+    D_800F4CC8 = !D_800F4CC8;
+    D_800F4E10 = &D_800F4F28[D_800F4CC8];
+    jt.ClearOTag(D_800F4E10->ot, 1);
+}
+
+extern int D_800F4CF8;
+
+// render fg
+void func_800E0A60(void)
+{
+    jt.DrawSync(0);
+    jt.VSync(0);
+    if (D_800F4CF8++ == 2) {
+        jt.SetDispMask(1);
+        D_800F4CF8 = 2;
+    }
+    jt.PutDispEnv(&D_800F4E10->disp);
+    jt.PutDrawEnv(&D_800F4E10->draw);
+    func_800E6668();
+    jt.DrawOTag(D_800F4E10->ot);
+}
+
+// sfx stuff
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0B54);
-
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0C24);
-
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0C74);
 
+// toggle_widescreen
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0CD8);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0D78);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0DB8);
 
 char *D_800EB054[] = {
           "STOP",
@@ -160,17 +202,20 @@ const char *D_800EB1D8[] = {
     "END ALOHA2",
 };
 
-
+// movie test prev/next/play
+INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0D78);
+INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0DB8);
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0E04);
 
+// level math
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0FD0);
-
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1044);
 
+// extra mode prev/next
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E10B8);
-
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E11D0);
 
+// more menu stuff
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E12B4);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1384);
@@ -181,6 +226,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14A4);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14CC);
 
+// mc functions
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1514);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1570);
@@ -246,9 +292,6 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E22D8);
 //INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C0);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C8);
-
-#include <libgpu.h>
-
 
 u8 text_set_attr(u8 attr);
 void text_set_pos(int x, int y);
@@ -871,13 +914,174 @@ void func_800E3DF8(char *str, RECT *rect)
     func_800E6D1C(str, 0xE, &r);
 }
 
-
+extern FGBuffer D_800F4F28[2];
 
 // cache_big_strings
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 
 // a ton of functions inside this one
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E4250);
+INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
+
+void func_800E8640(char *filename, int frame_count);
+extern int D_800F4CF4;
+extern int D_800F4CC4;
+extern int D_800F4E18;
+extern int D_800F4E50;
+extern int D_800F4E40;
+extern int D_800F4E20;
+extern int D_800F4E28;
+extern int D_800F4E70;
+extern int D_801A0FA8;
+extern int D_800F4E08;
+
+extern u32 D_800EB97C[4];
+extern u32 D_800EB98C[4];
+
+// part of a data structure
+extern int D_800F4CEC;
+
+// main
+int _func_800E4250()
+{
+    func_800E7FD4();
+    D_800F4E68 = 0;
+    func_800E7FA4();
+    func_800E87DC();
+    jt.sfx_free_vab(1);
+    jt.wait_for_vsync();
+    jt.ResetGraph(0);
+    func_800E8084();
+    func_800E76D4();
+    func_800E70F4();
+    func_800E742C();
+    glob = jt.globals();
+    if (glob->intro_played == 0) {
+        func_800E8640("MOVIE\\OPEN.STR", 485);
+        glob->unk518 = 1U;
+        if (glob->intro_played == 0) {
+            func_800E3C68();
+            glob->intro_played = 1U;
+        }
+    }
+
+    // initialize level number if first time
+    if ((glob->curr.unkE2 != 0) && (glob->curr.unkE4 == 0)) {
+        glob->curr.unkE4 = 1U;
+    }
+    glob->world = (u8) glob->curr.unkE4;
+
+    func_800E189C();
+    jt.SetDefDispEnv(&D_800F4F28[0].disp, 0, 0, 0x140, 0xF0);
+    jt.SetDefDispEnv(&D_800F4F28[1].disp, 0, 0x100, 0x140, 0xF0);
+    jt.SetDefDrawEnv(&D_800F4F28[0].draw, 0, 0x100, 0x140, 0xF0);
+    jt.SetDefDrawEnv(&D_800F4F28[1].draw, 0, 0, 0x140, 0xF0);
+    
+    D_800F4F28[0].disp.screen =
+    D_800F4F28[1].disp.screen = (RECT){
+        .x = 4,
+        .y = 12,
+        .w = 248,
+        .h = 216,
+    };
+
+    for (int i = 0; i < 2; i++) {
+        D_800F4F28[i].draw.isbg = 0;
+        D_800F4F28[i].draw.r0 = 255;
+        D_800F4F28[i].draw.g0 = 255;
+        D_800F4F28[i].draw.b0 = 255;
+        
+        D_800F4F28[i].disp.pad0 = 0;
+        if (jt.get_video_mode() == 1) {
+            D_800F4F28[i].disp.screen.y += 24;
+            D_800F4F28[i].disp.pad0 = 1;
+        }
+    }
+
+    //
+    //
+    u32 buttons;
+    int var_s1_2;
+    while (1) {
+        // loop 10
+        var_s1_2 = 0;
+        func_800E3EA4();    // setup_graph_env
+        jt.audio_unk3(0);
+        jt.audio_play_by_id(1);
+        D_800F4E50 = 0;
+        D_800F4E40 = 1;
+        D_800F4E20 = 0;
+        D_800F4E28 = 0;
+        while (1) {
+            // loop 11
+            func_800E09EC();    // gbuffer_swap
+            text_clear();
+            func_800E0C74();    // tick
+            func_800E14CC();    // tick
+            if ((D_800F4E50 == 0) && (D_800F4CEC == 0) && !(jt.unk_flags() & 8)) {
+                jt.audio_unk3(1);
+                jt.audio_play_by_id(0xF3);
+                D_800F4E40 = 1;
+                D_800F4E50 = 1;
+            }
+            if ((D_800F4E40 == 0) && (D_800F4E20 == 0) && (D_800F4CEC == 0)) {
+                jt.audio_unk3(1);
+                jt.audio_play_by_id(0xF3);
+                D_800F4E50 = 1;
+                D_800F4E40 = 1;
+            }
+            buttons = func_800E74A8(0);    // read_input
+            jt.printf("%08X\n", buttons);
+            if (buttons != 0) {
+                // reset timers
+                D_800F4E70 = 0;
+                D_800F4E38 = 8;
+                var_s1_2 = 0;
+                D_801A0FA8 = 0;
+            }
+            if (D_800F4E38 < 8) {
+                // something about input?
+                D_800F4E38 += 1;
+                func_800E7478();
+            }
+
+            if (D_800F4E08 < var_s1_2) {
+                if (glob->unk518 == 0)
+                    break;
+                
+                D_800F4CEC = glob->unk518 + 19;
+                jt.sound_fade_out(12, 0, 0);
+                glob->world = D_800EB97C[glob->unk518];
+                glob->stage = D_800EB98C[glob->unk518];
+                glob->unk518 = (glob->unk518 + 1) & 3;    /* bitfield? */
+                var_s1_2 = 0;
+                glob->unk516 = 3U;
+            }
+            if ((D_800F4E30 > 0) && (D_800F4CEC == 0)) {
+                D_800F4E30 -= D_800F4E18 * D_800F4CC4;
+            }
+            if (D_800F4E30 < 0) {
+                D_800F4E30 = 0;
+            }
+
+            //
+        }
+
+        // the right thing
+        jt.sound_fade_out(12, 0, 0);
+        int temp_v1 = D_800F4CF4;
+        while (D_800F4CF4 >= 0) {
+            D_800F4CF4 = temp_v1 - (D_800F4CC4 * 8);
+            if (D_800F4E30 < 0x100) {
+                D_800F4E30 += D_800F4E18 * D_800F4CC4;
+            }
+            func_800E4D40(D_800F4CC4, D_800F4E30);    // _the_callback
+        }
+        func_800E8640("MOVIE\\OPEN.STR", 485);
+        D_800F4CF4 = 8;
+        glob->unk518 = (u8) (glob->unk518 + 1);
+        //goto loop_10;
+    }
+}
 
 extern char *D_800F4F20;
 
@@ -976,8 +1180,24 @@ void func_800E8084(void)
     }
 }
 
+void func_800E83BC(u32 XZ, u32 WL, int Y, int step);
+void func_800E6E80(int a, int rows, int interval, int u, int v);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8124);
+void func_800E8124(int a, int b, int c)
+{
+
+    func_800E83BC(0xE0000E00, 0x20001E00, a, 0x800);
+    func_800E6E80(8, 2, 0x800, b, c + 0x60);
+
+    func_800E83BC(0xF0000600, 0x10000E00, a, 0x200);
+    func_800E6E80(16, 4, 0x200, b, c + 0x40);
+
+    func_800E83BC(0xFA000400, 0x06000600, a, 0x80);
+    func_800E6E80(24, 4, 0x80, b + 0x20, c + 0x20);
+
+    func_800E83BC(0xFC000200, 0x04000400, a, 0x80);
+    func_800E6E80(16, 4, 0x80, b + 0x40, c);
+}
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8238);
 
@@ -986,7 +1206,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8278);
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E82A8);
 
 // assembly function, rendering
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E83BC);
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E83BC);
 
 // movie.c
 
@@ -995,7 +1215,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8474);
 
 #include "movie_args.h"
 // static init_args
-void func_800E857C(MovieArgs *as,int frame_count)
+void func_800E857C(MovieArgs *as, int frame_count)
 {  
     as->frame_count = frame_count;
     as->ring_size = 0x40;
