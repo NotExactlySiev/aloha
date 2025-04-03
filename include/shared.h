@@ -107,7 +107,7 @@ extern struct {
     void        (*SetDrawMode)(DR_MODE* p, s32 dfe, s32 dtd, s32 tpage, RECT* tw);
     DISPENV*    (*SetDefDispEnv)(DISPENV*, int x, int y, int w, int h);
     DRAWENV*    (*SetDefDrawEnv)(DRAWENV*, int x, int y, int w, int h);
-    s32         (*GetGraphType)(void);
+    s32         (*GetGraphType)(void);  /* 400 */
     s32         (*VSync)(s32 mode);
     DISPENV*    (*GetDispEnv)(DISPENV*);
     DRAWENV*    (*GetDrawEnv)(DRAWENV*);

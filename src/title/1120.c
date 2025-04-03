@@ -25,6 +25,15 @@ typedef struct {
     u8 unk[32];
 } FGBuffer;
 
+typedef struct {
+    char unk[12];
+    u16 arr[30][64];
+    char unk2[72960];
+    u_long prims[64*1024];
+    u_long ot[5];
+    void *next;
+} BGBuffer;
+
 extern int D_800F4CC8;  // fg buffer index
 extern FGBuffer D_800F4F28[2];
 extern FGBuffer *D_800F4E10;    // current
@@ -1083,6 +1092,60 @@ int _func_800E4250()
     }
 }
 
+extern RECT D_800F4D90;
+extern BGBuffer *current_bgbuffer;
+extern u8 D_801A0FF0;   // brightness
+
+// draw sky polygons
+void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
+{
+    u16 *depth = (u16 *) 0x1F800000;
+    u32 *verts = (u32 *) 0x1F800154;
+    POLY_FT4 *p = current_bgbuffer->next;
+    u16 tpage = getTPage(0, 0, 640, 256);
+
+    step /= 16;
+
+    u8 u, v;
+    v = v0;
+    for (int j = 0; j < rows; j++) {
+        v %= 128;
+        u = u0;
+        for (int i = 0; i < cols; i++) {
+            setPolyFT4(p);
+            setRGB0(p, D_801A0FF0, D_801A0FF0, D_801A0FF0);
+            *((u32*)&p->x0) = verts[0];
+            *((u32*)&p->x1) = verts[1];
+            *((u32*)&p->x2) = verts[cols + 1];
+            *((u32*)&p->x3) = verts[cols + 2];
+            u16 fog_level = (depth[0] + depth[1] + depth[cols + 1] + depth[cols + 2])/4;
+            fog_level >>= 6;
+            u %= 128;
+            v %= 128;
+            setUVWH(p, u, v, step, step);
+            setClut(p, 320, 480 + fog_level);
+            p->tpage = tpage;
+            
+            addPrim(current_bgbuffer->ot[2], p);
+
+            p += 1;
+            u += step;
+            verts++;
+            depth++;
+        }
+        v += step;
+        verts++;
+        depth++;
+    }
+    current_bgbuffer->next = p;
+
+    DR_MODE *q = current_bgbuffer->next;
+    jt.SetDrawMode(q, 0, 0, tpage, &(RECT){ 0, 0, 128, 128 });
+    addPrim(current_bgbuffer->ot[2], q);
+
+    current_bgbuffer->next = q + 1;
+}
+
 extern char *D_800F4F20;
 
 void func_800E76D4(void)
@@ -1181,22 +1244,22 @@ void func_800E8084(void)
 }
 
 void func_800E83BC(u32 XZ, u32 WL, int Y, int step);
-void func_800E6E80(int a, int rows, int interval, int u, int v);
 
-void func_800E8124(int a, int b, int c)
+void func_800E8124(int height, int b, int c)
 {
-
-    func_800E83BC(0xE0000E00, 0x20001E00, a, 0x800);
+    // TODO: combine into an inline. have it deal with the invariants
+    func_800E83BC(0xE0000E00, 0x20001E00, height, 0x800);
     func_800E6E80(8, 2, 0x800, b, c + 0x60);
 
-    func_800E83BC(0xF0000600, 0x10000E00, a, 0x200);
+    func_800E83BC(0xF0000600, 0x10000E00, height, 0x200);
     func_800E6E80(16, 4, 0x200, b, c + 0x40);
 
-    func_800E83BC(0xFA000400, 0x06000600, a, 0x80);
+    func_800E83BC(0xFA000400, 0x06000600, height, 0x80);
     func_800E6E80(24, 4, 0x80, b + 0x20, c + 0x20);
 
-    func_800E83BC(0xFC000200, 0x04000400, a, 0x80);
+    func_800E83BC(0xFC000200, 0x04000400, height, 0x80);
     func_800E6E80(16, 4, 0x80, b + 0x40, c);
+
 }
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8238);
