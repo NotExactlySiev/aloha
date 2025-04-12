@@ -29,14 +29,14 @@ glabel func_800206E4
 /* 8F3C 8002073C 28000012 */  beqz       $s0, .L800207E0
 /* 8F40 80020740 21100000 */   addu      $v0, $zero, $zero
 .L80020744:
-/* 8F44 80020744 177F000C */  jal        func_8001FC5C
+/* 8F44 80020744 177F000C */  jal        mc_get_event_sw
 /* 8F48 80020748 00000000 */   nop
 /* 8F4C 8002074C 21804000 */  addu       $s0, $v0, $zero
 /* 8F50 80020750 07000016 */  bnez       $s0, .L80020770
 /* 8F54 80020754 04000234 */   ori       $v0, $zero, 0x4
 /* 8F58 80020758 286C000C */  jal        cd_run_block
 /* 8F5C 8002075C 00000000 */   nop
-/* 8F60 80020760 F57F000C */  jal        func_8001FFD4
+/* 8F60 80020760 F57F000C */  jal        do_callback
 /* 8F64 80020764 00000000 */   nop
 /* 8F68 80020768 D1810008 */  j          .L80020744
 /* 8F6C 8002076C 00000000 */   nop
@@ -63,7 +63,7 @@ glabel func_800206E4
 /* 8FAC 800207AC 328F000C */  jal         _card_write
 /* 8FB0 800207B0 21306002 */   addu      $a2, $s3, $zero
 .L800207B4:
-/* 8FB4 800207B4 3D7F000C */  jal        func_8001FCF4
+/* 8FB4 800207B4 3D7F000C */  jal        mc_get_event_hw
 /* 8FB8 800207B8 00000000 */   nop
 /* 8FBC 800207BC 21804000 */  addu       $s0, $v0, $zero
 /* 8FC0 800207C0 FCFF0012 */  beqz       $s0, .L800207B4

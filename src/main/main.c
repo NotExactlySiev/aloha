@@ -465,16 +465,16 @@ void game_shutdown(void)
     cd_stop();
     cd_flush();
     func_8001A74C();
-    func_80020C8C();
+    mc_deinit();
     func_8001DE98();
     StopCallback();
     PadStop();
     disable_vblank_event(vblank_event);
     CloseEvent(exception_event);
-    StopRCnt(0xF2000000);
-    StopRCnt(0xF2000001);
-    StopRCnt(0xF2000002);
-    StopRCnt(0xF2000003);
+    StopRCnt(RCntCNT0);
+    StopRCnt(RCntCNT1);
+    StopRCnt(RCntCNT2);
+    StopRCnt(RCntCNT3);
 }
 
 s32 enable_vblank_event(void* handler)
@@ -630,7 +630,7 @@ void game_init(void)
 
     // audio stuff? no idea
     sfx_set_reverb(0);
-    func_80020000(0);
+    mc_select_slot(0);
 }
 
 s32 get_engine_running(void)
