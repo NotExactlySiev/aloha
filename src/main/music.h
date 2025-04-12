@@ -25,7 +25,7 @@ typedef struct {
     MusicTrack tracks[];
 } MusicList;
 
-extern s32 fe_value;
+extern int fe_value;
 
 // private?
 extern s32 bgm_paused;

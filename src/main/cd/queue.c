@@ -69,7 +69,7 @@ extern s32 fade_out_task;
 extern s32 fade_in_task;
 extern int (*fade_out_callback)();
 extern int (*fade_in_callback)();
-extern s32 fe_value;
+extern int fe_value;
 extern s32 vol_scale;
 extern s32 D_80047EA4;
 extern s32 fade_paused;
@@ -117,6 +117,7 @@ void cd_command(u8 arg0, u32 arg1, u32 arg2)
     sndqueue_add(arg0, arg1, arg2);
 }
 
+// call it cd_do_work
 INCLUDE_ASM("asm/main/nonmatchings/274C", cd_run_block);
 // execute one block of command
 s32 _cd_run_block()

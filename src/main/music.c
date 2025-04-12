@@ -20,7 +20,7 @@ extern s32 D_80047EAC;
 CdlFILTER D_80047ECC;
 CdlFILE D_8004D0E0;
 
-s32 fe_value;
+int fe_value;
 int D_80047E00 = -1;  // bgm regular task handle
 int bgm_counter;
 int bgm_target;

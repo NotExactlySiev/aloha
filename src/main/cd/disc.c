@@ -12,6 +12,7 @@ s32 vblank_enable(void); // TODO: goes in a module header
 
 // general state
 extern int D_80047DD8;
+extern int fe_value;
 
 CdlLOC pvd_loc = { 0, 2, 22, 0 };
 
@@ -43,7 +44,6 @@ void func_80019F4C(s32 arg0) {
 //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
 void cd_ready_callback(u8 status, u8 *result)
 {
-    extern s32 fe_value;
     cd_last_status = result[0];
     if ((cd_last_status & CdlStatSeek == 0) && fe_value == 1) {
         // more CD-DA stuff that's never ran
@@ -168,6 +168,14 @@ extern int bgm_paused;
 CdlLOC D_8005475C[100];
 extern int sndqueue_is_running;
 extern SpuVolume vol_full;
+extern u32 cache_epoch;
+extern int fade_paused;
+extern int fade_out_active;
+extern int fading_out;
+extern int fade_in_active;
+extern int fading_in;
+extern int D_80047F24;
+extern int D_800548EC;
 
 // cd.h
 void cd_command(u8 arg0, u32 arg1, u32 arg2);
@@ -180,10 +188,6 @@ SpuVolume *cd_get_vol(SpuVolume *vol);
 int cd_set_reverb(int arg0);
 void cd_fade_stop(void);
 
-// jmptable setter 0x100-0x140
-// cd_init
-//INCLUDE_ASM("asm/main/nonmatchings/274C", cd_init);
-// FIXME: complete this
 void cd_init(void) {
     static int D_80047D74 = 0;  // cd subsystem initialized
     if (D_80047D74 == 1)
@@ -196,7 +200,6 @@ void cd_init(void) {
     D_80047D74 = 1;
     D_80047D78 = 0;
     D_80047D7C = 1;
-    /* TODO
     fade_out_active = 0;
     fade_in_active = 0;
     fading_out = 0;
@@ -207,7 +210,6 @@ void cd_init(void) {
     fade_paused = 0;
     pvd_is_cached = 0;
     cache_epoch = 1;
-    */
     sndqueue_is_running = 0;
     bgm_paused = 0;
     sector_cache_clear();
@@ -223,7 +225,7 @@ void cd_init(void) {
     };
     vol_full.left = 0x2800;
     vol_full.right = 0x2800;
-    //D_80047EA4 = 0;
+    D_80047EA4 = 0;
     SpuSetCommonAttr(&attr);
     func_8001A380();
     sndqueue_reset();

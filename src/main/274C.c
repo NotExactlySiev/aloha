@@ -57,17 +57,17 @@ void cd_set_vol(SpuVolume *vol) {
 }
 
 int D_800548EC;
-extern s32 fade_out_active;
-extern s32 fading_out;
-extern s32 fade_in_active;
-extern s32 fading_in;
+extern int fade_out_active;
+extern int fading_out;
+extern int fade_in_active;
+extern int fading_in;
 extern s32 fade_in_step;
 extern s32 fade_out_step;
 extern s32 fade_out_dest;
 extern s32 fade_in_dest;
 
 s32 vol_scale = VOL_FULL;
-s32 fade_paused = 0;
+int fade_paused = 0;
 s32 fade_out_task = 0;
 s32 fade_in_task = 0;
 int (*fade_out_callback)() = 0;
