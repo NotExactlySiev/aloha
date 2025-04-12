@@ -84,9 +84,16 @@ int call_DrawSync(int mode) {
     return DrawSync(mode);
 }
 
-// TODO: this is not correct. check ghidra
-int call_ResetGraph(int mode) {
-    return ResetGraph(mode);
+void call_ResetGraph(int mode) {
+    static int D_80047E64 = 0;
+    if (mode == 0) {
+        if (D_80047E64 == 0) {
+            ResetGraph(0);
+            D_80047E64 = 1;
+        }
+    } else {
+        ResetGraph(mode);
+    }
 }
 
 void call_wait_frame(void) {
@@ -106,9 +113,15 @@ void wait_frame(void) {
     while (curr == get_vsync_event_cnt());
 }
 
-// TODO: this is not correct. check ghidra
+
 int call_SetGraphDebug(int level) {
-    return SetGraphDebug(level);
+    static int D_80047E68 = 0;
+    int ret = 1;
+    if (D_80047E68 == 0) {
+        ret = SetGraphDebug(level);
+        D_80047E68 = 1;
+    }
+    return ret;
 }
 
 void call_SetDispMask(int mask) {
