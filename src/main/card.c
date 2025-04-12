@@ -282,7 +282,7 @@ int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 
 }
 */
 
-struct DIRENTRY *mc_firstfile(int mtidx, char *filename, struct DirEntry *out)
+struct DIRENTRY *mc_firstfile(int mtidx, char *filename, struct DIRENTRY *out)
 {
     int rc = prefix_address(mtidx, filename, D_800521F8);
     if (rc != 1)

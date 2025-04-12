@@ -130,17 +130,33 @@ extern struct {
     UNK(512, 639);
 
     // Memory Card Functions
-    UNK(640, 642);
+    // TODO: names not final
+    int         (*mc_get_event_sw)(void);
+    int         (*mc_select_slot)(int);
+    int         (*mc_file_exists)(int, char *);
     int         (*mc_make_header)(void *dst, u8 flags, int size, char *title, u16 *palette, void *icon0, void *icon1, void *icon2);
-    
-    UNK(644, 645);
-
+    int         (*mc_unk0)();
+    int         (*mc_unk1)();
     void        (*mc_set_callback_a)(void*);
-    
-    UNK(647, 767);
+    UNK(647, 655);
+
+    int         (*mc_file_create)(int chan, char* file, u32 size);
+    int         (*mc_file_open)(int chan, char* file, u32 mode);
+    int         (*mc_file_close)(int fd);
+    int         (*mc_unk2)();
+    int         (*mc_write)(int fd, void *buf, int len);
+    int         (*mc_seek)(int, int, int);
+    int         (*mc_file_delete)(int chan, char *filename);
+    DIRENTRY*   (*mc_firstfile)(int chan, char *filename, DIRENTRY *out);
+    DIRENTRY*   (*mc_nextfile)(DIRENTRY *);
+    int         (*mc_format)(int chan);
+    UNK(666, 671);
+
+    int         (*mc_read_block)(int fd, void *buf, int len);
+    int         (*mc_write_block)(int fd, void *buf, int len);
+    UNK(674, 767);
 
     // Misc. Functions
-
     void        (*sfx_load_vab)(short index, void *header, void *data);
     int         (*sfx_free_vab)(s16);
     int         (*snd_set_stereo)(int);

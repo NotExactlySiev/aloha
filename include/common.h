@@ -7,6 +7,7 @@
 #include <sys/types.h>
 
 typedef struct EXEC EXEC;
+typedef struct DIRENTRY DIRENTRY;
 
 #define SCREEN_WIDTH    320
 #define SCREEN_HEIGHT   240
