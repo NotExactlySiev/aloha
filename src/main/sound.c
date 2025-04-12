@@ -5,7 +5,7 @@
 #include "sound.h"
 
 static void set_volume(short arg0, short arg1);
-extern int D_80047E20;
+int D_80047E20 = 0;
 
 int snd_set_stereo(int mono)
 {

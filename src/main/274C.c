@@ -275,7 +275,8 @@ u32 call_PadRead(s32 id)
     return PadRead(id);
 }
 
-extern int D_80047E0C;  // is mdec initialized?
+// guard, just like call_ResetGraph
+int D_80047E0C = 0;  // is mdec initialized?
 void func_8001E608(int mode)
 {
     if (mode == 0) {
@@ -296,8 +297,8 @@ int sfx_free_vab(s16 idx)
 
 // music.c
 
-extern int D_80047E4C;          // music should repeat?
-extern MusicList *D_80047E50;   // bgm_list_ptr
+int D_80047E4C = 0;          // music should repeat?
+MusicList *D_80047E50 = NULL;   // bgm_list_ptr
 // audio_list_set_ptr
 void music_set_list(MusicList *val)
 {

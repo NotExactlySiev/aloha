@@ -64,3 +64,10 @@ ram_size:
         .word   0x00200000
         .word   0x00200000
         .word   0x00200000
+
+
+.section .data
+
+glabel stack_size
+        .word   0x00008000
+        .word   0x00800000

@@ -75,7 +75,7 @@ void func_8001DF14(long mode, short depth)
     SpuClearReverbWorkArea(mode);
 }
 
-extern int D_80047E08;
+int D_80047E08 = 0;
 
 void spu_set_stereo(int val)
 {

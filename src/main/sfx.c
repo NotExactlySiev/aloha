@@ -61,8 +61,8 @@ static int progs_count;
 static int tones_count;
 static int vags_count;
 
-extern int D_80047E10;
-extern int D_80047E14;
+int D_80047E10 = 0;
+int D_80047E14 = 1;
 
 u8 D_80047F9C[4];
 
