@@ -56,7 +56,7 @@ void cd_set_vol(SpuVolume *vol) {
     vol_full = *vol;
 }
 
-extern s32 D_800548EC;
+int D_800548EC;
 extern s32 fade_out_active;
 extern s32 fading_out;
 extern s32 fade_in_active;
@@ -169,8 +169,6 @@ u8 D_80047DA0[8] = { 8, 0, 0, 0, 0, 0, 0, 0 };
 int D_80047DE4 = 1;
 int D_80047DE8 = 0;
 int D_80047EEC; // SpuVolume ptr?
-extern CdlFILTER D_80047ECC;
-extern int D_8004D0E0;
 
 int func_8001B94C(void)
 {

@@ -165,8 +165,9 @@ int D_80047D84 = 1;
 SpuVolume D_80047D8C = {0};
 
 extern int bgm_paused;
-extern CdlLOC D_8005475C[];
+CdlLOC D_8005475C[100];
 extern int sndqueue_is_running;
+extern SpuVolume vol_full;
 
 // cd.h
 void cd_command(u8 arg0, u32 arg1, u32 arg2);
@@ -220,8 +221,8 @@ void cd_init(void) {
             .volume = { 0x2800, 0x2800 },
         },
     };
-    //vol_full = 0x2800;
-    //D_80047E9E = 0x2800;
+    vol_full.left = 0x2800;
+    vol_full.right = 0x2800;
     //D_80047EA4 = 0;
     SpuSetCommonAttr(&attr);
     func_8001A380();

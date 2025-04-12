@@ -5,8 +5,6 @@
 #include <libetc.h>
 
 extern SpuVolume D_80047D8C;
-extern CdlFILTER D_80047ECC;
-extern int D_8004D0E0;
 extern int D_80047DE4;
 extern SpuVolume vol_full;
 extern int D_80047EEC; // SpuVolume ptr?
@@ -18,6 +16,9 @@ extern s32 D_800548EC;
 extern s32 D_80047D78;
 extern s32 D_80047EA4;
 extern s32 D_80047EAC;
+
+CdlFILTER D_80047ECC;
+CdlFILE D_8004D0E0;
 
 s32 fe_value;
 int D_80047E00 = -1;  // bgm regular task handle

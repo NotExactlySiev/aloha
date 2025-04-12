@@ -6,7 +6,7 @@
 extern SpuVolume vol_full;
 extern int D_80047EEC; // SpuVolume ptr?
 extern CdlFILTER D_80047ECC;
-extern int D_8004D0E0;
+extern CdlFILE D_8004D0E0;
 
 // what's the header situattion?
 #define SNQ_FINISHED    -1
