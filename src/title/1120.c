@@ -3,8 +3,16 @@
 
 extern GlobalData *glob;
 
+const char *D_800EB8F0[6][3] = {
+    { "VAB\\W1_1.VAB", "VAB\\W1_2.VAB", "VAB\\W1_3.VAB" },
+    { "VAB\\W2_1.VAB", "VAB\\W2_2.VAB", "VAB\\W2_3.VAB" },
+    { "VAB\\W3_1.VAB", "VAB\\W3_2.VAB", "VAB\\W3_3.VAB" },
+    { "VAB\\W4_1.VAB", "VAB\\W4_2.VAB", "VAB\\W4_3.VAB" },
+    { "VAB\\W5_1.VAB", "VAB\\W5_2.VAB", "VAB\\W5_3.VAB" },
+    { "VAB\\W6_1.VAB", "VAB\\W6_2.VAB", "VAB\\W6_3.VAB" },
+};
+
 // load level vab
-extern const char *D_800EB8F0[6][3];
 void func_800E0920(void)
 {
     u32 *buffer = (u32 *) 0x80060000;

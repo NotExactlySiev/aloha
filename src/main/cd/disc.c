@@ -270,7 +270,6 @@ void cd_init(void) {
     jt_set(func_8001CF38, 0x151);   // movie_get_loc?
 }
 
-// clears all cd callbacks
 void func_8001A74C(void)
 {
     CdReadyCallback(0);
@@ -278,13 +277,11 @@ void func_8001A74C(void)
     CdSyncCallback(0);
 }
 
-
 static inline void sync_and_check(void)
 {
     CdSync(0, NULL);
     while (cd_get_status(&cd_last_status) != 1);
 }
-
 
 void func_8001A77C(void)
 {
