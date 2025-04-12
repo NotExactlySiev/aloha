@@ -36,7 +36,10 @@ typedef struct {
     s8  unk509;
     s8  unk50A;
     s8  unk50B;
-    UNK(0x50C, 0x50D);
+    // dialog selections
+    u8  unk50C;
+    u8  unk50D;
+
     u8  intro_played;
     s8  slot_state[3];
     u8  unk512;

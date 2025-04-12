@@ -294,13 +294,8 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1F60);
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1FB8);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E2234);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E22D8);
-
-// unused
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C0);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C8);
+// draw logo
+//void func_800E2234(void) {}
 
 u8 text_set_attr(u8 attr);
 void text_set_pos(int x, int y);
@@ -309,7 +304,7 @@ void text_put_char(u16 c);
 void text_put_str(char *str);
 
 typedef struct {
-    u8 flags;
+    u8 flags;   // and sfx. bitfield?
     u8 dest;
     u8 unk0;
     u8 unk1;
@@ -320,9 +315,9 @@ typedef struct {
     u8 field3_0x3;
 */
     // probably another function, for pressing
-    void *click;
-    void *press_right;
-    void *press_left;
+    void (*click)(void);
+    void (*press_right)(void);
+    void (*press_left)(void);
 } MenuItem;
 
 typedef union {
@@ -639,6 +634,46 @@ extern int D_800F4CC0;  // slot selected to overwrite
 extern int D_800F4E68;
 extern int D_800F4E38;
 
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E22D8);
+// draw menu box
+void func_800E22D8(int idx)
+{
+    RECT *r = &D_800EB8CC[idx]->rect;
+    if (D_800F4E38 == 0)
+        return;
+
+    short y = r->y;
+    short h = r->h;
+    // opening animation
+    if (D_800F4E38 < 8) {
+        y = (h/2 + y) - (h/2 * D_800F4E38) / 8;
+        h = (h * D_800F4E38) / 8;
+    }
+
+    if (r->w != 0) {
+        RECT rect = {
+            .x = r->x + 2,
+            .y = y + 4,
+            .w = r->w + 12,
+            .h = h + 16,
+        };
+        func_800E6940(&rect, 4*D_800F4E38);
+    }
+}
+
+// unused
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C0);
+
+// printf world status icon
+void func_800E23C8(int c)
+{
+    switch (c) {
+    case 1: text_put_char(0xB6); break;
+    case 2: text_put_char(0xB5); break;
+    case 3: text_put_char(0xB6); break;
+    }
+}
+
 static inline void text_put_progress(SavedData *save)
 {
     text_put_str(D_800EB430[func_800E0FD0(save->unkE2)]);
@@ -895,14 +930,89 @@ void func_800E2438(int page_id, uint selected, u8 attr)
     }
 }
 
+// robbit cursor anim
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3168);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);
+extern int D_800F4E48;  // main menu selection (why is it separate?
+// is this (and maybe the whole input module) the same one from gameover? 
+#define BUTTONS_ACCEPT      (Pad1Start|Pad1sqr|Pad1crc)
 
+
+
+#include <pad.h>
+// menu logic
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);selection
+u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
+{
+    if (buttons == 0)
+        return (selection << 16) | page_idx;
+    
+    MenuPage *page = &D_800EB8CC[page_idx];
+
+    if (buttons & Pad1Down) {
+        if (++selection >= page->nselections) {
+            selection = 0;
+        }
+        func_800E0B54(0x2C00);
+    }
+
+    if (buttons & Pad1Up) {
+        if (--selection < 0) {
+            selection = page->nselections - 1;
+        }
+        func_800E0B54(0x2C00);
+    }
+
+    if (page_idx == 0)
+        D_800F4E48 = selection;
+    
+    if (buttons & Pad1Left) {
+        if (page->items[selection].press_left)
+            page->items[selection].press_left();
+    }
+
+    if (buttons & Pad1Right) {
+        if (page->items[selection].press_right)
+            page->items[selection].press_right();
+    }
+
+    if (buttons & BUTTONS_ACCEPT) {
+        MenuItem *item = &page->items[selection];
+        switch (item->flags & 0xF) {
+        case 1: func_800E0B54(0x2600); break;
+        case 2: func_800E0B54(0x2700); break;
+        case 3: func_800E0B54(0x2D00); func_800E7478(); break;
+        }
+        if (page_idx == 5) {
+            glob->unk50C = D_800F4CC0;
+        }
+        if (page_idx == 4) {
+            glob->unk50D = D_800F4CC0;
+        }
+
+        if (page_idx == 1 && selection < 3) {
+            // load
+            //
+        }
+
+        if (page_idx == 2 && selection < 3) {
+            // save
+            //
+        }
+
+
+    }
+
+    return (selection << 16) | page_idx;
+}
+
+// main menu tick
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3BBC);
 
+// bzero
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C48);
 
+// init game data
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C68);
 
 // unused

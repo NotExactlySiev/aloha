@@ -24,20 +24,22 @@ int (*_mc_callback)() = 0;
 
 int func_8001FC5C(void)
 {
-    if (TestEvent(D_80047FB4) == 1) return 4;
-    if (TestEvent(D_80047FBC) == 1) return 0x8000;
-    if (TestEvent(D_80047FC4) == 1) return 0x100;
-    if (TestEvent(D_80047FCC) == 1) return 0x2000;
-    return (TestEvent(D_80047FD4) == 1) << 9;
+    if (TestEvent(D_80047FB4) == 1) return EvSpIOE;
+    if (TestEvent(D_80047FBC) == 1) return EvSpERROR;
+    if (TestEvent(D_80047FC4) == 1) return EvSpTIMOUT;
+    if (TestEvent(D_80047FCC) == 1) return EvSpNEW;
+    if (TestEvent(D_80047FD4) == 1) return EvSpUNKNOWN;
+    return 0;
 }
 
 int func_8001FCF4(void)
 {
-    if (TestEvent(D_80047FDC) == 1) return 4;
-    if (TestEvent(D_80047FE4) == 1) return 0x8000;
-    if (TestEvent(D_80047FEC) == 1) return 0x100;
-    if (TestEvent(D_80047FF4) == 1) return 0x2000;
-    return (TestEvent(D_80047FFC) == 1) << 9;
+    if (TestEvent(D_80047FDC) == 1) return EvSpIOE;
+    if (TestEvent(D_80047FE4) == 1) return EvSpERROR;
+    if (TestEvent(D_80047FEC) == 1) return EvSpTIMOUT;
+    if (TestEvent(D_80047FF4) == 1) return EvSpNEW;
+    if (TestEvent(D_80047FFC) == 1) return EvSpUNKNOWN;
+    return 0;
 }
 
 void func_8001FD8C(void)
@@ -49,8 +51,95 @@ void func_8001FD8C(void)
     TestEvent(D_80047FFC);
 }
 
+extern int D_80047E18;
 // 1 big function related to memory card testing (uses 3 above)
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FDF4);
+//NOT_IMPL_FN(func_8001FDF4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FDF4);
+int func_8001FDF4(int chan)
+{
+    const int timeout = 1000;
+    int ev;
+    printf("let's check the card thing! port %d\n", chan);
+    // TODO: inline this
+    for (int i = 0; i < timeout; i++) {
+        int info_tries = 0;
+        for (info_tries = 0; info_tries < timeout; info_tries++) {
+            if (_card_info(chan)) 
+                break;
+        }
+
+        if (info_tries == timeout) {
+            D_80047E18 = 1;
+            return -2;
+        }
+
+        while (1) {
+            ev = func_8001FC5C();
+            if (ev)
+                break;
+            // do other shit while we wait
+            cd_run_block();
+            func_8001FFD4();
+        }
+        
+        if (ev != EvSpERROR && ev != EvSpUNKNOWN)
+            break;
+    }
+
+    switch (ev) {
+    case EvSpIOE:
+        if (D_80047E18 != 1) break;
+        [[fallthrough]]
+    
+    case EvSpNEW:
+        func_8001FD8C();
+        card_write(chan);
+        while (func_8001FCF4() == 0);
+        int ev2;
+        for (int i = 0; i < timeout; i++) {
+            int load_tries = 0;
+            for (load_tries = 0; load_tries < timeout; load_tries++) {
+                if (_card_load(chan)) 
+                    break;
+            }
+
+            if (load_tries == timeout) {
+                D_80047E18 = 1;
+                return -2;
+            }
+
+            while (1) {
+                ev2 = func_8001FC5C();
+                if (ev2)
+                    break;
+                // do other shit while we wait
+                cd_run_block();
+                func_8001FFD4();
+            }
+            
+            if (ev2 != EvSpERROR && ev2 != EvSpUNKNOWN)
+                break;
+        }
+        if (ev2 == EvSpIOE) {
+            ev = EvSpIOE;
+        } else if (ev2 == EvSpNEW) {
+            D_80047E18 = 1;
+            return -1;
+        }
+        break;
+    
+    default:
+        D_80047E18 = 1;
+        return -2;
+    }
+
+    if (ev == EvSpIOE) {
+        D_80047E18 = 0;
+        return 1;
+    } else {
+        D_80047E18 = 1;
+        return -2;
+    }
+}
 
 
 // 3 trivial memory card functions
@@ -150,7 +239,7 @@ int func_800202A0(int fd, void *buf, int len)   // mc_write_block
 }
 
 // read with fine size
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);   //
+NOT_IMPL_FN(func_800202FC) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);
 
 // read full?
 int func_800203AC(long fd, void *buf, long len)
@@ -228,11 +317,12 @@ int func_80020630(long mtidx)
 }
 
 // 2 big almost identical functions
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
+NOT_IMPL_FN(func_800206E4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
 
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
+NOT_IMPL_FN(func_80020808) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
 
 // init memory card (events and jmptable)
+//NOT_IMPL_FN(mc_init)
 INCLUDE_ASM("asm/main/nonmatchings/274C", mc_init);
 
 
