@@ -1,8 +1,10 @@
+#include <stdio.h>
 #include "spu.h"
 
 #define SPU_MALLOC_NUM  16
 
 static char rec[SPU_MALLOC_RECSIZ * (SPU_MALLOC_NUM + 1)];
+static int is_stereo = 0;
 
 void func_8001DD7C(void)
 {
@@ -45,7 +47,7 @@ void func_8001DE98(void)
     SpuQuit();
 }
 
-long call_SpuSetCommonAttr(SpuCommonAttr *attr)
+void call_SpuSetCommonAttr(SpuCommonAttr *attr)
 {
     SpuSetCommonAttr(attr);
 }
@@ -75,11 +77,9 @@ void func_8001DF14(long mode, short depth)
     SpuClearReverbWorkArea(mode);
 }
 
-int D_80047E08 = 0;
-
 void spu_set_stereo(int val)
 {
-    D_80047E08 = val;
+    is_stereo = val;
 }
 
 long call_SpuMalloc(long size)
@@ -132,7 +132,7 @@ void call_SpuSetVoiceAttr(SpuVoiceAttr *attr) {
 }
 
 void set_voice_attr(SpuVoiceAttr *arg) {
-    if (D_80047E08 == 1) {
+    if (is_stereo == 1) {
         // make it mono
         SpuVoiceAttr attr = *arg;
         int left = attr.volume.left;
