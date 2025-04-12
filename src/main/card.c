@@ -6,57 +6,55 @@
 #include <file.h>
 #include <libmcrd.h>
 
-static void do_callback(void);
+static void do_callback_a(void);
 
-// 3 event test functions
-static int D_80047FB4;
-static int D_80047FBC;
-static int D_80047FC4;
-static int D_80047FCC;
-static int D_80047FD4;
-
-static int D_80047FDC;
-static int D_80047FE4;
-static int D_80047FEC;
-static int D_80047FF4;
-static int D_80047FFC;
+static int event_sw_ioe;
+static int event_sw_err;
+static int event_sw_tim;
+static int event_sw_new;
+static int event_sw_unk;
+static int event_hw_ioe;
+static int event_hw_err;
+static int event_hw_tim;
+static int event_hw_new;
+static int event_hw_unk;
 
 static char D_800521F8[32];
-int (*_mc_callback)() = 0;
+static int D_80047E18 = 1;  // card not available
 
-int mc_get_event_sw(void)
+void (*_mc_callback_a)(void) = 0;
+void (*_mc_callback_b)(void) = 0;
+
+int mc_get_event(void)
 {
-    if (TestEvent(D_80047FB4) == 1) return EvSpIOE;
-    if (TestEvent(D_80047FBC) == 1) return EvSpERROR;
-    if (TestEvent(D_80047FC4) == 1) return EvSpTIMOUT;
-    if (TestEvent(D_80047FCC) == 1) return EvSpNEW;
-    if (TestEvent(D_80047FD4) == 1) return EvSpUNKNOWN;
+    if (TestEvent(event_sw_ioe) == 1) return EvSpIOE;
+    if (TestEvent(event_sw_err) == 1) return EvSpERROR;
+    if (TestEvent(event_sw_tim) == 1) return EvSpTIMOUT;
+    if (TestEvent(event_sw_new) == 1) return EvSpNEW;
+    if (TestEvent(event_sw_unk) == 1) return EvSpUNKNOWN;
     return 0;
 }
 
 int mc_get_event_hw(void)
 {
-    if (TestEvent(D_80047FDC) == 1) return EvSpIOE;
-    if (TestEvent(D_80047FE4) == 1) return EvSpERROR;
-    if (TestEvent(D_80047FEC) == 1) return EvSpTIMOUT;
-    if (TestEvent(D_80047FF4) == 1) return EvSpNEW;
-    if (TestEvent(D_80047FFC) == 1) return EvSpUNKNOWN;
+    if (TestEvent(event_hw_ioe) == 1) return EvSpIOE;
+    if (TestEvent(event_hw_err) == 1) return EvSpERROR;
+    if (TestEvent(event_hw_tim) == 1) return EvSpTIMOUT;
+    if (TestEvent(event_hw_new) == 1) return EvSpNEW;
+    if (TestEvent(event_hw_unk) == 1) return EvSpUNKNOWN;
     return 0;
 }
 
 void mc_clear_hw_events(void)
 {
-    TestEvent(D_80047FDC);
-    TestEvent(D_80047FE4);
-    TestEvent(D_80047FEC);
-    TestEvent(D_80047FF4);
-    TestEvent(D_80047FFC);
+    TestEvent(event_hw_ioe);
+    TestEvent(event_hw_err);
+    TestEvent(event_hw_tim);
+    TestEvent(event_hw_new);
+    TestEvent(event_hw_unk);
 }
 
-extern int D_80047E18;
-
-// test and setup card
-static int select_slot(int chan)
+static int select_slot(int slot)
 {
     const int timeout = 1000;
     int ev;
@@ -64,7 +62,7 @@ static int select_slot(int chan)
     for (int i = 0; i < timeout; i++) {
         int info_tries = 0;
         for (info_tries = 0; info_tries < timeout; info_tries++) {
-            if (_card_info(chan)) 
+            if (_card_info(slot)) 
                 break;
         }
 
@@ -73,13 +71,9 @@ static int select_slot(int chan)
             return -2;
         }
 
-        while (1) {
-            ev = mc_get_event_sw();
-            if (ev)
-                break;
-            // do other shit while we wait
+        while ((ev = mc_get_event()) == 0) {
             cd_run_block();
-            do_callback();
+            do_callback_a();
         }
         
         if (ev != EvSpERROR && ev != EvSpUNKNOWN)
@@ -93,13 +87,13 @@ static int select_slot(int chan)
     
     case EvSpNEW:
         mc_clear_hw_events();
-        card_write(chan);
+        card_write(slot);
         while (mc_get_event_hw() == 0);
         int ev2;
         for (int i = 0; i < timeout; i++) {
             int load_tries = 0;
             for (load_tries = 0; load_tries < timeout; load_tries++) {
-                if (_card_load(chan)) 
+                if (_card_load(slot)) 
                     break;
             }
 
@@ -108,13 +102,9 @@ static int select_slot(int chan)
                 return -2;
             }
 
-            while (1) {
-                ev2 = mc_get_event_sw();
-                if (ev2)
-                    break;
-                // do other shit while we wait
+            while ((ev2 = mc_get_event()) == 0) {
                 cd_run_block();
-                do_callback();
+                do_callback_a();
             }
             
             if (ev2 != EvSpERROR && ev2 != EvSpUNKNOWN)
@@ -142,36 +132,32 @@ static int select_slot(int chan)
     }
 }
 
-
-// 3 trivial memory card functions
-extern int (*D_80047E1C)();
-
-void mc_set_callback_a(void *val)
+void mc_set_callback_a(void (*fn)(void))
 {
-    D_80047E1C = val;
+    _mc_callback_a = fn;
 }
 
-static void do_callback(void)
+static void do_callback_a(void)
 {
-    if (D_80047E1C)
-        D_80047E1C();
+    if (_mc_callback_a)
+        _mc_callback_a();
 }
 
-int mc_select_slot(int val)
+int mc_select_slot(int slot)
 {
-    return select_slot(val);
+    return select_slot(slot);
 }
 
-static int prefix_address(u32 mtidx, char* src, char* dst)
+static int prefix_address(u32 slot, char* src, char* dst)
 {
-    int rc = mc_select_slot(mtidx);
+    int rc = mc_select_slot(slot);
     if (1 != rc) return rc;
     
     dst[0] = 'b';
     dst[1] = 'u';
-    dst[2] = '0' + ((mtidx >> 8) & 1);
+    dst[2] = '0' + ((slot >> 8) & 1);
     
-    char c = mtidx & 0xf;
+    char c = slot & 0xf;
     c += c > 9 ? 'W' : '0';
     dst[3] = c;
     dst[4] = ':';
@@ -180,9 +166,9 @@ static int prefix_address(u32 mtidx, char* src, char* dst)
 }
 
 // this is actually just mc_file_exists
-int mc_file_exists(int mtidx, char *filename)
+int mc_file_exists(int slot, char *filename)
 {
-    int rc = prefix_address(mtidx, filename, D_800521F8);
+    int rc = prefix_address(slot, filename, D_800521F8);
     if (rc != 1)
         return rc;
 
@@ -191,11 +177,11 @@ int mc_file_exists(int mtidx, char *filename)
     return p == &ent;
 }
 
-int mc_file_create(s32 mtidx, char* file, u32 size)
+int mc_create(s32 slot, char* file, u32 size)
 {
     s32 fd;
 
-    if (1 != prefix_address(mtidx, file, D_800521F8))
+    if (1 != prefix_address(slot, file, D_800521F8))
         return 0;
     size += 0x2000 - 1;
     if (size < 0) size += 0x2000 - 1 + 0x2000 - 1;
@@ -206,39 +192,39 @@ int mc_file_create(s32 mtidx, char* file, u32 size)
     return 1;
 }
 
-int mc_file_open(s32 mtidx, char* file, u32 mode)
+int mc_open(s32 slot, char *file, u32 mode)
 {
-    if (1 != prefix_address(mtidx, file, D_800521F8))
+    if (1 != prefix_address(slot, file, D_800521F8))
         return -1;
     //printf("opening %s\n", D_800521F8);
     return open(D_800521F8, mode);
 }
 
-int mc_file_close(s32 fd)
+int mc_close(s32 fd)
 {
     return close(fd);
 }
 
-int mc_file_delete(u32 mtidx, char* file)
+int mc_delete(u32 slot, char *file)
 {
-    if (1 != prefix_address(mtidx, file, D_800521F8))
+    if (1 != prefix_address(slot, file, D_800521F8))
         return 0;
     return erase(D_800521F8);
 }
 
-int mc_write(int fd, void *buf, int len)   // mc_write
+int mc_write(int fd, void *buf, int len)
 {
     return write(fd, buf, (len + 127) & ~127);
 }
 
-int mc_write_block(int fd, void *buf, int len)   // mc_write_block
+int mc_write_block(int fd, void *buf, int len)
 {
     int rounded = (len + 127) & ~127;
     while (write(fd, buf, rounded) != 0);
     return rounded;
 }
 
-// read with fine size
+// mc_read, read with fine size
 NOT_IMPL_FN(func_800202FC) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);
 
 int mc_read_block(long fd, void *buf, long len)
@@ -282,9 +268,9 @@ int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 
 }
 */
 
-struct DIRENTRY *mc_firstfile(int mtidx, char *filename, struct DIRENTRY *out)
+struct DIRENTRY *mc_firstfile(int slot, char *filename, struct DIRENTRY *out)
 {
-    int rc = prefix_address(mtidx, filename, D_800521F8);
+    int rc = prefix_address(slot, filename, D_800521F8);
     if (rc != 1)
         return -1;
 
@@ -297,18 +283,18 @@ struct DIRENTRY *mc_nextfile(struct DIRENTRY *dir)
 }
 
 extern int D_80047E18;
-int mc_format(long mtidx)
+int mc_format(long slot)
 {
-    if (mc_select_slot(mtidx) == -2)
+    if (mc_select_slot(slot) == -2)
         return -1;
     
-    char c = (mtidx & 0xF);
+    char c = (slot & 0xF);
     if (c > 9)
         c += 'a' - '9' - 1;
 
     D_800521F8[0] = 'b';
     D_800521F8[1] = 'u';
-    D_800521F8[2] = '0' + ((mtidx >> 8) & 1);
+    D_800521F8[2] = '0' + ((slot >> 8) & 1);
     D_800521F8[3] = '0' + c;
     D_800521F8[4] = ':';
     D_800521F8[5] = 0;
@@ -327,43 +313,43 @@ void mc_init(void)
     StartCARD2();
     _bu_init();
     _card_auto(0);
-    D_80047E1C = 0;
+    _mc_callback_a = 0;
     EnterCriticalSection();
-    D_80047FB4 = OpenEvent(SwCARD, EvSpIOE    , EvMdNOINTR, NULL);
-    D_80047FBC = OpenEvent(SwCARD, EvSpERROR  , EvMdNOINTR, NULL);
-    D_80047FC4 = OpenEvent(SwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
-    D_80047FCC = OpenEvent(SwCARD, EvSpNEW    , EvMdNOINTR, NULL);
-    D_80047FD4 = OpenEvent(SwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
-    D_80047FDC = OpenEvent(HwCARD, EvSpIOE    , EvMdNOINTR, NULL);
-    D_80047FE4 = OpenEvent(HwCARD, EvSpERROR  , EvMdNOINTR, NULL);
-    D_80047FEC = OpenEvent(HwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
-    D_80047FF4 = OpenEvent(HwCARD, EvSpNEW    , EvMdNOINTR, NULL);
-    D_80047FFC = OpenEvent(HwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
-    EnableEvent(D_80047FB4);
-    EnableEvent(D_80047FBC);
-    EnableEvent(D_80047FC4);
-    EnableEvent(D_80047FCC);
-    EnableEvent(D_80047FD4);
-    EnableEvent(D_80047FDC);
-    EnableEvent(D_80047FE4);
-    EnableEvent(D_80047FEC);
-    EnableEvent(D_80047FF4);
-    EnableEvent(D_80047FFC);
+    event_sw_ioe = OpenEvent(SwCARD, EvSpIOE    , EvMdNOINTR, NULL);
+    event_sw_err = OpenEvent(SwCARD, EvSpERROR  , EvMdNOINTR, NULL);
+    event_sw_tim = OpenEvent(SwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
+    event_sw_new = OpenEvent(SwCARD, EvSpNEW    , EvMdNOINTR, NULL);
+    event_sw_unk = OpenEvent(SwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
+    event_hw_ioe = OpenEvent(HwCARD, EvSpIOE    , EvMdNOINTR, NULL);
+    event_hw_err = OpenEvent(HwCARD, EvSpERROR  , EvMdNOINTR, NULL);
+    event_hw_tim = OpenEvent(HwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
+    event_hw_new = OpenEvent(HwCARD, EvSpNEW    , EvMdNOINTR, NULL);
+    event_hw_unk = OpenEvent(HwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
+    EnableEvent(event_sw_ioe);
+    EnableEvent(event_sw_err);
+    EnableEvent(event_sw_tim);
+    EnableEvent(event_sw_new);
+    EnableEvent(event_sw_unk);
+    EnableEvent(event_hw_ioe);
+    EnableEvent(event_hw_err);
+    EnableEvent(event_hw_tim);
+    EnableEvent(event_hw_new);
+    EnableEvent(event_hw_unk);
     ExitCriticalSection();
-    jt_set(mc_get_event_sw, 0x280);
+    jt_set(mc_get_event, 0x280);
     jt_set(mc_select_slot, 0x281);
     jt_set(mc_file_exists, 0x282);
-    jt_set(func_80020434, 0x283);
+    jt_set(func_80020434, 0x283);   // make header
     jt_set(func_80020808, 0x284);   // not used
     jt_set(func_800206E4, 0x285);   // not used
     jt_set(mc_set_callback_a, 0x286);
-    jt_set(mc_file_create, 0x290);
-    jt_set(mc_file_open, 0x291);
-    jt_set(mc_file_close, 0x292);
-    jt_set(func_800202FC, 0x293);   // not used
+    jt_set(mc_create, 0x290);
+    jt_set(mc_open, 0x291);
+    jt_set(mc_close, 0x292);
+    jt_set(func_800202FC, 0x293);   // mc_read, not used
     jt_set(mc_write, 0x294);
     jt_set(mc_seek, 0x295);
-    jt_set(mc_file_delete, 0x296);
+    jt_set(mc_delete, 0x296);
     jt_set(mc_firstfile, 0x297);
     jt_set(mc_nextfile, 0x298);
     jt_set(mc_format, 0x299);
@@ -371,31 +357,27 @@ void mc_init(void)
     jt_set(mc_write_block, 0x2A1);
 }
 
-// misc functions (part of misc_ maybe?)
+// higher level functions. set in misc_
 
-// card read callback
 void mc_set_callback_b(void (*fn)(void))
 {
-    _mc_callback = fn;
+    _mc_callback_b = fn;
 }
 
-// static
-void func_800218B0(void)
+static void do_callback_b(void)
 {
-    if (_mc_callback != 0) {
-        (*_mc_callback)();
+    if (_mc_callback_b != 0) {
+        (*_mc_callback_b)();
     }
 }
 
-// read file
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800218DC);
-int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len)
+int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
 {
-    printf("read bu%d:/%s: %d bytes at %d\n", mtidx, filename, len, offset);
-    if (mc_file_exists(mtidx, filename) == 0)
+    printf("read bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
+    if (mc_file_exists(slot, filename) == 0)
         return 0;
     
-    int fd = mc_file_open(mtidx, filename, O_RDONLY | O_NOWAIT);
+    int fd = mc_open(slot, filename, O_RDONLY | O_NOWAIT);
     if (fd == -1)
         return 0;
     
@@ -403,33 +385,31 @@ int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len)
     mc_seek(fd, offset + 0x200, SEEK_SET);
     mc_read_block(fd, dst, len);
     int rc;
-    while ((rc = mc_get_event_sw()) == McErrNone) {
+    while ((rc = mc_get_event()) == 0) {
         cd_run_block();
-        func_800218B0();
+        do_callback_b();
     }
-    mc_file_close(fd);
+    mc_close(fd);
     // huh??
-    return len & -(uint) (rc == McErrNotFormat);
+    return len & -(uint) (rc == EvSpIOE);
 }
 
-// write file
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_800219DC);
-int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, char *title)
+int mc_file_write(int slot, char *filename, void *src, int offset, int len, char *title)
 {
-    printf("write bu%d:/%s: %d bytes at %d\n", mtidx, filename, len, offset);
-    if (mc_file_exists(mtidx, filename) == 0)
+    printf("write bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
+    if (mc_file_exists(slot, filename) == 0)
         return 0;
 
-    int fd = mc_file_open(mtidx, filename, O_RDWR | O_NOWAIT);
+    int fd = mc_open(slot, filename, O_RDWR | O_NOWAIT);
     if (fd == -1)
         return 0;
     
     McTitleFrame header;
     mc_seek(fd, 0, SEEK_SET);
     mc_read_block(fd, &header, 128);
-    while (mc_get_event_sw() == 0) {
+    while (mc_get_event() == 0) {
         cd_run_block();
-        func_800218B0();
+        do_callback_b();
     }
 
     int header_len = 0;
@@ -440,9 +420,9 @@ int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, ch
             strcpy(title, header.title);
             mc_seek(fd, 0, SEEK_SET);
             mc_write_block(fd, &header, 128);
-            while (mc_get_event_sw() == 0) {
+            while (mc_get_event() == 0) {
                 cd_run_block();
-                func_800218B0();
+                do_callback_b();
             }
         }
     }
@@ -450,32 +430,31 @@ int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, ch
     mc_seek(fd, offset, SEEK_SET);
     mc_write_block(fd, src, len);
     int rc;
-    while ((rc = mc_get_event_sw()) == 0) {
+    while ((rc = mc_get_event()) == 0) {
         cd_run_block();
-        func_800218B0();
+        do_callback_b();
     }
 
-    mc_file_close(fd);
+    mc_close(fd);
     // huh??
-    return len & -(uint) (rc == McErrNotFormat);
+    return len & -(uint) (rc == EvSpIOE);
 }
 
 extern u8 D_80032E5C[3][128];   // frames
 extern u16 D_80032FDC[];        // palette
 
-// high level create
-int mc_format_file(uint mtidx, char *filename, int len, char *title)
+int mc_file_create(int slot, char *filename, int len, char *title)
 {
-    int rc = mc_select_slot(mtidx);
+    int rc = mc_select_slot(slot);
     if (rc != 1)
         return rc;
     
     // low level create
-    int fd = mc_file_create(mtidx, filename, len + sizeof(McFileHeader));
+    int fd = mc_create(slot, filename, len + sizeof(McFileHeader));
     if (fd == 0)
         return -3;
     
-    fd = mc_file_open(mtidx, filename, O_RDWR | O_NOWAIT);
+    fd = mc_open(slot, filename, O_RDWR | O_NOWAIT);
     if (fd < -1)
         return -3;
     
@@ -484,39 +463,37 @@ int mc_format_file(uint mtidx, char *filename, int len, char *title)
     // TODO: #define number of frames = 3
     func_80020434(&header, 0x10 + 3, len + sizeof(McFileHeader), title, D_80032FDC, D_80032E5C[0], D_80032E5C[1], D_80032E5C[2]);
     mc_write_block(fd, &header, sizeof(McFileHeader));
-    while (mc_get_event_sw() == 0) {
+    while (mc_get_event() == 0) {
         cd_run_block();
-        func_800218B0();
+        do_callback_b();
     }
-    mc_file_close(fd);
+    mc_close(fd);
     return len;
 }
 
 // TODO: this might return void
 // never called?
-// mc_delete?
-int func_80021D08(uint mtidx, char *filename)
+int mc_file_delete(int slot, char *filename)
 {
-    int rc = mc_select_slot(mtidx);
+    int rc = mc_select_slot(slot);
     if (rc != 1)
-        rc = mc_file_delete(mtidx, filename);
+        rc = mc_delete(slot, filename);
     return rc;    
 }
 
-// close memory card events
 void mc_deinit(void)
 {
     EnterCriticalSection();
-    CloseEvent(D_80047FB4);
-    CloseEvent(D_80047FBC);
-    CloseEvent(D_80047FC4);
-    CloseEvent(D_80047FCC);
-    CloseEvent(D_80047FD4);
-    CloseEvent(D_80047FDC);
-    CloseEvent(D_80047FE4);
-    CloseEvent(D_80047FEC);
-    CloseEvent(D_80047FF4);
-    CloseEvent(D_80047FFC);
+    CloseEvent(event_sw_ioe);
+    CloseEvent(event_sw_err);
+    CloseEvent(event_sw_tim);
+    CloseEvent(event_sw_new);
+    CloseEvent(event_sw_unk);
+    CloseEvent(event_hw_ioe);
+    CloseEvent(event_hw_err);
+    CloseEvent(event_hw_tim);
+    CloseEvent(event_hw_new);
+    CloseEvent(event_hw_unk);
     ExitCriticalSection();
     StopCARD2();
 }

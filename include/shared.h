@@ -130,8 +130,7 @@ extern struct {
     UNK(512, 639);
 
     // Memory Card Functions
-    // TODO: names not final
-    int         (*mc_get_event_sw)(void);
+    int         (*mc_get_event)(void);
     int         (*mc_select_slot)(int);
     int         (*mc_file_exists)(int, char *);
     int         (*mc_make_header)(void *dst, u8 flags, int size, char *title, u16 *palette, void *icon0, void *icon1, void *icon2);
@@ -140,16 +139,16 @@ extern struct {
     void        (*mc_set_callback_a)(void*);
     UNK(647, 655);
 
-    int         (*mc_file_create)(int chan, char* file, u32 size);
-    int         (*mc_file_open)(int chan, char* file, u32 mode);
-    int         (*mc_file_close)(int fd);
-    int         (*mc_unk2)();
+    int         (*mc_create)(int slot, char *filename, u32 size);
+    int         (*mc_open)(int slot, char *filename, u32 mode);
+    int         (*mc_close)(int fd);
+    int         (*mc_read)(int fd, void *buf, int len);
     int         (*mc_write)(int fd, void *buf, int len);
     int         (*mc_seek)(int, int, int);
-    int         (*mc_file_delete)(int chan, char *filename);
-    DIRENTRY*   (*mc_firstfile)(int chan, char *filename, DIRENTRY *out);
+    int         (*mc_delete)(int slot, char *filename);
+    DIRENTRY*   (*mc_firstfile)(int slot, char *filename, DIRENTRY *out);
     DIRENTRY*   (*mc_nextfile)(DIRENTRY *);
-    int         (*mc_format)(int chan);
+    int         (*mc_format)(int slot);
     UNK(666, 671);
 
     int         (*mc_read_block)(int fd, void *buf, int len);
@@ -168,13 +167,17 @@ extern struct {
     void        (*audio_unk_set)(void);
     void        (*audio_unk_reset)(void);
     void        (*snd_reset)(void);
-    void        (*execute_compressed)(void* addr, u32 arg);
+    void        (*execute_compressed)(void *addr, u32 arg);
     void        (*audio_unk0)(s32 arg0, s16 arg1, s16 arg2);
     void        (*audio_unk1)(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
     UNK(787, 816);
     s32         (*audio_play_by_id)(s32);
     void        (*audio_unk3)(s32);
-    UNK(819, 835);
+    UNK(819, 831);
+    int         (*mc_file_read)(int slot, char *filename, void *buf, int off, int len);
+    int         (*mc_file_write)(int slot, char *filename, void *buf, int off, int len);
+    int         (*mc_file_create)(int slot, char *filename, int len, char *title);
+    int         (*mc_file_delete)(int slot, char *filename);
     void        (*mc_set_callback_b)(void*);
     UNK(837, 1000);
 

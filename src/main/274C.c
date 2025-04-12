@@ -360,16 +360,16 @@ void execute_compressed(void *addr, u32 stack)
 }
 
 // card.h
-extern int (*_mc_callback)();
-int func_800218DC(long mtidx, char *filename, void *dst, int offset, int len);
-int func_800219DC(long mtidx, char *filename, void *src, int offset, int len, char *title);
-int mc_format_file(); // TODO: complete signature
-int func_80021D08(uint mtidx, char *filename);
+extern int (*_mc_callback_b)();
+int mc_file_read(long mtidx, char *filename, void *dst, int offset, int len);
+int mc_file_write(long mtidx, char *filename, void *src, int offset, int len, char *title);
+int mc_file_create(); // TODO: complete signature
+int mc_file_delete(uint mtidx, char *filename);
 void mc_set_callback_b(void (*fn)(void));
 
 void misc_init(void)
 {
-    _mc_callback = 0;  // WHY DO YOU ACCESS THIS FROM HERE AAAA
+    _mc_callback_b = 0;  // WHY DO YOU ACCESS THIS FROM HERE AAAA
     jt_set(sfx_load_vab, 0x300);
     jt_set(sfx_free_vab, 0x301);
     jt_set(snd_set_stereo, 0x302);
@@ -389,9 +389,9 @@ void misc_init(void)
     jt_set(music_set_list, 0x330);
     jt_set(music_play, 0x331);
     jt_set(music_set_repeat, 0x332);
-    jt_set(func_800218DC, 0x340);
-    jt_set(func_800219DC, 0x341);
-    jt_set(mc_format_file, 0x342);
-    jt_set(func_80021D08, 0x343);
+    jt_set(mc_file_read, 0x340);
+    jt_set(mc_file_write, 0x341);
+    jt_set(mc_file_create, 0x342);
+    jt_set(mc_file_delete, 0x343);
     jt_set(mc_set_callback_b, 0x344);     // THERE ARE TWO CALLBACKS WTF
 }
