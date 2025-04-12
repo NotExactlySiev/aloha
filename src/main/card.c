@@ -52,13 +52,13 @@ void func_8001FD8C(void)
 }
 
 extern int D_80047E18;
-// 1 big function related to memory card testing (uses 3 above)
-//NOT_IMPL_FN(func_8001FDF4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FDF4);
+
+// test and setup card
+//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001FDF4);
 int func_8001FDF4(int chan)
 {
     const int timeout = 1000;
     int ev;
-    printf("let's check the card thing! port %d\n", chan);
     // TODO: inline this
     for (int i = 0; i < timeout; i++) {
         int info_tries = 0;
@@ -162,7 +162,7 @@ int func_80020000(int val)
 }
 
 // static?
-int mc_addr_prefix(u32 mtidx, char* src, char* dst)
+static int prefix_address(u32 mtidx, char* src, char* dst)
 {
     int rc = func_80020000(mtidx);
     if (1 != rc) return rc;
@@ -182,7 +182,7 @@ int mc_addr_prefix(u32 mtidx, char* src, char* dst)
 // this is actually just mc_file_exists
 int func_800200C8(int mtidx, char *filename)
 {
-    int rc = mc_addr_prefix(mtidx, filename, D_800521F8);
+    int rc = prefix_address(mtidx, filename, D_800521F8);
     if (rc != 1)
         return rc;
 
@@ -195,7 +195,7 @@ int mc_file_create(s32 mtidx, char* file, u32 size)
 {
     s32 fd;
 
-    if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
+    if (1 != prefix_address(mtidx, file, D_800521F8))
         return 0;
     size += 0x2000 - 1;
     if (size < 0) size += 0x2000 - 1 + 0x2000 - 1;
@@ -208,7 +208,7 @@ int mc_file_create(s32 mtidx, char* file, u32 size)
 
 int mc_file_open(s32 mtidx, char* file, u32 mode)
 {
-    if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
+    if (1 != prefix_address(mtidx, file, D_800521F8))
         return -1;
     //printf("opening %s\n", D_800521F8);
     return open(D_800521F8, mode);
@@ -221,7 +221,7 @@ int mc_file_close(s32 fd)
 
 int mc_file_delete(u32 mtidx, char* file)
 {
-    if (1 != mc_addr_prefix(mtidx, file, D_800521F8))
+    if (1 != prefix_address(mtidx, file, D_800521F8))
         return 0;
     return erase(D_800521F8);
 }
@@ -269,6 +269,7 @@ typedef struct {
 } McFileHeader;
 
 // make the header. static
+int func_80020434();
 INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020434);   // 
 //func_80020434
 /*
@@ -284,7 +285,7 @@ int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 
 
 struct DIRENTRY *func_800205C4(int mtidx, char *filename, struct DirEntry *out)
 {
-    int rc = mc_addr_prefix(mtidx, filename, D_800521F8);
+    int rc = prefix_address(mtidx, filename, D_800521F8);
     if (rc != 1)
         return -1;
 
@@ -321,10 +322,55 @@ NOT_IMPL_FN(func_800206E4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8002
 
 NOT_IMPL_FN(func_80020808) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
 
-// init memory card (events and jmptable)
-//NOT_IMPL_FN(mc_init)
-INCLUDE_ASM("asm/main/nonmatchings/274C", mc_init);
-
+void mc_init(void)
+{
+    InitCARD2(1);
+    StartCARD2();
+    _bu_init();
+    _card_auto(0);
+    D_80047E1C = 0;
+    EnterCriticalSection();
+    D_80047FB4 = OpenEvent(SwCARD, EvSpIOE    , EvMdNOINTR, NULL);
+    D_80047FBC = OpenEvent(SwCARD, EvSpERROR  , EvMdNOINTR, NULL);
+    D_80047FC4 = OpenEvent(SwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
+    D_80047FCC = OpenEvent(SwCARD, EvSpNEW    , EvMdNOINTR, NULL);
+    D_80047FD4 = OpenEvent(SwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
+    D_80047FDC = OpenEvent(HwCARD, EvSpIOE    , EvMdNOINTR, NULL);
+    D_80047FE4 = OpenEvent(HwCARD, EvSpERROR  , EvMdNOINTR, NULL);
+    D_80047FEC = OpenEvent(HwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
+    D_80047FF4 = OpenEvent(HwCARD, EvSpNEW    , EvMdNOINTR, NULL);
+    D_80047FFC = OpenEvent(HwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
+    EnableEvent(D_80047FB4);
+    EnableEvent(D_80047FBC);
+    EnableEvent(D_80047FC4);
+    EnableEvent(D_80047FCC);
+    EnableEvent(D_80047FD4);
+    EnableEvent(D_80047FDC);
+    EnableEvent(D_80047FE4);
+    EnableEvent(D_80047FEC);
+    EnableEvent(D_80047FF4);
+    EnableEvent(D_80047FFC);
+    ExitCriticalSection();
+    jt_set(&func_8001FC5C, 0x280);
+    jt_set(&func_80020000, 0x281);
+    jt_set(&func_800200C8, 0x282);
+    jt_set(&func_80020434, 0x283);
+    jt_set(&func_80020808, 0x284);
+    jt_set(&func_800206E4, 0x285);
+    jt_set(&func_8001FFC4, 0x286);
+    jt_set(&mc_file_create, 0x290);
+    jt_set(&mc_file_open, 0x291);
+    jt_set(&mc_file_close, 0x292);
+    jt_set(&func_800202FC, 0x293);
+    jt_set(&func_8002026C, 0x294);
+    jt_set(&func_80020414, 0x295);
+    jt_set(&mc_file_delete, 0x296);
+    jt_set(&func_800205C4, 0x297);
+    jt_set(&func_80020610, 0x298);
+    jt_set(&func_80020630, 0x299);
+    jt_set(&func_800203AC, 0x2A0);
+    jt_set(&func_800202A0, 0x2A1);
+}
 
 // misc functions (part of misc_ maybe?)
 

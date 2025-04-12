@@ -1,3 +1,5 @@
+.direnv
+.cache
 .vscode
 build.ninja
 us.xml
