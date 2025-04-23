@@ -20,7 +20,7 @@ extern s32 D_80047EAC;
 CdlFILTER D_80047ECC;
 CdlFILE D_8004D0E0;
 
-int fe_value;
+int music_state;
 int D_80047E00 = -1;  // bgm regular task handle
 int bgm_counter;
 int bgm_target;
@@ -31,7 +31,7 @@ NOT_IMPL_FN(func_8001B9D8);    // CD MUSIC
 void func_8001B9D8(void)
 {
     func_8001D104();
-    if (fe_value == 3) {
+    if (music_state == 3) {
         func_8001A380();
     }
     cd_pause();
@@ -96,7 +96,7 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
 // plays background music
 void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
 {
-    if (fe_value == 3) {
+    if (music_state == 3) {
         func_8001A380();
     }
 
@@ -130,7 +130,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     cd_command(0xFB, 0, 0);
     cd_command(0xFA, 0, 0);
     func_8001BA50();
-    D_80047F24 = 2;
+    D_80047F24 = 2; 
     D_800548EC = 1;
 
 }
@@ -221,7 +221,7 @@ void cd_stop(void) {
 s32 func_8001CD90(void) {
     s32 temp_s0;
 
-    temp_s0 = fe_value;
+    temp_s0 = music_state;
     cd_command(SNQ_SET_FE, 5, 0);
     return temp_s0;
 }

@@ -20,14 +20,10 @@ extern s32 D_80047D78;
 extern SpuVolume D_80047D8C;
 s32 D_80047EA4;
 s32 D_80047EAC;
-s32 D_80047F24;
-
+s32 D_80047F24 = 0;
 
 SpuVolume vol_full;
 
-
-//void cd_ready_callback(s32 status, u32 *result);
-s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2);
 void cd_demute(void);
 
 // functions
@@ -177,7 +173,7 @@ int func_8001B94C(void)
     D_80047F24 = 3;
     D_800548EC = 0;
     ret = 0;
-    if (fe_value != 3) {
+    if (music_state != 3) {
         cd_pause();
         cd_command(0xE, &D_80047DA0, 0);
         cd_mute();
@@ -188,10 +184,9 @@ int func_8001B94C(void)
     return ret;
 }
 
-extern s32 _sndqueue_empty;
+extern s32 cd_queue_is_empty;
 extern u8 D_80047D94;
 extern s32 D_80047DE0;
-extern u8 cd_last_status;
 
 // TODO: make an enum for these flags
 // cd_flags
@@ -200,13 +195,13 @@ u32 cd_status(void)
     u32 ret = 0;
     if (D_80047DE0 == 1)
         ret |= 0x80000000;
-    ret |= (fe_value & 0x7F) << 24;
+    ret |= (music_state & 0x7F) << 24;
     ret |= D_80047D94 << 16;
     if (fade_out_active == 1 || fade_in_active == 1)
         ret |= 0x8000;
     if (fading_out == 1 || fading_in == 1)
         ret |= 0x4000;
-    if (_sndqueue_empty == 1)
+    if (cd_queue_is_empty == 1)
         ret |= 0x2000;
     if (D_800548EC == 1)
         ret |= 0x1000;

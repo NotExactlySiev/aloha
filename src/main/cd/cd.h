@@ -1,3 +1,4 @@
+#pragma once
 #include <libcd.h>
 #define SECTOR_BYTES     (SECTOR_SIZE * sizeof(int))
 extern CdlLOC pvd_loc;
@@ -12,14 +13,18 @@ int cd_verify_read(int mode, u8 *result);
 void sector_cache_clear(void);
 int sector_cache_get(CdlLOC *loc, u8 *data);
 
-// TODO: enum, fix the numbers
-#define SNQ_FINISHED    -1
-#define SNQ_SET_FE       -2  //  arg0
-#define SNQ_SET_FULL       -3
-#define SNQ_SET_SCALED  -4
-#define SNQ_FADE_OUT       -5
-#define SNQ_FADE_IN       -6
-#define SNQ_SET_REVERB  -7
-#define SNQ_FUNC8       -8
-#define SNQ_FUNC9       -9
-#define SNQ_SET_PAUSED      -10
+enum {
+    SNQ_FINISHED =    0xFF,
+    SNQ_SET_FE =      0xFE,
+    SNQ_SET_FULL =    0xFD,
+    SNQ_SET_SCALED =  0xFC,
+    SNQ_FADE_OUT =    0xFB,
+    SNQ_FADE_IN =     0xFA,
+    SNQ_SET_REVERB =  0xF9,
+    SNQ_FUNC8 =       0xF8,
+    SNQ_FUNC9 =       0xF7,
+    SNQ_SET_PAUSED =  0xF6,
+};
+
+extern u8 _cd_last_status[8];
+#define cd_last_status (_cd_last_status[0])

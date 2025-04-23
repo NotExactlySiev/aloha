@@ -12,14 +12,11 @@ s32 vblank_enable(void); // TODO: goes in a module header
 
 // general state
 extern int D_80047DD8;
-extern int fe_value;
+extern int music_state;
 
 CdlLOC pvd_loc = { 0, 2, 22, 0 };
 
-s32 cd_busy = 0;   // step1
-void* cd_arg;     // param
-void* cd_result;     // result
-u8 cd_last_status = 0;
+u8 _cd_last_status[8] = {0};
 
 // update_state, gets called with the return value of CdSync(1,0)
 void func_80019F4C(s32 arg0) {
@@ -41,13 +38,12 @@ void func_80019F4C(s32 arg0) {
     lock = 0;
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", cd_ready_callback);
 void cd_ready_callback(u8 status, u8 *result)
 {
     cd_last_status = result[0];
-    if ((cd_last_status & CdlStatSeek == 0) && fe_value == 1) {
+    if ((cd_last_status & CdlStatSeek == 0) && music_state == 1) {
         // more CD-DA stuff that's never ran
-        // this break the cd queue abstraction by calling queue_add_unsafe
+        // this breaks the cd queue abstraction by calling queue_add_unsafe
         NOT_IMPL("handling cd callback for CD-DA")
     }
 }
@@ -127,7 +123,7 @@ void func_8001A380(void)
 int cd_status();
 int func_8001C734();
 int iso_never_called();
-int music_play_cdda();
+int music_play_cdda(int idx, int repeat);
 int music_play_cdda_from_loc();
 int cd_play();
 int cd_demute();
@@ -158,15 +154,15 @@ extern int D_80047EA4;
 extern int D_80047E9E;
 
 int D_80047E8C;
-int D_80047D78 = 0;
+int D_80047D78 = 0; // music_repeat
 int D_80047D7C = 0;
-int D_80047D80 = 1;
-int D_80047D84 = 1;
+int D_80047D80 = 1; // music_cdda_idx_bcd
+int D_80047D84 = 1; // music_cdda_idx
 SpuVolume D_80047D8C = {0};
 
 extern int bgm_paused;
 CdlLOC D_8005475C[100];
-extern int sndqueue_is_running;
+extern int cd_queue_is_running;
 extern SpuVolume vol_full;
 extern u32 cache_epoch;
 extern int fade_paused;
@@ -204,13 +200,13 @@ void cd_init(void) {
     fade_in_active = 0;
     fading_out = 0;
     fading_in = 0;
-    fe_value = 0;
+    music_state = 0;
     D_80047F24 = 0;
     D_800548EC = 0;
     fade_paused = 0;
     pvd_is_cached = 0;
     cache_epoch = 1;
-    sndqueue_is_running = 0;
+    cd_queue_is_running = 0;
     bgm_paused = 0;
     sector_cache_clear();
     func_8001DD7C();
@@ -228,7 +224,7 @@ void cd_init(void) {
     D_80047EA4 = 0;
     SpuSetCommonAttr(&attr);
     func_8001A380();
-    sndqueue_reset();
+    cd_clear_queue();
     cd_set_stereo(0);
     jt_set(cd_status, 0x100);
     jt_set(cd_command, 0x101);
