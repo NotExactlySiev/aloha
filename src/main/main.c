@@ -555,7 +555,7 @@ void read_version(void)
         rc = iso_read("COUNTRY.TXT", buf, sizeof(buf));
     } while (rc == -1);
     
-    game_region = REGION_NONE;
+    game_region = REGION_JAPAN;
     tv_system = MODE_NTSC;
     if (rc == -2)
         return;

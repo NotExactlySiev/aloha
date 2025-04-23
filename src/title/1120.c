@@ -81,52 +81,52 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0C74);
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0CD8);
 
 char *D_800EB054[] = {
-          "STOP",
-          "FADE OUT",
-          "TITLE",
-          "SELECT",
-          "POWER UP_1",
-          "POWER UP_2",
-          "POWER UP_3",
-          "POWER UP_4",
-          "POWER UP_5",
-          "POWER UP_6",
-          "LOST_1",
-          "LOST_2",
-          "LOST_3",
-          "LOST_4",
-          "LOST_5",
-          "LOST_6",
-          "GAME OVER_1",
-          "GAME OVER_2",
-          "GAME OVER_3",
-          "GAME OVER_4",
-          "GAME OVER_5",
-          "GAME OVER_6",
-          "CONTINUE_1",
-          "CONTINUE_2",
-          "CONTINUE_3",
-          "CONTINUE_4",
-          "CONTINUE_5",
-          "CONTINUE_6",
-          "STAGE CLR_1",
-          "STAGE CLR_2",
-          "STAGE CLR_3",
-          "STAGE CLR_4",
-          "STAGE CLR_5",
-          "STAGE CLR_6",
-          "ALLGET_1",
-          "ALLGET_2",
-          "ALLGET_3",
-          "ALLGET_4",
-          "ALLGET_5",
-          "ALLGET_6",
-          "BONUS_1",
-          "BONUS_2",
-          "BONUS_3",
-          "BONUS_4",
-          "BONUS_5",
-          "BONUS_6",
+    "STOP",
+    "FADE OUT",
+    "TITLE",
+    "SELECT",
+    "POWER UP_1",
+    "POWER UP_2",
+    "POWER UP_3",
+    "POWER UP_4",
+    "POWER UP_5",
+    "POWER UP_6",
+    "LOST_1",
+    "LOST_2",
+    "LOST_3",
+    "LOST_4",
+    "LOST_5",
+    "LOST_6",
+    "GAME OVER_1",
+    "GAME OVER_2",
+    "GAME OVER_3",
+    "GAME OVER_4",
+    "GAME OVER_5",
+    "GAME OVER_6",
+    "CONTINUE_1",
+    "CONTINUE_2",
+    "CONTINUE_3",
+    "CONTINUE_4",
+    "CONTINUE_5",
+    "CONTINUE_6",
+    "STAGE CLR_1",
+    "STAGE CLR_2",
+    "STAGE CLR_3",
+    "STAGE CLR_4",
+    "STAGE CLR_5",
+    "STAGE CLR_6",
+    "ALLGET_1",
+    "ALLGET_2",
+    "ALLGET_3",
+    "ALLGET_4",
+    "ALLGET_5",
+    "ALLGET_6",
+    "BONUS_1",
+    "BONUS_2",
+    "BONUS_3",
+    "BONUS_4",
+    "BONUS_5",
+    "BONUS_6",
     "STAGE 1-1",
     "STAGE 1-2",
     "STAGE 1-3",
@@ -151,7 +151,6 @@ char *D_800EB054[] = {
     "GAMEOVER N.V.",
     "TITLE N.V.",
 };
-
 
 const char *D_800EB168[] = {
     "MOVIE\\OPEN.STR",
@@ -1269,16 +1268,16 @@ extern char *D_800F4F20;
 void func_800E76D4(void)
 {
     switch (jt.get_region()) {
+    default:
+    case REGION_JAPAN:  D_800F4F20 = "BISCPS-10007EXACT02"; break;
+    case REGION_USA:    D_800F4F20 = "BASCUS-94103EXACT01"; break;
+    case REGION_EUROPE: D_800F4F20 = "BESCES-00003EXACT01"; break;
     case REGION_DEBUG:
         D_800F4F20 = "BISCPS-10007EXACT02";
         char *name = jt.get_mc_file_name();
         if (name)
             D_800F4F20 = name;
         break;
-
-    case REGION_USA:    D_800F4F20 = "BASCUS-94103EXACT01"; break;
-    case REGION_EUROPE: D_800F4F20 = "BESCES-00003EXACT01"; break;
-    default:            D_800F4F20 = "BISCPS-10007EXACT02"; break;
     }
 }
 

@@ -352,9 +352,12 @@ void execute_compressed(void *addr, u32 stack)
 {
     EXEC header;
     __builtin_memcpy(&header, addr+16, 0x3c);
+    printf("copied header.\n");
     decode_lz1(addr + 0x804, (void*) header.t_addr);
+    printf("decompressed.\n");
     header.s_addr = stack;
     flush_cache_safe();
+    printf("flushed. exec...\n");
     Exec(&header, 1, 0);
 }
 

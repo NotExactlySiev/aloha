@@ -254,19 +254,60 @@ typedef struct {
 } McFileHeader;
 
 // make the header. static
-int func_80020434();
-INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020434);   // 
-//func_80020434
-/*
-int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 *palette, u8 frame0[128], u8 frame1[128], u8 frame2[128])
+static int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 *palette, u8 frame0[128], u8 frame1[128], u8 frame2[128])
 {
-    //
     // so much of this is redundent lol
+    // size in words
     int totalsize = 0x80;
     if (iconflag == 0x11)
-        totalsize = 
+        totalsize = 0x40;   // 2 blocks
+
+    if (iconflag == 0x12)
+        totalsize = 0x60;   // 3 blocks
+    
+    if (iconflag == 0x13)
+        totalsize = 0x80;   // 4 blocks
+
+    u32 *p = (u32 *) header;
+    for (int i = 0; i < totalsize; i++) {
+        p[i] = 0;
+    }
+
+    header->titleframe.magic[0] = 'S';
+    header->titleframe.magic[1] = 'C';
+    header->titleframe.iconflag = iconflag;
+    header->titleframe.blocksize = size / 8192;
+    strcpy(title, header->titleframe.title);
+
+    for (int i = 0; i < 16; i++) {
+        header->titleframe.palette[i] = palette[i];
+    }
+
+    p = (u32 *) frame0;
+    u32 *dst = (u32 *) header->frames[0];
+    for (int i = 0; i < 32; i++) {
+        dst[i] = p[i];
+    }
+
+    if (iconflag > 0x11) {
+        p = (u32 *) frame1;
+        dst = (u32 *) header->frames[1];
+        for (int i = 0; i < 32; i++) {
+            dst[i] = p[i];
+        }
+    }
+
+    if (iconflag == 0x13) {
+        p = (u32 *) frame2;
+        dst = (u32 *) header->frames[2];
+        for (int i = 0; i < 32; i++) {
+            dst[i] = p[i];
+        }
+    }
+
+    return totalsize * sizeof(u32);
 }
-*/
+
 
 struct DIRENTRY *mc_firstfile(int slot, char *filename, struct DIRENTRY *out)
 {

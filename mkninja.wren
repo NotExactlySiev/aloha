@@ -93,8 +93,8 @@ var execs = [
         ["libpress", "libcd", "libds", "libcard", "libgpu", "libspu", "libetc", "libc", "libapi"]),
     //Executable.new("JM1/MAIN.PEX", "jm1", true, []),
     //Executable.new("SELECT.PEX", "select", true, ["libc"]),
-    Executable.new("GAMEOVER.PEX", "gameover", true, []),
-    Executable.new("TITLE.PEX", "title", true, ["libgte", "libc", "libapi"]),
+    //Executable.new("GAMEOVER.PEX", "gameover", true, []),
+    //Executable.new("TITLE.PEX", "title", true, ["libgte", "libc", "libapi"]),
 
 ]
 

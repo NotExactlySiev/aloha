@@ -1422,6 +1422,8 @@ glabel D_80032FDC
 /* 1B7F4 80032FF4 */ .word 0x6E598000
 /* 1B7F8 80032FF8 */ .word 0x30C155B6
 
+/* PRS logo image */
+
 glabel D_80032FFC
 /* 1B7FC 80032FFC */ .word 0x20C20000
 
