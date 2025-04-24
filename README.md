@@ -17,7 +17,7 @@ On Debian/Ubuntu:
 apt install ninja gcc-mipsel-gnu-linux binutils-mipsel-gnu-linux
 ```
 
-You also need Wren CLI, mkpsxiso and dumpsxiso.
+You also need mkpsxiso, dumpsxiso, and either Wren CLI or Python.
 
 ### Building
 Dump the original disc image:
@@ -26,13 +26,15 @@ sh dump.sh
 ```
 
 Generate the ninja build file:
-
 ```sh
+python mkninja.py
+# or
 wren_cli mkninja.wren > build.ninja
 ```
+(You will probably have to change the `cross` variable, either in the generator
+script or in the final build.ninja file.)
 
 And build the image:
-
 ```sh
 ninja
 ```
