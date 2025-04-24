@@ -39,8 +39,8 @@ static u16 queue_size;
 static int queue_lock = 0;
 static int try_again = 0;
 static u8 curr_command = SNQ_FINISHED;
-static void *curr_param = NULL;‍
-static void *curr_result = NULL;‍
+static void *curr_param = NULL;
+static void *curr_result = NULL;
 
 int fade_out_active = 0;
 int fading_out = 0;

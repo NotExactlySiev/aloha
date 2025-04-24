@@ -22,7 +22,6 @@ extern u32 tmpfilebuf;
 
 // These are probably extern:
 extern u8 D_80032FFC;          // builtin intro prs image
-extern u8 D_80033000;          // builtin logo data, const
 extern s32 widescreen;         // 80047d4c
 extern s32 D_80047D50;         // 80047d50
 extern s32 D_80047D58;         // 80047d58

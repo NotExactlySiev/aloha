@@ -481,8 +481,10 @@ int mc_file_write(int slot, char *filename, void *src, int offset, int len, char
     return len & -(uint) (rc == EvSpIOE);
 }
 
-extern u8 D_80032E5C[3][128];   // frames
-extern u16 D_80032FDC[];        // palette
+extern struct {
+    u8 frames[3][128];
+    u16 palette[16];
+} D_80032E5C;
 
 int mc_file_create(int slot, char *filename, int len, char *title)
 {
@@ -502,7 +504,7 @@ int mc_file_create(int slot, char *filename, int len, char *title)
     McFileHeader header;
     mc_seek(fd, 0, SEEK_SET);
     // TODO: #define number of frames = 3
-    func_80020434(&header, 0x10 + 3, len + sizeof(McFileHeader), title, D_80032FDC, D_80032E5C[0], D_80032E5C[1], D_80032E5C[2]);
+    func_80020434(&header, 0x10 + 3, len + sizeof(McFileHeader), title, D_80032E5C.palette, D_80032E5C.frames[0], D_80032E5C.frames[1], D_80032E5C.frames[2]);
     mc_write_block(fd, &header, sizeof(McFileHeader));
     while (mc_get_event() == 0) {
         cd_run_block();

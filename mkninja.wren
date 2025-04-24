@@ -62,6 +62,7 @@ class Executable {
         allDeps.add("build/header.o")
         for (f in _source) {
             Ninja.build("cc", buildDir + f.objName, [f.path], [])
+            Ninja.param("modid", _name)
             allDeps.add(buildDir + f.objName)
         }
         for (f in _libs) {
@@ -104,12 +105,12 @@ Ninja.set("jfdir", "tools/jfcomp")
 Ninja.set("jfcomp", "$jfdir/jfcomp")
 Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
-Ninja.set("cflags", "-Wall -Iinclude -Ipsyq/include -Iassets -Iassets/gameover -O1 -G0 -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic")
+Ninja.set("cflags", "-Wall -Iinclude -Ipsyq/include -Iassets -O1 -G0 -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic")
 Ninja.set("ldflags", "--no-check-sections -nostdlib -s")
 Ninja.set("cflagsnat", "-O2")
 
 Ninja.rule("ccnat", "gcc $cflagsnative $in -o $out")
-Ninja.rule("cc", "${cross}gcc $cflags -c $in -o $out")
+Ninja.rule("cc", "${cross}gcc $cflags -Iassets/$modid -c $in -o $out")
 Ninja.rule("link", "${cross}ld $ldflagas -Map=build/$modid.map -T linker/symbols.$modid.ld -T " + LINKER_SHARED + " $in -o $out")
 Ninja.rule("objcopy", "${cross}objcopy -O binary $in $out")
 Ninja.rule("copy", "cp $in $out")
