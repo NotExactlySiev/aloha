@@ -96,7 +96,6 @@ var execs = [
     //Executable.new("SELECT.PEX", "select", true, ["libc"]),
     //Executable.new("GAMEOVER.PEX", "gameover", true, []),
     //Executable.new("TITLE.PEX", "title", true, ["libgte", "libc", "libapi"]),
-
 ]
 
 // TODO: check for the compiler

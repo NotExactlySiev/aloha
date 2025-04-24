@@ -28,7 +28,7 @@ sh dump.sh
 Generate the ninja build file:
 
 ```sh
-wren_cli mkninja.wren
+wren_cli mkninja.wren > build.ninja
 ```
 
 And build the image:
