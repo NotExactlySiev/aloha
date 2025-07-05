@@ -76,10 +76,10 @@ class Executable:
 executables = [
     Executable("SCUS_941.03", "main", False,
                ["libpress", "libcd", "libds", "libcard", "libgpu", "libspu", "libetc", "libc", "libapi"]),
+    Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"]),
     # Executable("JM1/MAIN.PEX", "jm1", True, []),
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),
-    # Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"]),
 ]
 
 # Ninja setup
@@ -102,7 +102,7 @@ Ninja.rule("comp", "$jfcomp comp $in $out")
 Ninja.param("description", "Compressing $out")
 Ninja.rule("mkiso", "$makeiso -y $in -o $out")
 Ninja.param("description", "Generating Disc Image")
-Ninja.rule("REGENERATE", "wren_cli $in > $out")
+Ninja.rule("REGENERATE", "python $in")
 Ninja.param("description", "Updating build.ninja")
 Ninja.param("generator", "1")
 
@@ -121,5 +121,5 @@ for exe in executables:
     exe_paths.append(exe.final_path)
 
 Ninja.build("mkiso", "build/aloha.bin", ["us.xml"], exe_paths)
-Ninja.build("REGENERATE", "build.ninja", ["mkninja.wren"], ["ninja.wren"])
+Ninja.build("REGENERATE", "build.ninja", ["mkninja.py"], ["ninja.py"])
 Ninja.write_to_file("build.ninja")
