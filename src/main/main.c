@@ -714,7 +714,7 @@ GlobalData *globals(void)
     return (GlobalData*) 0x80014000;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char *argv[])
 {
     printf("MAX ADR:%x\n", malloc(4));
     D_80047E6C = 1;

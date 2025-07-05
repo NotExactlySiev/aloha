@@ -690,7 +690,6 @@ static inline void text_put_progress(SavedData *save)
 // draw_menu
 void func_800E2438(int page_id, uint selected, u8 attr)
 {
-    //printf("drawing %d\n", page_id);
     MenuPage *page = D_800EB8CC[page_id];
     text_set_attr(attr);
     if (D_800F4E38 < 8)
@@ -948,25 +947,26 @@ extern int D_800F4E48;  // main menu selection (why is it separate?
 
 #include <pad.h>
 // menu logic
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);selection
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);
 u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
 {
     if (buttons == 0)
         return (selection << 16) | page_idx;
     
-    MenuPage *page = &D_800EB8CC[page_idx];
+    MenuPage *page = D_800EB8CC[page_idx];
 
     if (buttons & Pad1Down) {
-        if (++selection >= page->nselections) {
+        if (++selection > page->nselections - 1) {
             selection = 0;
         }
         func_800E0B54(0x2C00);
     }
 
     if (buttons & Pad1Up) {
-        if (--selection < 0) {
-            selection = page->nselections - 1;
+        if (selection < 1) {
+            selection = page->nselections;
         }
+        selection--;
         func_800E0B54(0x2C00);
     }
 
@@ -1010,6 +1010,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
 
     }
 
+    printf("new selection: %d\n", selection);
     return (selection << 16) | page_idx;
 }
 
@@ -1021,6 +1022,18 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C48);
 
 // init game data
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C68);
+/*
+void func_800E3C68(void)
+{
+    bzero(&glob->curr, sizeof(SavedData));
+    bzero(&glob->saved[0], sizeof(SavedData));
+    bzero(&glob->saved[1], sizeof(SavedData));
+    bzero(&glob->saved[2], sizeof(SavedData));
+    bzero(&glob->backup, sizeof(SavedData));
+    bzero(&glob->backup, sizeof(SavedData));
+    //
+}
+*/
 
 // unused
 //INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3D9C);

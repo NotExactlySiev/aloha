@@ -11,7 +11,6 @@ extern int D_80047EEC; // SpuVolume ptr?
 extern s32 D_80047F24;
 extern CdlLOC cdda_loc;
 extern s32 is_mono;
-extern s32 D_80047D78;
 extern s32 D_800548EC;
 extern s32 D_80047D78;
 extern s32 D_80047EA4;
@@ -137,7 +136,6 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
 
 NOT_IMPL_FN(music_play_cdda);  // CD MUSIC
 
-// music_play_cdda_from_loc
 void music_play_cdda_from_loc(CdlLOC *loc) {   // CD MUSIC
     D_80047D78 = 0;
     D_80047F24 = 0;

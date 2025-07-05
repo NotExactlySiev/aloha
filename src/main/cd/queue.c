@@ -78,7 +78,7 @@ void cd_clear_queue(void) {
     queue_size = 0;
 }
 
-static s32 sndqueue_add(u8 arg0, u32 arg1, u32 arg2)
+static int queue_add(u8 arg0, u32 arg1, u32 arg2)
 {
     QueueEntry *task;
 
@@ -105,7 +105,7 @@ void cd_command(u8 arg0, u32 arg1, u32 arg2)
         while (queue_size > 192)
             cd_run_block();
     }
-    sndqueue_add(arg0, arg1, arg2);
+    queue_add(arg0, arg1, arg2);
 }
 
 int cd_run_block(void)
@@ -156,17 +156,17 @@ skip_out:
         if (1 == D_80047D78) {
             // THIS RESTARTS THE BACKGROUND MUSIC YOU MORON!
             // a ton of duplicated calls from func_8001BA50
-            sndqueue_add(CdlPause, 0, 0);
-            sndqueue_add(CdlSetmode, &D_80047EC4, 0);
-            sndqueue_add(CdlSetfilter, &D_80047ECC, 0);
-            sndqueue_add(CdlSeekL, &D_8004D0E0, 0);
-            sndqueue_add(CdlPause, NULL, 0);
-            sndqueue_add(CdlReadS, &D_8004D0E0, 0);
-            sndqueue_add(SNQ_SET_SCALED, &vol_full, 0);
-            sndqueue_add(SNQ_FUNC9, D_80047EEC, 0);
-            sndqueue_add(SNQ_SET_FE, 2, 0);
+            queue_add(CdlPause, 0, 0);
+            queue_add(CdlSetmode, &D_80047EC4, 0);
+            queue_add(CdlSetfilter, &D_80047ECC, 0);
+            queue_add(CdlSeekL, &D_8004D0E0, 0);
+            queue_add(CdlPause, NULL, 0);
+            queue_add(CdlReadS, &D_8004D0E0, 0);
+            queue_add(SNQ_SET_SCALED, &vol_full, 0);
+            queue_add(SNQ_FUNC9, D_80047EEC, 0);
+            queue_add(SNQ_SET_FE, 2, 0);
         } else {
-            sndqueue_add(CdlPause, 0, 0);
+            queue_add(CdlPause, 0, 0);
             D_800548EC = 0;
         }
     }

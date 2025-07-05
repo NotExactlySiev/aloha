@@ -8,9 +8,9 @@ typedef struct {
 } RoutineTask;
 
 extern RoutineTask D_80023370[40];
-extern int tasks_enabled;
 
 // why is the freaking array backwards
+// these are all fucked
 
 int tasks_add(TaskFunc fn, s16 arg1)
 {
@@ -20,7 +20,7 @@ int tasks_add(TaskFunc fn, s16 arg1)
             p->fn = fn;
             p->wait = arg1;
             p->counter = 0;
-            return 31 - i;
+            return 32 - i;
         }
     }
     return -1;
@@ -34,7 +34,7 @@ int tasks_add_reserved(TaskFunc fn, s16 arg1)
             p->fn = fn;
             p->wait = arg1;
             p->counter = 0;
-            return 39 - i;
+            return 40 - i;
         }
     }
     return -1;

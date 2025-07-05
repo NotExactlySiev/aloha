@@ -76,7 +76,7 @@ class Executable:
 executables = [
     Executable("SCUS_941.03", "main", False,
                ["libpress", "libcd", "libds", "libcard", "libgpu", "libspu", "libetc", "libc", "libapi"]),
-    Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"]),
+    # Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"]),
     # Executable("JM1/MAIN.PEX", "jm1", True, []),
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),

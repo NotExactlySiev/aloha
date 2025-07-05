@@ -13,10 +13,10 @@ typedef struct DIRENTRY DIRENTRY;
 #define SCREEN_HEIGHT   240
 
 enum {
-        REGION_JAPAN = 0,        // Japan?
-        REGION_USA = 1,
-        REGION_EUROPE = 2,
-        REGION_DEBUG = 3,
+    REGION_JAPAN = 0,
+    REGION_USA = 1,
+    REGION_EUROPE = 2,
+    REGION_DEBUG = 3,
 };
 
 #define SCRTCHPAD(p)    ((void*) (0x1F800000 + (p)))

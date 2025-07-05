@@ -39,7 +39,6 @@ static u16 func_8001E3D4(u16 sjis)
 // fnt_get
 u8 *func_8001E438(u32 c, int set)
 {
-    printf("FONT %d:\t%c (%04X)\n", set, c, c);
     switch (set) {
     case 4:
         if (font_ptr8)
