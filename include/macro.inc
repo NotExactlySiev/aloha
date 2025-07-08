@@ -55,11 +55,11 @@
   .endm
 
   .macro GPF sf
-    cop2        0x0190003D | \sf<<19
+    cop2        0x190003D | (\sf<<19)
   .endm
 
   .macro GPL sf
-    cop2        0x01A0003E | \sf<<19
+    cop2        0x1A0003E | (\sf<<19)
   .endm
 
   .macro INTPL
@@ -68,4 +68,8 @@
 
   .macro RTPS
     cop2        0x0180001
+  .endm
+
+  .macro SQR sf
+    cop2        0x0A00428 | (\sf<<19)
   .endm
