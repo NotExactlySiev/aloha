@@ -144,10 +144,10 @@ glabel D_80103154
 
 glabel D_8010315C
 	.space 0x8
-
+/*
 glabel D_80103164
 	.space 0x10
-
+*/
 glabel D_80103174
 	.space 0x10
 

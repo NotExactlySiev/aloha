@@ -15,11 +15,26 @@ extern int D_801026B8;
 extern int D_801026BC;
 
 typedef struct {
-    void *unk0;
-    void *unk1;
+    int unk0;
+    int unk1;
+    int unk2;
+    int unk3;
+} MeshMetadata;
+
+typedef struct {
+    // TODO
+} EntityResources;
+
+typedef struct {
+    MeshMetadata *unk0;
+    EntityResources *unk1;
     void *unk2;
     void *unk3;
 } EntityTemplate;
+
+MeshMetadata D_80103164;    // only frog, but should be an array
+
+extern EntityResources D_800FE7AC;
 
 extern EntityTemplate D_800FE818;
 extern EntityTemplate D_800FEB54;
@@ -42,10 +57,19 @@ extern EntityTemplate D_8010048C;
 
 extern EntityTemplate D_80100334;
 
+void func_800B1F8C(void);
+void func_800B1D78(Entity *this, void *params);
+
 EntityTemplate *(*D_800FD454[3])[] = {
     &(EntityTemplate*[]){
-        //&(EntityTemplate){0},
-        &D_800FE818,
+        &(EntityTemplate){
+            //glabel D_800FE818
+            &D_80103164,
+            &D_800FE7AC,
+            func_800B1F8C,
+            func_800B1D78,
+        },
+        //&D_800FE818,
         &D_800FEB54,
         &D_800FED64,
         &D_800FEFE4,
@@ -143,7 +167,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1788);
 u32 func_800B1B28(Entity *e, s32 val);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
 
-extern s32 D_80103164;
+//extern s32 D_80103164;
 //INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
 // frog render (TODO: shadow)
 void func_800B1BF4(Entity* this)
@@ -157,7 +181,7 @@ void func_800B1BF4(Entity* this)
     rot.vy =  this->angle_y;
     rot.vx = -this->angle_x;
     rot.vz =  this->angle_z;
-    if (func_800E5DD8(&pos, this->model[1] + D_80103164) > -1) {
+    if (func_800E5DD8(&pos, this->model[1] + D_80103164.unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         if (this->unk5 != 0) {
             meshid |= 0x8000;   // damage blinkW
@@ -167,7 +191,7 @@ void func_800B1BF4(Entity* this)
     // and the shadow
     pos.vy = this->max_y + 2;
     if (cam->vy < pos.vy &&
-        func_800E5DD8(&pos, this->model[1] + D_80103164) > -1) {
+        func_800E5DD8(&pos, this->model[1] + D_80103164.unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         func_800E5B88(0, 0, 0);
         func_800E5E60(&pos, &rot, meshid | 0x4000);
