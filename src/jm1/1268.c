@@ -32,24 +32,71 @@ typedef struct {
     void *unk3;
 } EntityTemplate;
 
-MeshMetadata D_80103164;    // only frog, but should be an array
+MeshMetadata D_80103164[8];    // only frog, but should be an array
+
+void func_800B1F8C(void);
+void func_800B1D78(Entity *this, Spirit *params);
+
+void func_800B31E8(void);
+void func_800B2FF0(Entity *this, Spirit *params);
+
+void func_800B4D20(void);
+void func_800B4B14(Entity *this, Spirit *params);
+
+void func_800B6614(void);
+void func_800B6430(Entity *this, Spirit *params);
+
+void func_800B6C40(void);
+void func_800B6820(Entity *this, Spirit *params);
+
+void func_800B7D54(void);
+void func_800B7B58(Entity *this, Spirit *params);
+
+void func_800C5DD8(void);
+void func_800C5CD0(Entity *this, Spirit *params);
+
+void func_800C6124(void);
+void func_800C602C(Entity *this, Spirit *params);
+
+void func_800C6538(void);
+void func_800C643C(Entity *this, Spirit *params);
+
+
+void func_800B9280(void);
+void func_800B9068(Entity *this, Spirit *params);
+
+void func_800BBFD8(void);
+void func_800BBD9C(Entity *this, Spirit *params);
 
 extern EntityResources D_800FE7AC;
+extern EntityResources D_800FEAE8;
+extern EntityResources D_800FECF8;
+extern EntityResources D_800FEF78;
+extern EntityResources D_800FF034;
+extern EntityResources D_800FF28C;
 
-extern EntityTemplate D_800FE818;
-extern EntityTemplate D_800FEB54;
-extern EntityTemplate D_800FED64;
-extern EntityTemplate D_800FEFE4;
-extern EntityTemplate D_800FF0A0;
-extern EntityTemplate D_800FF2F8;
+extern EntityResources D_800FF474;
+extern EntityResources D_800FFA0C;
+
+//extern EntityTemplate D_800FE818;
+//extern EntityTemplate D_800FEB54;
+//extern EntityTemplate D_800FED64;
+//extern EntityTemplate D_800FEFE4;
+//extern EntityTemplate D_800FF0A0;
+EntityTemplate D_800FF2F8 = {
+    &D_80103164[5],
+    &D_800FF28C,
+    func_800B7D54,
+    func_800B7B58,
+};
 extern EntityTemplate D_800FFCEC;
 extern EntityTemplate D_80100544;
-extern EntityTemplate D_80100554;
-extern EntityTemplate D_80100564;
-extern EntityTemplate D_80100574;
+//extern EntityTemplate D_80100554;
+//extern EntityTemplate D_80100564;
+//extern EntityTemplate D_80100574;
 
 extern EntityTemplate D_800FF4E0;
-extern EntityTemplate D_800FF2F8;
+//extern EntityTemplate D_800FF2F8;
 extern EntityTemplate D_800FFA78;
 extern EntityTemplate D_800FFC50;
 extern EntityTemplate D_800FFD3C;
@@ -57,37 +104,95 @@ extern EntityTemplate D_8010048C;
 
 extern EntityTemplate D_80100334;
 
-void func_800B1F8C(void);
-void func_800B1D78(Entity *this, void *params);
-
 EntityTemplate *(*D_800FD454[3])[] = {
     &(EntityTemplate*[]){
+        //&D_800FE818,
         &(EntityTemplate){
-            //glabel D_800FE818
-            &D_80103164,
+            &D_80103164[0],
             &D_800FE7AC,
             func_800B1F8C,
             func_800B1D78,
         },
-        //&D_800FE818,
-        &D_800FEB54,
-        &D_800FED64,
-        &D_800FEFE4,
-        &D_800FF0A0,
-        &D_800FF2F8,
+
+        //&D_800FEB54,
+        &(EntityTemplate){
+            &D_80103164[1],
+            &D_800FEAE8,
+            func_800B31E8,
+            func_800B2FF0,
+        },
+
+        //&D_800FED64,
+        //glabel D_800FED64
+        &(EntityTemplate){
+            &D_80103164[2],
+            &D_800FECF8,
+            func_800B4D20,
+            func_800B4B14,
+        },
+
+        //&D_800FEFE4,
+        &(EntityTemplate){
+            &D_80103164[3],
+            &D_800FEF78,
+            func_800B6614,
+            func_800B6430,
+        },
+
+        //&D_800FF0A0,
+        &(EntityTemplate){
+            &D_80103164[4],
+            &D_800FF034,
+            func_800B6C40,
+            func_800B6820,
+        },
+
+        &D_800FF2F8,    // shared
+
+        // the pattern doesn't continue after this
         &D_800FFCEC,
         &D_80100544,
-        &D_80100554,
-        &D_80100564,
-        &D_80100574,
+
+        //&D_80100554,
+        &(EntityTemplate){
+            .unk2 = func_800C5DD8,
+            .unk3 = func_800C5CD0,
+        },
+
+        //&D_80100564,
+        &(EntityTemplate){
+            .unk2 = func_800C6124,
+            .unk3 = func_800C602C,
+        },
+
+        //&D_80100574,
+        &(EntityTemplate){
+            .unk2 = func_800C6538,
+            .unk3 = func_800C643C,
+        },
+
         (void *) -1
     },
 
     &(EntityTemplate*[]){
-        //&(EntityTemplate){0},
-        &D_800FF4E0,
-        &D_800FF2F8,
-        &D_800FFA78,
+        //&D_800FF4E0,
+        &(EntityTemplate){
+            &D_80103164[6],
+            &D_800FF474,
+            func_800B9280,
+            func_800B9068,
+        },
+
+        &D_800FF2F8,    // shared
+
+        //&D_800FFA78,
+        &(EntityTemplate){
+            &D_80103164[7],
+            &D_800FFA0C,
+            func_800BBFD8,
+            func_800BBD9C,
+        },
+        
         &D_800FFC50,
         &D_800FFD3C,
         &D_8010048C,
@@ -121,12 +226,22 @@ void func_800B0A88(int val)
 }
 
 //INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0AD4);
-EntityTemplate **func_800B0AD4(int index)
+EntityTemplate *(*func_800B0AD4(int index))[]
 {
     return D_800FD454[index % 3];
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0B24);
+const char *D_800FD48C[3] = {
+    "sou_ene.ear",
+    "kaz_ene.ear",
+    "bos1_ene.ear",
+};
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0B24);
+const char *func_800B0B24(int index)
+{
+    return D_800FD48C[index];
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0B74);
 
@@ -181,7 +296,7 @@ void func_800B1BF4(Entity* this)
     rot.vy =  this->angle_y;
     rot.vx = -this->angle_x;
     rot.vz =  this->angle_z;
-    if (func_800E5DD8(&pos, this->model[1] + D_80103164.unk0) > -1) {
+    if (func_800E5DD8(&pos, this->model[1] + D_80103164[0].unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         if (this->unk5 != 0) {
             meshid |= 0x8000;   // damage blinkW
@@ -191,7 +306,7 @@ void func_800B1BF4(Entity* this)
     // and the shadow
     pos.vy = this->max_y + 2;
     if (cam->vy < pos.vy &&
-        func_800E5DD8(&pos, this->model[1] + D_80103164.unk0) > -1) {
+        func_800E5DD8(&pos, this->model[1] + D_80103164[0].unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         func_800E5B88(0, 0, 0);
         func_800E5E60(&pos, &rot, meshid | 0x4000);
@@ -203,9 +318,9 @@ void func_800B1BF4(Entity* this)
 }
 
 // contrusction
-void _func_800B1D78(Entity *this, void *params);
+void _func_800B1D78(Entity *this, Spirit *params);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", _func_800B1D78);
-void func_800B1D78(Entity *this, void *params)
+void func_800B1D78(Entity *this, Spirit *params)
 {
     //LinkedList *list = get_list0_head();
     

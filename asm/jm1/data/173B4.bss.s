@@ -147,7 +147,7 @@ glabel D_8010315C
 /*
 glabel D_80103164
 	.space 0x10
-*/
+
 glabel D_80103174
 	.space 0x10
 
@@ -168,6 +168,7 @@ glabel D_801031C4
 
 glabel D_801031D4
 	.space 0x10
+*/
 
 glabel D_801031E4
 	.space 0x4
