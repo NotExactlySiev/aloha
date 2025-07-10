@@ -10,16 +10,97 @@ void func_800E5B88(s16, s16, s16);  // does this do anything?
 // this module
 s32 func_800E5DD8(SVECTOR *v, u32 meshid);                  // camera transform
 
-
 // map stuff
+extern int D_801026B8;
+extern int D_801026BC;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A68);
+typedef struct {
+    void *unk0;
+    void *unk1;
+    void *unk2;
+    void *unk3;
+} EntityTemplate;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A78);
+extern EntityTemplate D_800FE818;
+extern EntityTemplate D_800FEB54;
+extern EntityTemplate D_800FED64;
+extern EntityTemplate D_800FEFE4;
+extern EntityTemplate D_800FF0A0;
+extern EntityTemplate D_800FF2F8;
+extern EntityTemplate D_800FFCEC;
+extern EntityTemplate D_80100544;
+extern EntityTemplate D_80100554;
+extern EntityTemplate D_80100564;
+extern EntityTemplate D_80100574;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A88);
+extern EntityTemplate D_800FF4E0;
+extern EntityTemplate D_800FF2F8;
+extern EntityTemplate D_800FFA78;
+extern EntityTemplate D_800FFC50;
+extern EntityTemplate D_800FFD3C;
+extern EntityTemplate D_8010048C;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0AD4);
+extern EntityTemplate D_80100334;
+
+EntityTemplate *(*D_800FD454[3])[] = {
+    &(EntityTemplate*[]){
+        //&(EntityTemplate){0},
+        &D_800FE818,
+        &D_800FEB54,
+        &D_800FED64,
+        &D_800FEFE4,
+        &D_800FF0A0,
+        &D_800FF2F8,
+        &D_800FFCEC,
+        &D_80100544,
+        &D_80100554,
+        &D_80100564,
+        &D_80100574,
+        (void *) -1
+    },
+
+    &(EntityTemplate*[]){
+        //&(EntityTemplate){0},
+        &D_800FF4E0,
+        &D_800FF2F8,
+        &D_800FFA78,
+        &D_800FFC50,
+        &D_800FFD3C,
+        &D_8010048C,
+        (void *) -1
+    },
+
+    &(EntityTemplate*[]){
+        //&(EntityTemplate){0},
+        &D_80100334,
+        (void *) -1
+    },
+};
+
+
+int func_800B0A68(void)
+{
+    return D_801026B8;
+}
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A78);
+int func_800B0A78(void)
+{
+    return D_801026BC;
+}
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A88);
+void func_800B0A88(int val)
+{
+    D_801026B8 = val % 18;
+    D_801026BC = val / 18;
+}
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0AD4);
+EntityTemplate **func_800B0AD4(int index)
+{
+    return D_800FD454[index % 3];
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0B24);
 

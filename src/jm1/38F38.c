@@ -8,7 +8,7 @@
 #include "entity.h"
 
 // TODO: this is repeated, put in header
-extern sin_lut[4096];
+extern s16 sin_lut[4096];
 #define sinf(a)     (sin_lut[(a) & 0xFFF])
 #define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
 
@@ -451,13 +451,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F16B8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1800);
 
+#define camera_pos ((SVECTOR*)SCRTCHPAD(0x3C8))
+
 // copies the ground texture from the render area to screen
 void func_800F1A0C(void)
 {
     if (D_80141448.vx <= -0x200) return;
     GBuffer *g = gbuffer_get_current();
     // TODO: have camera pos defined somewhere else correctly
-    #define camera_pos ((SVECTOR*)SCRTCHPAD(0x3C8))
     g->nextfree = func_800F1800(&D_8010285C, D_80102864, g->nextfree, &g->ot[camera_pos->vy > 0 ? 558 : 43]);
 }
 
@@ -622,11 +623,27 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42C8);
 //INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42F4);
 //INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4338);
 
-// this is the distance from camera calculator thing
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
-
 #include <inline_n.h>
 
+// this is the distance from camera calculator thing
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
+// it's probably handwritten assembly? the patterns don't like like inlines
+
+// this function does both rotation and distance calculation. the output vector
+// is only valid if the distance is not -1
+// this really does look like handwritten assembly
+// IT'S NOT UINT
+/*
+int func_800F4354(SVECTOR *in, VECTOR *out, Mesh *m)
+{
+    gte_ldv0(in);
+    if (m->a == 0) {
+        return -1;
+    }
+    gte_mvmva(1, 0, 0, 3, 0);
+    return 0;
+}
+*/
 
 // sort faces (sets actually)
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);

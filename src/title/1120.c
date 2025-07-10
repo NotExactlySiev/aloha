@@ -939,10 +939,24 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 // robbit cursor anim
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3168);
 
-extern int D_800F4E48;  // main menu selection (why is it separate?
 // is this (and maybe the whole input module) the same one from gameover? 
 #define BUTTONS_ACCEPT      (Pad1Start|Pad1sqr|Pad1crc)
+#define BUTTONS_CANCEL      (Pad1x)
 
+extern int D_800F4CF4;
+extern int D_800F4CC4;
+extern int D_800F4E18;
+extern int D_800F4E48;  // main menu selection (why is it separate?
+extern int D_800F4E50;
+extern int D_800F4E40;
+extern int D_800F4E20;
+extern int D_800F4E28;
+extern int D_800F4E70;
+extern int D_801A0FA8;
+extern int D_800F4E08;
+
+extern u32 D_800EB97C[4];
+extern u32 D_800EB98C[4];
 
 
 #include <pad.h>
@@ -1007,8 +1021,45 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
             //
         }
 
+        // dialog stuff
+        //
 
+        if (item->flags & 0x80) {
+            //
+        }
+
+        if (item->flags & 0x40) {
+            if (item->click) {
+                D_800F4E20 = page_idx;
+                D_800F4E28 = selection;
+                item->click();
+            }
+            //
+        }
+
+        if (page_idx == 3) {
+            if (glob->debug_features == 2) {
+                page_idx = 7;
+            } else {
+                int region = jt.get_region();
+                if (region == REGION_JAPAN || region == REGION_DEBUG) {
+                    page_idx = 8;
+                }
+            }
+        }
     }
+
+    u32 new_selection;
+
+    if (buttons & BUTTONS_CANCEL) {
+        // 
+    } else {
+        // 
+    }
+
+    //
+    //if (selection >= D_800EB8CC[page_idx]->nselections)
+
 
     printf("new selection: %d\n", selection);
     return (selection << 16) | page_idx;
@@ -1062,19 +1113,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
 
 void func_800E8640(char *filename, int frame_count);
-extern int D_800F4CF4;
-extern int D_800F4CC4;
-extern int D_800F4E18;
-extern int D_800F4E50;
-extern int D_800F4E40;
-extern int D_800F4E20;
-extern int D_800F4E28;
-extern int D_800F4E70;
-extern int D_801A0FA8;
-extern int D_800F4E08;
 
-extern u32 D_800EB97C[4];
-extern u32 D_800EB98C[4];
 
 // part of a data structure
 extern int D_800F4CEC;

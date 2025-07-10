@@ -165,6 +165,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9BE0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9CA8);
 
+// SquareRoot0
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9D70);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9DF4);
@@ -207,6 +208,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAB3C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAC60);
 
+// SetLightMatrix
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAC90);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CACC0);
@@ -2419,8 +2421,17 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5D90);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DA0);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
+SVECTOR* camera_pos = 0x1F8003C8;
 
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
+/*u32 func_800E5DD8(SVECTOR *v, u32 index)
+{
+    SVECTOR *vec = (SVECTOR *) SCRTCHPAD(0x0);
+    vec->vx = v->vx - camera_pos->vx;
+    vec->vy = v->vy - camera_pos->vy;
+    vec->vz = v->vz - camera_pos->vz;
+    return func_800F4354(vec, SCRTCHPAD(0x8), &mesh_array[index & 0x3FF]);
+}*/
 
 // main function called for rendering models. disabled for now
 // because the model rendering code is a nightmare and has to
@@ -2431,91 +2442,123 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
 //__asm__(".section .text\n" "\t.align\t2\n" "\t.globl\t" "_func_800E5E60" "\n" "\t.ent\t" "_func_800E5E60" "\n" "_func_800E5E60" ":\n" ".include \"" "asm/jm1/nonmatchings/173B4" "/" "func_800E5E60" ".s\"\n" "\t.set reorder\n" "\t.set at\n" "\t.end\t" "_func_800E5E60");
 
 
-
+extern int D_80138088;
 extern s32 D_801380B0;  // lod_distance
 extern u16 D_8013EC48[1024]; // added flags and stuff
 extern s16 D_80141468[1024];    // z offsets
-
-SVECTOR* camera_pos = 0x1F8003C8;
-/*void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
-{
-    //if ((id & 0xFFFF) == 406) 
-    //_func_800E5E60(pos, angle, id);
-        //jt.printf("DRAWING %X\n", id);
-
-}*/
+extern int (*D_80102E3C)(int, VECTOR*, u32); // depth adjuster
+extern SVECTOR D_80102E44;
+extern SVECTOR D_801380A0;
+extern MATRIX D_80137CD0;
 
 // draw_model
-/*void func_800E5E60(SVECTOR* pos, SVECTOR* angle, u32 id)
+void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
 {
+    angle = NULL;
     if (id < 0) return;
 
     // LET's only do the frog for now
     //if (id != 0x196) return;
+    SVECTOR *dir = SCRTCHPAD(0x00);
+    VECTOR *tmp = SCRTCHPAD(0x24);
+    MATRIX *mat = SCRTCHPAD(0x50);
 
-    SVECTOR *dir = 0x1F800000;
-    SVECTOR *tmp = 0x1F800024;
-    Mesh* mesh = &mesh_array[id & 0x3FF];
-    //jt.printf("DRAW %d\n", id);
-    //jt.printf("\tat\t%d %d %d\n", pos->vx, pos->vy, pos->vz);
-    //jt.printf("\trot\t%d %d %d\n", angle->vx, angle->vy, angle->vz);
+    SVECTOR *camera = SCRTCHPAD(0x3C8);
+    MATRIX *light = SCRTCHPAD(0x3D0);
+    MATRIX *rotation = SCRTCHPAD(0x3E4);
+
+    SVECTOR *third = dir;
     
-    
+    Mesh *mesh = &mesh_array[id & 0x3FF];
     dir->vx = pos->vx - camera_pos->vx;
     dir->vy = pos->vy - camera_pos->vy;
     dir->vz = pos->vz - camera_pos->vz;
     s32 mag2 = func_800F4354(dir, tmp, mesh);
-    //jt.printf("DRAW: MAG2 %d\t\n", mag2);
-    //s32 mag  = func_800C9D70(mag2);
-    // is in frame?
-    if (mag2 <= -1) return;
-
+    
+    if (mag2 < 0) return;
     if (mag2 >= D_801380B0/4) {
-        //jt.printf("FAR");
-    }
-
-    if (mag2 >= D_801380B0) {
-        //jt.printf(", VERY FAR");
+        // far
+        if (id & 0x4000) {
+            return;
+        }
+        if (angle && (!(id & 0x10000))) {
+            mesh = ((void*) &mesh_array[id & 0x3ff]) + 1;   // ???
+        }
     }
 
     id |= D_8013EC48[id & 0x3FF] & 0xFC00;
-    //jt.printf(" ADDED FLAGS: %X\n", D_8013EC48[id & 0x3FF] & 0xFC00);
 
-    // for now assume no 0x800
-    s32 mag = func_800C9D70(mag2) + D_80141468[id & 0x3FF];
-    mag = mag >> 4;
-    s32 diff = mag;
-    if (mag < 1) diff = 1;
-    if (mag > 511) diff = 511;
-    //jt.printf("MAG %d\t", mag);
-    mag = 558 - diff;
-    //jt.printf("-> %d\n", mag);
+    if (mag2 >= D_801380B0) {
+        // very far
+        // TODO
+        //mesh = &mesh_array[(id & 0x3ff) + ]
+    }
 
-    // let's assume angle == NULL
-    // just use the basic matrices
-    func_800E8838(0x1F8003E4, 0x1F800010);
-    func_800E8838(0x1F8003D0, 0x1F800024);
+    if (id & 0x800) {
+        mag2 = (D_8013EC48[id & 0x3ff] & 0x3ff) + 44;
+    } else {
+        mag2 = func_800C9D70(mag2);
+        if (D_80102E3C) {
+            mag2 = D_80102E3C(mag2, pos, id);
+        }
+        mag2 += D_80141468[id & 0x3FF];
+        mag2 = mag2 >> 4;
 
-    // SetLightMatrix
-    func_800CAC90(0x1F800024);
-    
-    // double matrix
+        int diff = mag2;
+        if (mag2 < 1) diff = 1;
+        if (mag2 > 511) diff = 511;
+        mag2 = 558 - diff;        
+    }
+
+    MATRIX *rot_p = rotation;
+    if (id & 0x7000) {
+        MATRIX *alt_rot = SCRTCHPAD(0x70);
+        third = NULL;
+        rot_p = alt_rot;
+
+        if (id & 0x2000) {
+            func_800E563C(alt_rot);
+        } else if (id & 0x4000) {
+            func_800E8838(rotation, alt_rot);
+            third = &D_80102E44;
+            alt_rot->m[0][1] = (D_801380A0.vx * alt_rot->m[0][0] + D_801380A0.vz * alt_rot->m[0][2]) / ONE;
+            alt_rot->m[1][1] = (D_801380A0.vx * alt_rot->m[1][0] + D_801380A0.vz * alt_rot->m[1][2]) / ONE;
+            alt_rot->m[2][1] = (D_801380A0.vx * alt_rot->m[2][0] + D_801380A0.vz * alt_rot->m[2][2]) / ONE;
+        } else {
+            rot_p = &D_80137CD0;
+        }
+    }
+
+    MATRIX *other_rotation = SCRTCHPAD(0x10);
+    if (angle) {
+        func_800E5668(other_rotation, mat, angle);
+        //
+        // TODO
+    } else {
+        func_800E8838(rot_p, other_rotation);
+        func_800E8838(light, 0x1F800030);
+    }
+
+    func_800CAC90(0x1F800030);
     func_800E87B8(0x1F800010);
+
+    SVECTOR *cool = SCRTCHPAD(0x1C);
+    if (id & 0x1000) {
+        third = NULL;
+        cool->vx = cool->vx >> 1;
+        cool->vy = cool->vy >> 1; 
+        cool->vz = cool->vz >> 1;
+    }
     // SetRotMatrix
     func_800CAC60(0x1F800010);
     // SetTransMatrix
     func_800CACF0(0x1F800010);
 
-    //mag = 4;
-
-    GBuffer* gbuf = gbuffer_get_current();
-    jt.printf("LAYER %d\n", mag);
-    jt.printf("%p\t", gbuf->nextfree);
-    gbuf->nextfree = func_800F4548(mesh, gbuf->nextfree, gbuf->ot + mag, 0);
-    jt.printf("-> %p\n", gbuf->nextfree);
-
-    //for (;;);
-}*/
+    GBuffer *gbuf = gbuffer_get_current();
+    gbuf->nextfree = func_800F4548(mesh, gbuf->nextfree, gbuf->ot + mag2, 0);
+    func_800CAC60(0x1F8003E4);
+    D_80138088 += 1;
+}
 
 // ground collision is also lost and you just fall.
 // but the ground texture bug is gone too. so that one's also

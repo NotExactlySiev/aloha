@@ -20,8 +20,10 @@ glabel func_800F49A0
     ori     $s2, 0x1000
 .L1:
     lw      $a3, 0x0004($a0)
-    lui     $s5, 0x1f7f
-    ori     $s5, 0xfff4
+        # lui     $s5, 0x1f7f
+        # ori     $s5, 0xfff4
+    la      $s5, 0x1f800000 - 12
+
     lh      $v0, 0x037e($s5)
     addiu   $a0, 0x0004
     addu    $s4, $a0
@@ -1606,6 +1608,12 @@ glabel func_800F5E04
 /* 46A14 800F6214 */ .word 0xA0A80003
 	j func_800F697C
 /* 46A1C 800F621C */ .word 0x24080018
+
+/*
+
+what's in t9?
+
+*/
 
 .QUAD:
     sll     $t9, 0x2
