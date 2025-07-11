@@ -1568,9 +1568,65 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF884);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
+void func_800DFE18(void)
+{
+    DRAWENV drawenv;
+    short ofs[2];
+    //
+    GBuffer *gbuf = gbuffer_get_current();
+    //
+    SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
+    drawenv.ofs[0] = gbuf->draw.ofs[0] + func_800E16BC() - 4;
+    drawenv.ofs[1] = gbuf->draw.ofs[1] + func_800E16CC() - 20;
+    ofs[0] = gbuf->draw.ofs[0] + func_800E16BC() + 124;
+    ofs[1] = gbuf->draw.ofs[1] + func_800E16BC() + 108;
+    
+    DR_OFFSET *poff = gbuf->nextfree;
+    gbuf->nextfree = poff + 1;
+    SetDrawOffset(poff, ofs);
+    addPrim(&gbuf->ot[1], poff);
+
+    DR_ENV *penv = gbuf->nextfree;
+    gbuf->nextfree = penv + 1;
+    SetDrawEnv(penv, &drawenv);
+    addPrim(&gbuf->ot[1], penv);
+
+    penv = gbuf->nextfree;
+    gbuf->nextfree = penv + 1;
+    SetDrawEnv(penv, &drawenv);
+    addPrim(&gbuf->ot[43], penv);
+
+    SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
+    
+    penv = gbuf->nextfree;
+    gbuf->nextfree = penv + 1;
+    SetDrawEnv(penv, &drawenv);
+    addPrim(&gbuf->ot[563], penv);
+
+    // check the game in the vram debugger, something's broken
+    // mine
+    POLY_G4 *p = gbuf->nextfree;
+    gbuf->nextfree = p + 1;
+    setPolyG4(p);
+    setXYWH(p, 50, 50, 50, 50);
+    setRGB0(p, 128, 0, 0);
+    setRGB1(p, 0, 0, 128);
+    setRGB2(p, 0, 128, 0);
+    setRGB3(p, 128, 128, 0);
+    addPrim(&gbuf->ot[0], p);
+}
 
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
+extern u32 D_80102794;
+extern int D_80102CA4;
+extern int D_80102CAC;
+extern int D_80102CB4;
+extern int D_80102CCC;
+extern int D_80102CD4;
+extern int D_80102CDC;
+extern int D_80102CE4;
+extern int D_80102D04;
 
 void main(void)
 {
@@ -1585,14 +1641,96 @@ void main(void)
     int rc = func_800E2C00();
     if (rc)
         goto out;
-    
-    
-    
+    func_800EE51C();
+    func_800CF08C();
+    func_800E3BA8(0);
+    func_800DB348();
+    D_80102CB4 = 0;
+    D_80102CD4 = 0;
+
+reload:
+    my_DrawSync(0);
+    func_800F33A8();
+    func_800D4BA4();
+    func_800F2C30();
+    func_800E3568();
+    while (1) {
+        func_800F2C30();
+        func_800DF1E4();
+        func_800F2C10();
+        func_800E9728(0);
+        D_80102CA4 = 0;
+        func_800F3198();
+        while (1) {
+            if (D_80102CA4) {
+                //
+            }
+            
+            if (D_80102CD4 == 1) {
+                //
+            }
+
+            if (D_80102CDC == 1) break;
+            gbuffer_swap();
+            func_800DA4C8();
+            int r;
+            for (r = func_800F3198(); r > 6; r--) {
+                func_800F31C4();
+            }
+            for (; r > 0; r--) {
+                if (!func_800F3350()) {
+                    if (D_80102CCC < ONE) {
+                        int tmp = D_80102CCC + 128;
+                        if (tmp < 0) tmp = 0;
+                        else if (tmp > ONE) tmp = ONE;
+                        D_80102CCC = tmp;
+                        func_800E1164(tmp);
+                    }
+                }
+                if (func_800E95A0() != MODE_NTSC) {
+                    D_80102D04 += 704;
+                }
+                int buttons = D_80102D04 < ONE
+                    ? func_800F32BC()
+                    : (r++, D_80102D04 -= ONE, func_800F323C());
+                if (buttons < 0) {
+                    //if (buttons & Pad2Down)
+                    //
+                }
+                if (!D_80102CAC) {
+                    func_800DF474();
+                }
+                func_800DF690();
+                if (!func_800F3350()) {
+                    func_800DF884();
+                }
+                if (!func_800F3350() && D_80102CE4) {
+                    func_800DFC78();
+                    func_800CE6AC();
+                }
+                func_800DF6FC();
+            }
+            func_800EA824();
+            func_800CE484();
+            func_800DFE18();
+            if (D_80102794) {
+                // debug info
+                //func_800E1164
+            }
+            my_DrawSync(0);
+            func_800F2C6C(1);
+            func_800E11A0();
+            if (D_80102794) {
+                debug_text_draw();
+            }
+        }
+    }
+
 out:
     my_DrawSync(0);
     func_800F2A94();
-    func_800E9728();
-    func_800E9758();
+    func_800E9728(0);
+    func_800E9758(0);
     func_800CE8A8();
     func_800E9994();
 }
