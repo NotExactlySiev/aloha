@@ -2,6 +2,8 @@
 #include "entity.h"
 #include <libgpu.h>
 
+// this file contains mostly world specific code, which are linked with the
+// other units that contain general code shared between all worlds.
 
 // from other modules
 void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id);   // render model
@@ -22,7 +24,33 @@ typedef struct {
 } MeshMetadata;
 
 typedef struct {
-    // TODO
+    char *unk0;     // mesh clut name
+    char *unk1;     // texture clut name
+    char *unk2;     // vo2 name
+    void *unk3;
+    void *unk4;
+    void *unk5;
+    void *unk6;
+    void *unk7;
+    void *unk8;
+    void *unk9;
+    char *unk10;    // xs3 name
+    void *unk11;
+    void *unk12;
+    void *unk13;
+    void *unk14;
+    void *unk15;
+    void *unk16;
+    void *unk17;
+    void *unk18;
+    void *unk19;
+    void *unk20;
+    void *unk21;
+    void *unk22;
+    void *unk23;
+    void *unk24;
+    void *unk25;
+    void *unk26;
 } EntityResources;
 
 typedef struct {
@@ -33,6 +61,7 @@ typedef struct {
 } EntityTemplate;
 
 MeshMetadata D_80103164[8];    // only frog, but should be an array
+extern MeshMetadata D_8010353C;
 
 void func_800B1F8C(void);
 void func_800B1D78(Entity *this, Spirit *params);
@@ -68,41 +97,84 @@ void func_800B9068(Entity *this, Spirit *params);
 void func_800BBFD8(void);
 void func_800BBD9C(Entity *this, Spirit *params);
 
-extern EntityResources D_800FE7AC;
-extern EntityResources D_800FEAE8;
-extern EntityResources D_800FECF8;
-extern EntityResources D_800FEF78;
-extern EntityResources D_800FF034;
-extern EntityResources D_800FF28C;
 
-extern EntityResources D_800FF474;
-extern EntityResources D_800FFA0C;
+void func_800C5044(void);
+void func_800C4DE8(Entity *this, Spirit *params);
 
-//extern EntityTemplate D_800FE818;
-//extern EntityTemplate D_800FEB54;
-//extern EntityTemplate D_800FED64;
-//extern EntityTemplate D_800FEFE4;
-//extern EntityTemplate D_800FF0A0;
+EntityResources D_800FE7AC = {
+    .unk0 = "frog_obj.clt",
+    .unk1 = "frog_tp0.clt",
+    .unk2 = "frog_obj.vo2",
+    .unk10 = "frog_tp0.xs3",
+};
+
+EntityResources D_800FEAE8 = {
+    .unk0 = "kiui_obj.clt",
+    .unk2 = "kiui_obj.vo2",
+};
+
+extern u16 D_800FECE8[];
+
+EntityResources D_800FECF8 = {
+    .unk0 = "tmbo_obj.clt",
+    .unk2 = "tmbo_obj.vo2",
+    .unk24 = &D_800FECE8,
+};
+
+extern u16 D_800FEF68[];
+
+EntityResources D_800FEF78 = {
+    .unk0 = "hipo_obj.clt",
+    .unk1 = "hipo_tp0.clt",
+    .unk2 = "hipo_obj.vo2",
+    .unk10 = "hipo_tp0.xs3",
+    .unk24 = &D_800FEF68,
+};
+
+EntityResources D_800FF034 = {
+    .unk0 = "blck_obj.clt",
+    .unk1 = "blck_tp0.clt",
+    .unk2 = "blck_obj.vo2",
+    .unk10 = "blck_tp0.xs3",
+};
+
+EntityResources D_800FF28C = {
+    .unk0 = "goki_obj.clt",
+    .unk2 = "goki_obj.vo2",
+};
+
+EntityResources D_800FF474 = {
+    .unk0 = "hari_obj.clt",
+    .unk2 = "hari_obj.vo2",
+};
+ 
+extern u16 D_800FF9FC[];
+
+EntityResources D_800FFA0C = {
+    .unk0 = "kumo_obj.clt",
+    .unk2 = "kumo_obj.vo2",
+    .unk24 = &D_800FF9FC,
+};
+
+EntityResources D_801002C8 = {
+    .unk0 = "drgn_obj.clt",
+    .unk1 = "drgn_tp0.clt",
+    .unk2 = "drgn_obj.vo2",
+    .unk10 = "drgn_tp0.xs3",
+};
+
 EntityTemplate D_800FF2F8 = {
     &D_80103164[5],
     &D_800FF28C,
     func_800B7D54,
     func_800B7B58,
 };
+
 extern EntityTemplate D_800FFCEC;
 extern EntityTemplate D_80100544;
-//extern EntityTemplate D_80100554;
-//extern EntityTemplate D_80100564;
-//extern EntityTemplate D_80100574;
-
-extern EntityTemplate D_800FF4E0;
-//extern EntityTemplate D_800FF2F8;
-extern EntityTemplate D_800FFA78;
 extern EntityTemplate D_800FFC50;
 extern EntityTemplate D_800FFD3C;
 extern EntityTemplate D_8010048C;
-
-extern EntityTemplate D_80100334;
 
 EntityTemplate *(*D_800FD454[3])[] = {
     &(EntityTemplate*[]){
@@ -200,8 +272,13 @@ EntityTemplate *(*D_800FD454[3])[] = {
     },
 
     &(EntityTemplate*[]){
-        //&(EntityTemplate){0},
-        &D_80100334,
+        //&D_80100334,
+        &(EntityTemplate){
+            &D_8010353C,
+            &D_801002C8,
+            func_800C5044,
+            func_800C4DE8,
+        },
         (void *) -1
     },
 };
@@ -212,20 +289,17 @@ int func_800B0A68(void)
     return D_801026B8;
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A78);
 int func_800B0A78(void)
 {
     return D_801026BC;
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0A88);
 void func_800B0A88(int val)
 {
     D_801026B8 = val % 18;
     D_801026BC = val / 18;
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0AD4);
 EntityTemplate *(*func_800B0AD4(int index))[]
 {
     return D_800FD454[index % 3];
@@ -237,7 +311,6 @@ const char *D_800FD48C[3] = {
     "bos1_ene.ear",
 };
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0B24);
 const char *func_800B0B24(int index)
 {
     return D_800FD48C[index];
@@ -880,16 +953,17 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C643C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6538);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6558);
+// unused:
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6558);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C664C);
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C664C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C67F4);
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C67F4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6834);
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6834);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A68);
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A68);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A7C);
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A7C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6B0C);
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6B0C);

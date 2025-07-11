@@ -39,6 +39,7 @@ List entity_list_free = {};
 #define sinf(a)     (sin_lut[(a) & 0xFFF])
 #define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
 
+/*
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BC4);
@@ -362,6 +363,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCDF0);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCE1C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCF74);
+*/
 
 // ^ these are standard lib functions 
 
