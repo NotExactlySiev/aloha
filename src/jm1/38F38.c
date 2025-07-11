@@ -83,24 +83,47 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9600);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9630);
 
+// read
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9670);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9728);
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9728);
+void func_800E9728(void)
+{
+    jt.wait_for_vsync();
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9758);
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9758);
+void func_800E9758(int mask)
+{
+    jt.SetDispMask(mask);
+}
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", DrawSync);
+// WHYYYYYYY
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", my_DrawSync);
+int my_DrawSync(int mode)
+{
+    return jt.DrawSync(mode);
+}
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", LoadImage);
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", my_LoadImage);
+int my_LoadImage(RECT *r, u_long *data)
+{
+    return jt.LoadImage(r, data);
+}
 
+// call_ClearImage
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E97E8);
 
+// call_DrawOTag
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9818);
 
+// task_add
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9848);
 
+// task_remove
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9878);
 
+// reset_and_clear_gpu
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E98A8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9994);

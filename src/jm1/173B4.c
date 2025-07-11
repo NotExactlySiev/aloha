@@ -39,338 +39,11 @@ List entity_list_free = {};
 #define sinf(a)     (sin_lut[(a) & 0xFFF])
 #define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
 
-// GetGraphType, remove when no longer needed
+// GetGraphType, TODO: remove when no longer needed
 int func_800C6FB8()
 {
     return 0;
 }
-/*
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BC4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6DA4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6EB4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6F1C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6FB8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6FC8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6FD8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7034);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C70AC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7118);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7230);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C72C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7328);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C738C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7430);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C74DC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C755C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C75BC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C762C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7724);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7784);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7BCC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7C30);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7C64);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7CA0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7D24);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7D68);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDrawMode);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7DE8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C80A0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C80F0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C81BC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8288);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C82C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8348);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8420);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8438);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8520);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C876C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C89F8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8CC8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8D00);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8D20);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8D70);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8DBC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8DEC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C8E10);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9078);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9378);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C94F4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C96E0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9714);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C98AC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C98D8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9960);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C99B0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9A00);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9A88);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9B10);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9B6C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", VectorNormal);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9CA8);
-
-// SquareRoot0
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SquareRoot0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9DF4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9E88);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9F14);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9F94);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA00C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA058);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", MulMatrix0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA2C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", MulMatrix);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", MulMatrix2);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA5C0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA6A8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA7B8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA808);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA864);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA9C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA9F4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAA18);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAB3C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetRotMatrix);
-
-// SetLightMatrix
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetLightMatrix);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetColorMatrix);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetTransMatrix);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAD10);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CADB0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAE50);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAE98);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAEE0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAF28);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAF54);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", RotTrans);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAFD0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAFF8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB01C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB044);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB06C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB088);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB0C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB0E8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB110);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB138);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB154);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB190);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB1B4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", NormalColorCol);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB21C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB260);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB288);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", NormalClip);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB2D0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB2E0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB300);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB310);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB334);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB344);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB39C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB3F4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB418);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB590);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB710);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB888);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB9FC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CBB70);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", rsin);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CBD34);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CBDEC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CBEC0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC268);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC338);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC368);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC398);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC3C8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC3F8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC428);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC43C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC454);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC470);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC530);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC724);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC84C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC8B4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC8E0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC8F0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC910);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC9B4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CC9FC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCB60);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCC68);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCC94);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCCAC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCCBC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCD34);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCD6C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCDB8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCDF0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCE1C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CCF74);
-*/
-
-// ^ these are standard lib functions 
 
 // custom math functions. math.c?
 
@@ -1733,13 +1406,13 @@ void func_800DE384(u16 x, u16 y)
         .w = 4,
         .h = 1,
     };
-    LoadImage(&rect, debug_font_color);
-    DrawSync(0);
+    my_LoadImage(&rect, debug_font_color);
+    my_DrawSync(0);
 }
 
 
 
-//extern void func_800DED4C(void* p, s32 v);   // SetSemiTrans                   /* extern */
+//extern void SetSemiTrans(void* p, s32 v);   // SetSemiTrans                   /* extern */
 
 s32 debug_char_x = 0;
 s32 debug_char_y = 0;
@@ -1764,7 +1437,7 @@ void debug_print_char(char c)
         debug_text_ot[debug_ot_index].count += 1;
         p = debug_text_ot[debug_ot_index].nextfree;
         debug_text_ot[debug_ot_index].nextfree = p + 1;
-        func_800DED4C(p, debug_text_transparent);
+        SetSemiTrans(p, debug_text_transparent);
         p->x0 = debug_char_x * 8;
         p->y0 = debug_char_y * 8;
         p->u0 = debug_char_uvs[c].u;
@@ -1839,7 +1512,7 @@ void debug_text_draw(void)
     u16 tpage;
 
     p = &debug_text_ot[debug_ot_index].draw_mode;
-    tpage = func_800DEAD4(0,debug_font_index, debug_font_x, debug_font_y);
+    tpage = GetTPage(0,debug_font_index, debug_font_x, debug_font_y);
     SetDrawMode(p, 0, 0, tpage, &debug_text_texture);
     last = &debug_text_ot[debug_ot_index].ot[0];
     addPrim(last, p);
@@ -1873,84 +1546,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE920);   // Set index
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE930);   // debug_text_init
 
-
-// this is all libgpu stuff, probably all for debug.c
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEAD4);   // GetTPage
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEB6C);   // GetClut
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEB84);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEC20);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEC60);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEC7C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEC98);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DECD4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DED10);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DED34);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DED4C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DED74);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DED9C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEDB0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEDC4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEDD8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEDEC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE00);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE14);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE28);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE3C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE50);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE64);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE78);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEE8C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEEA0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEEB4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEEC8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEEDC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEEF0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEF04);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEF24);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEF44);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEF64);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEF84);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DEFB8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF108);
-
-
 // more real functions
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1B4);
@@ -1975,7 +1570,32 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
+
+void main(void)
+{
+    func_800E98A8();
+    func_800DE8B0(448, 224);
+    func_800DE8DC(0x8000, 0x8000, 0x7FFF);
+    func_800DE930();
+    func_800CE820();
+    make_sin_lut();
+    func_800DADE0();
+    func_800F2A18();
+    int rc = func_800E2C00();
+    if (rc)
+        goto out;
+    
+    
+    
+out:
+    my_DrawSync(0);
+    func_800F2A94();
+    func_800E9728();
+    func_800E9758();
+    func_800CE8A8();
+    func_800E9994();
+}
 
 
 // 2 functions, for sale, never called

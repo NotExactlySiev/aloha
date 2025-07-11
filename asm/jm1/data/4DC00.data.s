@@ -3755,8 +3755,6 @@ glabel D_80100584
 glabel D_801005C4
     .word D_80100584
 */
-glabel D_801005C8
-    .word GPU_printf
 
 glabel D_801005CC
 /* 50DCC 801005CC */ .word 0x00000000
