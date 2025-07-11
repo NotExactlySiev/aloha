@@ -39,6 +39,11 @@ List entity_list_free = {};
 #define sinf(a)     (sin_lut[(a) & 0xFFF])
 #define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
 
+// GetGraphType, remove when no longer needed
+int func_800C6FB8()
+{
+    return 0;
+}
 /*
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C6BB4);
 
@@ -96,7 +101,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7D24);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7D68);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7D90);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDrawMode);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C7DE8);
 
@@ -162,12 +167,12 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9B10);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9B6C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9BE0);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", VectorNormal);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9CA8);
 
 // SquareRoot0
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9D70);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SquareRoot0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800C9DF4);
 
@@ -181,13 +186,13 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA00C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA058);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA1B8);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", MulMatrix0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA2C4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA3A8);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", MulMatrix);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA4B4);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", MulMatrix2);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CA5C0);
 
@@ -207,14 +212,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAA18);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAB3C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAC60);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetRotMatrix);
 
 // SetLightMatrix
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAC90);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetLightMatrix);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CACC0);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetColorMatrix);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CACF0);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetTransMatrix);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAD10);
 
@@ -230,7 +235,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAF28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAF54);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAFA8);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", RotTrans);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CAFD0);
 
@@ -258,7 +263,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB190);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB1B4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB1FC);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", NormalColorCol);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB21C);
 
@@ -266,7 +271,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB260);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB288);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB2AC);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", NormalClip);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB2D0);
 
@@ -296,7 +301,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CB9FC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CBB70);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CBCE4);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", rsin);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CBD34);
 
@@ -396,7 +401,7 @@ s16 sin_lut[4096];
 void make_sin_lut(void)
 {
     for (int i = 0; i < 4096; i++) {
-        sin_lut[i] = func_800CBCE4(i);   // rsin
+        sin_lut[i] = rsin(i);   // rsin
     }
 }
 
@@ -436,11 +441,11 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDBA4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDCD0);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDDD4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDFC4);
 
@@ -1835,7 +1840,7 @@ void debug_text_draw(void)
 
     p = &debug_text_ot[debug_ot_index].draw_mode;
     tpage = func_800DEAD4(0,debug_font_index, debug_font_x, debug_font_y);
-    func_800C7D90(p, 0, 0, tpage, &debug_text_texture);
+    SetDrawMode(p, 0, 0, tpage, &debug_text_texture);
     last = &debug_text_ot[debug_ot_index].ot[0];
     addPrim(last, p);
     func_800E9818(last);
@@ -1977,8 +1982,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0810);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E08FC);   // LoadClut
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDrawEnv);
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDispEnv);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDrawEnv);
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDispEnv);
 
 void* data_buffer_start = 0x80060000;
 extern void* data_buffer_ptr;
@@ -2499,7 +2504,7 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     if (id & 0x800) {
         mag2 = (D_8013EC48[id & 0x3ff] & 0x3ff) + 44;
     } else {
-        mag2 = func_800C9D70(mag2);
+        mag2 = SquareRoot0(mag2);
         if (D_80102E3C) {
             mag2 = D_80102E3C(mag2, pos, id);
         }
@@ -2541,7 +2546,7 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
         func_800E8838(light, 0x1F800030);
     }
 
-    func_800CAC90(0x1F800030);
+    SetLightMatrix(0x1F800030);
     func_800E87B8(0x1F800010);
 
     SVECTOR *cool = SCRTCHPAD(0x1C);
@@ -2552,13 +2557,13 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
         cool->vz = cool->vz >> 1;
     }
     // SetRotMatrix
-    func_800CAC60(0x1F800010);
+    SetRotMatrix(0x1F800010);
     // SetTransMatrix
-    func_800CACF0(0x1F800010);
+    SetTransMatrix(0x1F800010);
 
     GBuffer *gbuf = gbuffer_get_current();
     gbuf->nextfree = func_800F4548(mesh, gbuf->nextfree, gbuf->ot + mag2, 0);
-    func_800CAC60(0x1F8003E4);
+    SetRotMatrix(0x1F8003E4);
     D_80138088 += 1;
 }
 
