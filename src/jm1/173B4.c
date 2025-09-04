@@ -1109,6 +1109,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBD2C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
 
+// read raw input and process it
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC00C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
@@ -1571,6 +1572,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
 void func_800DFE18(void)
 {
+    func_800EF004();
+
+
     DRAWENV drawenv;
     short ofs[2];
     //
@@ -1580,41 +1584,36 @@ void func_800DFE18(void)
     drawenv.ofs[0] = gbuf->draw.ofs[0] + func_800E16BC() - 4;
     drawenv.ofs[1] = gbuf->draw.ofs[1] + func_800E16CC() - 20;
     ofs[0] = gbuf->draw.ofs[0] + func_800E16BC() + 124;
-    ofs[1] = gbuf->draw.ofs[1] + func_800E16BC() + 108;
-    
+    ofs[1] = gbuf->draw.ofs[1] + func_800E16CC() + 108;
+
+    // despite exporting the libgpu functions from main executable, this file is
+    // still sometimes using duplicates from its own imported copy of libgpu.
+    // instead of using the ones in the jumptable. this was overlooked because
+    // in the original version of PsyQ used, those functinos ended up not
+    // any important libgpu globals and therefore acted the same either way.
+    // this is no longer the case in 4.7 and e.g SetDrawEnv has to be called
+    // from the same instance of libgpu that has called ResetGraph.
+
     DR_OFFSET *poff = gbuf->nextfree;
     gbuf->nextfree = poff + 1;
-    SetDrawOffset(poff, ofs);
+    jt.SetDrawOffset(poff, ofs);
     addPrim(&gbuf->ot[1], poff);
 
     DR_ENV *penv = gbuf->nextfree;
     gbuf->nextfree = penv + 1;
-    SetDrawEnv(penv, &drawenv);
+    jt.SetDrawEnv(penv, &drawenv);
     addPrim(&gbuf->ot[1], penv);
 
     penv = gbuf->nextfree;
     gbuf->nextfree = penv + 1;
-    SetDrawEnv(penv, &drawenv);
+    jt.SetDrawEnv(penv, &drawenv);
     addPrim(&gbuf->ot[43], penv);
 
     SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
-    
     penv = gbuf->nextfree;
     gbuf->nextfree = penv + 1;
-    SetDrawEnv(penv, &drawenv);
+    jt.SetDrawEnv(penv, &drawenv);
     addPrim(&gbuf->ot[563], penv);
-
-    // check the game in the vram debugger, something's broken
-    // mine
-    POLY_G4 *p = gbuf->nextfree;
-    gbuf->nextfree = p + 1;
-    setPolyG4(p);
-    setXYWH(p, 50, 50, 50, 50);
-    setRGB0(p, 128, 0, 0);
-    setRGB1(p, 0, 0, 128);
-    setRGB2(p, 0, 128, 0);
-    setRGB3(p, 128, 128, 0);
-    addPrim(&gbuf->ot[0], p);
 }
 
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
@@ -1776,8 +1775,17 @@ void func_800E0ABC(DISPENV* disp)
     }
 }
 
-extern u16 gbuffer_draw_pos[3][2];
-extern u16 gbuffer_disp_pos[3][2];
+const u16 gbuffer_draw_pos[3][2] = {
+    { 0, 0 },
+    { 256, 0 },
+    { 512, 0 },
+};
+
+const u16 gbuffer_disp_pos[3][2] = {
+    { 512, 0 },
+    { 0, 0 },
+    { 256, 0 },
+};
 
 void gbuffer_reset(GBuffer* gbuf, int idx)
 {

@@ -7038,26 +7038,6 @@ glabel D_80101F1C
 /* 52724 80101F24 */ .word 0x00000200
 /* 52728 80101F28 */ .word 0x00000280
 
-glabel gbuffer_draw_pos
-/* 5272C 80101F2C */ .short 0x0000
-
-glabel D_80101F2E
-/* 5272E 80101F2E */ .short 0x0000
-/* 52730 80101F30 */ .short 0x0100
-/* 52732 80101F32 */ .short 0x0000
-/* 52734 80101F34 */ .short 0x0200
-/* 52736 80101F36 */ .short 0x0000
-
-glabel gbuffer_disp_pos
-/* 52738 80101F38 */ .short 0x0200
-
-glabel D_80101F3A
-/* 5273A 80101F3A */ .short 0x0000
-/* 5273C 80101F3C */ .short 0x0000
-/* 5273E 80101F3E */ .short 0x0000
-/* 52740 80101F40 */ .short 0x0100
-/* 52742 80101F42 */ .short 0x0000
-
 glabel D_80101F44
 /* 52744 80101F44 */ .word 0x5F617267
 /* 52748 80101F48 */ .word 0x2E746164
