@@ -1274,6 +1274,7 @@ glabel D_8013E448
 glabel D_8013EC48
 	.space 0x800
 
+/*
 glabel D_80141448
 	.space 0x2
 
@@ -1282,6 +1283,7 @@ glabel D_8014144A
 
 glabel D_8014144C
 	.space 0x4
+*/
 
 glabel D_80141450
 	.space 0x1

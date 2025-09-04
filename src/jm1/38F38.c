@@ -818,7 +818,31 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F83E4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8694);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F87BC);
+extern int D_8010308C;  // ground exists
+extern int D_8010309C;
+extern SVECTOR D_80141448;  // camera rotation
+
+// render_ground_texture
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F87BC);
+void func_800F87BC(void)
+{
+    DRAWENV drawenv;
+    GBuffer *gbuf = gbuffer_get_current();
+    jt.SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
+    drawenv.ofs[0] = gbuf->draw.ofs[0] + func_800E16BC() - 4;
+    drawenv.ofs[1] = gbuf->draw.ofs[1] + func_800E16CC() - 20;
+    DR_ENV *penv = gbuf->nextfree;
+    gbuf->nextfree = penv + 1;
+    jt.SetDrawEnv(penv, &drawenv);
+    addPrim(&gbuf->ot[43], penv);
+    if (!D_8010308C || !D_8010309C || camera_pos->vy > 0 || D_80141448.vy <= -512) {
+        return;
+    }
+
+    //
+    //
+    //
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8C00);
 

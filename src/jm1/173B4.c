@@ -1333,7 +1333,7 @@ void debug_print_decimal(s32 num)
 
 u32 D_80102794 = 0;
 extern s32 D_80102BF4;
-extern SVECTOR D_80141448;  // camera rotation?
+SVECTOR D_80141448;  // camera rotation?
 
 void func_800DDF04(void)
 {
@@ -1569,6 +1569,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF884);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 
+// 0x400 to 0xC00 camera is glitched
+
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
 void func_800DFE18(void)
 {
@@ -1584,6 +1586,7 @@ void func_800DFE18(void)
     func_800F421C();
     func_800D46CC();
     func_800EF004();
+    
     if (!func_800F3434()) {
         func_800F1A0C();
         func_800F87BC();
@@ -1593,19 +1596,19 @@ void func_800DFE18(void)
     }
     
     if (!func_800DBC24() && !func_800F3434()) {
-        func_800D0E5C();
+        //func_800D0E5C();
     }
 
     if (!func_800F3434()) {
-        func_800D0FC4();
+        //func_800D0FC4();
         func_800DDF04();
-        func_800D0370();
-        func_800DA998();
-        func_800DA4E8();
-        func_800F8EF4();
-        func_800F8E10();
+        //func_800D0370();
+        //func_800DA998();
+        //func_800DA4E8();
+        //func_800F8EF4();
+        //func_800F8E10();
     }
-
+    
     DRAWENV drawenv;
     short ofs[2];
     GBuffer *gbuf = gbuffer_get_current();
@@ -2192,7 +2195,43 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E543C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5458);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5478);
+SVECTOR *D_801027F0 = SCRTCHPAD(0x3C8);    // camera pos
+MATRIX *D_801027F4 = SCRTCHPAD(0x3E4);    // rotation matrix
+MATRIX *D_801027F8 = SCRTCHPAD(0x3D0);    // light matrix
+extern void *D_80102814;
+extern MATRIX D_80137CD0;
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5478);
+void func_800E5478(void)
+{
+    MATRIX tmp;
+    int c = cosf(D_80141448.vy);
+    int s = sinf(D_80141448.vy);
+
+    MATRIX *m = D_801027F4;
+    m->m[0][0] = c; m->m[0][1] = 0; m->m[0][2] = s;
+    m->m[1][0] = 0; m->m[1][1] = ONE; m->m[1][2] = 0;
+    m->m[2][0] = -s; m->m[2][1] = 0; m->m[2][2] = c;
+
+    c = cosf(D_80141448.vx);
+    s = sinf(D_80141448.vx);
+    tmp.m[0][0] = ONE; tmp.m[0][1] = 0; tmp.m[0][2] = 0;
+    tmp.m[1][0] = 0; tmp.m[1][1] = c; tmp.m[1][2] = -s;
+    tmp.m[2][0] = 0; tmp.m[2][1] = s ; tmp.m[2][2] = c;
+
+    func_800E8838(m, &D_80137CD0);
+    MulMatrix2(&tmp, m);
+
+    c = cosf(D_80141448.vz);
+    s = sinf(D_80141448.vz);
+    tmp.m[0][0] = c; tmp.m[0][1] = -s; tmp.m[0][2] = 0;
+    tmp.m[1][0] = s; tmp.m[1][1] = c; tmp.m[1][2] = 0;
+    tmp.m[2][0] = 0; tmp.m[2][1] = 0; tmp.m[2][2] = ONE;
+    MulMatrix2(&tmp, m);
+    MulMatrix2(&tmp, &D_80137CD0);
+    func_800E8738(m, D_80102814);
+    func_800E8738(&D_80137CD0, D_80102814);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E563C);
 
@@ -2252,7 +2291,6 @@ extern s16 D_80141468[1024];    // z offsets
 extern int (*D_80102E3C)(int, VECTOR*, u32); // depth adjuster
 extern SVECTOR D_80102E44;
 extern SVECTOR D_801380A0;
-extern MATRIX D_80137CD0;
 
 // draw_model
 void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
