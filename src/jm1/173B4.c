@@ -1572,15 +1572,45 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
 void func_800DFE18(void)
 {
+    func_800E5CC0();
+    func_800F1FFC();
+    func_800F2760();
+    func_800F296C();
+    func_800E17D0();
+    func_800EEDB4();
+    func_800E5D30();
+    func_800E6668();
+    func_800D4CC8();
+    func_800F421C();
+    func_800D46CC();
     func_800EF004();
+    if (!func_800F3434()) {
+        func_800F1A0C();
+        func_800F87BC();
+        func_800EFEC4();
+        func_800E5D30();
+        func_800D0F24();
+    }
+    
+    if (!func_800DBC24() && !func_800F3434()) {
+        func_800D0E5C();
+    }
 
+    if (!func_800F3434()) {
+        func_800D0FC4();
+        func_800DDF04();
+        func_800D0370();
+        func_800DA998();
+        func_800DA4E8();
+        func_800F8EF4();
+        func_800F8E10();
+    }
 
     DRAWENV drawenv;
     short ofs[2];
-    //
     GBuffer *gbuf = gbuffer_get_current();
-    //
-    SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
+    func_800E1914();
+    jt.SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
     drawenv.ofs[0] = gbuf->draw.ofs[0] + func_800E16BC() - 4;
     drawenv.ofs[1] = gbuf->draw.ofs[1] + func_800E16CC() - 20;
     ofs[0] = gbuf->draw.ofs[0] + func_800E16BC() + 124;
@@ -1589,7 +1619,7 @@ void func_800DFE18(void)
     // despite exporting the libgpu functions from main executable, this file is
     // still sometimes using duplicates from its own imported copy of libgpu.
     // instead of using the ones in the jumptable. this was overlooked because
-    // in the original version of PsyQ used, those functinos ended up not
+    // in the original version of PsyQ used, those functinos ended up not using
     // any important libgpu globals and therefore acted the same either way.
     // this is no longer the case in 4.7 and e.g SetDrawEnv has to be called
     // from the same instance of libgpu that has called ResetGraph.
@@ -1609,7 +1639,7 @@ void func_800DFE18(void)
     jt.SetDrawEnv(penv, &drawenv);
     addPrim(&gbuf->ot[43], penv);
 
-    SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
+    jt.SetDefDrawEnv(&drawenv, gbuf->draw.clip.x, gbuf->draw.clip.y, gbuf->draw.clip.w, gbuf->draw.clip.h);
     penv = gbuf->nextfree;
     gbuf->nextfree = penv + 1;
     jt.SetDrawEnv(penv, &drawenv);
