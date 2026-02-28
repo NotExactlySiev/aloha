@@ -1,14 +1,14 @@
+#include "cd/cd.h"
 #include "common.h"
+#include "decode.h"
+#include "music.h"
+#include "sfx.h"
+#include "sound.h"
+#include "spu.h"
+#include "tasks.h"
 #include <kernel.h>
 #include <libapi.h>
 #include <libetc.h>
-#include "cd/cd.h"
-#include "music.h"
-#include "tasks.h"
-#include "spu.h"
-#include "sfx.h"
-#include "decode.h"
-#include "sound.h"
 
 s32 is_mono = 0;
 CdlFILE D_80048068;
@@ -25,30 +25,31 @@ SpuVolume vol_full;
 
 void cd_demute(void);
 
-// functions
+#define VOL_FULL 1024
 
-// module cd_
+#define CLAMP(a, b, x) \
+    {                  \
+        if (x < a)     \
+            x = a;     \
+        if (x > b)     \
+            x = b;     \
+    }
 
-#define VOL_FULL    1024
-
-#define CLAMP(a,b,x)    { if (x < a) x = a; if (x > b) x = b; }
-
-
-// TODO: the multiplications here have the weird if statements
 // 8001A8A0
 void set_vol_scaled(SpuVolume *vol, s32 scale)
 {
     SpuCommonAttr attr;
     CLAMP(0, VOL_FULL, scale);
     attr.mask = SPU_COMMON_CDVOLL | SPU_COMMON_CDVOLR;
-    attr.cd.volume.left = (vol->left * scale) >> 10;
-    attr.cd.volume.right = (vol->right * scale) >> 10;
+    attr.cd.volume.left = (vol->left * scale) / 1024;
+    attr.cd.volume.right = (vol->right * scale) / 1024;
     SpuSetCommonAttr(&attr);
 }
 
 // this one ignores fading effects
 // 8001A934
-void cd_set_vol(SpuVolume *vol) {
+void cd_set_vol(SpuVolume *vol)
+{
     set_vol_scaled(vol, VOL_FULL);
     vol_full = *vol;
 }
@@ -73,7 +74,8 @@ int (*fade_in_callback)() = 0;
 // 8001A978
 void fade_out_routine(void)
 {
-    if (fade_paused || !fading_out) return;
+    if (fade_paused || !fading_out)
+        return;
     if (vol_scale > fade_out_dest) {
         set_vol_scaled(&vol_full, vol_scale);
         vol_scale -= fade_out_step;
@@ -83,7 +85,8 @@ void fade_out_routine(void)
         fading_out = 0;
         fade_in_active = 0;
         fade_out_active = 0;
-        if (fade_out_callback != 0) (*fade_out_callback)();
+        if (fade_out_callback != 0)
+            (*fade_out_callback)();
         set_vol_scaled(&vol_full, vol_scale);
     }
 }
@@ -91,7 +94,8 @@ void fade_out_routine(void)
 // 8001AA80
 void fade_in_routine(void)
 {
-    if (fade_paused || !fading_in) return;
+    if (fade_paused || !fading_in)
+        return;
     if (vol_scale < fade_in_dest) {
         set_vol_scaled(&vol_full, vol_scale);
         vol_scale += fade_in_step;
@@ -101,15 +105,17 @@ void fade_in_routine(void)
         fading_in = 0;
         fade_in_active = 0;
         fade_out_active = 0;
-        if (fade_in_callback != 0) (*fade_in_callback)();
+        if (fade_in_callback != 0)
+            (*fade_in_callback)();
         set_vol_scaled(&vol_full, vol_scale);
     }
 }
 
 // 8001AB88
-s32 fade_out(s32 duration, s32 dstvol, void* callback)
+s32 fade_out(s32 duration, s32 dstvol, void *callback)
 {
-    if (fade_out_active == 1) return 0;
+    if (fade_out_active == 1)
+        return 0;
 
     if (MODE_PAL == get_video_mode()) {
         duration = (duration * 5) / 6 - 1;
@@ -132,13 +138,14 @@ s32 fade_out(s32 duration, s32 dstvol, void* callback)
 }
 
 // 8001AD0C
-s32 fade_in(s32 duration, s32 dstvol, void* callback)
+s32 fade_in(s32 duration, s32 dstvol, void *callback)
 {
-    if (fade_in_active == 1) return 0;
+    if (fade_in_active == 1)
+        return 0;
 
     if (MODE_PAL == get_video_mode()) {
         duration = (duration * 5) / 6 - 1;
-        //if (duration < 1) duration = 1;
+        // if (duration < 1) duration = 1;
     }
     fade_in_active = 1;
     CLAMP(1, 1024, duration);
@@ -241,6 +248,7 @@ void fade_unpause(void)
 }
 
 #include "movie.h"
+
 // FIXME: the world 1 intro movie doesn't play correctly
 // 8001D2AC
 int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
@@ -283,7 +291,8 @@ u32 call_PadRead(s32 id)
 }
 
 // guard, just like call_ResetGraph
-int D_80047E0C = 0;  // is mdec initialized?
+int D_80047E0C = 0; // is mdec initialized?
+
 // 8001E608
 void func_8001E608(int mode)
 {
@@ -299,8 +308,9 @@ void func_8001E608(int mode)
 
 // music.c
 
-int D_80047E4C = 0;          // music should repeat?
-MusicList *D_80047E50 = NULL;   // bgm_list_ptr
+int D_80047E4C = 0; // music should repeat?
+MusicList *D_80047E50 = NULL; // bgm_list_ptr
+
 // audio_list_set_ptr
 // 80020FC0
 void music_set_list(MusicList *val)
@@ -317,7 +327,7 @@ MusicTrack *get_track_by_id(u8 id)
     while (count--) {
         if (p->id == id)
             return p;
-        p = &p->name[p->size - 22];  // why is the next one there?
+        p = &p->name[p->size - 22]; // why is the next one there?
     }
     return NULL;
 }

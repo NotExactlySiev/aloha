@@ -1,9 +1,9 @@
-#include "sfx.h"
-#include "sound.h"
-#include "music.h"
+#include "card.h"
 #include "decode.h"
 #include "main.h"
-#include "card.h"
+#include "music.h"
+#include "sfx.h"
+#include "sound.h"
 #include <libapi.h>
 #include <sys/file.h>
 
@@ -13,8 +13,8 @@ void (*_mc_callback_b)(void) = 0;
 void execute_compressed(void *addr, u32 stack)
 {
     EXEC header;
-    __builtin_memcpy(&header, addr+16, 0x3c);
-    decode_lz1(addr + 0x804, (void*) header.t_addr);
+    __builtin_memcpy(&header, addr + 16, 0x3c);
+    decode_lz1(addr + 0x804, (void *)header.t_addr);
     header.s_addr = stack;
     flush_cache_safe();
     Exec(&header, 1, 0);
@@ -37,7 +37,7 @@ static void do_callback_b(void)
 // 800218DC
 int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
 {
-    //printf("read bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
+    // printf("read bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
     if (mc_file_exists(slot, filename) == 0)
         return 0;
 
@@ -55,13 +55,13 @@ int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
     }
     mc_close(fd);
     // huh??
-    return len & -(uint) (rc == EvSpIOE);
+    return len & -(uint)(rc == EvSpIOE);
 }
 
 // 800219DC
 int mc_file_write(int slot, char *filename, void *src, int offset, int len, char *title)
 {
-    //printf("write bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
+    // printf("write bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
     if (mc_file_exists(slot, filename) == 0)
         return 0;
 
@@ -102,7 +102,7 @@ int mc_file_write(int slot, char *filename, void *src, int offset, int len, char
 
     mc_close(fd);
     // huh??
-    return len & -(uint) (rc == EvSpIOE);
+    return len & -(uint)(rc == EvSpIOE);
 }
 
 extern struct {
@@ -177,5 +177,5 @@ void misc_init(void)
     jt_set(mc_file_write, 0x341);
     jt_set(mc_file_create, 0x342);
     jt_set(mc_file_delete, 0x343);
-    jt_set(mc_set_callback_b, 0x344);     // THERE ARE TWO CALLBACKS WTF
+    jt_set(mc_set_callback_b, 0x344); // THERE ARE TWO CALLBACKS WTF
 }
