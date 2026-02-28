@@ -75,7 +75,7 @@ static inline int bcd(int x)
 
 static inline int unbcd(int x)
 {
-    return ((x >> 4)*10 + x&0xF);
+    return ((x >> 4) * 10 + (x & 0xF));
 }
 
 // 8001BB50
@@ -83,7 +83,6 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
     int sector;
     int seconds;
     int second;
-    int minute;
 
     seconds = get_video_mode() == MODE_PAL ? 203 : 200;
     sector = ((arg0 % 2048) * seconds) / 200;

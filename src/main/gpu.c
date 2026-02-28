@@ -2,6 +2,7 @@
 #include "common.h"
 #include <libgte.h>
 #include <libgpu.h>
+#include "jumptable.h"
 
 extern volatile s32 vsync_counter;
 

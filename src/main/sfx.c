@@ -5,6 +5,7 @@
 #include "tasks.h"
 #include "spu.h"
 #include "sfx.h"
+#include "jumptable.h"
 
 #define NCHANNELS   24
 

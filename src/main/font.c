@@ -1,4 +1,6 @@
 #include "common.h"
+#include "jumptable.h"
+#include <libapi.h>
 
 u8 *func_8001E438(u32 sjis, int set);
 void *func_8001E5BC(void *ptr, int set);
@@ -63,7 +65,7 @@ u8 *func_8001E438(u32 c, int set)
                 c += 0x821F;
             }
         }
-        u8 *ret = Krom2RawAdd(c);
+        u8 *ret = (u8 *) Krom2RawAdd(c);
         if (ret != (u8 *) -1)
             return ret;
         else

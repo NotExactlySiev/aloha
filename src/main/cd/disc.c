@@ -2,13 +2,8 @@
 #include "../main.h"
 #include "../movie.h"
 #include "../spu.h"
+#include "../jumptable.h"
 #include "cd.h"
-#include <libcd.h>
-#include <libspu.h>
-
-s32 vblank_enable(void); // TODO: goes in a module header
-
-// this should be cd.c, the main cd driver file
 
 // general state
 extern int D_80047DD8;
@@ -179,17 +174,6 @@ extern int fade_in_active;
 extern int fading_in;
 extern int D_80047F24;
 extern int D_800548EC;
-
-// cd.h
-void cd_command(u8 arg0, u32 arg1, u32 arg2);
-int cd_run_block(void);
-int cd_flush(void);
-void cd_pause(void);
-void cd_mute(void);
-void cd_set_vol(SpuVolume *vol);
-SpuVolume *cd_get_vol(SpuVolume *vol);
-int cd_set_reverb(int arg0);
-void cd_fade_stop(void);
 
 // 8001A3B8
 void cd_init(void) {

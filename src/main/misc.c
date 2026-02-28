@@ -6,8 +6,10 @@
 #include "sound.h"
 #include <libapi.h>
 #include <sys/file.h>
+#include "jumptable.h"
+#include "util.h"
 
-void (*_mc_callback_b)(void) = 0;
+static void (*mc_callback_b)(void) = 0;
 
 // 80021808
 void execute_compressed(void *addr, u32 stack)
@@ -23,14 +25,14 @@ void execute_compressed(void *addr, u32 stack)
 // 800218A0
 void mc_set_callback_b(void (*fn)(void))
 {
-    _mc_callback_b = fn;
+    mc_callback_b = fn;
 }
 
 // 800218B0
 static void do_callback_b(void)
 {
-    if (_mc_callback_b != 0) {
-        (*_mc_callback_b)();
+    if (mc_callback_b != 0) {
+        (*mc_callback_b)();
     }
 }
 
@@ -81,8 +83,8 @@ int mc_file_write(int slot, char *filename, void *src, int offset, int len, char
     if (header.magic[0] == 'S' && header.magic[1] == 'C') {
         header_len = 128 * ((header.iconflag & 0xF) + 1);
         if (title) {
-            memset(header.title, 64, 0);
-            strcpy(title, header.title);
+            ram_memset(header.title, 64, 0);
+            ram_strcpy(title, header.title);
             mc_seek(fd, 0, SEEK_SET);
             mc_write_block(fd, &header, 128);
             while (mc_get_event() == 0) {
@@ -153,7 +155,7 @@ int mc_file_delete(int slot, char *filename)
 // 80021D54
 void misc_init(void)
 {
-    _mc_callback_b = 0;
+    mc_callback_b = 0;
     jt_set(sfx_load_vab, 0x300);
     jt_set(sfx_free_vab, 0x301);
     jt_set(snd_set_stereo, 0x302);

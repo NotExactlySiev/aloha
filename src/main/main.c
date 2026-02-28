@@ -13,6 +13,8 @@
 #include "music.h"
 #include "tasks.h"
 #include "decode.h"
+#include "jumptable.h"
+#include "util.h"
 
 u32 saved_ra;
 
@@ -227,14 +229,14 @@ void set_widescreen(s32 arg0)
 }
 
 // move splash.c to another file?
-static inline sleep_frames(int n)
+static inline void sleep_frames(int n)
 {
     for (int i = 0; i < n; i++)
         wait_frame(0);
 }
 
 // draw_polys
-static inline SET_POLYS_COL(u8 c, POLY_FT4 *p, int n)
+static inline void SET_POLYS_COL(u8 c, POLY_FT4 *p, int n)
 {
     DrawSync(0);
     wait_frame(0);
@@ -289,12 +291,7 @@ void show_logo(void)
     DISPENV dispenv;
     POLY_FT4 polys[5];
     TILE tile;
-    RECT rect;
-    s16 left;
-    s32 i;
-    s32 col;
     s32 tmp;
-    s32 tex_x;
     s32 y;
     u32 h;
 
@@ -522,11 +519,9 @@ void flush_cache_safe(void)
 // 800198B4
 void jt_clear(void)
 {
-    void** jmptable = (void**) 0x80010000;
-    int i;
-
-    for (i = 0; i < 1024; i++) {
-        *jmptable++ = KSEG0(nop);
+    const void **jmptable = (void **) 0x80010000;
+    for (int i = 0; i < 1024; i++) {
+        jmptable[i] = KSEG0(nop);
     }
     flush_cache_safe();
 }
@@ -593,7 +588,7 @@ void read_version(void)
         game_region = REGION_DEBUG;
         for (int i = 0; i < 12; i++)
             mc_file_name[i] = buf[2 + i];
-        strcpy("EXACT01", &mc_file_name[12]);
+        ram_strcpy("EXACT01", &mc_file_name[12]);
         dev_mode = 1;
     }
 }
@@ -676,9 +671,9 @@ void* jt_reset(void)
 void func_80019D0C(void)
 {
     struct {
-        ExCB* excb[2];
-        PCB* pcb;
-        TCB* tcb;
+        ExCB *excb[2];
+        PCB *pcb;
+        TCB *tcb;
     } *bios_tables = (void*) 0x100;
 
     TCB *tcb = bios_tables->pcb->current_tcb;

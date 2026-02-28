@@ -6,7 +6,7 @@
 // TODO: Rename these to ram_memset or something so we don't override.
 
 // 80022EE8
-void strcpy(char *src, char *dst)
+void ram_strcpy(char *src, char *dst)
 {
     while (*src)
         *dst++ = *src++;
@@ -14,7 +14,7 @@ void strcpy(char *src, char *dst)
 }
 
 // 80022F14
-void strcat(char *a, char *b, char *dst)
+void ram_strcat(char *a, char *b, char *dst)
 {
     char *src = a;
     while (*src)
@@ -27,7 +27,7 @@ void strcat(char *a, char *b, char *dst)
 
 // TODO: this is not actually strchr :P it returns a bool
 // 80022F64
-int strchr(char *str, char c)
+int ram_strchr(char *str, char c)
 {
     while (*str)
         if (*str++ == c)
@@ -36,7 +36,7 @@ int strchr(char *str, char c)
 }
 
 // 80022F9C
-void strupper(char *src, char *dst)
+void ram_strupper(char *src, char *dst)
 {
     char c;
     while ((c = *src++)) {
@@ -48,7 +48,7 @@ void strupper(char *src, char *dst)
 }
 
 // 80022FDC
-int strlen(char *str)
+int ram_strlen(char *str)
 {
     int i = 0;
     while (str[i]) i++;
@@ -59,7 +59,7 @@ int strlen(char *str)
 NOT_IMPL_FN(basename)
 
 // 80023060
-int memcmp(int n, u8 *a, u8 *b)
+int ram_memcmp(int n, u8 *a, u8 *b)
 {
     for (int i = 0; i < n; i++) {
         if (*a++ != *b++)
@@ -69,14 +69,14 @@ int memcmp(int n, u8 *a, u8 *b)
 }
 
 // 800230A0
-void memcpy(int n, u8 *src, u8 *dst)
+void ram_memcpy(int n, u8 *src, u8 *dst)
 {
     for (int i = 0; i < n; i++)
         dst[i] = src[i];
 }
 
 // 800230C8
-void memset(u8 *dst, int n, u8 c)
+void ram_memset(u8 *dst, int n, u8 c)
 {
     for (int i = 0; i < n; i++)
         dst[i] = c;
@@ -86,7 +86,7 @@ void memset(u8 *dst, int n, u8 c)
 // unused?
 /*
 // 800230E8
-int strlen2(char *str)
+int ram_strlen2(char *str)
 {
     int i = 0;
     while (str[i]) i++;

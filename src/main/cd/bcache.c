@@ -2,6 +2,7 @@
 #include "cd.h"
 #include <libcd.h>
 #include <memory.h>
+#include "../util.h"
 
 #define CACHE_ENTRIES   10
 
@@ -44,7 +45,7 @@ int sector_cache_get(CdlLOC *loc, u8 *data)
     cache_entry_t *entry;
     for (i = 0; i < CACHE_ENTRIES; i++) {
         if (cache_entries[i].last_access
-         && memcmp(3, loc, &cache_entries[i].loc)) {
+         && ram_memcmp(3, loc, &cache_entries[i].loc)) {
             // found it!
             entry = &cache_entries[i];
             memcpy(0x800, &cache_entries[i].data, data);
@@ -78,7 +79,7 @@ int sector_cache_get(CdlLOC *loc, u8 *data)
     }
 
 found:
-    memcpy(0x800, data, entry->data);
+    ram_memcpy(0x800, data, entry->data);
     entry->loc = *loc;
 
 done:

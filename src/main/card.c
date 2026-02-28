@@ -6,11 +6,13 @@
 #include <file.h>
 #include <libmcrd.h>
 #include "card.h"
-
-void (*_mc_callback_a)(void) = 0;
+#include "jumptable.h"
+#include "util.h"
+#include "cd/cd.h"
 
 static void do_callback_a(void);
 
+static void (*mc_callback_a)(void) = 0;
 static int event_sw_ioe;
 static int event_sw_err;
 static int event_sw_tim;
@@ -139,14 +141,14 @@ static int select_slot(int slot)
 // 8001FFC4
 void mc_set_callback_a(void (*fn)(void))
 {
-    _mc_callback_a = fn;
+    mc_callback_a = fn;
 }
 
 // 8001FFD4
 static void do_callback_a(void)
 {
-    if (_mc_callback_a)
-        _mc_callback_a();
+    if (mc_callback_a)
+        mc_callback_a();
 }
 
 // 80020000
@@ -169,7 +171,7 @@ static int prefix_address(u32 slot, char* src, char* dst)
     c += c > 9 ? 'W' : '0';
     dst[3] = c;
     dst[4] = ':';
-    strcpy(src, dst+5);
+    ram_strcpy(src, dst+5);
     return 1;
 }
 
@@ -244,14 +246,14 @@ int mc_write_block(int fd, void *buf, int len)
 NOT_IMPL_FN(func_800202FC) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);
 
 // 800203AC
-int mc_read_block(long fd, void *buf, long len)
+int mc_read_block(int fd, void *buf, long len)
 {
     while (read(fd, buf, (len + 127) & ~127) != 0);
     return len;
 }
 
 // 80020414
-long mc_seek(long fd, long a, long b)
+long mc_seek(int fd, long a, long b)
 {
     return lseek(fd, a, b);
 }
@@ -281,7 +283,7 @@ int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 
     header->titleframe.magic[1] = 'C';
     header->titleframe.iconflag = iconflag;
     header->titleframe.blocksize = size / 8192;
-    strcpy(title, header->titleframe.title);
+    ram_strcpy(title, header->titleframe.title);
 
     for (int i = 0; i < 16; i++) {
         header->titleframe.palette[i] = palette[i];
@@ -363,7 +365,7 @@ void mc_init(void)
     StartCARD2();
     _bu_init();
     _card_auto(0);
-    _mc_callback_a = 0;
+    mc_callback_a = 0;
     EnterCriticalSection();
     event_sw_ioe = OpenEvent(SwCARD, EvSpIOE    , EvMdNOINTR, NULL);
     event_sw_err = OpenEvent(SwCARD, EvSpERROR  , EvMdNOINTR, NULL);

@@ -1,8 +1,8 @@
 #include "common.h"
 #include <kernel.h>
-#include <stdio.h>
 #include <libcd.h>
 #include "cd.h"
+#include "../util.h"
 #include "../main.h"
 
 static int iso_read_prv(int fast, char *filename, void *buf, int n);
@@ -14,15 +14,15 @@ int cd_fs_get_file(CdlFILE *file, char *filename) {
     char *dst = formatted;
 
     // format the name
-    strupper(filename, upper);
+    ram_strupper(filename, upper);
     if (upper[0] != '\\') {
         *dst++ = '\\';
     }
 
-    if (strchr(upper, ';') == 0) {
-        strcat(upper, ";1", dst);
+    if (ram_strchr(upper, ';') == 0) {
+        ram_strcat(upper, ";1", dst);
     } else {
-        strcpy(upper, dst);
+        ram_strcpy(upper, dst);
     }
 
     // call the iso function

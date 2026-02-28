@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "cd.h"
+#include "../util.h"
 
 // 8001D67C
 static int read_unaligned_int(u8 *p) {
@@ -101,10 +102,10 @@ static u8 find_entry(char *filename, u8 *buf, u32 max, CdlFILE* file) {
             p = buf + temp_a0;
         }
         expected_len = p[0x20];
-        if (expected_len != strlen(filename)) continue;
+        if (expected_len != ram_strlen(filename)) continue;
         real_name = (char*) p + 0x21;
         expected_name = file->name;
-        if (memcmp(p[0x20], (s32) filename, real_name) != 1) continue;
+        if (ram_memcmp(p[0x20], filename, real_name) != 1) continue;
         np = real_name;
         for (int i = 0; i < (s32) p[0x20]; i++) {
             *expected_name++ = *np++;
@@ -150,8 +151,5 @@ int iso_get_file(CdlFILE *file, char *filename)
     return 1;
 }
 
-
-// TODO: I don't think this is ever called. keeping around for now
-//INCLUDE_ASM("asm/main/nonmatchings/274C", iso_never_called);
 // 8001DB04
 NOT_IMPL_FN(iso_never_called)

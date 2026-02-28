@@ -10,32 +10,26 @@
 
 #include "gbuffer.h"
 
-static  s32      gbuffer_current_idx; 
+static  s32      gbuffer_current_idx;
 static  GBuffer  gbuffers[2];
 
 GBuffer *gbuffer_current;
 
 void gbuffer_init(void)
 {
-    int i;
-    int tv_standard;
-    DRAWENV *draw;
-    DISPENV *disp;
-
-    jt.wait_for_vsync();    // wait_frame
-    jt.SetDispMask(0);   // SetDispMask
+    jt.wait_for_vsync();
+    jt.SetDispMask(0);
     gbuffer_current_idx = 0;
-    gbuffer_swap();    // clear
+    gbuffer_swap();
     sprite_init();
     jt.SetDefDispEnv(&gbuffers[0].disp, 0, 0, 256, 240);
     jt.SetDefDispEnv(&gbuffers[1].disp, 0, 256, 256, 240);
     jt.SetDefDrawEnv(&gbuffers[0].draw, 0, 256, 256, 240);
     jt.SetDefDrawEnv(&gbuffers[1].draw, 0, 0, 256, 240);
-    
-    for (i = 0; i < 2; i++) {
-        draw = &gbuffers[i].draw;
-        disp = &gbuffers[i].disp;
 
+    for (int i = 0; i < 2; i++) {
+        DRAWENV *draw = &gbuffers[i].draw;
+        DISPENV *disp = &gbuffers[i].disp;
 
         draw->isbg = 1;
         draw->r0 = 0;
@@ -45,7 +39,7 @@ void gbuffer_init(void)
 
         draw->dtd = 0;
         draw->dfe = 0;
-        tv_standard = jt.get_video_mode();
+        int tv_standard = jt.get_video_mode();
         disp->screen.x = 4;
         disp->screen.y = tv_standard == MODE_PAL ? 36 : 12;
         disp->screen.w = 248;

@@ -6,6 +6,8 @@
 #include <ints.h>
 #include <sys/types.h>
 
+#define NULL ((void *)0)
+
 typedef struct EXEC EXEC;
 typedef struct DIRENTRY DIRENTRY;
 
@@ -20,6 +22,9 @@ enum {
 };
 
 #define SCRTCHPAD(p) ((void *)(0x1F800000 + (p)))
+
+int printf(const char *fmt, ...);
+
 #define NOT_IMPL_FN(fn)                                      \
     int fn()                                                 \
     {                                                        \

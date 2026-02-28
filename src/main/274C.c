@@ -1,13 +1,13 @@
 #include "cd/cd.h"
-#include "common.h"
+// #include "common.h"
 #include "decode.h"
 #include "music.h"
 #include "sfx.h"
 #include "sound.h"
 #include "spu.h"
 #include "tasks.h"
-#include <kernel.h>
-#include <libapi.h>
+// #include <kernel.h>
+// #include <libapi.h>
 #include <libetc.h>
 
 s32 is_mono = 0;
@@ -273,29 +273,12 @@ int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
     return rc;
 }
 
-// end of cd_ stuff
-
-u32 call_PadRead(s32 id);
-
-// 8001E33C
-void pad_init(void)
-{
-    PadInit(0);
-    jt_set(call_PadRead, 0xf0);
-}
-
-// 8001E36C
-u32 call_PadRead(s32 id)
-{
-    return PadRead(id);
-}
-
-// guard, just like call_ResetGraph
-int D_80047E0C = 0; // is mdec initialized?
+#include <libpress.h>
 
 // 8001E608
 void func_8001E608(int mode)
 {
+    static int D_80047E0C = 0; // is mdec initialized?
     if (mode == 0) {
         if (D_80047E0C == 0) {
             D_80047E0C = 1;

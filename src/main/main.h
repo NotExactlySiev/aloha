@@ -2,16 +2,15 @@
 #include "shared.h"
 #include <kernel.h>
 
-#define KSEG0(x)    ((void*) (((u32) (x) & 0x0FFFFFFF) | 0x80000000))
+#define KSEG0(x) ((void *)(((u32)(x) & 0x0FFFFFFF) | 0x80000000))
 
 typedef struct {
-    char magic[16];     // 0x10 0x00
-    EXEC header;        // 0x3C 0x10
+    char magic[16]; // 0x10 0x00
+    EXEC header; // 0x3C 0x10
     char filler[0x7B4]; // 7B4  0x4C
-    u32 expected_size;  // 4    0x800
-    u8 data;            // ???  0x804
+    u32 expected_size; // 4    0x800
+    u8 data; // ???  0x804
 } compexec_t;
-
 
 typedef struct {
     void *header;
@@ -21,15 +20,15 @@ typedef struct {
 extern u32 tmpfilebuf;
 
 // These are probably extern:
-extern u8 D_80032FFC;          // builtin intro prs image
-extern s32 widescreen;         // 80047d4c
-extern s32 D_80047D50;         // 80047d50
-extern s32 D_80047D58;         // 80047d58
+extern u8 D_80032FFC; // builtin intro prs image
+extern s32 widescreen; // 80047d4c
+extern s32 D_80047D50; // 80047d50
+extern s32 D_80047D58; // 80047d58
 extern s32 D_80047D64;
 extern s32 D_80047D48;
 
 typedef struct {
-    int* elements;
+    int *elements;
     int _pad;
 } ExCB;
 
@@ -45,11 +44,11 @@ typedef struct {
 } TCB;
 
 typedef struct {
-    TCB* current_tcb;
+    TCB *current_tcb;
 } PCB;
 
-void file_execute_loop(void);               
-char* get_file_addr(s32 idx);
+void file_execute_loop(void);
+char *get_file_addr(s32 idx);
 s32 func_80018A6C(void);
 s32 get_widescreen(void);
 void set_widescreen(s32 arg0);
@@ -57,12 +56,10 @@ void show_logo(void);
 void func_8001926C(void);
 void init_everything(void);
 void game_shutdown(void);
-s32 enable_vblank_event(void*);
+s32 enable_vblank_event(void *);
 void disable_vblank_event(s32);
 void nop(void);
 void flush_cache_safe(void);
-void jt_clear(void);
-void jt_set(void*, s32);
 void vblank_disable(void);
 s32 vblank_enable(void);
 s32 get_video_mode(void);
@@ -71,12 +68,10 @@ s32 get_region(void);
 char *get_mc_file_name(void);
 void game_init(void);
 s32 get_engine_running(void);
-void* jt_reset(void);
 void func_80019D0C(void);
 void exception_handler(void);
-s32 enable_exception_event(void*);
+s32 enable_exception_event(void *);
 u32 get_engine_version(void);
 void set_next_exec(s32);
 s32 get_next_exec(void);
 GlobalData *globals(void);
-int main(int, char**);

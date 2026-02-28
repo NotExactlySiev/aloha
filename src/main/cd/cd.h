@@ -1,6 +1,7 @@
 #pragma once
 #include <ints.h>
 #include <libcd.h>
+#include <libspu.h>
 
 #define SECTOR_BYTES (SECTOR_SIZE * sizeof(int))
 extern CdlLOC pvd_loc;
@@ -31,4 +32,12 @@ enum {
 extern u8 _cd_last_status[8];
 #define cd_last_status (_cd_last_status[0])
 
+void cd_command(u8 arg0, u32 arg1, u32 arg2);
 int cd_run_block(void);
+int cd_flush(void);
+void cd_pause(void);
+void cd_mute(void);
+void cd_set_vol(SpuVolume *vol);
+void cd_get_vol(SpuVolume *vol);
+int cd_set_reverb(int arg0);
+void cd_fade_stop(void);
