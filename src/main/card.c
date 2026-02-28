@@ -5,6 +5,9 @@
 #include <sys/file.h>
 #include <file.h>
 #include <libmcrd.h>
+#include "card.h"
+
+void (*_mc_callback_a)(void) = 0;
 
 static void do_callback_a(void);
 
@@ -21,9 +24,6 @@ static int event_hw_unk;
 
 static char D_800521F8[32];
 static int D_80047E18 = 1;  // card not available
-
-void (*_mc_callback_a)(void) = 0;
-void (*_mc_callback_b)(void) = 0;
 
 // 8001FC5C
 int mc_get_event(void)
@@ -256,24 +256,9 @@ long mc_seek(long fd, long a, long b)
     return lseek(fd, a, b);
 }
 
-typedef struct {
-    u8 magic[2];
-    u8 iconflag;
-    u8 blocksize;
-    u8 title[64];
-    u8 reserved[12];
-    u8 pocketstation[16];
-    u16 palette[16];
-} McTitleFrame;
-
-typedef struct {
-    McTitleFrame titleframe;
-    u8 frames[3][128];
-} McFileHeader;
-
-// make the header. static
+// make the header
 // 80020434
-static int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 *palette, u8 frame0[128], u8 frame1[128], u8 frame2[128])
+int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 *palette, u8 frame0[128], u8 frame1[128], u8 frame2[128])
 {
     // so much of this is redundent lol
     // size in words
@@ -438,135 +423,4 @@ void mc_deinit(void)
     CloseEvent(event_hw_unk);
     ExitCriticalSection();
     StopCARD2();
-}
-
-// higher level functions. set in misc_
-// 800218A0
-void mc_set_callback_b(void (*fn)(void))
-{
-    _mc_callback_b = fn;
-}
-
-// 800218B0
-static void do_callback_b(void)
-{
-    if (_mc_callback_b != 0) {
-        (*_mc_callback_b)();
-    }
-}
-
-// 800218DC
-int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
-{
-    printf("read bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
-    if (mc_file_exists(slot, filename) == 0)
-        return 0;
-
-    int fd = mc_open(slot, filename, O_RDONLY | O_NOWAIT);
-    if (fd == -1)
-        return 0;
-
-    // skip over the header and icons
-    mc_seek(fd, offset + 0x200, SEEK_SET);
-    mc_read_block(fd, dst, len);
-    int rc;
-    while ((rc = mc_get_event()) == 0) {
-        cd_run_block();
-        do_callback_b();
-    }
-    mc_close(fd);
-    // huh??
-    return len & -(uint) (rc == EvSpIOE);
-}
-
-// 800219DC
-int mc_file_write(int slot, char *filename, void *src, int offset, int len, char *title)
-{
-    printf("write bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
-    if (mc_file_exists(slot, filename) == 0)
-        return 0;
-
-    int fd = mc_open(slot, filename, O_RDWR | O_NOWAIT);
-    if (fd == -1)
-        return 0;
-
-    McTitleFrame header;
-    mc_seek(fd, 0, SEEK_SET);
-    mc_read_block(fd, &header, 128);
-    while (mc_get_event() == 0) {
-        cd_run_block();
-        do_callback_b();
-    }
-
-    int header_len = 0;
-    if (header.magic[0] == 'S' && header.magic[1] == 'C') {
-        header_len = 128 * ((header.iconflag & 0xF) + 1);
-        if (title) {
-            memset(header.title, 64, 0);
-            strcpy(title, header.title);
-            mc_seek(fd, 0, SEEK_SET);
-            mc_write_block(fd, &header, 128);
-            while (mc_get_event() == 0) {
-                cd_run_block();
-                do_callback_b();
-            }
-        }
-    }
-    offset += header_len;
-    mc_seek(fd, offset, SEEK_SET);
-    mc_write_block(fd, src, len);
-    int rc;
-    while ((rc = mc_get_event()) == 0) {
-        cd_run_block();
-        do_callback_b();
-    }
-
-    mc_close(fd);
-    // huh??
-    return len & -(uint) (rc == EvSpIOE);
-}
-
-extern struct {
-    u8 frames[3][128];
-    u16 palette[16];
-} D_80032E5C;
-
-// 80021BCC
-int mc_file_create(int slot, char *filename, int len, char *title)
-{
-    int rc = mc_select_slot(slot);
-    if (rc != 1)
-        return rc;
-
-    // low level create
-    int fd = mc_create(slot, filename, len + sizeof(McFileHeader));
-    if (fd == 0)
-        return -3;
-
-    fd = mc_open(slot, filename, O_RDWR | O_NOWAIT);
-    if (fd < -1)
-        return -3;
-
-    McFileHeader header;
-    mc_seek(fd, 0, SEEK_SET);
-    // TODO: #define number of frames = 3
-    func_80020434(&header, 0x10 + 3, len + sizeof(McFileHeader), title, D_80032E5C.palette, D_80032E5C.frames[0], D_80032E5C.frames[1], D_80032E5C.frames[2]);
-    mc_write_block(fd, &header, sizeof(McFileHeader));
-    while (mc_get_event() == 0) {
-        cd_run_block();
-        do_callback_b();
-    }
-    mc_close(fd);
-    return len;
-}
-
-// TODO: this might return void
-// never called?
-// 80021D08
-int mc_file_delete(int slot, char *filename)
-{
-    int rc = mc_select_slot(slot);
-    if (rc != 1)
-        rc = mc_delete(slot, filename);
-    return rc;
 }

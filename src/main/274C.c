@@ -4,7 +4,6 @@
 #include <libetc.h>
 #include "cd/cd.h"
 #include "music.h"
-#include "main.h"
 #include "tasks.h"
 #include "spu.h"
 #include "sfx.h"
@@ -351,54 +350,4 @@ int music_play(u8 id)
 void music_set_repeat(int val)
 {
     D_80047E4C = val;
-}
-
-// misc
-// 80021808
-void execute_compressed(void *addr, u32 stack)
-{
-    EXEC header;
-    __builtin_memcpy(&header, addr+16, 0x3c);
-    decode_lz1(addr + 0x804, (void*) header.t_addr);
-    header.s_addr = stack;
-    flush_cache_safe();
-    Exec(&header, 1, 0);
-}
-
-// card.h
-extern int (*_mc_callback_b)();
-int mc_file_read(long mtidx, char *filename, void *dst, int offset, int len);
-int mc_file_write(long mtidx, char *filename, void *src, int offset, int len, char *title);
-int mc_file_create(); // TODO: complete signature
-int mc_file_delete(uint mtidx, char *filename);
-void mc_set_callback_b(void (*fn)(void));
-
-// 80021D54
-void misc_init(void)
-{
-    _mc_callback_b = 0;  // WHY DO YOU ACCESS THIS FROM HERE AAAA
-    jt_set(sfx_load_vab, 0x300);
-    jt_set(sfx_free_vab, 0x301);
-    jt_set(snd_set_stereo, 0x302);
-    jt_set(snd_get_stereo, 0x303);
-    jt_set(sfx_kill_all, 0x304);
-    jt_set(snd_set_volume, 0x305);
-    jt_set(snd_set_reverb, 0x307);
-    jt_set(snd_set_vol_to_min, 0x308);
-    jt_set(snd_set_vol_to_max, 0x309);
-    jt_set(snd_fade_out, 0x30A);
-    jt_set(snd_fade_in, 0x30B);
-    jt_set(snd_status, 0x30C);
-    jt_set(snd_fade_pause, 0x30D);
-    jt_set(snd_fade_unpause, 0x30E);
-    jt_set(snd_reset, 0x30F);
-    jt_set(execute_compressed, 0x320);
-    jt_set(music_set_list, 0x330);
-    jt_set(music_play, 0x331);
-    jt_set(music_set_repeat, 0x332);
-    jt_set(mc_file_read, 0x340);
-    jt_set(mc_file_write, 0x341);
-    jt_set(mc_file_create, 0x342);
-    jt_set(mc_file_delete, 0x343);
-    jt_set(mc_set_callback_b, 0x344);     // THERE ARE TWO CALLBACKS WTF
 }

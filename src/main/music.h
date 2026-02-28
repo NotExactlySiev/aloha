@@ -1,10 +1,10 @@
+#include "cd/cd.h"
 #include "common.h"
 #include <libcd.h>
-#include "cd/cd.h"
 
 enum {
     MUSIC_TYPE_CDDA = 0,
-    MUSIC_TYPE_STR  = 1,
+    MUSIC_TYPE_STR = 1,
 };
 
 typedef struct {
@@ -13,7 +13,7 @@ typedef struct {
     u32 size;
     u32 unk0;
     u32 unk1;
-    u8 file;     // CdlFILTER
+    u8 file; // CdlFILTER
     u8 chan;
     CdlLOC loc;
     char name[12];
@@ -21,7 +21,7 @@ typedef struct {
 
 typedef struct {
     u16 count;
-    u16 _pad;   // TODO: not needed?    
+    u16 _pad; // TODO: not needed?
     MusicTrack tracks[];
 } MusicList;
 
@@ -30,3 +30,7 @@ extern int music_state;
 // private?
 extern s32 bgm_paused;
 extern s32 bgm_finished;
+
+void music_set_list(MusicList *val);
+int music_play(u8 id);
+void music_set_repeat(int val);
