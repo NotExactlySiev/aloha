@@ -48,7 +48,7 @@ int sector_cache_get(CdlLOC *loc, u8 *data)
          && ram_memcmp(3, loc, &cache_entries[i].loc)) {
             // found it!
             entry = &cache_entries[i];
-            memcpy(0x800, &cache_entries[i].data, data);
+            ram_memcpy(0x800, &cache_entries[i].data, data);
             goto done;
         }
     }

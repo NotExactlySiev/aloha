@@ -78,7 +78,7 @@ static inline int bcd(int x)
 
 static inline int unbcd(int x)
 {
-    return ((x >> 4) * 10 + (x & 0xF));
+    return (x >> 4) * 10 + (x & 0xF);
 }
 
 // 8001BB50

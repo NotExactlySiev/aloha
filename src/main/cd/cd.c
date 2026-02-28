@@ -6,6 +6,7 @@
 #include "../main.h"
 
 static int iso_read_prv(int fast, char *filename, void *buf, int n);
+int iso_get_file(CdlFILE *file, char *filename);
 
 // 8001C418
 int cd_fs_get_file(CdlFILE *file, char *filename) {

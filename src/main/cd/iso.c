@@ -33,9 +33,6 @@ static int get_root_loc(CdlLOC *loc)
     return 1;
 }
 
-
-// never called
-//INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D740);
 // 8001D740
 NOT_IMPL_FN(func_8001D740)
 
@@ -85,42 +82,53 @@ static int get_dir(char *path, char *dir) {
     return ret;
 }
 
-// 8001D8B0
-static u8 find_entry(char *filename, u8 *buf, u32 max, CdlFILE* file) {
-    char *expected_name;
-    u8 expected_len;
-    char *real_name;
-    char *np;
-    u8 *p;
+typedef struct [[gnu::packed]] {
+    u16 v;
+    u16 _;
+} BL16;
 
-    // TODO: make dir entries in iso a struct instead of having magic offsets here for p
-    for (p = buf; (int) p < (int)(buf + max); p += *p) {
-        if (*p == 0) {
-            u32 temp_a0 = ((u32) ((p + 0x800) - buf) >> 0xB) << 0xB;
+typedef struct [[gnu::packed]] {
+    u32 v;
+    u32 _;
+} BL32;
+
+typedef struct [[gnu::packed]] {
+    u8 len;
+    u8 other_len;
+    BL32 lba;
+    BL32 size;
+    u8 time[7];    // struct
+    u8 flags;
+    u8 uint;
+    u8 gap;
+    BL16 volume;
+    u8 name_len;
+    char name[];
+} DirRecord;
+
+// 8001D8B0
+static u8 find_entry(char *filename, void *buf, u32 max, CdlFILE* file) {
+    for (DirRecord *p = buf; (int) p < (int)(buf + max); p = (DirRecord *) ((u8 *)p + p->len)) {
+        if (p->len == 0) {
+            u32 temp_a0 = ((u32) (((void *)p + 0x800) - buf) >> 0xB) << 0xB;
             if (temp_a0 >= max) break;
             p = buf + temp_a0;
         }
-        expected_len = p[0x20];
-        if (expected_len != ram_strlen(filename)) continue;
-        real_name = (char*) p + 0x21;
-        //expected_name = file->name;
-        if (ram_memcmp(p[0x20], filename, real_name) != 1) continue;
-        //np = real_name;
-        for (int i = 0; i < (s32) p[0x20]; i++) {
-            //*expected_name++ = *np++;
-            file->name[i] = real_name[i];
+        if (p->name_len != ram_strlen(filename)) continue;
+        if (ram_memcmp(p->name_len, filename, p->name) != 1) continue;
+        for (int i = 0; i < p->name_len; i++) {
+            file->name[i] = p->name[i];
         }
-        //*np = 0;
-        real_name[p[0x20]] = 0;
-
-        file->size = read_unaligned_int(&p[10]);
-        CdIntToPos(read_unaligned_int(&p[2]), &file->pos);
-        return p[0x19];
+        // This is a mistake. Writing the null terminator to the iso structure
+        // instead of the output.
+        p->name[p->name_len] = 0;
+        file->size = read_unaligned_int((u8 *) &p->size.v);
+        CdIntToPos(read_unaligned_int((u8 *) &p->lba.v), &file->pos);
+        return p->flags;
     }
     file->size = -1U;
     return 0xFFU;
 }
-
 
 extern int D_800548EC;
 // 8001DA00
@@ -140,7 +148,6 @@ int iso_get_file(CdlFILE *file, char *filename)
         if (curr == 0) return 0;
         int flags = find_entry(p, buf, curr, file);
         if (file->size == -1U) return 0;
-        printf("5\n");
         dirloc = file->pos;
         if ((levels != 1) && ((flags & 2) == 0)) return 0;
         while (*p++);
