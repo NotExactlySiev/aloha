@@ -1,24 +1,18 @@
 #include "cd/cd.h"
-// #include "common.h"
-#include "decode.h"
 #include "music.h"
 #include "sfx.h"
 #include "sound.h"
 #include "spu.h"
 #include "tasks.h"
-// #include <kernel.h>
-// #include <libapi.h>
 #include <libetc.h>
 
 s32 is_mono = 0;
 CdlFILE D_80048068;
-CdlLOC cdda_loc;
 
 // regular task vars, they're in the assembly
 extern s32 D_80047D78;
 extern SpuVolume D_80047D8C;
 s32 D_80047EA4;
-s32 D_80047EAC;
 s32 D_80047F24 = 0;
 
 SpuVolume vol_full;
@@ -175,9 +169,6 @@ void cd_fade_stop(void)
 
 // and then these functinos actually use those 4 to do stuff
 u8 D_80047DA0[8] = { 8, 0, 0, 0, 0, 0, 0, 0 };
-int D_80047DE4 = 1;
-int D_80047DE8 = 0;
-int D_80047EEC; // SpuVolume ptr?
 
 // 8001B94C
 int func_8001B94C(void)
@@ -189,9 +180,9 @@ int func_8001B94C(void)
     ret = 0;
     if (music_state != 3) {
         cd_pause();
-        cd_command(0xE, &D_80047DA0, 0);
+        cd_command(0xE, (u32) &D_80047DA0, 0);
         cd_mute();
-        cd_command(0xFC, &D_80047D8C, 0);
+        cd_command(0xFC, (u32) &D_80047D8C, 0);
         cd_command(0xFE, 3, 0);
         ret = cd_flush();
     }
@@ -289,12 +280,9 @@ void func_8001E608(int mode)
     DecDCTReset(mode);
 }
 
-// music.c
-
 int D_80047E4C = 0; // music should repeat?
 MusicList *D_80047E50 = NULL; // bgm_list_ptr
 
-// audio_list_set_ptr
 // 80020FC0
 void music_set_list(MusicList *val)
 {

@@ -10,6 +10,7 @@
 #include <libetc.h>
 #include <shared.h>
 #include <libapi.h>
+#include "libcd.h"
 #include "music.h"
 #include "tasks.h"
 #include "decode.h"
@@ -752,7 +753,6 @@ int main(int argc, char *argv[])
     game_init();
     exception_event = enable_exception_event(exception_handler);
     music_set_list(&D_80034344);
-
     while (1) {
         int rc = iso_read("SYS_SE.VAB", &tmpfilebuf, 0);
         if (rc > 0 && tmpfilebuf == 0x56414270) break;

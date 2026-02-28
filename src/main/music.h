@@ -1,5 +1,4 @@
-#include "cd/cd.h"
-#include "common.h"
+#include <ints.h>
 #include <libcd.h>
 
 enum {
@@ -29,7 +28,6 @@ extern int music_state;
 
 // private?
 extern s32 bgm_paused;
-extern s32 bgm_finished;
 
 void music_set_list(MusicList *val);
 int music_play(u8 id);

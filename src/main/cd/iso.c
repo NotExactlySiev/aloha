@@ -12,7 +12,6 @@ static int read_unaligned_int(u8 *p) {
     return ret;
 }
 
-
 // root sector loc is cached here
 CdlLOC rootloc;
 int pvd_is_cached;
@@ -104,14 +103,15 @@ static u8 find_entry(char *filename, u8 *buf, u32 max, CdlFILE* file) {
         expected_len = p[0x20];
         if (expected_len != ram_strlen(filename)) continue;
         real_name = (char*) p + 0x21;
-        expected_name = file->name;
+        //expected_name = file->name;
         if (ram_memcmp(p[0x20], filename, real_name) != 1) continue;
-        np = real_name;
+        //np = real_name;
         for (int i = 0; i < (s32) p[0x20]; i++) {
-            *expected_name++ = *np++;
-            //expected_name[i] = np[i];
+            //*expected_name++ = *np++;
+            file->name[i] = real_name[i];
         }
-        *np = 0;
+        //*np = 0;
+        real_name[p[0x20]] = 0;
 
         file->size = read_unaligned_int(&p[10]);
         CdIntToPos(read_unaligned_int(&p[2]), &file->pos);
@@ -133,15 +133,14 @@ int iso_get_file(CdlFILE *file, char *filename)
     D_800548EC = 0;
     int levels = get_dir(filename, path);
     if (levels == 0) return 0;
-
     CdlLOC dirloc;
     if (0 == get_root_loc(&dirloc)) return 0;
-
     while (levels > 0) {
         int curr = read_sectors(&dirloc, buf, 4);
         if (curr == 0) return 0;
         int flags = find_entry(p, buf, curr, file);
         if (file->size == -1U) return 0;
+        printf("5\n");
         dirloc = file->pos;
         if ((levels != 1) && ((flags & 2) == 0)) return 0;
         while (*p++);

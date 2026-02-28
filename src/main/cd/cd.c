@@ -62,8 +62,6 @@ s32 func_8001C734(s32 mode, u8* result) // pause
     return ret;
 }
 
-
-// cd filesystem io
 // 8001C780
 int iso_read(char *filename, u8 *buf, int n)
 {
@@ -80,7 +78,6 @@ int iso_read_fast(char *filename, u8 *buf, int n)
 // 8001C7E8
 static int iso_read_prv(int fast, char *filename, void *buf, int n)
 {
-    // what even is this function...
     u32 *dst = buf;
 
     func_8001A77C();

@@ -1,29 +1,32 @@
-
-// music.c
 #include "music.h"
+#include "common.h"
 #include <libspu.h>
 #include <libetc.h>
+#include "cd/cd.h"
 
 extern SpuVolume D_80047D8C;
-extern int D_80047DE4;
 extern SpuVolume vol_full;
-extern int D_80047EEC; // SpuVolume ptr?
 extern s32 D_80047F24;
-extern CdlLOC cdda_loc;
 extern s32 is_mono;
 extern s32 D_800548EC;
 extern s32 D_80047D78;
 extern s32 D_80047EA4;
-extern s32 D_80047EAC;
 
+static s32 D_80047EAC;
+
+int D_80047DE4 = 1;
+int D_80047DE8 = 0;
+int D_80047EEC; // SpuVolume ptr?
+CdlLOC cdda_loc;
 CdlFILTER D_80047ECC;
 CdlFILE D_8004D0E0;
-
 int music_state;
 int D_80047E00 = -1;  // bgm regular task handle
-int bgm_counter;
-int bgm_target;
-int bgm_finished;
+static int bgm_counter;
+static int bgm_target;
+static int bgm_finished;
+
+void music_really_unpause(void);
 
 // 8001B9D8
 NOT_IMPL_FN(func_8001B9D8);    // CD MUSIC

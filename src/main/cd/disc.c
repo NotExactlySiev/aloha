@@ -204,7 +204,7 @@ void cd_init(void) {
     func_8001DD7C();
 
     SpuCommonAttr attr = {
-        .mask= 0x3C0,
+        .mask = 0x3C0,
         .cd = {
             .mix = 1,
             .reverb = 0,
