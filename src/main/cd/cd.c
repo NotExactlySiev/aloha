@@ -7,6 +7,7 @@
 
 static int iso_read_prv(int fast, char *filename, void *buf, int n);
 
+// 8001C418
 int cd_fs_get_file(CdlFILE *file, char *filename) {
     char upper[128];
     char formatted[128];
@@ -17,13 +18,13 @@ int cd_fs_get_file(CdlFILE *file, char *filename) {
     if (upper[0] != '\\') {
         *dst++ = '\\';
     }
-    
+
     if (strchr(upper, ';') == 0) {
         strcat(upper, ";1", dst);
     } else {
         strcpy(upper, dst);
     }
-    
+
     // call the iso function
     for (int i = 0; i < 10; i++) {
         if (iso_get_file(file, formatted))
@@ -32,17 +33,25 @@ int cd_fs_get_file(CdlFILE *file, char *filename) {
     return 0;
 }
 
-
+// 8001C4F0
 NOT_IMPL_FN(cd_fs_get_file_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_get_file_safe);   // iso_get_file_loc
+
+// 8001C564
 NOT_IMPL_FN(iso_file_size) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_file_size);   // iso_get_file_size
 
 // helper functions for cd stuff
+// 8001C5BC
 NOT_IMPL_FN(cd_seek_safe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_seek_safe);   // cd_seek_safe
+
+// 8001C5F4
 NOT_IMPL_FN(iso_seek) //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_seek);   // iso_seek
+
+// 8001C670
 NOT_IMPL_FN(cd_read_full) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_read_full);   // cd_read_full
 
-
-s32 func_8001C734(s32 mode, u8* result) {   // pause
+// 8001C734
+s32 func_8001C734(s32 mode, u8* result) // pause
+{
     s32 ret;
 
     ret = cd_verify_read(mode, result);
@@ -55,17 +64,20 @@ s32 func_8001C734(s32 mode, u8* result) {   // pause
 
 
 // cd filesystem io
+// 8001C780
 int iso_read(char *filename, u8 *buf, int n)
 {
     return iso_read_prv(0, filename, buf, n);
 }
 
 // with rounding, fast. not used?
+// 8001C7B4
 int iso_read_fast(char *filename, u8 *buf, int n)
 {
     return iso_read_prv(1, filename, buf, n);
 }
 
+// 8001C7E8
 static int iso_read_prv(int fast, char *filename, void *buf, int n)
 {
     // what even is this function...
@@ -74,11 +86,11 @@ static int iso_read_prv(int fast, char *filename, void *buf, int n)
     func_8001A77C();
     if (func_8001B94C() == -1)
         return -1;
-    
+
     CdlFILE file;
     if (cd_fs_get_file(&file, filename) == 0)
         return -2;
-    
+
     if (n == 0 || n > file.size)
         n = file.size;
 
@@ -107,7 +119,7 @@ static int iso_read_prv(int fast, char *filename, void *buf, int n)
             int file_start = CdPosToInt(&file.pos);
             CdlLOC last_sector;
             CdIntToPos(file_start + sectors, &last_sector);
-            
+
             u32 tmpbuf[SECTOR_SIZE];
             try_CdControl(CdlSetloc, &last_sector, NULL);
             try_CdRead(1, tmpbuf, 0x80);
@@ -132,12 +144,13 @@ static int iso_read_prv(int fast, char *filename, void *buf, int n)
     return n;
 }
 
-
+// 8001CA84
 NOT_IMPL_FN(cd_fs_load_exe) //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_fs_load_exe);
 
+// 8001CCC0
 s32 iso_exec(char* file, s32 param) {
     EXEC header;
-    
+
     if (cd_fs_load_exe(file, param, &header) != 0)
         return -1;
 

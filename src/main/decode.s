@@ -5,6 +5,9 @@
 
 .section .text, "ax"
 
+# Handwritten decompression functions
+
+# 800234B8
 glabel decode_rle
         addu       $t0, $a0, $zero
         addu       $t1, $a1, $zero
@@ -57,7 +60,7 @@ glabel decode_rle
         andi       $v0, $v0, 0x1
 .endm
 
-# Handwritten function
+# 8002353C
 glabel decode_lz1
         nop
         addu       $t6, $ra, $zero
@@ -72,21 +75,21 @@ glabel decode_lz1
         sb         $at, 0x0($t5)        #
         addiu      $t5, $t5, 0x1        #
 .L80023568:
-        getbit                          # 
+        getbit                          #
         beqz       $v0, .L80023558      # } while (NEXT == 0);
         nop                             #
         getbit                          # t2 = -0x100
         bnez       $v0, .L800235D0      # if (NEXT == 0) {
         addiu     $t2, $zero, -0x100    #
         lbu        $at, 0x0($t4)        #   t2 = 0xFFFFFF00 | read();
-        addiu      $t4, $t4, 0x1        #   
+        addiu      $t4, $t4, 0x1        #
         bnez       $at, .L80023680      #   if t2 == -256 return;
-        or        $t2, $t2, $at         #   
+        or        $t2, $t2, $at         #
         b          .L80023724           #
         nop                             # } else {
-.L800235D0:                             # 
+.L800235D0:                             #
         lbu        $at, 0x0($t4)        #   t2 = 0xFFFFFF00 | read();
-        addiu      $t4, $t4, 0x1        #   
+        addiu      $t4, $t4, 0x1        #
         or         $t2, $t2, $at        #
         getbit                          #   t2 = NEXT | t2 << 1;
         sll        $t2, $t2, 1          #
@@ -104,18 +107,18 @@ glabel decode_lz1
 .L80023680:                             # }
         addu       $at, $t5, $zero      #
         add        $t3, $at, $t2        # from = dst + t2;
-        getbit                          # 
+        getbit                          #
         beqz       $v0, .L80023700      # l = 1;
         ori       $t2, $zero, 0x1       # while NEXT == 1 {
 .L800236B0:                             #
         getbit                          #
-        sll        $t2, $t2, 1          #   
+        sll        $t2, $t2, 1          #
         or         $t2, $t2, $v0        #   l = NEXT | (l << 1);
         getbit                          #
         bnez       $v0, .L800236B0      #
         nop                             #
 .L80023700:                             # }
-        lb         $at, 0x0($t3)        # 
+        lb         $at, 0x0($t3)        #
         addiu      $t5, $t5, 0x1        # do {
         addiu      $t2, $t2, -0x1       #   l--;
         sb         $at, -0x1($t5)       #   *dst++ = *from++;

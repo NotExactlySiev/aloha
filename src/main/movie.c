@@ -26,6 +26,7 @@ static int curr_frame;
 static int fading_out;
 static int finished;
 
+// 80021EF4
 static void init_decoder(Decoder *dec, MovieArgs *args)
 {
     *dec = (Decoder) {
@@ -56,12 +57,14 @@ static void init_decoder(Decoder *dec, MovieArgs *args)
     };
 }
 
+// 80021F7C
 static void seek_and_stream(CdlLOC *loc, u32 mode)
 {
     while (CdControl(CdlSeekL, (u8*) loc, NULL) == 0);
     while (CdRead2(mode | CdlModeStream) == 0);
 }
 
+// 80021FD0
 static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 {
     func_8001E608(0);
@@ -75,6 +78,7 @@ static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
     fading_out = 0;
 }
 
+// 80022074
 static u32 *next_frame(Decoder *dec)
 {
     u32 *addr;
@@ -88,7 +92,7 @@ static u32 *next_frame(Decoder *dec)
 
     if (addr[0] != hdr->dummy1 || addr[1] != hdr->dummy2)
         return NULL;
-    
+
     if (hdr->width != width || hdr->height != height) {
         // first frame (always?)
         ClearImage(&(RECT) { 0, 0, 640, 480 }, 0, 0, 0);
@@ -116,7 +120,7 @@ static u32 *next_frame(Decoder *dec)
     return addr;
 }
 
-
+// 80022260
 static void dct_out_callback(void)
 {
     extern u_long StCdIntrFlag;
@@ -138,7 +142,8 @@ static void dct_out_callback(void)
     }
 }
 
-static void prepare_frame(Decoder *dec) 
+// 8002237C
+static void prepare_frame(Decoder *dec)
 {
     uint *bs = 0;
     while ((bs = next_frame(dec)) == 0);
@@ -147,6 +152,7 @@ static void prepare_frame(Decoder *dec)
     StFreeRing(bs);
 }
 
+// 800223EC
 static void wait_for_decode(Decoder *dec)
 {
     int timeout = 0x800000;
@@ -163,6 +169,7 @@ static void wait_for_decode(Decoder *dec)
     dec->img_loaded = 0;
 }
 
+// 80022474
 int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
 {
     int ret = 0;
@@ -172,7 +179,7 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
     curr_frame = 0;
     call_wait_frame();
     call_SetDispMask(0);
-    
+
     CdlFILE f;
     if (cd_fs_get_file(&f, filename) == 0)
         return -1;
@@ -190,7 +197,7 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
             ret = 1;
             break;
         }
-        
+
         if (finished == 1) {
             ret = 0;
             break;

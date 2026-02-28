@@ -11,6 +11,7 @@ extern u8 D_80032A4C[128][8];
 
 // 4 font and type functions
 // fnt_init
+// 8001E38C
 void fnt_init(void) {
     jt_set(func_8001E438, 0xD0);
     jt_set(func_8001E5BC, 0xD1);
@@ -19,11 +20,12 @@ void fnt_init(void) {
 }
 
 // I hope this is correct
+// 8001E3D4
 static u16 func_8001E3D4(u16 sjis)
 {
     u16 lo = sjis & 0xFF;
-    u16 hi = (sjis >> 8);    
-    
+    u16 hi = (sjis >> 8);
+
     hi = 2*hi - (lo < 0x9F ? 0xE1 : 0xE0);
 
     if (lo < 0x7F)
@@ -32,11 +34,12 @@ static u16 func_8001E3D4(u16 sjis)
         lo -= 0x20;
     else
         lo -= 0x7E;
-    
+
     return ((hi & 0xFF) << 8) | (lo & 0xFF);
 }
 
 // fnt_get
+// 8001E438
 u8 *func_8001E438(u32 c, int set)
 {
     switch (set) {
@@ -45,7 +48,7 @@ u8 *func_8001E438(u32 c, int set)
             return (*font_ptr8)[c & 0xFF];
         else
             return D_80032A4C[c & 0xFF];
-    
+
     case 8:     // japanese
         // TODO: this one is definitely wrong
         if (font_ptr16) {
@@ -76,6 +79,7 @@ u8 *func_8001E438(u32 c, int set)
 }
 
 // fnt_set_tiles
+// 8001E5BC
 void *func_8001E5BC(void *ptr, int set)
 {
     void *ret = -1;

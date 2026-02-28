@@ -4,10 +4,12 @@
 
 .section .text, "ax"
 
+# 8002373C
 glabel __main
         jr         $ra
         nop
 
+# 80023744
 glabel _start
         /* clear the bss segment */
         la      $v0, __bss_start

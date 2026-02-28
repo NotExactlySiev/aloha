@@ -14,6 +14,7 @@ typedef struct {
 u32 cache_epoch;
 cache_entry_t cache_entries[CACHE_ENTRIES];
 
+// 8001D398
 static void access_entry(cache_entry_t *block)
 {
     if (cache_epoch++ > 0x100000) {
@@ -28,15 +29,17 @@ static void access_entry(cache_entry_t *block)
     block->last_access = cache_epoch;
 }
 
+// 8001D414
 void sector_cache_clear(void)
 {
     for (int i = 0; i < CACHE_ENTRIES; i++)
         cache_entries[i].last_access = 0;
 }
 
+// 8001D440
 int sector_cache_get(CdlLOC *loc, u8 *data)
 {
-    int i;  
+    int i;
     u32 oldest_access;
     cache_entry_t *entry;
     for (i = 0; i < CACHE_ENTRIES; i++) {
@@ -64,7 +67,7 @@ int sector_cache_get(CdlLOC *loc, u8 *data)
             goto found;
         }
     }
-    
+
     // if not found, replace the least recently accessed sector
     oldest_access = -1;
     for (i = 0; i < CACHE_ENTRIES; i++) {

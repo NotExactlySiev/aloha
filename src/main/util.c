@@ -1,10 +1,11 @@
 #include "common.h"
 #include <libapi.h>
 
-// custom str functions because the BIOS ones are slow and libc2.a was not a
-// thing yet. THESE ARE NOT COMPATIBLE WITH libc2.a! compare the signatures
-// TODO: rename these to ram_memset or something so we don't override
+// Custom string functions because the BIOS ones are slow and libc2.a was not a
+// thing yet. THESE ARE NOT COMPATIBLE WITH libc2.a! Compare the signatures.
+// TODO: Rename these to ram_memset or something so we don't override.
 
+// 80022EE8
 void strcpy(char *src, char *dst)
 {
     while (*src)
@@ -12,6 +13,7 @@ void strcpy(char *src, char *dst)
     *dst = 0;
 }
 
+// 80022F14
 void strcat(char *a, char *b, char *dst)
 {
     char *src = a;
@@ -24,6 +26,7 @@ void strcat(char *a, char *b, char *dst)
 }
 
 // TODO: this is not actually strchr :P it returns a bool
+// 80022F64
 int strchr(char *str, char c)
 {
     while (*str)
@@ -32,6 +35,7 @@ int strchr(char *str, char c)
     return 0;
 }
 
+// 80022F9C
 void strupper(char *src, char *dst)
 {
     char c;
@@ -43,6 +47,7 @@ void strupper(char *src, char *dst)
     *dst = 0;
 }
 
+// 80022FDC
 int strlen(char *str)
 {
     int i = 0;
@@ -50,10 +55,10 @@ int strlen(char *str)
     return i;
 }
 
-// unused
-// basename
-//INCLUDE_ASM("asm/main/nonmatchings/274C", get_path_leaf);
+// 80023004
+NOT_IMPL_FN(basename)
 
+// 80023060
 int memcmp(int n, u8 *a, u8 *b)
 {
     for (int i = 0; i < n; i++) {
@@ -63,12 +68,14 @@ int memcmp(int n, u8 *a, u8 *b)
     return 1;
 }
 
+// 800230A0
 void memcpy(int n, u8 *src, u8 *dst)
 {
     for (int i = 0; i < n; i++)
         dst[i] = src[i];
 }
 
+// 800230C8
 void memset(u8 *dst, int n, u8 c)
 {
     for (int i = 0; i < n; i++)
@@ -78,6 +85,7 @@ void memset(u8 *dst, int n, u8 c)
 // exactly the same as the other one. linking shenanigans?
 // unused?
 /*
+// 800230E8
 int strlen2(char *str)
 {
     int i = 0;
@@ -87,6 +95,7 @@ int strlen2(char *str)
 */
 
 // TODO: move to card.c?
+// 80023110
 void card_write(int port)
 {
     _new_card();

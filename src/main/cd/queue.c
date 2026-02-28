@@ -67,6 +67,7 @@ extern int D_80047D78; // music_repeat
 extern int D_80047D80; // music_cdda_idx_bcd
 extern int D_80047D84; // music_cdda_idx
 
+// 8001AED8
 void cd_clear_queue(void) {
     queue_tail = 0;
     queue_head = 0;
@@ -78,6 +79,7 @@ void cd_clear_queue(void) {
     queue_size = 0;
 }
 
+// 8001AF28
 static int queue_add(u8 arg0, u32 arg1, u32 arg2)
 {
     QueueEntry *task;
@@ -99,6 +101,7 @@ static int queue_add(u8 arg0, u32 arg1, u32 arg2)
     return 1;
 }
 
+// 8001B020
 void cd_command(u8 arg0, u32 arg1, u32 arg2)
 {
     if (cd_queue_is_running == 0) {
@@ -108,6 +111,7 @@ void cd_command(u8 arg0, u32 arg1, u32 arg2)
     queue_add(arg0, arg1, arg2);
 }
 
+// 8001B0A0
 int cd_run_block(void)
 {
     int rc;
@@ -300,6 +304,7 @@ done:
     return 0;
 }
 
+// 8001B8DC
 int cd_flush(void)
 {
     int ret = 0;

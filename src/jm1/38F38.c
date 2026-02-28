@@ -164,7 +164,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9FDC);
 void ui_draw_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
 {
     GBuffer* gbuf = gbuffer_get_current();
-    gbuf->nextfree = 
+    gbuf->nextfree =
         func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 563);
 }
 
@@ -172,7 +172,7 @@ void ui_draw_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
 void ui_draw_menu_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
 {
     GBuffer* gbuf = gbuffer_get_current();
-    gbuf->nextfree = 
+    gbuf->nextfree =
         func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 564);
 }
 
@@ -285,9 +285,28 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4E4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 
-// enemies on radar
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
-//func_800EC5C8() {}
+// radar
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
+func_800EC5C8() {
+    //
+    //
+    GBuffer *gbuf = gbuffer_get_current();
+    POLY_F4 *p = gbuf->nextfree;
+
+
+    SVECTOR *v0 = SCRTCHPAD(0);
+    VECTOR *v1 = SCRTCHPAD(8);
+    *v0 = (SVECTOR){ 0, 0xF00, 0 };
+    RotTrans(v0, v1, v0);
+    setPolyF4(p);
+    setRGB0(p, 0, 0xD0, 0xD0);
+    setXYWH(p, v1->vx + 213, v1->vy + 45, 3, 3);
+
+    addPrim(&gbuf->ot[12], p);  // FAKE NUMBER!
+
+
+    gbuf->nextfree = p + 1;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECD88);
 
@@ -385,7 +404,27 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EEDB4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EEF50);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF004);
+// render hud
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF004);
+void func_800EF004(void)
+{
+    //func_800EE06C();  // level start text
+    if (func_800DBC24())
+        return;
+    //func_800D4928();    // boss fight
+    //func_800D4AC4();    // bonus mode counter
+    //func_800EADE0();
+    //
+    //func_800ED444();
+    //func_800ED02C();
+    //func_800EC2F4();
+    //func_800EBCB8();
+    func_800EC5C8();
+    GBuffer *gbuf = gbuffer_get_current();
+    //
+    //
+}
+
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF150);
 
@@ -681,7 +720,7 @@ void _func_800F443C(FaceList *facelist)
     void *verts = *(void**) SCRTCHPAD(0x3A0);
 
     //__asm__ volatile( "mfc0   %0, $12; nop;" :  :"r"(sr) : "memory");
-    
+
     for (int i = 0; i < facelist->size + 1; i++) {
         EnterCriticalSection();
         u16 *sets = &facelist->data[i];
@@ -798,7 +837,7 @@ int func_800F8228(int arg)
 
     int range = D_80141458 - D_80138620;
     int amt = ((D_80141458 - arg) << 0xC) / range;
-    
+
     return amt * D_80138620 / arg;
 }
 

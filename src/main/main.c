@@ -166,6 +166,7 @@ s32     iso_exec(char* file, s32 param);
 // boot.h
 void reset(void);
 
+// 800188C8
 void file_execute_loop(void)
 {
     u32 *addr;
@@ -197,22 +198,26 @@ void file_execute_loop(void)
     }
 }
 
+// 80018A3C
 char* get_file_addr(s32 idx)
 {
     if (idx > 42) return 0;
     return g_Files[idx].addr;
 }
 
+// 80018A6C
 s32 func_80018A6C(void)
 {
     return D_80047D50;
 }
 
+// 80018A7C
 s32 get_widescreen(void)
 {
     return widescreen;
 }
 
+// 80018A8C
 void set_widescreen(s32 arg0)
 {
     if (arg0 != 0)
@@ -243,13 +248,13 @@ static inline SET_POLYS_COL(u8 c, POLY_FT4 *p, int n)
 
 static inline void FADE_IN(POLY_FT4 *p, int n)
 {
-    for (u8 col = 0; col < 128; col += LOGO_FADE_STEP) 
+    for (u8 col = 0; col < 128; col += LOGO_FADE_STEP)
         SET_POLYS_COL(col, p, n);
 }
 
 static inline void FADE_OUT(POLY_FT4 *p, int n)
 {
-    for (u8 col = 128; col > 0; col -= LOGO_FADE_STEP) 
+    for (u8 col = 128; col > 0; col -= LOGO_FADE_STEP)
         SET_POLYS_COL(col, p, n);
 }
 
@@ -257,7 +262,7 @@ static inline void MAKE_QUADS(POLY_FT4 *polys, int n, int x, int y, int w, int h
 {
     int left = x;
     int tex_x = 0x280;
-    for (int i = 0; i < n; i++) { 
+    for (int i = 0; i < n; i++) {
         SetPolyFT4(&polys[i]);
         SetShadeTex(&polys[i], 0);
         polys[i].tpage = GetTPage(1, 1, tex_x, 0);
@@ -277,6 +282,7 @@ static inline void LOAD_PRS(u8 *dst, short w, short h)
     DrawSync(0);
 }
 
+// 80018AB4
 void show_logo(void)
 {
     DRAWENV drawenv;
@@ -307,7 +313,7 @@ void show_logo(void)
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
     DrawSync(0);
-    
+
     // clear the screen with black
     //SetBlockFill(&tile);
     //setBlockFill(&tile);
@@ -319,36 +325,36 @@ void show_logo(void)
     tile.w = 640; tile.h = 480;
     DrawPrim(&tile);
     DrawSync(0);
-    
+
     do {
         tmp = iso_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
     } while (tmp == -1);
 
-    if (tmp >= 0) {       
-        // TODO: maybe a #define POLYCOUNT 4 so I don't have to 
-        // repeat 4? just put POLYCOUNT in the macros 
+    if (tmp >= 0) {
+        // TODO: maybe a #define POLYCOUNT 4 so I don't have to
+        // repeat 4? just put POLYCOUNT in the macros
         MAKE_QUADS(polys, 4, 64, 0, 128, 480, 0, 0, 128, 480, 64);
         LOAD_PRS(&tmpfilebuf, 256, 240);
         //SLEEP_FRAMES(10);
         sleep_frames(10);
-        
+
         wait_frame(0);
         SetDispMask(1); // set disp mask to show it
-        
+
         FADE_IN(polys,4);
-        
+
         DrawSync(0);
         wait_frame(0);
-        
+
         SET_POLYS_COL(128, polys, 4);
         sleep_frames(300);
-        
+
         FADE_OUT(polys, 4);
     }
-    
+
     wait_frame(0);
     SetDispMask(0);
-    
+
     do {
         D_80047D48 = iso_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
     } while (D_80047D48 == -1);
@@ -357,25 +363,26 @@ void show_logo(void)
         MAKE_QUADS(polys, 4, 64, 192, 128, 96, 0, 0, 128, 96, 64);
         LOAD_PRS(&D_80032FFC, 256, 96);
         sleep_frames(10);
-        
+
         wait_frame(0);
         SetDispMask(1);
-        
+
         FADE_IN(polys, 4);
     } else {
-        if (get_region() == 1) { y = 120; h = 240; } 
+        if (get_region() == 1) { y = 120; h = 240; }
         else { y = 0; h = 480; }
         MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
         LOAD_PRS(&tmpfilebuf, 320, 240);
         sleep_frames(10);
-        
+
         wait_frame(0);
         SetDispMask(1);
-        
+
         FADE_IN(polys, 5);
     }
 }
 
+// 8001926C
 void func_8001926C(void)
 {
     DRAWENV drawenv;
@@ -403,13 +410,13 @@ void func_8001926C(void)
         MAKE_QUADS(polys, 64, 4, 192, 128, 96, 0, 0, 128, 96, 64);
         FADE_OUT(polys, 4);
     } else {
-        if (get_region() == 1) { y = 120; h = 240; } 
+        if (get_region() == 1) { y = 120; h = 240; }
         else { y = 0; h = 480; }
-        
+
         MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
         FADE_OUT(polys, 5);
     }
-    
+
     wait_frame(0);
     SetDispMask(0);
     SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
@@ -428,13 +435,14 @@ void func_8001926C(void)
     wait_frame(0);
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
-    
+
     DrawSync(0);
     wait_frame(0);
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
 }
 
+// 80019680
 void init_everything(void)
 {
     cd_init();
@@ -460,6 +468,7 @@ void init_everything(void)
     fnt_init();
 }
 
+// 8001972C
 void game_shutdown(void)
 {
     cd_stop();
@@ -477,6 +486,7 @@ void game_shutdown(void)
     StopRCnt(RCntCNT3);
 }
 
+// 800197C8
 s32 enable_vblank_event(void* handler)
 {
     s32 event;
@@ -489,6 +499,7 @@ s32 enable_vblank_event(void* handler)
     return event;
 }
 
+// 8001983C
 void disable_vblank_event(s32 event)
 {
     EnterCriticalSection();
@@ -497,8 +508,10 @@ void disable_vblank_event(s32 event)
     ExitCriticalSection();
 }
 
+// 8001987C
 void nop(void) {}
 
+// 80019884
 void flush_cache_safe(void)
 {
     EnterCriticalSection();
@@ -506,6 +519,7 @@ void flush_cache_safe(void)
     ExitCriticalSection();
 }
 
+// 800198B4
 void jt_clear(void)
 {
     void** jmptable = (void**) 0x80010000;
@@ -517,12 +531,15 @@ void jt_clear(void)
     flush_cache_safe();
 }
 
-void jt_set(void* func, s32 idx) {
+// 80019908
+void jt_set(void* func, s32 idx)
+{
     void** jmptable = (void**) &jt;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();
 }
 
+// 80019948
 void vblank_disable(void)
 {
     if (D_80047D64 != 1) {
@@ -531,6 +548,7 @@ void vblank_disable(void)
     }
 }
 
+// 80019990
 s32 vblank_enable(void)
 {
     s32 ret = 0;
@@ -542,11 +560,13 @@ s32 vblank_enable(void)
     return ret;
 }
 
+// 800199D4
 s32 get_video_mode(void)
 {
     return tv_system;
 }
 
+// 800199E4
 void read_version(void)
 {
     int rc;
@@ -554,20 +574,20 @@ void read_version(void)
     do {
         rc = iso_read("COUNTRY.TXT", buf, sizeof(buf));
     } while (rc == -1);
-    
+
     game_region = REGION_JAPAN;
     tv_system = MODE_NTSC;
     if (rc == -2)
         return;
-    
+
     if (buf[0] == 'P')
         tv_system = MODE_PAL;
-    
+
     if (buf[1] == 'U')
         game_region = REGION_USA;
     else if (buf[1] == 'E')
         game_region = REGION_EUROPE;
-    
+
     // in dev mode, the MC file uses a custom name read from COUNTRY.TXT
     if (buf[1] == 'Z') {
         game_region = REGION_DEBUG;
@@ -578,19 +598,22 @@ void read_version(void)
     }
 }
 
+// 80019AE8
 s32 get_region(void)
 {
     return game_region;
 }
 
 // this is the save file name for the debug version
+// 80019AF8
 char *get_mc_file_name(void)
 {
     if (dev_mode == 0)
-        return 0;    
+        return 0;
     return mc_file_name;
 }
 
+// 80019B1C
 void game_init(void)
 {
     // setup events and handlers
@@ -633,11 +656,13 @@ void game_init(void)
     mc_select_slot(0);
 }
 
+// 80019CA4
 s32 get_engine_running(void)
 {
     return D_80047E6C;
 }
 
+// 80019CB4
 void* jt_reset(void)
 {
     jt_clear();
@@ -647,6 +672,7 @@ void* jt_reset(void)
     return game_init;
 }
 
+// 80019D0C
 void func_80019D0C(void)
 {
     struct {
@@ -654,7 +680,7 @@ void func_80019D0C(void)
         PCB* pcb;
         TCB* tcb;
     } *bios_tables = (void*) 0x100;
-    
+
     TCB *tcb = bios_tables->pcb->current_tcb;
     if (D_80047D58 == 0) {
         D_80047D58 = 1;
@@ -665,6 +691,7 @@ void func_80019D0C(void)
     }
 }
 
+// 80019D64
 void exception_handler(void)
 {
     struct {
@@ -681,6 +708,7 @@ void exception_handler(void)
     bios_tables->pcb->current_tcb->regs[2] = 0;
 }
 
+// 80019D78
 s32 enable_exception_event(void* handler)
 {
     s32 event;
@@ -694,26 +722,31 @@ s32 enable_exception_event(void* handler)
     return event;
 }
 
+// 80019DCC
 u32 get_engine_version(void)
 {
   return 0x10002;
 }
 
+// 80019DD8
 void set_next_exec(s32 id)
 {
-    next_exec = id;    
+    next_exec = id;
 }
 
+// 80019DE8
 s32 get_next_exec(void)
 {
     return next_exec;
 }
 
+// 80019DF8
 GlobalData *globals(void)
 {
     return (GlobalData*) 0x80014000;
 }
 
+// 80019E04
 int main(int argc, char *argv[])
 {
     printf("MAX ADR:%x\n", malloc(4));
@@ -731,7 +764,7 @@ int main(int argc, char *argv[])
         printf("VAB file Reload\n");
     }
     sfx_load_vab(0, &tmpfilebuf, 0);
-    
+
     // fade logo?
     func_8001926C();
 

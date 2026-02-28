@@ -25,6 +25,7 @@ int bgm_counter;
 int bgm_target;
 int bgm_finished;
 
+// 8001B9D8
 NOT_IMPL_FN(func_8001B9D8);    // CD MUSIC
 /*
 void func_8001B9D8(void)
@@ -44,6 +45,7 @@ void func_8001B9D8(void)
 
 extern s8 D_80047EC4[];
 
+// 8001BA50
 void func_8001BA50(void) {
     music_really_unpause();
     cd_command(0xFC, &D_80047D8C, 0);
@@ -67,7 +69,7 @@ void func_8001BA50(void) {
 // and do some other weird stuff that doesn't make any sense
 
 static inline int bcd(int x)
-{ 
+{
     return ((x / 10) << 4) + (x % 10);
 }
 
@@ -76,6 +78,7 @@ static inline int unbcd(int x)
     return ((x >> 4)*10 + x&0xF);
 }
 
+// 8001BB50
 void func_8001BB50(int arg0, CdlLOC *loc) {
     int sector;
     int seconds;
@@ -85,7 +88,7 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
     seconds = get_video_mode() == MODE_PAL ? 203 : 200;
     sector = ((arg0 % 2048) * seconds) / 200;
     second = sector / 75;
-    
+
     loc->sector = bcd(sector % 75);
     loc->minute = bcd(second / 60);
     loc->second = bcd(second % 60);
@@ -93,6 +96,7 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
 
 //INCLUDE_ASM("asm/main/nonmatchings/274C", music_play_str);
 // plays background music
+// 8001BD00
 void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
 {
     if (music_state == 3) {
@@ -113,7 +117,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     D_80047F24 = 0;
     D_80047ECC.file = file;
     D_80047ECC.chan = chan;
-    
+
     if (get_video_mode() == MODE_PAL) {
         unbcd(loc->minute) * 60;
         while (1);
@@ -129,13 +133,15 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     cd_command(0xFB, 0, 0);
     cd_command(0xFA, 0, 0);
     func_8001BA50();
-    D_80047F24 = 2; 
+    D_80047F24 = 2;
     D_800548EC = 1;
 
 }
 
+// 8001C03C
 NOT_IMPL_FN(music_play_cdda);  // CD MUSIC
 
+// 8001C20C
 void music_play_cdda_from_loc(CdlLOC *loc) {   // CD MUSIC
     D_80047D78 = 0;
     D_80047F24 = 0;
@@ -153,32 +159,37 @@ void music_play_cdda_from_loc(CdlLOC *loc) {   // CD MUSIC
     func_8001B9D8();
 }
 
+// 8001C2F4
 void cd_pause(void) {
     cd_command(CdlPause, 0, 0);
 }
 
+// 8001C31C
 void cd_play(void) {
     cd_command(CdlPlay, 0, 0);
     cd_demute();
 }
 
+// 8001C34C
 void cd_mute(void) {
     cd_command(CdlMute, 0, 0);
 }
 
+// 8001C374
 void cd_demute(void) {
     cd_command(CdlDemute, 0, 0);
 }
 
+// 8001C39C
 s32 cd_set_stereo(s32 arg0) {
     CdlATV vol;
     s32 ret;
-    
+
     ret = is_mono;
     is_mono = arg0;
-    
+
     cd_flush();
-    
+
     if (arg0 == 0) {
         vol.val0 = 0x80;
         vol.val1 = 0;
@@ -190,19 +201,22 @@ s32 cd_set_stereo(s32 arg0) {
         vol.val2 = 0x5B;
         vol.val3 = 0x5B;
     }
-    
+
     try_CdMix(&vol);
     return ret;
 }
 
 //INCLUDE_ASM("asm/main/nonmatchings/274C", cd_get_vol);
 // TODO: the assembly for this is weird
+// 8001CD0C
 void cd_get_vol(SpuVolume *out)
 {
     *out = vol_full;
 }
 
-s32 cd_set_reverb(s32 arg0) {
+// 8001CD30
+s32 cd_set_reverb(s32 arg0)
+{
     s32 temp_s0;
 
     temp_s0 = D_80047EA4;
@@ -210,12 +224,15 @@ s32 cd_set_reverb(s32 arg0) {
     return temp_s0;
 }
 
-void cd_stop(void) {
+// 8001CD68
+void cd_stop(void)
+{
     cd_command(CdlStop, 0, 0);
 }
 
 // these two are unused?
 /*
+// 8001CD90
 s32 func_8001CD90(void) {
     s32 temp_s0;
 
@@ -224,24 +241,29 @@ s32 func_8001CD90(void) {
     return temp_s0;
 }
 
+// 8001CDC8
 void func_8001CDC8(s32 arg0) {
     cd_command(SNQ_SET_FE, arg0, 0);
 }
 */
 
+// 8001CDF0
 void cd_fade_wait(void) {
     cd_command(SNQ_FUNC8, 0, 0);
 }
 
+// 8001CE18
 s32 func_8001CE18(void) {
     return bgm_finished;
 }
 
+// 8001CE28
 void music_pause(void) {
     cd_pause();
     cd_command(SNQ_SET_PAUSED, 1, 0);
 }
 
+// 8001CE58
 void music_unpause(void) {
     if (bgm_paused == 1) {
         cd_command(CdlReadS, 0, 0);
@@ -249,11 +271,13 @@ void music_unpause(void) {
     }
 }
 
+// 8001CEA0
 void music_really_unpause(void) {
     cd_command(SNQ_SET_PAUSED, 0, 0);
 }
 
-// bgm_tick 
+// bgm_tick
+// 8001CEC8
 void func_8001CEC8(void)
 {
     if ((bgm_finished == 0) && (bgm_paused == 0))
@@ -265,9 +289,10 @@ void func_8001CEC8(void)
 }
 
 // CD MUSIC
+// 8001CF38
 NOT_IMPL_FN(func_8001CF38) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
 
-
+// 8001D0AC
 void func_8001D0AC(int delay)
 {
     bgm_counter = 0;
@@ -278,6 +303,7 @@ void func_8001D0AC(int delay)
     }
 }
 
+// 8001D104
 void func_8001D104(void)
 {
     if (D_80047E00 > -1) {

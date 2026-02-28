@@ -25,6 +25,7 @@ static int D_80047E18 = 1;  // card not available
 void (*_mc_callback_a)(void) = 0;
 void (*_mc_callback_b)(void) = 0;
 
+// 8001FC5C
 int mc_get_event(void)
 {
     if (TestEvent(event_sw_ioe) == 1) return EvSpIOE;
@@ -35,6 +36,7 @@ int mc_get_event(void)
     return 0;
 }
 
+// 8001FCF4
 int mc_get_event_hw(void)
 {
     if (TestEvent(event_hw_ioe) == 1) return EvSpIOE;
@@ -45,6 +47,7 @@ int mc_get_event_hw(void)
     return 0;
 }
 
+// 8001FD8C
 void mc_clear_hw_events(void)
 {
     TestEvent(event_hw_ioe);
@@ -54,6 +57,7 @@ void mc_clear_hw_events(void)
     TestEvent(event_hw_unk);
 }
 
+// 8001FDF4
 static int select_slot(int slot)
 {
     const int timeout = 1000;
@@ -62,7 +66,7 @@ static int select_slot(int slot)
     for (int i = 0; i < timeout; i++) {
         int info_tries = 0;
         for (info_tries = 0; info_tries < timeout; info_tries++) {
-            if (_card_info(slot)) 
+            if (_card_info(slot))
                 break;
         }
 
@@ -75,7 +79,7 @@ static int select_slot(int slot)
             cd_run_block();
             do_callback_a();
         }
-        
+
         if (ev != EvSpERROR && ev != EvSpUNKNOWN)
             break;
     }
@@ -83,8 +87,8 @@ static int select_slot(int slot)
     switch (ev) {
     case EvSpIOE:
         if (D_80047E18 != 1) break;
-        [[fallthrough]]
-    
+        [[fallthrough]];
+
     case EvSpNEW:
         mc_clear_hw_events();
         card_write(slot);
@@ -93,7 +97,7 @@ static int select_slot(int slot)
         for (int i = 0; i < timeout; i++) {
             int load_tries = 0;
             for (load_tries = 0; load_tries < timeout; load_tries++) {
-                if (_card_load(slot)) 
+                if (_card_load(slot))
                     break;
             }
 
@@ -106,7 +110,7 @@ static int select_slot(int slot)
                 cd_run_block();
                 do_callback_a();
             }
-            
+
             if (ev2 != EvSpERROR && ev2 != EvSpUNKNOWN)
                 break;
         }
@@ -117,7 +121,7 @@ static int select_slot(int slot)
             return -1;
         }
         break;
-    
+
     default:
         D_80047E18 = 1;
         return -2;
@@ -132,31 +136,35 @@ static int select_slot(int slot)
     }
 }
 
+// 8001FFC4
 void mc_set_callback_a(void (*fn)(void))
 {
     _mc_callback_a = fn;
 }
 
+// 8001FFD4
 static void do_callback_a(void)
 {
     if (_mc_callback_a)
         _mc_callback_a();
 }
 
+// 80020000
 int mc_select_slot(int slot)
 {
     return select_slot(slot);
 }
 
+// 80020020
 static int prefix_address(u32 slot, char* src, char* dst)
 {
     int rc = mc_select_slot(slot);
     if (1 != rc) return rc;
-    
+
     dst[0] = 'b';
     dst[1] = 'u';
     dst[2] = '0' + ((slot >> 8) & 1);
-    
+
     char c = slot & 0xf;
     c += c > 9 ? 'W' : '0';
     dst[3] = c;
@@ -166,6 +174,7 @@ static int prefix_address(u32 slot, char* src, char* dst)
 }
 
 // this is actually just mc_file_exists
+// 800200C8
 int mc_file_exists(int slot, char *filename)
 {
     int rc = prefix_address(slot, filename, D_800521F8);
@@ -177,6 +186,7 @@ int mc_file_exists(int slot, char *filename)
     return p == &ent;
 }
 
+// 8002011C
 int mc_create(s32 slot, char* file, u32 size)
 {
     s32 fd;
@@ -192,6 +202,7 @@ int mc_create(s32 slot, char* file, u32 size)
     return 1;
 }
 
+// 800201A0
 int mc_open(s32 slot, char *file, u32 mode)
 {
     if (1 != prefix_address(slot, file, D_800521F8))
@@ -200,11 +211,13 @@ int mc_open(s32 slot, char *file, u32 mode)
     return open(D_800521F8, mode);
 }
 
+// 80020208
 int mc_close(s32 fd)
 {
     return close(fd);
 }
 
+// 80020228
 int mc_delete(u32 slot, char *file)
 {
     if (1 != prefix_address(slot, file, D_800521F8))
@@ -212,11 +225,13 @@ int mc_delete(u32 slot, char *file)
     return erase(D_800521F8);
 }
 
+// 8002026C
 int mc_write(int fd, void *buf, int len)
 {
     return write(fd, buf, (len + 127) & ~127);
 }
 
+// 800202A0
 int mc_write_block(int fd, void *buf, int len)
 {
     int rounded = (len + 127) & ~127;
@@ -225,14 +240,17 @@ int mc_write_block(int fd, void *buf, int len)
 }
 
 // mc_read, read with fine size
+// 800202FC
 NOT_IMPL_FN(func_800202FC) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);
 
+// 800203AC
 int mc_read_block(long fd, void *buf, long len)
 {
     while (read(fd, buf, (len + 127) & ~127) != 0);
     return len;
 }
 
+// 80020414
 long mc_seek(long fd, long a, long b)
 {
     return lseek(fd, a, b);
@@ -254,6 +272,7 @@ typedef struct {
 } McFileHeader;
 
 // make the header. static
+// 80020434
 static int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 *palette, u8 frame0[128], u8 frame1[128], u8 frame2[128])
 {
     // so much of this is redundent lol
@@ -264,7 +283,7 @@ static int func_80020434(McFileHeader *header, u8 iconflag, int size, char *titl
 
     if (iconflag == 0x12)
         totalsize = 0x60;   // 3 blocks
-    
+
     if (iconflag == 0x13)
         totalsize = 0x80;   // 4 blocks
 
@@ -308,7 +327,7 @@ static int func_80020434(McFileHeader *header, u8 iconflag, int size, char *titl
     return totalsize * sizeof(u32);
 }
 
-
+// 800205C4
 struct DIRENTRY *mc_firstfile(int slot, char *filename, struct DIRENTRY *out)
 {
     int rc = prefix_address(slot, filename, D_800521F8);
@@ -318,17 +337,19 @@ struct DIRENTRY *mc_firstfile(int slot, char *filename, struct DIRENTRY *out)
     return firstfile2(D_800521F8, out);
 }
 
+// 80020610
 struct DIRENTRY *mc_nextfile(struct DIRENTRY *dir)
 {
     return nextfile(dir);
 }
 
 extern int D_80047E18;
+// 80020630
 int mc_format(long slot)
 {
     if (mc_select_slot(slot) == -2)
         return -1;
-    
+
     char c = (slot & 0xF);
     if (c > 9)
         c += 'a' - '9' - 1;
@@ -344,10 +365,13 @@ int mc_format(long slot)
 }
 
 // 2 big almost identical functions
+// 800206E4
 NOT_IMPL_FN(func_800206E4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
 
+// 80020808
 NOT_IMPL_FN(func_80020808) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
 
+// 8002092C
 void mc_init(void)
 {
     InitCARD2(1);
@@ -398,13 +422,32 @@ void mc_init(void)
     jt_set(mc_write_block, 0x2A1);
 }
 
-// higher level functions. set in misc_
+// 80020C8C
+void mc_deinit(void)
+{
+    EnterCriticalSection();
+    CloseEvent(event_sw_ioe);
+    CloseEvent(event_sw_err);
+    CloseEvent(event_sw_tim);
+    CloseEvent(event_sw_new);
+    CloseEvent(event_sw_unk);
+    CloseEvent(event_hw_ioe);
+    CloseEvent(event_hw_err);
+    CloseEvent(event_hw_tim);
+    CloseEvent(event_hw_new);
+    CloseEvent(event_hw_unk);
+    ExitCriticalSection();
+    StopCARD2();
+}
 
+// higher level functions. set in misc_
+// 800218A0
 void mc_set_callback_b(void (*fn)(void))
 {
     _mc_callback_b = fn;
 }
 
+// 800218B0
 static void do_callback_b(void)
 {
     if (_mc_callback_b != 0) {
@@ -412,16 +455,17 @@ static void do_callback_b(void)
     }
 }
 
+// 800218DC
 int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
 {
     printf("read bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
     if (mc_file_exists(slot, filename) == 0)
         return 0;
-    
+
     int fd = mc_open(slot, filename, O_RDONLY | O_NOWAIT);
     if (fd == -1)
         return 0;
-    
+
     // skip over the header and icons
     mc_seek(fd, offset + 0x200, SEEK_SET);
     mc_read_block(fd, dst, len);
@@ -435,6 +479,7 @@ int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
     return len & -(uint) (rc == EvSpIOE);
 }
 
+// 800219DC
 int mc_file_write(int slot, char *filename, void *src, int offset, int len, char *title)
 {
     printf("write bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
@@ -444,7 +489,7 @@ int mc_file_write(int slot, char *filename, void *src, int offset, int len, char
     int fd = mc_open(slot, filename, O_RDWR | O_NOWAIT);
     if (fd == -1)
         return 0;
-    
+
     McTitleFrame header;
     mc_seek(fd, 0, SEEK_SET);
     mc_read_block(fd, &header, 128);
@@ -486,21 +531,22 @@ extern struct {
     u16 palette[16];
 } D_80032E5C;
 
+// 80021BCC
 int mc_file_create(int slot, char *filename, int len, char *title)
 {
     int rc = mc_select_slot(slot);
     if (rc != 1)
         return rc;
-    
+
     // low level create
     int fd = mc_create(slot, filename, len + sizeof(McFileHeader));
     if (fd == 0)
         return -3;
-    
+
     fd = mc_open(slot, filename, O_RDWR | O_NOWAIT);
     if (fd < -1)
         return -3;
-    
+
     McFileHeader header;
     mc_seek(fd, 0, SEEK_SET);
     // TODO: #define number of frames = 3
@@ -516,27 +562,11 @@ int mc_file_create(int slot, char *filename, int len, char *title)
 
 // TODO: this might return void
 // never called?
+// 80021D08
 int mc_file_delete(int slot, char *filename)
 {
     int rc = mc_select_slot(slot);
     if (rc != 1)
         rc = mc_delete(slot, filename);
-    return rc;    
-}
-
-void mc_deinit(void)
-{
-    EnterCriticalSection();
-    CloseEvent(event_sw_ioe);
-    CloseEvent(event_sw_err);
-    CloseEvent(event_sw_tim);
-    CloseEvent(event_sw_new);
-    CloseEvent(event_sw_unk);
-    CloseEvent(event_hw_ioe);
-    CloseEvent(event_hw_err);
-    CloseEvent(event_hw_tim);
-    CloseEvent(event_hw_new);
-    CloseEvent(event_hw_unk);
-    ExitCriticalSection();
-    StopCARD2();
+    return rc;
 }

@@ -19,11 +19,12 @@ CdlLOC pvd_loc = { 0, 2, 22, 0 };
 u8 _cd_last_status[8] = {0};
 
 // update_state, gets called with the return value of CdSync(1,0)
+// 80019F4C
 void func_80019F4C(s32 arg0) {
     static int lock = 0;  // lock
     if (lock == 1) return;
     lock = 1;
-    
+
     switch (arg0) {
     case CdlNoIntr:
         break;
@@ -38,6 +39,7 @@ void func_80019F4C(s32 arg0) {
     lock = 0;
 }
 
+// 80019FB8
 void cd_ready_callback(u8 status, u8 *result)
 {
     cd_last_status = result[0];
@@ -48,71 +50,76 @@ void cd_ready_callback(u8 status, u8 *result)
     }
 }
 
-
+// 8001A16C
 int try_CdControl(u_char com, void *param, u_char *result) {
     while (CdControl(com, param, result) != 1);
     return 1;
 }
 
-
+// 8001A1CC
 int try_CdControlB(u_char com, void *param, u_char *result) {
     while (CdControlB(com, param, result) != 1);
     return 1;
 }
 
-
+// 8001A22C
 int try_CdGetSector(void *madr, int size) {
     while (CdGetSector(madr, size) == 0);
     return 1;
 }
 
-
+// 8001A270
 int try_CdRead(int sectors, void *buf, int mode) {
     while (CdRead(sectors, buf, mode) == 0);
     return 1;
 }
 
-
 extern s32 pvd_is_cached;
+
+// 8001A2C8
 int cd_verify_read(int mode, u8 *result)
 {
     int rc;
     int ret;
-    
+
     rc = CdReadSync(mode, result);
     ret = -1;
     if (rc == -1) {
         pvd_is_cached = 0;
         sector_cache_clear();
     }
-    
+
     if (rc >= 0) {
         ret = vblank_enable();
     }
     return ret;
 }
 
-
+// 8001A318
 s32 try_CdMix(CdlATV* vol)
 {
     while (CdMix(vol) == 0);
     return 1;
 }
 
+// 8001A348
 s32 cd_get_status(u8* result)
 {
     return CdControl(CdlNop, 0, result);
 }
 
+// 8001A370
 void cd_read_callback(u8 status, u8 *result) {}
 
 // must have been some debug thing?
 // or get next free? returning 0 always clears it
+// 8001A378
 int func_8001A378(CdlLOC arr[])
 {
     return 0;
 }
 
+// 8001A380
 void func_8001A380(void)
 {
     CdReadyCallback(cd_ready_callback);
@@ -184,6 +191,7 @@ SpuVolume *cd_get_vol(SpuVolume *vol);
 int cd_set_reverb(int arg0);
 void cd_fade_stop(void);
 
+// 8001A3B8
 void cd_init(void) {
     static int D_80047D74 = 0;  // cd subsystem initialized
     if (D_80047D74 == 1)
@@ -191,7 +199,7 @@ void cd_init(void) {
 
     CdInit();
     CdSetDebug(0);
-    
+
     D_80047E8C = func_8001A378(D_8005475C);
     D_80047D74 = 1;
     D_80047D78 = 0;
@@ -210,7 +218,7 @@ void cd_init(void) {
     bgm_paused = 0;
     sector_cache_clear();
     func_8001DD7C();
-    
+
     SpuCommonAttr attr = {
         .mask= 0x3C0,
         .cd = {
@@ -266,6 +274,7 @@ void cd_init(void) {
     jt_set(func_8001CF38, 0x151);   // movie_get_loc?
 }
 
+// 8001A74C
 void func_8001A74C(void)
 {
     CdReadyCallback(0);
@@ -279,6 +288,7 @@ static inline void sync_and_check(void)
     while (cd_get_status(&cd_last_status) != 1);
 }
 
+// 8001A77C
 void func_8001A77C(void)
 {
     u8 buf[2048];
@@ -287,7 +297,7 @@ void func_8001A77C(void)
     if (!(cd_last_status & CdlStatShellOpen))
         // not open, everything is fine
         return;
-    
+
     do {
         while (cd_last_status & CdlStatShellOpen) {
             //CdSync(0, NULL);

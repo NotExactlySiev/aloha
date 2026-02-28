@@ -3,6 +3,7 @@
 #include <string.h>
 #include "cd.h"
 
+// 8001D67C
 static int read_unaligned_int(u8 *p) {
     int ret = 0;
     for (int i = 0; i < sizeof(int); i++)
@@ -15,6 +16,7 @@ static int read_unaligned_int(u8 *p) {
 CdlLOC rootloc;
 int pvd_is_cached;
 
+// 8001D6AC
 static int get_root_loc(CdlLOC *loc)
 {
     int rc;
@@ -34,9 +36,10 @@ static int get_root_loc(CdlLOC *loc)
 
 // never called
 //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001D740);
+// 8001D740
 NOT_IMPL_FN(func_8001D740)
 
-
+// 8001D780
 static int read_sectors(CdlLOC *loc, u8 *buf, u32 nsectors) {
     CdlLOC sp10;
     s32 off;
@@ -46,7 +49,7 @@ static int read_sectors(CdlLOC *loc, u8 *buf, u32 nsectors) {
     off = CdPosToInt(loc);
     if (sector_cache_get(loc, buf) == 0)
         return 0;
-    
+
     max = read_unaligned_int(&buf[10]) / SECTOR_BYTES;
     dst = buf + 0x800;
     if (max < nsectors) {
@@ -61,7 +64,7 @@ static int read_sectors(CdlLOC *loc, u8 *buf, u32 nsectors) {
     return dst - buf;
 }
 
-
+// 8001D840
 static int get_dir(char *path, char *dir) {
     int ret;
     char c;
@@ -69,7 +72,7 @@ static int get_dir(char *path, char *dir) {
     ret = 1;
     if (*path++ != '\\')
         return 0;
-    
+
     while ((c = *path++)) {
         if (c == '\\') {
             *dir++ = 0;
@@ -82,7 +85,7 @@ static int get_dir(char *path, char *dir) {
     return ret;
 }
 
-
+// 8001D8B0
 static u8 find_entry(char *filename, u8 *buf, u32 max, CdlFILE* file) {
     char *expected_name;
     u8 expected_len;
@@ -108,7 +111,7 @@ static u8 find_entry(char *filename, u8 *buf, u32 max, CdlFILE* file) {
             //expected_name[i] = np[i];
         }
         *np = 0;
-        
+
         file->size = read_unaligned_int(&p[10]);
         CdIntToPos(read_unaligned_int(&p[2]), &file->pos);
         return p[0x19];
@@ -119,6 +122,7 @@ static u8 find_entry(char *filename, u8 *buf, u32 max, CdlFILE* file) {
 
 
 extern int D_800548EC;
+// 8001DA00
 int iso_get_file(CdlFILE *file, char *filename)
 {
     u8 buf[4 * SECTOR_BYTES];
@@ -128,7 +132,7 @@ int iso_get_file(CdlFILE *file, char *filename)
     D_800548EC = 0;
     int levels = get_dir(filename, path);
     if (levels == 0) return 0;
-    
+
     CdlLOC dirloc;
     if (0 == get_root_loc(&dirloc)) return 0;
 
@@ -149,4 +153,5 @@ int iso_get_file(CdlFILE *file, char *filename)
 
 // TODO: I don't think this is ever called. keeping around for now
 //INCLUDE_ASM("asm/main/nonmatchings/274C", iso_never_called);
+// 8001DB04
 NOT_IMPL_FN(iso_never_called)

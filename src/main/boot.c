@@ -18,12 +18,14 @@ typedef struct {
 
 #define BIOS_HEADER   (*(BiosHeader *) 0xBFC00100)
 
-__asm__(".section .text\n\t" 
+// 80023800
+__asm__(".section .text\n\t"
         ".align\t2\n"
         "kern 0xA0, 0xA0, _boot\n\t"
         ".set reorder\n\t"
         ".set at\n");
 
+// 80023810
 void reset(void)
 {
     u8 *kernelbuf = (u8 *) 0xA000DF00;
@@ -31,11 +33,13 @@ void reset(void)
     reboot("PSEXE", "SYSTEM.CNF");
 }
 
+// 80023850
 void reset2(void)
 {
     reboot("PSEXE", "SYSTEM.CNF");
 }
 
+// 8002387C
 void reboot(char* exec, char* conf)
 {
     char confAddr[20];
@@ -44,7 +48,7 @@ void reboot(char* exec, char* conf)
     if (conf[0] == 0) {
         conf = "SYSTEM.CNF";
     }
-    
+
     strcpy(execAddr, "cdrom:");
     strcat(execAddr, exec);
     strcat(execAddr, ";1");

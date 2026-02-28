@@ -7,6 +7,7 @@
 static void set_volume(short arg0, short arg1);
 int D_80047E20 = 0;
 
+// 80020DE8
 int snd_set_stereo(int mono)
 {
     int ret = D_80047E20;
@@ -16,16 +17,19 @@ int snd_set_stereo(int mono)
     return ret;
 }
 
+// 80020E30
 int snd_get_stereo(void)
 {
     return D_80047E20;
 }
 
+// 80020E40
 void sfx_kill_all(void)
 {
     sfx_kill_voices(SPU_ALLCH);
 }
 
+// 80020E64
 void sfx_release_all(void)
 {
     sfx_release_voices(SPU_ALLCH);
@@ -49,19 +53,21 @@ static void (*fade_in_callback)(void);
 static int fade_in_target = 0x400;
 static int fade_in_step = 0;
 
-
+// 80020E88
 void snd_set_vol_to_min(void)
 {
     D_80047E26 = 0;
     set_volume(0, 0);
 }
 
+// 80020EB4
 void snd_set_vol_to_max(void)
 {
     D_80047E26 = D_80047E24;
     set_volume(D_80047E24, fade_amount);
 }
 
+// 80020EF0
 static void set_volume(short arg0, short arg1)
 {
     short val = (arg0 * arg1) / 1024;
@@ -72,6 +78,7 @@ static void set_volume(short arg0, short arg1)
     });
 }
 
+// 80020F48
 int snd_set_volume(short val)
 {
     short old = D_80047E24;
@@ -81,16 +88,18 @@ int snd_set_volume(short val)
     return old;
 }
 
+// 80020F9C
 void snd_set_reverb(long mode, short depth)
 {
     func_8001DF14(mode, depth);
 }
 
+// 800210E4
 static void fade_out_tick(void)
 {
     if (fade_paused != 0 || fading_out != 1)
         return;
-    
+
     if (fade_amount > fade_out_target) {
         set_volume(D_80047E26, fade_amount);
         fade_amount -= fade_out_step;
@@ -107,11 +116,12 @@ static void fade_out_tick(void)
     }
 }
 
+// 800211F0
 static void fade_in_tick(void)
 {
     if (fade_paused != 0 || fading_in != 1)
         return;
-    
+
     if (fade_amount < fade_in_target) {
         set_volume(D_80047E26, fade_amount);
         fade_amount += fade_in_step;
@@ -128,21 +138,24 @@ static void fade_in_tick(void)
     }
 }
 
+// 800212FC
 void snd_fade_pause(void)
 {
     fade_paused = 1;
 }
 
+// 80021310
 void snd_fade_unpause(void)
 {
     fade_paused = 0;
 }
 
+// 80021320
 int snd_fade_out(int step, int target, void *cb)
 {
     if (fading_out == 1)
         return 0;
-    
+
     if (fading_in == 1) {
         tasks_remove_reserved(fade_in_task);
         fade_in_task = -1;
@@ -170,11 +183,12 @@ int snd_fade_out(int step, int target, void *cb)
     return 1;
 }
 
+// 80021490
 int snd_fade_in(int step, int target, void *cb)
 {
     if (fading_in == 1)
         return 0;
-    
+
     if (fading_out == 1) {
         tasks_remove_reserved(fade_out_task);
         fade_out_task = -1;
@@ -202,6 +216,7 @@ int snd_fade_in(int step, int target, void *cb)
     return 1;
 }
 
+// 80021600
 void snd_reset(void)
 {
     sfx_set_reverb(0);
@@ -238,6 +253,7 @@ void snd_reset(void)
     cd_flush();
 }
 
+// 80021740
 u32 snd_status(void)
 {
     u32 ret = 0;
@@ -248,7 +264,7 @@ u32 snd_status(void)
         ret |= 1 << 3;
     if (cd_flags & 0x8000)
         ret |= 1 << 1;
-    
+
     for (int i = 0; i < 24; i++) {
         if (sfx_is_active(i)) {
             ret |= 1 << 2;

@@ -66,6 +66,7 @@ int D_80047E14 = 1;
 
 u8 D_80047F9C[4];
 
+// 8001E654
 static void sfx_tick(void) {
     SpuGetAllKeysStatus(D_800521E0);
     u32 mask = 0;
@@ -97,6 +98,7 @@ static void sfx_tick(void) {
     //func_8001E2F4();    // is a nop
 }
 
+// 8001E744
 u32 sfx_get_mask(void)
 {
     u32 ret = 0;
@@ -107,11 +109,13 @@ u32 sfx_get_mask(void)
     return ret;
 }
 
+// 8001E790
 long call_SpuClearReverbWorkArea(long mode)
 {
     return SpuClearReverbWorkArea(mode);
 }
 
+// 8001E7B0
 void sfx_init(void)
 {
     vab_progs_next = &loaded_progs[0];
@@ -121,12 +125,12 @@ void sfx_init(void)
     progs_count = 0;
     vags_count = 0;
     vabs_count = 0;
-    
+
     for (int i = 0; i < MAX_VABS; i++) {
         loaded_vabs[i].a = 0;
         loaded_vabs[i].b = 0;
     }
-    
+
     for (int i = 0; i < NCHANNELS; i++) {
         channels[i].active = 0;
         channels[i].epoch = 0;
@@ -151,6 +155,7 @@ void sfx_init(void)
     tick_task = tasks_add_reserved(sfx_tick, 1);
 }
 
+// 8001E998
 static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     // TODO: refactor this insanity
     u16 vagoff;
@@ -163,7 +168,7 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
 
     u32 ui;
 
-    if (idx == -1) {        
+    if (idx == -1) {
         for (int i = 0; i < MAX_VABS; i++) {
             if (loaded_vabs[i].a == 0) break;
             idx = i;
@@ -181,7 +186,7 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     if (arg->header.ts + tones_count >= MAX_TONES) return -1;
     progattrs = arg->progattrs;
     if (arg->header.vs + vags_count >= MAX_VAGS) return -1;
-    
+
     loaded_vabs[idx].hdr = arg->header;
 
     ui = arg->header.ps;
@@ -195,7 +200,7 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
         vab_progs_next->reserved2 = tone_off;    // tone accum index start thing
         tone_off += vab_progs_next->tones;
         vab_progs_next += 1;
-    }        
+    }
     loaded_vabs[idx].nprogs = ui;
     progs_count += ui;
 
@@ -216,8 +221,8 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
         }
     }
 
-    vagoff = 0;    
-    vcount = arg->header.vs; 
+    vagoff = 0;
+    vcount = arg->header.vs;
     loaded_vabs[idx].nvags = vcount;
     loaded_vabs[idx].offsets = vab_offsets_next;
     vags_count += vcount;
@@ -226,10 +231,10 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
         vagoff += vag_sizes[i];
         *vab_offsets_next++ = vagoff;
     }
-    
+
     loaded_vabs[idx].a = 1;
     loaded_vabs[idx].b = 0;
-    loaded_vabs[idx].hdr.fsize -= sizeof(VabRealHeader) 
+    loaded_vabs[idx].hdr.fsize -= sizeof(VabRealHeader)
                                 + sizeof(VagAtr[16]) * arg->header.ps
                                 + sizeof(u16[256]);
     D_80047F9C[vabs_count++] = idx;
@@ -238,6 +243,7 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
 }
 
 // upload_vab
+// 8001EEA4
 int func_8001EEA4(VabRealHeader *header, void *data, short idx)
 {
     if (data == 0) {
@@ -249,7 +255,7 @@ int func_8001EEA4(VabRealHeader *header, void *data, short idx)
         return -2;
     if (v->b == 1)  // already uploaded
         return 1;
-    
+
     u32 ptr = SpuMalloc(v->hdr.fsize);
     if (ptr == -1)
         return -1;
@@ -262,6 +268,7 @@ int func_8001EEA4(VabRealHeader *header, void *data, short idx)
 }
 
 // free_vab
+// 8001EFAC
 int func_8001EFAC(s16 idx)
 {
     if (vabs_count == 0) return -1;
@@ -286,6 +293,7 @@ int func_8001EFAC(s16 idx)
     return idx;
 }
 
+// 8001F17C
 void sfx_set_prog_attr(u32 id, int attr)
 {
     if (attr < 0)
@@ -298,38 +306,39 @@ void sfx_set_prog_attr(u32 id, int attr)
 
     if (vab_idx >= MAX_VABS) return;
     VabFile *vab = &loaded_vabs[vab_idx];
-        
+
     if (vab->a == 0) return;
     if (prog_idx >= vab->nprogs) return;
-        
+
     vab->progs[prog_idx].attr = attr;
 }
 
 // NOTE: I wouldn't bet my life on the correctness of this function. but it seems
 // to be behaving just like the original as far as I can tell.
+// 8001F200
 static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, int vol, u16 note, u16 cent)
 {
     Channel *temp_s1 = &channels[channel];
 
     if (prog_idx >= 0x80) return -1;
-    if (tone_idx >= 0x10) return -1;            
+    if (tone_idx >= 0x10) return -1;
     if ((s16) vol > 255) {
         vol = 255;
-    }    
+    }
     if ((s16) vol < -255) {
         vol = -255;
-    }    
+    }
     if ((u8) temp_s1->active == 1) return -2;
 
     VabFile *vab = &loaded_vabs[vab_idx];
     VagAtr *vag = &vab->tones[tone_idx + vab->progs[prog_idx].reserved2];
 
     if (vag->vag == 0) return -1;
-    
+
     if (pan == -1) {
         pan = (u32) vag->pan;
     }
-    
+
     pan = (pan << 16) >> 16;
 
     if (pan < 0) {
@@ -350,7 +359,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
     u32 mask = 1 << channel;
     SpuSetReverbVoice(D_80047E10, mask);
     temp_s1->unk0 = D_80047E10;
-    
+
     int right = pan > 64 ? 64 : pan;
     int left = pan > 64 ? 127 - pan : 64;
 
@@ -375,6 +384,7 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
     return 0;
 }
 
+// 8001F4F0
 void sfx_kill_voices(u32 mask)
 {
     for (int i = 0; i < NCHANNELS; i++) {
@@ -395,6 +405,7 @@ void sfx_kill_voices(u32 mask)
     spu_set_key_on(mask);
 }
 
+// 8001F578
 void sfx_release_voices(u32 mask)
 {
     for (int i = 0; i < NCHANNELS; i++) {
@@ -411,11 +422,13 @@ void sfx_release_voices(u32 mask)
 
 int sfx_play_modulated(u32 arg0, s32 arg1, s16 arg2, s16 arg3, u16 arg4, s32 prio);
 
+// 8001F5DC
 void sfx_play_simple(int id)
 {
     sfx_play_modulated(id, 0x3F, 100, 0, 0, -1);
 }
 
+// 8001F610
 void sfx_play(int id, short pan, short vol)
 {
     sfx_play_modulated(id, pan, vol, 0x3C, 0, -1);
@@ -423,14 +436,15 @@ void sfx_play(int id, short pan, short vol)
 
 //INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_play_modulated);
 // FIXME: this is not entirely correct, even though it works
+// 8001F64C
 int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     u32 vab_idx = id >> 0x18;
     u32 prog_idx = (id >> 8) & 0x7F;
     u32 tone_idx = id & 0xF;
 
     if (vab_idx >= MAX_VABS) return -1;
-    VabFile *vp = &loaded_vabs[vab_idx];    
-    if (vp->a == 0) return -1;    
+    VabFile *vp = &loaded_vabs[vab_idx];
+    if (vp->a == 0) return -1;
     if (vp->b == 0) return -1;
     if (prog_idx > vp->nprogs) return -1;
 
@@ -446,7 +460,7 @@ int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     else if (prio < 0)
         prio = 0;
     else if (prio > 2)
-        prio = 2;        
+        prio = 2;
 
     // look for an empty
     for (int i = 0; i < NCHANNELS; i++) {
@@ -458,7 +472,7 @@ int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
 
     // didn't find an empty one. free the oldest effect of lower priority
     u16 max = 0;
-    int max_index = -1;              
+    int max_index = -1;
     // search through different levels (of priority?)
     for (int i = 2; (i >= (prio & 0xFFFF)) && (i != 0); i--) {
         // find the effect that's been playing the longest
@@ -477,7 +491,7 @@ int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     }
 
     // FIXME: this is uninitialized. where did it come from?
-    //if (!(var_s2 & 0xFFFF)) return -1;                                    
+    //if (!(var_s2 & 0xFFFF)) return -1;
 
     // screw it, look for anything
     for (int i = 0; i < NCHANNELS; i++) {
@@ -496,32 +510,37 @@ found:
 
     // TODO: this is confusing. is it correct??
     D_800521E0[channel] = prio;
-    return channel | channels[channel].epoch;    
+    return channel | channels[channel].epoch;
 }
 
 // TODO: "handle" macros
+// 8001F8D4
 void sfx_kill(u32 handle)
 {
     if (sfx_is_valid(handle) == -1) return;
     sfx_kill_voices(1 << (handle & 0x1F));
 }
 
+// 8001F918
 void sfx_release(u32 handle)
 {
     if (sfx_is_valid(handle) == -1) return;
     sfx_release_voices(1 << (handle & 0x1F));
 }
 
+// 8001F95C
 int sfx_set_pan(u32 handle, u16 pan)
 {
     return sfx_set_both(handle, pan, channels[handle & 0x1F].vol);
 }
 
+// 8001F9A4
 int sfx_set_vol(u32 handle, u16 vol)
 {
     return sfx_set_both(handle, channels[handle & 0x1F].pan, vol);
 }
 
+// 8001F9EC
 int sfx_set_both(u32 handle, u16 pan, u16 vol)
 {
     int idx = handle & 0x1F;
@@ -548,7 +567,7 @@ int sfx_set_both(u32 handle, u16 pan, u16 vol)
 
     u16 right = pan > MIDDLE ? MIDDLE : pan;
     u16 left = pan < MIDDLE ? MIDDLE : (126 - pan);
-    
+
     set_voice_attr(&(SpuVoiceAttr){
         .voice = 1 << idx,
         .mask = 3,
@@ -562,16 +581,19 @@ int sfx_set_both(u32 handle, u16 pan, u16 vol)
 }
 
 // TODO: these types are all messed up
+// 8001FB38
 int sfx_get_pan(uint handle)
 {
     return channels[handle & 0x1F].pan;
 }
 
+// 8001FB58
 int sfx_get_vol(uint handle)
 {
     return channels[handle & 0x1F].vol;
 }
 
+// 8001FB78
 int sfx_is_valid(u32 handle)
 {
     if (channels[handle & 0x1F].active != 1) return handle;
@@ -579,6 +601,7 @@ int sfx_is_valid(u32 handle)
     return -1;
 }
 
+// 8001FBC0
 int sfx_set_reverb(int val)
 {
     int ret = D_80047E10;
@@ -587,6 +610,7 @@ int sfx_set_reverb(int val)
     return ret;
 }
 
+// 8001FBE4
 void func_8001FBE4(void)
 {
     if (D_80047E14 == 1 && D_80047E10 == 1) {
@@ -595,11 +619,13 @@ void func_8001FBE4(void)
     }
 }
 
+// 8001FC34
 int sfx_is_active(u32 handle)
 {
     return channels[handle & 0x1F].active == 1;
 }
 
+// 80020D5C
 int sfx_load_vab(short index, VabRealHeader *header, void *data)
 {
     index = load_metadata(header, index);
@@ -607,4 +633,11 @@ int sfx_load_vab(short index, VabRealHeader *header, void *data)
         return -1;
 
     return func_8001EEA4(header, data, index);
+}
+
+// trivial or easy functions related to audio
+// 80020DC4
+int sfx_free_vab(s16 idx)
+{
+    return func_8001EFAC(idx);
 }

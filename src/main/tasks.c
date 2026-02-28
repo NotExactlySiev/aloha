@@ -1,4 +1,4 @@
-#include "common.h"
+#include "types.h"
 #include "tasks.h"
 
 typedef struct {
@@ -12,6 +12,7 @@ extern RoutineTask D_80023370[40];
 // why is the freaking array backwards
 // these are all fucked
 
+// 80023144
 int tasks_add(TaskFunc fn, s16 arg1)
 {
     for (int i = 0; i < 32; i++) {
@@ -26,6 +27,7 @@ int tasks_add(TaskFunc fn, s16 arg1)
     return -1;
 }
 
+// 80023188
 int tasks_add_reserved(TaskFunc fn, s16 arg1)
 {
     for (int i = 32; i < 40; i++) {
@@ -40,6 +42,7 @@ int tasks_add_reserved(TaskFunc fn, s16 arg1)
     return -1;
 }
 
+// 800231CC
 void tasks_remove(int handle)
 {
     tasks_set_enabled(0);
@@ -53,6 +56,7 @@ void tasks_remove(int handle)
     tasks_set_enabled(1);
 }
 
+// 80023260
 void tasks_remove_reserved(int i)
 {
     tasks_set_enabled(0);
@@ -60,10 +64,11 @@ void tasks_remove_reserved(int i)
     if (i >= 0 && i <= 8) {
         D_80023370[40 - i].fn = 0;
     }
-    
+
     tasks_set_enabled(1);
 }
 
+// 800232C4
 void tasks_set_enabled(s32 val)
 {
     extern int tasks_enabled;

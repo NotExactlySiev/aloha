@@ -28,3 +28,5 @@ enum {
 
 extern u8 _cd_last_status[8];
 #define cd_last_status (_cd_last_status[0])
+
+int cd_run_block(void);

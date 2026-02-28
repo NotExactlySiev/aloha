@@ -21,13 +21,13 @@ typedef struct {
     short pad;
 } TextUV;
 
-extern Entity player_entity;
+Entity player_entity;
 
 // entity lists
 
 typedef struct {
-        LinkedList head;
-        LinkedList tail;
+    LinkedList head;
+    LinkedList tail;
 } List;
 
 List entity_list_0 = {};
@@ -1575,24 +1575,25 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 void func_800DFE18(void)
 {
     func_800E5CC0();
-    func_800F1FFC();
-    func_800F2760();
-    func_800F296C();
-    func_800E17D0();
-    func_800EEDB4();
-    func_800E5D30();
-    func_800E6668();
-    func_800D4CC8();
-    func_800F421C();
-    func_800D46CC();
-    func_800EF004();
+    
+    // func_800F1FFC();
+    // func_800F2760();
+    // func_800F296C();
+    // func_800E17D0();
+    // func_800EEDB4();
+    // func_800E5D30();
+    // func_800E6668(); //
+    // func_800D4CC8(); // pause menu
+    // func_800F421C(); //
+    // func_800D46CC(); // demo overlay
+    func_800EF004();    // ui
     
     if (!func_800F3434()) {
-        func_800F1A0C();
-        func_800F87BC();
-        func_800EFEC4();
-        func_800E5D30();
-        func_800D0F24();
+        //func_800F1A0C();
+        //func_800F87BC();
+        //func_800EFEC4();
+        //func_800E5D30();
+        //func_800D0F24();
     }
     
     if (!func_800DBC24() && !func_800F3434()) {
@@ -1601,7 +1602,7 @@ void func_800DFE18(void)
 
     if (!func_800F3434()) {
         //func_800D0FC4();
-        func_800DDF04();
+        //func_800DDF04();
         //func_800D0370();
         //func_800DA998();
         //func_800DA4E8();
