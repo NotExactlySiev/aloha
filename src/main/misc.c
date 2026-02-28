@@ -13,7 +13,7 @@ void (*_mc_callback_b)(void) = 0;
 void execute_compressed(void *addr, u32 stack)
 {
     EXEC header;
-    __builtin_memcpy(&header, addr + 16, 0x3c);
+    __builtin_memcpy(&header, addr + 16, sizeof(EXEC));
     decode_lz1(addr + 0x804, (void *)header.t_addr);
     header.s_addr = stack;
     flush_cache_safe();

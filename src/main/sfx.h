@@ -1,14 +1,14 @@
-#include "common.h"
+#include <ints.h>
 
-typedef struct VabRealHeader VabRealHeader; 
+typedef struct VabRealHeader VabRealHeader;
 
 int sfx_set_both(u32 handle, u16 pan, u16 vol);
 void sfx_set_prog_attr(u32 id, int arg2);
 int sfx_set_reverb(int val);
 int sfx_set_pan(u32 handle, u16 pan);
 int sfx_set_vol(u32 handle, u16 vol);
-int sfx_get_pan(uint handle);
-int sfx_get_vol(uint handle);
+int sfx_get_pan(u32 handle);
+int sfx_get_vol(u32 handle);
 int sfx_is_valid(u32 handle);
 void sfx_play_simple(int id);
 void sfx_play(int id, short pan, short vol);
