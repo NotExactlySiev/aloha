@@ -172,7 +172,7 @@ void set_voice_attr(SpuVoiceAttr *arg) {
 
 // this is almost exactly the same as the previous one
 // 8001E17C
-NOT_IMPL_FN(func_8001E17C) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001E17C);
+NOT_IMPL_FN(func_8001E17C)
 
 // 8001E22C
 void spu_set_key_on(u32 mask) {

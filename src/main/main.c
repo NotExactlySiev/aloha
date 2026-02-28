@@ -1,21 +1,18 @@
-//#define LOG_JT
-
 #include "common.h"
 #include "main.h"
 #include <kernel.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <libgpu.h>
-#include <string.h>
 #include <libetc.h>
 #include <shared.h>
 #include <libapi.h>
-#include "libcd.h"
 #include "music.h"
 #include "tasks.h"
 #include "decode.h"
 #include "jumptable.h"
 #include "util.h"
+#include "pad.h"
 
 u32 saved_ra;
 
@@ -386,10 +383,7 @@ void func_8001926C(void)
     DRAWENV drawenv;
     DISPENV dispenv;
     POLY_FT4 polys[5];
-    s32 i;
-    s32 left, tex_x;
     s32 y, h;
-    u32 col;
 
     SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
     SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
@@ -520,7 +514,7 @@ void flush_cache_safe(void)
 // 800198B4
 void jt_clear(void)
 {
-    const void **jmptable = (void **) 0x80010000;
+    void **jmptable = (void **) 0x80010000;
     for (int i = 0; i < 1024; i++) {
         jmptable[i] = KSEG0(nop);
     }
@@ -642,12 +636,8 @@ void game_init(void)
     jt_set(get_mc_file_name, 11);
 
     // clear global space
-    memset((void*) 0x80014000, 0x4000, 0);
-
-    // set reverb
+    ram_memset((void*) 0x80014000, 0x4000, 0);
     snd_set_reverb(5, 0);
-
-    // audio stuff? no idea
     sfx_set_reverb(0);
     mc_select_slot(0);
 }
@@ -707,11 +697,9 @@ void exception_handler(void)
 // 80019D78
 s32 enable_exception_event(void* handler)
 {
-    s32 event;
-
     EnterCriticalSection();
     // exception event (only cause by the invalid syscall function at the start of every main)
-    event = OpenEvent(0xF0000010, 0x4000, EvMdINTR, handler);
+    int event = OpenEvent(HwCPU, EvSpSYSCALL, EvMdINTR, handler);
     EnableEvent(event);
 
     ExitCriticalSection();

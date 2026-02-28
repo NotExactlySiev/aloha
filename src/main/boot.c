@@ -1,8 +1,10 @@
-#include "common.h"
+// I don't think this module was written by Exact. I believe the file was simply
+// given to them by Sony along with a "put this in there and don't worry about
+// it". Which explains its complete lack of coupling with anything else and why
+// it sniffs around undocumented kernel memory.
+
+#include <ints.h>
 #include <stdio.h>
-// TODO: why don't I have libapi.h?
-// because _boot is not the _boot in libapi. it's _96_boot or something
-//#include <libapi.h>
 #include <string.h>
 
 typedef void (*boot_f)(char*,char*);
@@ -16,13 +18,23 @@ typedef struct {
     u32 console_type;
 } BiosHeader;
 
-#define BIOS_HEADER   (*(BiosHeader *) 0xBFC00100)
+#define BIOS_HEADER (*(BiosHeader *) 0xBFC00100)
+
+// This _boot is not the _boot in libapi. It's _96_boot or something. That's
+// why we haven't included libapi.h
 
 // 80023800
-__asm__(".section .text\n\t"
-        ".align\t2\n"
-        "kern 0xA0, 0xA0, _boot\n\t"
-        ".set reorder\n\t"
+__asm__(".section .text\n"
+        ".align 2\n"
+        ".set noreorder\n"
+        ".set noat\n"
+        ".global _boot\n"
+        "_boot:\n"
+            "addiu      $t2, $zero, 0xA0\n"
+            "jr         $t2\n"
+            "addiu      $t1, $zero, 0xA0\n"
+            "nop\n"
+        ".set reorder\n"
         ".set at\n");
 
 // 80023810

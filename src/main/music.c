@@ -292,7 +292,7 @@ void func_8001CEC8(void)
 
 // CD MUSIC
 // 8001CF38
-NOT_IMPL_FN(func_8001CF38) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_8001CF38);
+NOT_IMPL_FN(func_8001CF38)
 
 // 8001D0AC
 void func_8001D0AC(int delay)

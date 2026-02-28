@@ -243,7 +243,7 @@ int mc_write_block(int fd, void *buf, int len)
 
 // mc_read, read with fine size
 // 800202FC
-NOT_IMPL_FN(func_800202FC) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800202FC);
+NOT_IMPL_FN(func_800202FC)
 
 // 800203AC
 int mc_read_block(int fd, void *buf, long len)
@@ -353,10 +353,10 @@ int mc_format(long slot)
 
 // 2 big almost identical functions
 // 800206E4
-NOT_IMPL_FN(func_800206E4) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_800206E4);
+NOT_IMPL_FN(func_800206E4)
 
 // 80020808
-NOT_IMPL_FN(func_80020808) //INCLUDE_ASM("asm/main/nonmatchings/274C", func_80020808);
+NOT_IMPL_FN(func_80020808)
 
 // 8002092C
 void mc_init(void)

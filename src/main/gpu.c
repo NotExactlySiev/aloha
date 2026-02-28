@@ -1,10 +1,10 @@
 // caller functions for jumptable
-#include "common.h"
 #include <libgte.h>
 #include <libgpu.h>
+#include <libetc.h>
 #include "jumptable.h"
 
-extern volatile s32 vsync_counter;
+extern volatile int vsync_counter;
 
 void wait_frame(void);
 
