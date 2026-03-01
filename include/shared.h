@@ -1,19 +1,22 @@
 #ifndef _JMPTABLE_H
 #define _JMPTABLE_H
 
+#include "common.h"
+#include "movie_args.h"
 #include <libgpu.h>
 #include <libspu.h>
-#include "common.h"
-// for MovieArgs
-#include "movie_args.h"
+
+// clang-format off
 
 // shared data provided by the main executable
 
 #define UNK(a,b)    u8 unk##a[b - a + 1]
 typedef struct {
     u32 best_times[6][3][3];
-    UNK(0xD8, 0xE1);
-    u8  unkE2;
+    UNK(0xD8, 0xDF);
+    u8  unkE0;
+    u8  unkE1;
+    u8  unkE2;  // have we beaten the game?
     u8  unkE3;
     u8  unkE4;
     s8  unkE5;
@@ -21,7 +24,8 @@ typedef struct {
     s8  unkE7;
     s8  unkE8;  // played before?
     s8  unkE9;
-    UNK(0xEA, 0xFF);
+    s8  unkEA;  // widescreen
+    UNK(0xEB, 0xFF);
 } SavedData;
 #undef UNK
 
@@ -36,9 +40,8 @@ typedef struct {
     s8  unk509;
     s8  unk50A;
     s8  unk50B;
-    // dialog selections
-    u8  unk50C;
-    u8  unk50D;
+    u8  unk50C; // last slot saved to
+    u8  unk50D; // last slot loaded from
 
     u8  intro_played;
     s8  slot_state[3];
@@ -80,16 +83,39 @@ extern struct {
     u32         (*get_engine_version)(void);
 
     // CD functions
-    UNK(256, 257);
-    s32         (*snd_queue_exec)(void);
-    UNK(259, 272);
-    s32         (*iso_read)(const char* addr, void* buf, s32 mode);
-    UNK(274, 294);
-    s32         (*sound_fade_out)(s32 duration, s32, s32);
-    s32         (*sound_fade_in)(s32 duration, s32, s32);
-    void        (*set_global_volume)(SpuVolume*);
-    void        (*get_global_volume)(SpuVolume*);
-    UNK(299, 319);
+    /* 100 */ int         (*cd_status)();
+    /* 101 */ void        (*cd_command)(u8 arg0, u32 arg1, u32 arg2);
+    /* 102 */ int         (*cd_run_block)(void);
+    /* 103 */ int         (*cd_flush)(void);
+    /* 104 */ int         (*func_8001C734)();
+    UNK(261, 271);
+    /* 110 */ int         (*cd_read_full)();
+    /* 111 */ int         (*iso_read)(const char* addr, void* buf, s32 mode);
+    /* 112 */ int         (*iso_file_size)();
+    /* 113 */ int         (*iso_exec)();
+    /* 114 */ int         (*cd_seek_safe)();
+    /* 115 */ int         (*iso_read_fast)();
+    /* 116 */ int         (*iso_seek)();
+    /* 117 */ int         (*iso_never_called)();
+    UNK(280, 287);
+    /* 120 */ int         (*music_play_cdda)(int idx, int repeat);
+    /* 121 */ int         (*music_play_cdda_from_loc)();
+    /* 122 */ void        (*cd_pause)(void);
+    /* 123 */ int         (*cd_play)();
+    /* 124 */ void        (*cd_mute)(void);
+    /* 125 */ int         (*cd_demute)();
+    /* 126 */ int         (*cd_set_stereo)();
+    /* 127 */ s32         (*sound_fade_out)(s32 duration, s32, s32);
+    /* 128 */ s32         (*sound_fade_in)(s32 duration, s32, s32);
+    /* 129 */ void        (*set_global_volume)(SpuVolume*);
+    /* 12A */ void        (*get_global_volume)(SpuVolume*);
+    /* 12B */ int         (*cd_set_reverb)(int arg0);
+    /* 12C */ int         (*cd_stop)();
+    /* 12D */ int         (*cd_fade_wait)();
+    /* 12E */ int         (*fade_pause)();
+    /* 12F */ int         (*fade_unpause)();
+    /* 130 */ int         (*music_play_str)();
+    UNK(305, 319);
     s32         (*play_movie)(char *filename, MovieArgs *args, int (*cb)(void));
     UNK(321, 383);
 
@@ -98,7 +124,7 @@ extern struct {
     void        (*wait_for_vsync)(void);
     void        (*SetGraphDebug)(s32 level);
     void        (*SetDispMask)(s32 mask);
-    u32         (*get_frame_counter)(void); 
+    u32         (*get_frame_counter)(void);
     DISPENV*    (*PutDispEnv)(DISPENV*);
     DRAWENV*    (*PutDrawEnv)(DRAWENV*);
     u32*        (*ClearOTag)(u32* ot, s32 n);
@@ -161,18 +187,36 @@ extern struct {
     int         (*snd_set_stereo)(int);
     int         (*snd_get_stereo)(void);
     void        (*sfx_kill_all)(void);
-    s32         (*snd_set_volume)(s16);
-    UNK(774, 779);
-    u32         (*unk_flags)(void);
-    void        (*audio_unk_set)(void);
-    void        (*audio_unk_reset)(void);
-    void        (*snd_reset)(void);
-    void        (*execute_compressed)(void *addr, u32 arg);
-    void        (*audio_unk0)(s32 arg0, s16 arg1, s16 arg2);
-    void        (*audio_unk1)(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
-    UNK(787, 816);
-    s32         (*audio_play_by_id)(s32);
-    void        (*audio_unk3)(s32);
+    /* 305 */ s32         (*snd_set_volume)(s16);
+    /* 306 */ int         (*sfx_set_reverb)(int val);
+    /* 307 */ void        (*snd_set_reverb)(long mode, short depth);
+    /* 308 */ void        (*snd_set_vol_to_min)(void);
+    /* 309 */ void        (*snd_set_vol_to_max)(void);
+    /* 30A */ int         (*snd_fade_out)(int step, int target, void *cb);
+    /* 30B */ int         (*snd_fade_in)(int step, int target, void *cb);
+    /* 30C */ u32         (*snd_status)(void);
+    /* 30D */ void        (*snd_fade_pause)(void);
+    /* 30E */ void        (*snd_fade_unpause)(void);
+    /* 30F */ void        (*snd_reset)(void);
+    /* 310 */ void        (*sfx_play_simple)(u32 id);
+    /* 311 */ short       (*sfx_play)(u32 id, short pan, short volume);
+    /* 312 */ void        (*sfx_play_modulated)(u32 id, s16 arg1, s16 arg2, s16 arg3);
+    /* 313 */ void        (*sfx_kill)(u32 handle);
+    /* 314 */ int         (*sfx_set_pan)(u32 handle, u16 pan);
+    /* 315 */ int         (*sfx_set_vol)(u32 handle, u16 vol);
+    /* 316 */ int         (*sfx_set_both)(u32 handle, u16 pan, u16 vol);
+    /* 317 */ int         (*sfx_get_pan)(u32 handle);
+    /* 318 */ int         (*sfx_get_vol)(u32 handle);
+    /* 319 */ int         (*sfx_is_valid)(u32 handle);
+    /* 31A */ void        (*sfx_release)(u32 handle);
+    /* 31B */ void        (*sfx_set_prog_attr)(u32 id, int arg2);
+    /* 31C */ u32         (*sfx_get_mask)(void);
+    /* 31D */ long        (*call_SpuClearReverbWorkArea)(long mode);
+    UNK(798, 799);
+    /* 320 */ void        (*execute_compressed)(void *addr, u32 arg);
+    UNK(801, 816);
+    /* 331 */ int         (*music_play)(u8 id);
+    /* 332 */ void        (*music_set_repeat)(int val);
     UNK(819, 831);
     int         (*mc_file_read)(int slot, char *filename, void *buf, int off, int len);
     int         (*mc_file_write)(int slot, char *filename, void *buf, int off, int len);

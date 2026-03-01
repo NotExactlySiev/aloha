@@ -421,24 +421,25 @@ void sfx_release_voices(u32 mask)
     spu_set_key_off(mask);
 }
 
-int sfx_play_modulated(u32 arg0, s32 arg1, s16 arg2, s16 arg3, u16 arg4, s32 prio);
+short sfx_play_modulated(u32 arg0, s32 arg1, s16 arg2, s16 arg3, u16 arg4, s32 prio);
 
 // 8001F5DC
-void sfx_play_simple(int id)
+short sfx_play_simple(int id)
 {
-    sfx_play_modulated(id, 0x3F, 100, 0, 0, -1);
+    return sfx_play_modulated(id, 0x3F, 100, 0, 0, -1);
 }
 
+// TODO: Apparently this should return a short?
 // 8001F610
-void sfx_play(int id, short pan, short vol)
+short sfx_play(int id, short pan, short vol)
 {
-    sfx_play_modulated(id, pan, vol, 0x3C, 0, -1);
+    return sfx_play_modulated(id, pan, vol, 0x3C, 0, -1);
 }
 
 //INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_play_modulated);
 // FIXME: this is not entirely correct, even though it works
 // 8001F64C
-int sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
+short sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
     u32 vab_idx = id >> 0x18;
     u32 prog_idx = (id >> 8) & 0x7F;
     u32 tone_idx = id & 0xF;

@@ -72,13 +72,62 @@ void func_800E0A60(void)
     jt.DrawOTag(D_800F4E10->ot);
 }
 
-// sfx stuff
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0B54);
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0C24);
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0C74);
+// sfx.c
+
+short D_800F4CFC = 0; // sfx handle
+int D_800F4D00 = -1; // sfx counter
+short D_800F4D04 = -1; // sfx return code
+
+// sfx_play
+short func_800E0B54(u32 id)
+{
+    if (id == 0x2900) {
+        if (D_800F4D00 > -1) {
+            jt.sfx_release(D_800F4CFC);
+        }
+        D_800F4CFC = jt.sfx_play(id, 62, 100);
+        D_800F4D00 = 0;
+        D_800F4D04 = D_800F4CFC;
+    } else {
+        D_800F4D04 = jt.sfx_play(id, 62, 100);
+    }
+    return D_800F4D04;
+}
+
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0C24);
+void func_800E0C24(void)
+{
+    if (D_800F4D00 > -1) {
+        jt.sfx_release(D_800F4CFC);
+        D_800F4D00 = -1;
+    }
+}
+
+// sfx_tick
+void func_800E0C74(void)
+{
+    if (D_800F4D00 > -1) {
+        if (++D_800F4D00 >= 32) {
+            jt.sfx_release(D_800F4CFC);
+            D_800F4D00 = -1;
+        }
+    }
+}
+
+// menu.c
 
 // toggle_widescreen
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0CD8);
+void func_800E0CD8(void)
+{
+    if (jt.get_widescreen()) {
+        jt.set_widescreen(0);
+        glob->curr.unkEA = 0;
+    } else {
+        jt.set_widescreen(1);
+        glob->curr.unkEA = 1;
+    }
+    func_800E0B54(0x2600);
+}
 
 char *D_800EB054[] = {
     "STOP",
@@ -185,6 +234,8 @@ const char *D_800EB168[] = {
     "MOVIE\\EX_END3.STR",
 };
 
+#define NMOVIES (sizeof(D_800EB168)/sizeof(*D_800EB168))
+
 const char *D_800EB1D8[] = {
     "OPENING",
     "W 1 ROBIT",
@@ -218,10 +269,31 @@ const char *D_800EB1D8[] = {
     "END ALOHA2",
 };
 
+extern int D_800F4E68; // movie_test_selected
 // movie test prev/next/play
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0D78);
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0DB8);
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0E04);
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0D78);
+void func_800E0D78(void)
+{
+    if (--D_800F4E68 < 0)
+        D_800F4E68 = NMOVIES - 1;
+    func_800E0B54(0x2C00);
+}
+
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0DB8);
+void func_800E0DB8(void)
+{
+    if (++D_800F4E68 > NMOVIES - 1)
+        D_800F4E68 = 0;
+    func_800E0B54(0x2C00);
+}
+
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0E04);
+void func_800E0E04(void)
+{
+    printf("Now playing %s\n", D_800EB168[D_800F4E68]);
+    // TODO
+    //
+}
 
 // level math
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0FD0);
@@ -236,7 +308,19 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E12B4);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1384);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1418);
+extern int D_801A0FA8;
+extern int D_801A0FB0;
+
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1418);
+void func_800E1418(void)
+{
+    RECT r;
+    if (D_801A0FA8 == 1 && D_801A0FB0 != 1) {
+        func_800E6B90();
+        func_800E6940();
+    }
+}
+
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14A4);
 
@@ -311,10 +395,10 @@ void text_put_char(u16 c);
 void text_put_str(char *str);
 
 typedef struct {
-    u8 flags;   // and sfx. bitfield?
+    u8 flags; // and sfx. bitfield?
     u8 dest;
     u8 unk0;
-    u8 unk1;
+    u8 unk1; // 1 = launch normal play, 2 = launch time trial
     // I think this is padding lol?
 /*
     u8 field1_0x1;
@@ -344,7 +428,7 @@ typedef struct {
     u8 field8_0x12;
     u8 field9_0x13;
     RECT rect;
-    int field11_0x1c;
+    int field11_0x1c; // starting select position
     int nselections;
     short panel_x;
     short panel_y;
@@ -370,44 +454,39 @@ enum {
     PAGES_COUNT
 };
 
-int func_800E1928();
-int func_800E1A88();
-int func_800E11D0();
-int func_800E10B8();
-int func_800E15FC();
-int func_800E1BCC();
-
-int func_800E0E04();
-int func_800E0D78();
-int func_800E0DB8();
-int func_800E1C24();
-int func_800E1D48();
-int func_800E1DB8();
-int func_800E0CD8();
+void func_800E1928(void);
+void func_800E1A88(void);
+void func_800E11D0(void);
+void func_800E10B8(void);
+void func_800E15FC(void);
+void func_800E1BCC(void);
+void func_800E1C24(void);
+void func_800E1D48(void);
+void func_800E1DB8(void);
 
 // TODO: move this back in when everything is decomped. the address is needed
 MenuPage D_800EB468 = {
-        .items_type = 3,
-        .offset = { 9, 10, 21, 5 },
-        .field8_0x12 = 8,
-        .rect = { 0x30, 0x6E, 0xC8, 0x3C },
-        .field11_0x1c = 0,
-        .nselections = 5,
-        .panel_x = 0,
-        .panel_y = 0,
-        .panel_sprite_id = -1,
-        .panel_clut_thing = -1,
-        .items_sprites = (short[]){
-            8, 9, 10, 11, 12,
-        },
-        .items = {
-            { 0x80, 0, 0xFE, 0x01, NULL, func_800E11D0, func_800E10B8 },
-            { 0x80, 0, 0xFE, 0x02, NULL, NULL, NULL },
-            { 0x43, 1, 0xFE, 0x00, func_800E15FC, func_800E11D0, func_800E10B8 },
-            { 0x43, 2, 0xFE, 0x00, func_800E15FC, NULL, NULL },
-            { 0x03, 3, 0xFE, 0x00, NULL, NULL, NULL },
-        },
-    };
+    .items_type = 3,
+    .offset = { 9, 10, 21, 5 },
+    .field8_0x12 = 8,
+    .rect = { 0x30, 0x6E, 0xC8, 0x3C },
+    .field11_0x1c = 0,
+    .nselections = 5,
+    .panel_x = 0,
+    .panel_y = 0,
+    .panel_sprite_id = -1,
+    .panel_clut_thing = -1,
+    .items_sprites = (short[]){
+        8, 9, 10, 11, 12,
+    },
+    .items = {
+        { 0x80, 0, 0xFE, 0x01, NULL, func_800E11D0, func_800E10B8 },
+        { 0x80, 0, 0xFE, 0x02, NULL, NULL, NULL },
+        { 0x43, PAGE_LOAD, 0xFE, 0x00, func_800E15FC, func_800E11D0, func_800E10B8 },
+        { 0x43, PAGE_SAVE, 0xFE, 0x00, func_800E15FC, NULL, NULL },
+        { 0x03, PAGE_SETTINGS_TEST, 0xFE, 0x00, NULL, NULL, NULL },
+    },
+};
 
 
 MenuPage *D_800EB8CC[PAGES_COUNT] = {
@@ -770,7 +849,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
             text_put_str("-------");
         }
         break;
-    
+
     case PAGE_SETTINGS:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
@@ -778,7 +857,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
             text_put_str("REVERSE");
         else
             text_put_str("NORMAL");
-        
+
         text_set_attr(selected == 1);
         text_set_pos(page->offset.x + 15, page->offset.y + 1);
         if (glob->curr.unkE5 == 0)
@@ -828,7 +907,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         text_put_str("DATA ");
         text_put_char('1' + D_800F4CC0);
         break;
-    
+
     case PAGE_YES_NO:
         func_800E6B90(&(RECT){
             .x = 0,
@@ -839,10 +918,10 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         func_800E6B90(&(RECT){
             .y = 16,
             .w = 240,
-            .h = 16 
+            .h = 16
         }, page->rect.x + 16, page->rect.y + 12);
         break;
-    
+
     case PAGE_SETTINGS_TEST:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
@@ -858,7 +937,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
             text_put_str("REVERSE");
         else
             text_put_str("NORMAL");
-        
+
         text_set_attr(selected == 3);
         text_set_pos(page->offset.x + 15, page->offset.y + 3);
         if (glob->curr.unkE5 == 0)
@@ -888,7 +967,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         else
             text_put_str("OFF");
         break;
-    
+
     case PAGE_SETTINGS_WIDE:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
@@ -903,7 +982,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
             text_put_str("REVERSE");
         else
             text_put_str("NORMAL");
-        
+
         text_set_attr(selected == 2);
         text_set_pos(page->offset.x + 15, page->offset.y + 2);
         if (glob->curr.unkE5 == 0)
@@ -939,21 +1018,37 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 // robbit cursor anim
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3168);
 
-// is this (and maybe the whole input module) the same one from gameover? 
+// is this (and maybe the whole input module) the same one from gameover?
 #define BUTTONS_ACCEPT      (Pad1Start|Pad1sqr|Pad1crc)
 #define BUTTONS_CANCEL      (Pad1x)
 
-extern int D_800F4CF4;
-extern int D_800F4CC4;
-extern int D_800F4E18;
-extern int D_800F4E48;  // main menu selection (why is it separate?
-extern int D_800F4E50;
-extern int D_800F4E40;
-extern int D_800F4E20;
-extern int D_800F4E28;
-extern int D_800F4E70;
-extern int D_801A0FA8;
-extern int D_800F4E08;
+int D_800F4CBC = 0;
+int D_800F4CC0 = 0;
+int D_800F4CC4 = 1;
+int D_800F4CC8 = 0;
+int D_800F4CEC = 0; // Write an executable index here to go to it
+int D_800F4CF0 = 0;
+int D_800F4CF4 = 8;
+int D_800F4CF8 = 0;
+int D_800F4E00 = 0;
+// D_800F4E04
+int D_800F4E08 = 0;
+int D_800F4E18 = 0;
+int D_800F4E20 = 0;
+int D_800F4E28 = 0;
+int D_800F4E30 = 0;
+int D_800F4E38 = 0;
+int D_800F4E40 = 0;
+int D_800F4E48 = 0;  // main menu selection (why is it separate?
+int D_800F4E50 = 0;
+int D_800F4E58 = 0;
+int D_800F4E60 = 0;
+int D_800F4E68 = 0;
+int D_800F4E70 = 0;
+int D_800F4E78 = 0;
+int D_800F4E80 = 0;
+//
+/* 800F4ED0 */ BGBuffer *current_bgbuffer = NULL;
 
 extern u32 D_800EB97C[4];
 extern u32 D_800EB98C[4];
@@ -962,11 +1057,12 @@ extern u32 D_800EB98C[4];
 #include <pad.h>
 // menu logic
 //INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);
+// 800E32BC
 u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
 {
     if (buttons == 0)
         return (selection << 16) | page_idx;
-    
+
     MenuPage *page = D_800EB8CC[page_idx];
 
     if (buttons & Pad1Down) {
@@ -986,7 +1082,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
 
     if (page_idx == 0)
         D_800F4E48 = selection;
-    
+
     if (buttons & Pad1Left) {
         if (page->items[selection].press_left)
             page->items[selection].press_left();
@@ -999,33 +1095,104 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
 
     if (buttons & BUTTONS_ACCEPT) {
         MenuItem *item = &page->items[selection];
+        printf("flags is %02X\n", item->flags);
         switch (item->flags & 0xF) {
         case 1: func_800E0B54(0x2600); break;
         case 2: func_800E0B54(0x2700); break;
         case 3: func_800E0B54(0x2D00); func_800E7478(); break;
         }
-        if (page_idx == 5) {
+
+        if (page_idx == PAGE_CONFIRM_SAVE) {
             glob->unk50C = D_800F4CC0;
         }
-        if (page_idx == 4) {
+        if (page_idx == PAGE_CONFIRM_LOAD) {
             glob->unk50D = D_800F4CC0;
         }
 
-        if (page_idx == 1 && selection < 3) {
+        if (page_idx == PAGE_LOAD && selection < 3) {
             // load
             //
         }
 
-        if (page_idx == 2 && selection < 3) {
+        if (page_idx == PAGE_SAVE && selection < 3) {
             // save
             //
         }
 
         // dialog stuff
         //
+        //
+        printf("dest is %02x\n", item->dest);
+        printf("item->flags & 0xa0 == %d\n", item->flags & 0xa0);
+        if (item->dest == 0xff) {
+            func_800E7478();
+            page_idx = D_800F4CBC;
+            selection = D_800F4CC0;
+            if (page_idx == PAGE_MAIN) {
+                selection = D_800F4E48;
+            }
+        } else if ((item->flags & 0xa0) == 0) {
+            D_800F4CBC = page_idx;
+            D_800F4CC0 = selection;
+            func_800E7478();
+            page_idx = item->dest;
+            selection = D_800EB8CC[page_idx]->field11_0x1c;
+            if (page_idx == PAGE_SAVE) {
+                selection = glob->unk50C; // last used save slot
+            }
+            if (page_idx == PAGE_LOAD) {
+                selection = glob->unk50D; // last used load slot
+            }
+            if (page_idx == PAGE_MAIN) {
+                selection = D_800F4E48; // last main menu location
+            }
+            // some other thing
+            //
+        }
 
         if (item->flags & 0x80) {
-            //
+            if (page_idx == 0 && selection == 1 && !glob->curr.unkE2) {
+                // Can't go into time trial right now.
+                func_800E0B54(0x2900);
+                func_800E7478();
+                return 0x10000;
+            }
+            jt.sound_fade_out(12, 0, 0);
+            D_800F4CEC = item->unk1;
+            func_800E8790();
+            glob->curr.unkE4 = glob->world;
+            glob->unk516 = 0;
+
+            if (D_800F4E58 == 1) {
+                glob->unk516 = 2;
+                glob->stage = 0;
+                if (D_800F4E60 == 0 && (glob->curr.unkE9 & 1)) {
+                    glob->world = 0;
+                } else {
+                    glob->world = 7;
+                }
+            }
+
+            // This code is strange. Maybe there used to be seperate executables
+            // for these functions before they were all unified into TITLE.PEX
+            // and this is trying to patch around that.
+            if (D_800F4CEC == 1) {
+                if (glob->world != 0) {
+                    glob->world -= 1;
+                    glob->stage = 0;
+                }
+            } else if (D_800F4CEC == 2) {
+                glob->unk516 = 1;
+                if (glob->curr.unkE0 == 0) {
+                    glob->world = 0;
+                    glob->stage = 0;
+                } else {
+                    glob->world = (glob->curr.unkE0 - 1) / 3;
+                    glob->stage = (glob->curr.unkE0 - 1) % 3;
+                }
+            }
+            D_800F4CEC = 1;
+            func_800E0B54(0x2600);
         }
 
         if (item->flags & 0x40) {
@@ -1052,9 +1219,9 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
     u32 new_selection;
 
     if (buttons & BUTTONS_CANCEL) {
-        // 
+        //
     } else {
-        // 
+        //
     }
 
     //
@@ -1110,16 +1277,66 @@ extern FGBuffer D_800F4F28[2];
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 
 // a ton of functions inside this one
+// glabel func_800E4250 main
+// glabel func_800E4D40 _the_callback
+// glabel func_800E4EE8 load_textures
+// glabel func_800E561C
+// x text_set_pos
+// x text_clear
+// x text_put_char
+// x text_put_str
+// glabel func_800E5748 text_put_u8
+// glabel func_800E5780 text_put_u16
+// glabel func_800E57B4 text_put_u32
+// text_put_u64
+// glabel func_800E5818 gbuffer_swap
+// glabel func_800E58D4
+// glabel func_800E58E4
+// glabel func_800E5904 _draw_sprite
+// glabel func_800E5BBC draw_sprite
+// glabel func_800E5C00
+// glabel func_800E5F58
+// glabel func_800E6300
+// glabel func_800E6658 set_brightness
+// glabel func_800E6668
+// glabel func_800E681C
+// glabel func_800E6940
+// glabel func_800E6B90
+// glabel func_800E6D1C
+// glabel __func_800E6E80
+// glabel func_800E70F4
+// glabel func_800E7174
+// glabel func_800E7328
+// glabel func_800E73CC
+// glabel func_800E742C
+// glabel func_800E7478
+// glabel func_800E74A8
+// glabel func_800E77E4
+// glabel func_800E799C
+// glabel func_800E7BD8
+// glabel func_800E7CD8
+// glabel func_800E7D78
+// glabel func_800E7DA4
+// glabel func_800E7F78
+// glabel jt_ptr
+// glabel func_800E7FA4
+// glabel func_800E7FD4
+// glabel _start
+// glabel func_800E7FEC
 INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
+
+
+
 
 void func_800E8640(char *filename, int frame_count);
 
 
 // part of a data structure
 extern int D_800F4CEC;
+int D_800F4D74 = 0;
 
 // main
-int _func_800E4250()
+int func_800E4250()
 {
     func_800E7FD4();
     D_800F4E68 = 0;
@@ -1153,7 +1370,7 @@ int _func_800E4250()
     jt.SetDefDispEnv(&D_800F4F28[1].disp, 0, 0x100, 0x140, 0xF0);
     jt.SetDefDrawEnv(&D_800F4F28[0].draw, 0, 0x100, 0x140, 0xF0);
     jt.SetDefDrawEnv(&D_800F4F28[1].draw, 0, 0, 0x140, 0xF0);
-    
+
     D_800F4F28[0].disp.screen =
     D_800F4F28[1].disp.screen = (RECT){
         .x = 4,
@@ -1167,7 +1384,7 @@ int _func_800E4250()
         D_800F4F28[i].draw.r0 = 255;
         D_800F4F28[i].draw.g0 = 255;
         D_800F4F28[i].draw.b0 = 255;
-        
+
         D_800F4F28[i].disp.pad0 = 0;
         if (jt.get_video_mode() == 1) {
             D_800F4F28[i].disp.screen.y += 24;
@@ -1183,8 +1400,8 @@ int _func_800E4250()
         // loop 10
         var_s1_2 = 0;
         func_800E3EA4();    // setup_graph_env
-        jt.audio_unk3(0);
-        jt.audio_play_by_id(1);
+        //
+        //
         D_800F4E50 = 0;
         D_800F4E40 = 1;
         D_800F4E20 = 0;
@@ -1195,20 +1412,20 @@ int _func_800E4250()
             text_clear();
             func_800E0C74();    // tick
             func_800E14CC();    // tick
-            if ((D_800F4E50 == 0) && (D_800F4CEC == 0) && !(jt.unk_flags() & 8)) {
-                jt.audio_unk3(1);
-                jt.audio_play_by_id(0xF3);
+            if ((D_800F4E50 == 0) && (D_800F4CEC == 0) && !(jt.snd_status() & 8)) {
+                jt.music_set_repeat(1);
+                jt.music_play(0xF3);
                 D_800F4E40 = 1;
                 D_800F4E50 = 1;
             }
             if ((D_800F4E40 == 0) && (D_800F4E20 == 0) && (D_800F4CEC == 0)) {
-                jt.audio_unk3(1);
-                jt.audio_play_by_id(0xF3);
+                jt.music_set_repeat(1);
+                jt.music_play(0xF3);
                 D_800F4E50 = 1;
                 D_800F4E40 = 1;
             }
             buttons = func_800E74A8(0);    // read_input
-            jt.printf("%08X\n", buttons);
+            //jt.printf("%08X\n", buttons);
             if (buttons != 0) {
                 // reset timers
                 D_800F4E70 = 0;
@@ -1225,7 +1442,7 @@ int _func_800E4250()
             if (D_800F4E08 < var_s1_2) {
                 if (glob->unk518 == 0)
                     break;
-                
+
                 D_800F4CEC = glob->unk518 + 19;
                 jt.sound_fade_out(12, 0, 0);
                 glob->world = D_800EB97C[glob->unk518];
@@ -1241,7 +1458,77 @@ int _func_800E4250()
                 D_800F4E30 = 0;
             }
 
-            //
+            if (D_800F4CEC == 0) {
+                // Normal mode
+
+                // Are we still fading in? Speed it up if there's player input.
+                if (D_800F4CF4 < 0x81) {
+                    func_800E6658(D_800F4CF4);
+                    D_800F4CF4 += 8;
+                    if (buttons != 0) {
+                        D_800F4E30 = 0;
+                        D_800F4CF4 = 0x80;
+                        func_800E6658(0x80);
+                    }
+                }
+
+                // Process input
+                u32 new_state = func_800E3BBC(buttons, D_800F4E20, D_800F4E28);
+                D_800F4E28 = new_state >> 16;
+                D_800F4E20 = new_state & 0xffff;
+            } else {
+                // Switching executable mode
+
+                printf("switching\n");
+
+                // Block user input during the transition
+                func_800E3BBC(0, D_800F4E20, D_800F4E28);
+
+                // Fade out the screen
+                if (D_800F4CF4 >= 0) {
+                    func_800E6658(D_800F4CF4);
+                    D_800F4CF4 -= 8;
+                }
+
+                if (D_800F4E30 < 0x100) {
+                    D_800F4E30 += D_800F4E18;
+                }
+
+                D_800F4D74 += 1;
+                if (!(jt.snd_status() & 2) || (D_800F4D74 > 0x78)) {
+                    // Transition complete. Clean up and launch the executable.
+                    jt.DrawSync(0);
+                    jt.cd_pause();
+                    jt.cd_flush();
+                    jt.snd_reset();
+                    jt.execs_set_next(D_800F4CEC);
+                    jt.wait_for_vsync();
+                    jt.SetDispMask(0);
+                    if (glob->unk516 == 3) {
+                        func_800E0920();
+                        func_800E8790();
+                    }
+                    return;
+                }
+            }
+
+            // And then draw the screen.
+            text_set_attr(0);
+            // If the current page is a dialog screen, also show the previous
+            // page.
+            if (D_800F4E20 >= 4 && D_800F4E20 <= 6) {
+                func_800E22D8(D_800F4CBC);
+            }
+            func_800E22D8(D_800F4E20);
+            func_800E1FB8();
+            func_800E2234(D_800F4E20);
+            func_800E82A8();
+            func_800E681C();
+            func_800E0A60();
+            jt.cd_run_block();
+            if (D_800F4E20 == 0) {
+                var_s1_2 += 1;
+            }
         }
 
         // the right thing
@@ -1262,8 +1549,35 @@ int _func_800E4250()
 }
 
 extern RECT D_800F4D90;
-extern BGBuffer *current_bgbuffer;
 extern u8 D_801A0FF0;   // brightness
+extern int D_800F4EE0;
+
+void _func_800E6B90(RECT *r, short x, short y)
+{
+    //D_801A0FF0
+    SPRT *p = current_bgbuffer->next;
+    func_800E58E4(2);
+    setSprt(p);
+    setClut(p, D_800F4EE0 << 4, 240);
+    setWH(p, r->w, r->h);
+    setUV0(p, r->x, r->y);
+    setRGB0(p, D_801A0FF0, D_801A0FF0, D_801A0FF0);
+    setXY0(p, x, y);
+    // ????
+    //addPrim(current_bgbuffer->ot, p)
+    //
+    //
+    //
+
+}
+
+// draw_big_string_layer
+void _func_800E6D1C(char*, int, RECT*)
+{
+    //
+    //
+    // It uses an empty jumptable function.
+}
 
 // draw sky polygons
 void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
@@ -1294,7 +1608,7 @@ void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
             setUVWH(p, u, v, step, step);
             setClut(p, 320, 480 + fog_level);
             p->tpage = tpage;
-            
+
             addPrim(current_bgbuffer->ot[2], p);
 
             p += 1;
@@ -1348,10 +1662,10 @@ void func_800E77B8(void)
 
 extern u8 D_800F4D8E;
 extern int D_800F4EE8;
-extern int D_800F4EF0; 
+extern int D_800F4EF0;
 u16 D_800F7050[30][64];
 
-
+// 800E4ED0
 u8 text_set_attr(u8 attr)
 {
     u8 old = D_800F4D8E;
@@ -1359,12 +1673,14 @@ u8 text_set_attr(u8 attr)
     return old;
 }
 
+// 800E5634
 void text_set_pos(int x, int y)
 {
     D_800F4EE8 = x;
     D_800F4EF0 = y;
 }
 
+// 800E564C
 void text_clear(void)
 {
     u16 *p = D_800F7050;
@@ -1373,6 +1689,7 @@ void text_clear(void)
     text_set_pos(0, 0);
 }
 
+// 800E568C
 void text_put_char(u16 c)
 {
     if (D_800F4EE8 >= 63) return;
@@ -1380,6 +1697,7 @@ void text_put_char(u16 c)
     D_800F7050[D_800F4EF0][D_800F4EE8++] = (c & 0xFF) | (D_800F4D8E << 8);
 }
 
+// 800E56FC
 void text_put_str(char *str)
 {
     char c;
@@ -1448,7 +1766,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8474);
 #include "movie_args.h"
 // static init_args
 void func_800E857C(MovieArgs *as, int frame_count)
-{  
+{
     as->frame_count = frame_count;
     as->ring_size = 0x40;
     as->buffers[0] = 0x80060000;
@@ -1476,7 +1794,7 @@ extern SpuVolume D_800F4E04;
 void func_800E8640(char *filename, int frame_count)
 {
     MovieArgs args;
-    
+
     D_800F4E00 = 0;
     func_800E857C(&args, frame_count);
     jt.snd_reset();
@@ -1495,6 +1813,16 @@ void func_800E8640(char *filename, int frame_count)
     jt.DrawSync(0);
 }
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8790);
+//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8790);
+void func_800E8790(void)
+{
+    GlobalData *g = jt.globals();
+    g->unk500 = 0;
+    g->unk508 = 1;
+    g->unk509 = 0;
+    g->unk50A = 0;
+    g->unk50B = 0;
+    g->unk504 = 3;
+}
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E87DC);
