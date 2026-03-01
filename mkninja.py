@@ -1,7 +1,9 @@
 import os
+
 import ninja as Ninja
 
 LINKER_SHARED = "linker/shared.ld"
+
 
 class SourceFile:
     def __init__(self, name, path):
@@ -11,6 +13,7 @@ class SourceFile:
     @property
     def obj_name(self):
         return f"{self.name}.o"
+
 
 class Executable:
     def __init__(self, final_name, name, is_comped, libs):
@@ -72,10 +75,26 @@ class Executable:
     def final_path(self):
         return f"build/disc/{self.final_name}"
 
+
 # Setup
 executables = [
-    Executable("SCUS_941.03", "main", False, ["libpress", "libcd", "libds", "libcard", "libgpu", "libspu", "libetc", "libc", "libapi"]),
-    # Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"]),
+    Executable(
+        "SCUS_941.03",
+        "main",
+        False,
+        [
+            "libpress",
+            "libcd",
+            "libds",
+            "libcard",
+            "libgpu",
+            "libspu",
+            "libetc",
+            "libc",
+            "libapi",
+        ],
+    ),
+    Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"]),
     # Executable("JM1/MAIN.PEX", "jm1", True, ["libgpu", "libgte", "libetc", "libc", "libapi"]),
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),
@@ -87,13 +106,21 @@ Ninja.set("jfdir", "tools/jfcomp")
 Ninja.set("jfcomp", "$jfdir/jfcomp")
 Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
-Ninja.set("cflags", "-Wall -Iinclude -Ipsyq/include -Iassets -O1 -G0 -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic")
+Ninja.set(
+    "cflags",
+    "-Wall -Iinclude -Ipsyq/include -Iassets -O1 -G0 -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic",
+)
 Ninja.set("ldflags", "--no-check-sections -nostdlib -s")
 Ninja.set("cflagsnat", "-O2")
 
 Ninja.rule("ccnat", "gcc $cflagsnative $in -o $out")
 Ninja.rule("cc", "${cross}gcc $cflags -Iassets/$modid -c $in -o $out")
-Ninja.rule("link", "${cross}ld $ldflags -Map=build/$modid.map -T linker/symbols.$modid.ld -T " + LINKER_SHARED + " $in -o $out")
+Ninja.rule(
+    "link",
+    "${cross}ld $ldflags -Map=build/$modid.map -T linker/symbols.$modid.ld -T "
+    + LINKER_SHARED
+    + " $in -o $out",
+)
 Ninja.rule("objcopy", "${cross}objcopy -O binary $in $out")
 Ninja.rule("copy", "cp $in $out")
 Ninja.rule("decomp", "$jfcomp decomp $in $out")
@@ -107,11 +134,15 @@ Ninja.param("generator", "1")
 
 # Build tools
 Ninja.build("phony", "tools", ["$jfcomp"])
-Ninja.build("ccnat", "$jfcomp", [
-    "$jfdir/main.c",
-    "$jfdir/comp.c",
-    "$jfdir/decomp.c",
-])
+Ninja.build(
+    "ccnat",
+    "$jfcomp",
+    [
+        "$jfdir/main.c",
+        "$jfdir/comp.c",
+        "$jfdir/decomp.c",
+    ],
+)
 Ninja.build("cc", "build/header.o", ["src/header.s"])
 
 exe_paths = []

@@ -3,7 +3,6 @@
 
 // Custom string functions because the BIOS ones are slow and libc2.a was not a
 // thing yet. THESE ARE NOT COMPATIBLE WITH libc2.a! Compare the signatures.
-// TODO: Rename these to ram_memset or something so we don't override.
 
 // 80022EE8
 void ram_strcpy(char *src, char *dst)
