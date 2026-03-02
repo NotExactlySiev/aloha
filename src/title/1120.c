@@ -1346,7 +1346,6 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 
 // a ton of functions inside this one
 // # main stuff
-// glabel func_800E4250 main
 // glabel func_800E4D40 _the_callback
 // glabel func_800E4EE8 load_textures
 // glabel func_800E561C
@@ -1391,12 +1390,11 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
 extern int D_800F4CEC;
 int D_800F4D74 = 0;
 
-// main
-int func_800E4250()
+int main()
 {
-    func_800E7FD4();
+    __main();
     D_800F4E68 = 0;
-    func_800E7FA4();
+    announce_entering_main();
     func_800E87DC();
     jt.sfx_free_vab(1);
     jt.wait_for_vsync();

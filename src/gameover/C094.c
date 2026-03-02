@@ -312,9 +312,9 @@ void render_background(void)
     D_800ED394 = (D_800ED394 + 1) & 0x7F;
     for (i = 0; i < 4; i++)
         for (j = 0; j < 4; j++)
-            sprite_render(0, 0x30, 
-                ((i << 7) - D_800ED394) - 0x40, 
-                ((j << 7) + D_800ED394) - 0x40, 
+            sprite_render(0, 0x30,
+                ((i << 7) - D_800ED394) - 0x40,
+                ((j << 7) + D_800ED394) - 0x40,
                 screen_brightness / 2, 2);
 }
 
@@ -331,7 +331,7 @@ void render_routine(void)
 void func_800EC358(void)
 {
     GlobalData* global = jt.globals();
-    
+
     global->unk500 = 0;
     global->unk504 = 3;
     global->unk508 = 1;
@@ -347,12 +347,13 @@ int main(void)
     int choice;
 
     // TEST: let's disable all audio shit
-    func_800ED268();    // go to weird event handler
+    __main();
+    announce_entering_main();    // go to weird event handler
     gbuffer_init();    // set up graphics env
     func_800EC098();    // set up some constants
-    
+
     jt.snd_reset();
-    
+
     input_das_setup();
     GlobalData* global = jt.globals();
     jt.set_global_volume(&(SpuVolume){ 0x7FFF, 0x7FFF });
@@ -363,7 +364,7 @@ int main(void)
     u8 world = global->world;
     if (world > 5) world = 5;
     jt.audio_play_by_id(D_800ED354[world]);
-    
+
     // cycle through both buffers once
     gbuffer_swap();    // clear
     gbuffer_draw();    // draw
@@ -382,11 +383,11 @@ int main(void)
         render_routine();            // update graphics
         gbuffer_draw();            // render graphics
     } while (stage != 4);
-    
+
     jt.snd_reset();
 
     choice = 0;
-    
+
     if (selected == 0) {
         global->world = 0;
         func_800EC358();
@@ -399,7 +400,7 @@ int main(void)
 void func_800ECBB4(s16 x, s16 y, s16 w, s16 h, u8 col)
 {
     POLY_FT4 *p;
-    
+
     u32 tpage;
     p = gbuffer_current->next;
     setPolyFT4(p);

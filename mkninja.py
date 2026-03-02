@@ -96,7 +96,9 @@ executables = [
         ],
         ["util.o"],
     ),
-    Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o"]),
+    Executable(
+        "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
+    ),
     # Executable("JM1/MAIN.PEX", "jm1", True, ["libgpu", "libgte", "libetc", "libc", "libapi"]),
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),
@@ -148,6 +150,7 @@ Ninja.build(
 
 # Common objects
 Ninja.build("cc", "build/header.o", ["src/header.s"])
+Ninja.build("cc", "build/start.o", ["src/start.s"])
 Ninja.build("cc", "build/util.o", ["src/util.c"])
 
 exe_paths = []
