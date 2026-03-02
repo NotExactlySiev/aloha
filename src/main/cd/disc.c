@@ -176,7 +176,8 @@ extern int D_80047F24;
 extern int D_800548EC;
 
 // 8001A3B8
-void cd_init(void) {
+void cd_init(void)
+{
     static int D_80047D74 = 0;  // cd subsystem initialized
     if (D_80047D74 == 1)
         return;

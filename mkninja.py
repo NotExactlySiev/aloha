@@ -99,7 +99,7 @@ executables = [
     Executable(
         "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
     ),
-    # Executable("JM1/MAIN.PEX", "jm1", True, ["libgpu", "libgte", "libetc", "libc", "libapi"]),
+    Executable("JM1/MAIN.PEX", "jm1", True, ["libgte", "libetc", "libc", "libapi"]),
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),
 ]

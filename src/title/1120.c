@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pad.h"
 #include "shared.h"
 #include <libetc.h>
 #include "sky.h"
@@ -6,6 +7,23 @@
 #include "sfx.h"
 
 extern GlobalData *glob;
+
+// cheat sequence. unlock all levels
+const u32 D_800EBA3C[] = {
+    Pad1Up, Pad1Up, Pad1Down, Pad1Down,
+    Pad1x, Pad1x, Pad1Left, Pad1Right,
+    Pad1Left, Pad1Right, Pad1x, Pad1tri,
+    Pad1x, Pad1tri, 0, 0x08200000, // What is this final number doing here?
+};
+
+// enable debug mode. cheat mode should be on.
+// enter while holding down R2
+const u32 D_800EB9D4[] = {
+    Pad1Up, Pad1tri, Pad1Up, Pad1x,
+    Pad1Left, Pad1Left, Pad1Right, Pad1Right,
+    Pad1x, Pad1x, Pad1tri, Pad1tri,
+    Pad1Select, 0
+};
 
 const char *D_800EB8F0[6][3] = {
     { "VAB\\W1_1.VAB", "VAB\\W1_2.VAB", "VAB\\W1_3.VAB" },
@@ -1377,12 +1395,28 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 // glabel func_800E70F4
 // glabel func_800E7174
 // glabel func_800E7328
-// glabel func_800E73CC
+// glabel func_800E73CC set cloud speed
 // glabel func_800E742C update cheat mode
 // glabel func_800E7478 input das nonsense
 // glabel func_800E74A8 input das nonsense
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
+
+int func_800E73CC(int arg, u32 buttons)
+{
+    if ((arg == 0) && (buttons & (Pad1L1 | Pad1L2 | Pad1R1 | Pad1R2))) {
+        if (buttons & Pad1Up) {
+            func_800E8238();
+
+            return 1;
+        }
+        if (buttons & Pad1Down) {
+            func_800E8278();
+            return 1;
+        }
+    }
+    return 0;
+}
 
 // part of a data structure
 extern int D_800F4CEC;

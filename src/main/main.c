@@ -709,7 +709,7 @@ s32 enable_exception_event(void* handler)
 // 80019DCC
 u32 get_engine_version(void)
 {
-  return 0x10002;
+    return 0x10002;
 }
 
 // 80019DD8

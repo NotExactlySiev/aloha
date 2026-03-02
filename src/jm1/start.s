@@ -5,9 +5,6 @@
 
 .section .text, "ax"
 
-
-# Handwritten function
-
 # jumptable pointer pointer
 glabel func_800C6B64
 /* 17364 800C6B64 00000180 */  .word    0x80010000
@@ -35,5 +32,6 @@ glabel func_800C6BA4
 /* 173A8 800C6BA8 00000000 */   nop
 
 glabel _start
+    # This one doesn't load gp. Interesting.
 /* 173AC 800C6BAC 50800308 */  j          main
 /* 173B0 800C6BB0 00000000 */   nop

@@ -212,4 +212,9 @@ void gpu_init(void) {
     jt_set(call_LoadClut, 0x19B);
     jt_set(call_SetVideoMode, 0x19C);
     jt_set(call_GetVideoMode, 0x19D);
+
+    // Extra exports not done by the original game
+    jt_set(SetSemiTrans, 0x19E);
+    jt_set(SetShadeTex, 0x19F);
+    jt_set(SetTexWindow, 0x1A0);
 }

@@ -54,7 +54,7 @@ typedef struct {
     s8  unk516;
     u8  debug_features;
     u8  unk518;
-    s8  unk519; // have beaten the game?
+    s8  unk519; // unlock all levels cheat
 } GlobalData;
 #undef UNK
 
@@ -70,8 +70,8 @@ extern struct {
     char*       (*execs_get_path)(s32);
     s32         (*get_video_mode)(void);
     s32         (*get_region)(void);
-    int         (*get_widescreen)(void);  // WIDESCREEN?????!!!!
-    void        (*set_widescreen)(int); // title sets it to EA in globals
+    int         (*get_widescreen)(void);
+    void        (*set_widescreen)(int);
     char*       (*get_mc_file_name)(void);
     UNK(12, 191);
     void        (*decompress_rle)(u32,void* src,void* dst);
@@ -152,7 +152,14 @@ extern struct {
     u16         (*LoadClut)(u16* data, u32 x, u32 y);
     u32         (*SetVideoMode)(u32);
     u32         (*GetVideoMode)(void);
-    UNK(414, 511);
+
+    // I had to also export these three functions in addition. Since the game
+    // executable was using them from its own linked libgpu which is bad.
+    /* 19E */ void (*SetSemiTrans)(void *p, int abe);
+    /* 19F */ void (*SetShadeTex)(void *p, int tge);
+    /* 1A0 */ void (*SetTexWindow)(DR_TWIN *p, RECT *tw);
+
+    UNK(417, 511);
 
     // Audio Functions
     UNK(512, 639);
@@ -184,11 +191,11 @@ extern struct {
     UNK(674, 767);
 
     // Misc. Functions
-    void        (*sfx_load_vab)(short index, void *header, void *data);
-    int         (*sfx_free_vab)(s16);
-    int         (*snd_set_stereo)(int);
-    int         (*snd_get_stereo)(void);
-    void        (*sfx_kill_all)(void);
+    /* 300 */ void        (*sfx_load_vab)(short index, void *header, void *data);
+    /* 301 */ int         (*sfx_free_vab)(s16);
+    /* 302 */ int         (*snd_set_stereo)(int);
+    /* 303 */ int         (*snd_get_stereo)(void);
+    /* 304 */ void        (*sfx_kill_all)(void);
     /* 305 */ s32         (*snd_set_volume)(s16);
     /* 306 */ int         (*sfx_set_reverb)(int val);
     /* 307 */ void        (*snd_set_reverb)(long mode, short depth);

@@ -3,6 +3,7 @@
 #include <libetc.h>
 #include "gbuffer.h"
 #include "entity.h"
+#include "libgte.h"
 #include "mesh.h"
 
 #include "shared.h"
@@ -74,7 +75,7 @@ s16 sin_lut[4096];
 void make_sin_lut(void)
 {
     for (int i = 0; i < 4096; i++) {
-        sin_lut[i] = rsin(i);   // rsin
+        sin_lut[i] = rsin(i);
     }
 }
 
@@ -392,7 +393,7 @@ void func_800D0C5C(void)
     func_800D0C48(&entity_list_1.head, &entity_list_1.tail);
     entity_free_count = 128;
 
-    // TODO: entity size should be correct 
+    // TODO: entity size should be correct
     // initialize all entities as free
 
     entity_list_free.head.prev = 0;
@@ -408,7 +409,7 @@ void func_800D0C5C(void)
         // connect to last element
         last->next = node;
         node->prev = last;
-        
+
         last = node;
     }
     last->next = &entity_list_free.tail;
@@ -544,7 +545,7 @@ void func_800D30E4(Entity *e)
     int meshid;
     // TODO: make the coin type in union
     if (e->sub.unk[0] < 0) return;  // lifetime?
-    
+
     // is visible? these are flags I think TODO
     e->unk5 |= 0x8000;
     if (e->unk5 & 1) return;
@@ -567,7 +568,7 @@ void func_800D30E4(Entity *e)
 
     pos.vy = e->max_y + 2;
     if (cam->vy >= pos.vy || e->max_y > 0) return;
-    
+
     // draw shadow
     // TODO: make sin_lut lookup a macro?
     s32 tmp = (e->range_y / 2) * sin_lut[e->angle_x & 0xFFF];
@@ -1145,13 +1146,13 @@ void func_800DC4C4(void)
     //jt.printf("%d\n", player_entity.comp1.state);
     switch (player_entity.comp1.state) {
 
-make_0: // landing
-    D_80102C6C = 0;
-    D_80102C4C = 0x800;
-    player_entity.vel_y = 0;
-    func_800DC9EC(&player_entity);  // land
-    D_80102BFC = player_entity.max_y;
-    player_entity.comp1.state = 0;
+    make_0: // landing
+        D_80102C6C = 0;
+        D_80102C4C = 0x800;
+        player_entity.vel_y = 0;
+        func_800DC9EC(&player_entity);  // land
+        D_80102BFC = player_entity.max_y;
+        player_entity.comp1.state = 0;
     case 0: // grounded
         if (D_80102C9C > 0) {
             D_80102C9C = 0;
@@ -1180,10 +1181,10 @@ make_0: // landing
             func_800CE304(0x500, 0x50, 0x3F);
         } else {
             D_80102C5C = func_800D9E40(&player_entity);
-            if (func_800D9F2C(&player_entity) 
-             || func_800D9DD4(&player_entity) 
+            if (func_800D9F2C(&player_entity)
+             || func_800D9DD4(&player_entity)
              || (D_80102C34 & D_80102738) == 0) break;
-            
+
             func_800CE304(0x300, 0x50, 0x3F);
             D_80102C9C = 0;
             D_80102C6C = 0x300;
@@ -1211,16 +1212,16 @@ make_0: // landing
         break;
 
 
-make_3:
-    func_800CE304(0x400, 0x5A, 0x3F);
-    D_80102C6C = 0x300;
-    D_80102C1C = 0;
-    D_80102724 = -16;
-    D_80102C9C = 0;
-    player_entity.comp1.unk0 = 24;
-    player_entity.comp1.state = 3;
-    player_entity.vel_y = -D_80102710;
-    player_entity.unk7 = D_80102718; 
+    make_3:
+        func_800CE304(0x400, 0x5A, 0x3F);
+        D_80102C6C = 0x300;
+        D_80102C1C = 0;
+        D_80102724 = -16;
+        D_80102C9C = 0;
+        player_entity.comp1.unk0 = 24;
+        player_entity.comp1.state = 3;
+        player_entity.vel_y = -D_80102710;
+        player_entity.unk7 = D_80102718;
     case 3: // air jump (just)
         if (D_80102C34 & D_80102738 == 0 || --player_entity.comp1.unk0 == 0) {
             player_entity.unk7 = player_entity.comp1.unk0 * 0x300 + D_80102718;
@@ -1237,8 +1238,8 @@ make_3:
         break;
 
 
-make_5:
-    player_entity.comp1.state = 5;
+    make_5:
+        player_entity.comp1.state = 5;
     case 5: // falling
         D_80102C6C = 0;
         //jt.printf("timer: %d\n", D_80102C14);
@@ -1349,7 +1350,7 @@ void func_800DDF04(void)
         debug_set_pos(1, 16);
         debug_print_str("GROUND=");
         debug_print_decimal(player_entity.max_y);
-        
+
         debug_set_pos(1, 23);
         debug_print_str("X=");
         debug_print_decimal(player_entity.pos_x >> 12);
@@ -1379,18 +1380,18 @@ void func_800DDF04(void)
     s16 x,y,z;
     if (player_entity.on_air == 0 && player_entity.max_y <= 0) {
         func_800E5E60(
-            &(SVECTOR) { 
-                player_entity.pos_x >> 12, 
+            &(SVECTOR) {
+                player_entity.pos_x >> 12,
                 player_entity.max_y,
                 player_entity.pos_z >> 12
             },
-            &(SVECTOR) { 
+            &(SVECTOR) {
                 .vy = player_entity.angle_y + 0x800,
             },
             D_80102BF4 + 1
         );
     }
-    
+
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE244);
@@ -1433,7 +1434,7 @@ void debug_print_char(char c)
 {
     s32* last;
     SPRT_8* p;
-    
+
     if (debug_text_ot[debug_ot_index].count < 512) {
         debug_text_ot[debug_ot_index].count += 1;
         p = debug_text_ot[debug_ot_index].nextfree;
@@ -1531,7 +1532,7 @@ void func_800DE8B0(u32 x, u32 y)
     debug_font_x = x & 0x3c0;
     debug_font_y = y & 0x100;
     D_80102788 = y & 0xff;
-    
+
 }
 
 void func_800DE8DC(u16 r, u16 g, u16 b)
@@ -1571,11 +1572,11 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
 
 // 0x400 to 0xC00 camera is glitched
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
-void func_800DFE18(void)
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
+void _func_800DFE18(void)
 {
     func_800E5CC0();
-    
+
     // func_800F1FFC();
     // func_800F2760();
     // func_800F296C();
@@ -1587,7 +1588,7 @@ void func_800DFE18(void)
     // func_800F421C(); //
     // func_800D46CC(); // demo overlay
     func_800EF004();    // ui
-    
+
     if (!func_800F3434()) {
         //func_800F1A0C();
         //func_800F87BC();
@@ -1595,7 +1596,7 @@ void func_800DFE18(void)
         //func_800E5D30();
         //func_800D0F24();
     }
-    
+
     if (!func_800DBC24() && !func_800F3434()) {
         //func_800D0E5C();
     }
@@ -1609,7 +1610,7 @@ void func_800DFE18(void)
         //func_800F8EF4();
         //func_800F8E10();
     }
-    
+
     DRAWENV drawenv;
     short ofs[2];
     GBuffer *gbuf = gbuffer_get_current();
@@ -1663,14 +1664,20 @@ extern int D_80102D04;
 
 void main(void)
 {
+    // __main();
     func_800E98A8();
     func_800DE8B0(448, 224);
     func_800DE8DC(0x8000, 0x8000, 0x7FFF);
     func_800DE930();
     func_800CE820();
     make_sin_lut();
+
+    // Load the level
     func_800DADE0();
     func_800F2A18();
+
+    // This loads fine, but doesn't show any of the graphics on the screen yet.
+    // We need to fix that to figure out what's going on.
     int rc = func_800E2C00();
     if (rc)
         goto out;
@@ -1694,11 +1701,14 @@ reload:
         func_800E9728(0);
         D_80102CA4 = 0;
         func_800F3198();
+
+        // The real display loop
         while (1) {
+            printf("loop\n");
             if (D_80102CA4) {
                 //
             }
-            
+
             if (D_80102CD4 == 1) {
                 //
             }
@@ -1711,6 +1721,7 @@ reload:
                 func_800F31C4();
             }
             for (; r > 0; r--) {
+                printf("simulate\n");
                 if (!func_800F3350()) {
                     if (D_80102CCC < ONE) {
                         int tmp = D_80102CCC + 128;
@@ -1864,21 +1875,12 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F4C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F84);
 
-#define OT_SIZE 567
-
-// this actually holds the primitive data
-typedef struct {
-    u32 ot[OT_SIZE];
-    u32 prims[40960];
-} PrimBuffer;
-
-
+// This is weird. The second primbuffer will run into the text section if full.
 PrimBuffer *gbuffer_prim_buffers = 0x80060000;
 s32 D_80102D3C = 0;  // primbuffer_index
 
 GBuffer gbuffers[3];
 s32 gbuffer_current_index;
-
 
 extern s32 D_80102DBC;
 
@@ -1898,7 +1900,7 @@ void gbuffer_swap(void)
         gbuffer_current_index = 0;
     if (++D_80102D3C > 1)
         D_80102D3C = 0;
-    
+
     PrimBuffer *pb = gbuffer_prim_buffers + D_80102D3C;
     gbuffers[gbuffer_current_index].ot = pb->ot;
     gbuffers[gbuffer_current_index].nextfree = pb->prims;
@@ -1914,7 +1916,98 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1164);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1190);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E11A0);
+extern int D_80102D0C;
+extern int D_80102D44;
+extern int D_80102D4C;
+extern int D_80102D54;
+
+typedef struct {
+    RECT *rect;
+    void *data;
+} QueuedImage;
+
+extern CVECTOR D_80142CE0;
+
+extern QueuedImage D_8012B980[16];
+
+// gbuffer_draw
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E11A0);
+void func_800E11A0(void)
+{
+    int index = gbuffer_current_index;
+    GBuffer *gbuf = &gbuffers[index];
+    //printf("Drawing buffer %d\n", index);
+    if (D_80102D0C) {
+        // VRAM Inspector
+        //
+        // SetDefDispEnv blah
+    } else {
+        gbuf->disp.screen.x = D_80102D4C + 4;
+        gbuf->disp.screen.y = D_80102D54 + 14;
+        func_800E0ABC(&gbuf->disp);
+    }
+
+    // Switch disp env in the next vsync
+    if (D_80102D44 == 0) {
+        func_800F2C50(NULL);
+        D_80102D44++;
+    } else {
+        func_800F2C50(&gbuf->disp);
+    }
+
+    func_800F2C30();
+    func_800F2CAC(0); // set since drawn
+    func_800F2C10();
+
+    // ????
+    RECT *rect = gbuf->nextfree;
+    gbuf->nextfree = rect + 1;
+    *rect = (RECT){
+        .x = gbuf->draw.clip.x,
+        .y = gbuf->draw.clip.y,
+        .w = 4,
+        .h = 1,
+    };
+    jt.LoadImage(rect, rect);
+
+    for (int i = 0; i < D_80102DBC; i++) {
+        QueuedImage *image = &D_8012B980[i];
+        jt.LoadImage(image->rect, image->data);
+    }
+    D_80102DBC = 0;
+
+    //
+    //
+    //
+    //
+
+#ifdef DUMP_OT
+    P_TAG *ot = &gbuf->ot[0];
+    int layer = 0;
+    printf("OT starts at %p\n", ot);
+    while (ot->addr) {
+        if (ot->len) {
+            printf("%03d: %08X [%d] C: 0x%02X\n", layer, ot->addr, ot->len, ot->code);
+        }
+        ot = (((u32) &ot) & 0xFF000000) | (ot->addr);
+        if (ot == &gbuf->ot[layer + 1]) {
+            layer += 1;
+        }
+        //printf("next is at %p\n", ot);
+        //break;
+    }
+#endif
+
+    DR_ENV *p = gbuf->nextfree;
+    gbuf->nextfree = p + 1;
+    gbuf->draw.r0 = D_80142CE0.r;
+    gbuf->draw.g0 = D_80142CE0.g;
+    gbuf->draw.b0 = D_80142CE0.b;
+    jt.SetDrawEnv(p, &gbuf->draw);
+    addPrim(&gbuf->ot[1], p);
+    //jt.DrawOTag(gbuf->ot);
+    func_800E9818(gbuf->ot);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E169C);
 
@@ -1944,7 +2037,51 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1C34);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1D8C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1E28);
+// Animate "GRAB" image
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1E28);
+void func_800E1E28(int rate, int frames)
+{
+    printf("rate %d frame %d\n", rate, frames);
+    func_800F3154();
+    my_DrawSync(0);
+    func_800F2C10();
+    for (int i = 0; i < frames + 3; i++) {
+        printf("do\n");
+        //
+        //
+        gbuffer_swap();
+        GBuffer *gbuf = gbuffer_get_current();
+
+        POLY_F3 *hm = gbuf->nextfree;
+        gbuf->nextfree = hm + 1;
+        setPolyF3(hm);
+        setRGB0(hm, 128, 64, 64);
+        setXY3(hm, 30, 30, 30, 70, 70, 30);
+        addPrim(&gbuf->ot[64], hm);
+
+        POLY_FT4 *p = gbuf->nextfree;
+        gbuf->nextfree = p + 1;
+        setPolyFT4(p);
+        setTPage(p, 1, 0, 768, 0);
+        setClut(p, 512, 240);
+        setRGB0(p, 0x80, 0x80, 0x80);
+        setXYWH(p, 0, 0, 248, 216);
+        setUVWH(p, 0, 0, 248, 216);
+        addPrim(&gbuf->ot[563], p);
+
+        DR_MODE *dm = gbuf->nextfree;
+        gbuf->nextfree = dm + 1;
+        jt.SetDrawMode(dm, 1, 0, getTPage(1, 0, 768, 0), NULL);
+        addPrim(&gbuf->ot[563], dm);
+        my_DrawSync(0);
+        func_800F2C6C(1);
+        func_800E11A0();
+    }
+    my_DrawSync(0);
+    func_800F2C6C(1);
+    func_800F2C30();
+    func_800F3154();
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E20A0);
 
@@ -1958,9 +2095,9 @@ u32 func_800E20E8(u32 *header, s32 section)
     // should be converted from big endian
     union { u8 b[4]; u32 i; } be;
     be.i = header[section];
-    u32 le = (be.b[0] << 24) 
-           | (be.b[1] << 16) 
-           | (be.b[2] << 8) 
+    u32 le = (be.b[0] << 24)
+           | (be.b[1] << 16)
+           | (be.b[2] << 8)
            | (be.b[3] << 0);
     return le;
 }
@@ -2141,7 +2278,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
             //jt.printf("\t\tSET VOFF: %d\tFOFF: %d\n", header[2*j], header[2*j+1]);
             gcount = *data++ + 1;
             for (int k = 0; k < gcount; k++) {
-                
+
                 //skip the bytes
                 data += (*data)/4 + 1;
                 u32 size = *data++;
@@ -2310,13 +2447,13 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     MATRIX *rotation = SCRTCHPAD(0x3E4);
 
     SVECTOR *third = dir;
-    
+
     Mesh *mesh = &mesh_array[id & 0x3FF];
     dir->vx = pos->vx - camera_pos->vx;
     dir->vy = pos->vy - camera_pos->vy;
     dir->vz = pos->vz - camera_pos->vz;
     s32 mag2 = func_800F4354(dir, tmp, mesh);
-    
+
     if (mag2 < 0) return;
     if (mag2 >= D_801380B0/4) {
         // far
@@ -2349,7 +2486,7 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
         int diff = mag2;
         if (mag2 < 1) diff = 1;
         if (mag2 > 511) diff = 511;
-        mag2 = 558 - diff;        
+        mag2 = 558 - diff;
     }
 
     MATRIX *rot_p = rotation;
@@ -2388,7 +2525,7 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     if (id & 0x1000) {
         third = NULL;
         cool->vx = cool->vx >> 1;
-        cool->vy = cool->vy >> 1; 
+        cool->vy = cool->vy >> 1;
         cool->vz = cool->vz >> 1;
     }
     // SetRotMatrix
@@ -2518,3 +2655,87 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E736C);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E749C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E75B0);
+
+
+
+
+// TEMPORARY FIX FOR LIBGPU
+
+// These are libgpu functions that were called directly by this file, rather
+// than using macros or the entries exported from main. This break so many
+// things in the new version of PsyQ that I'm gonna not link libgpu at all.
+// But until we decompile all the functions that do call libgpu, we have to
+// implement the calls safely ourselves. These should be removed once they're
+// not needed anymore.
+
+void SetSprt(SPRT *p)
+{
+    setSprt(p);
+}
+
+void SetSprt8(SPRT_8 *p)
+{
+    setSprt8(p);
+}
+
+void SetTile(TILE *p)
+{
+    setTile(p);
+}
+
+void SetPolyFT4(POLY_FT4 *p)
+{
+    setPolyFT4(p);
+}
+
+void SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw)
+{
+    jt.SetDrawMode(p, dfe, dtd, tpage, tw);
+}
+
+void SetSemiTrans(void *p, int abe)
+{
+    jt.SetSemiTrans(p, abe);
+}
+
+void SetShadeTex(void *p, int tge)
+{
+    jt.SetShadeTex(p, tge);
+}
+
+void SetTexWindow(DR_TWIN *p, RECT *tw)
+{
+    jt.SetTexWindow(p, tw);
+}
+
+DRAWENV *SetDefDrawEnv(DRAWENV *env, int x, int y, int w, int h)
+{
+    return jt.SetDefDrawEnv(env, x, y, w, h);
+}
+
+DISPENV *SetDefDispEnv(DISPENV *env, int x, int y, int w, int h)
+{
+    return jt.SetDefDispEnv(env, x, y, w, h);
+}
+
+void SetDrawOffset(DR_OFFSET *p, u_short *ofs)
+{
+    jt.SetDrawOffset(p, ofs);
+}
+
+void SetDrawEnv(DR_ENV *dr_env, DRAWENV *env)
+{
+    jt.SetDrawEnv(dr_env, env);
+}
+
+u_short GetTPage(int tp, int abr, int x, int y)
+{
+    return getTPage(tp, abr, x, y);
+}
+
+u_short GetClut(int x, int y)
+{
+    return getClut(x, y);
+}
+
+int (*GPU_printf)(char *fmt, ...) = printf;
