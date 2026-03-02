@@ -25,7 +25,9 @@ typedef struct {
     s8  unkE8;  // played before?
     s8  unkE9;
     s8  unkEA;  // widescreen
-    UNK(0xEB, 0xFF);
+    char signature[8];
+    UNK(0xF3, 0xFB);
+    u32 checksum;
 } SavedData;
 #undef UNK
 
@@ -46,7 +48,7 @@ typedef struct {
     u8  intro_played;
     s8  slot_state[3];
     u8  unk512;
-    u8  unk513;    // index 0-69
+    u8  unk513; // index 0-69
     u8  world;
     u8  stage;  // next one to play
     s8  unk516;

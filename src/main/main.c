@@ -757,7 +757,7 @@ int main(int argc, char *argv[])
     }
 
     // # custom stuff:
-    globals()->debug_features = 1;
+    //globals()->debug_features = 1;
     jt_set(printf, 1001);
 
     // run the game

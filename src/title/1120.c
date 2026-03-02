@@ -97,7 +97,6 @@ short func_800E0B54(u32 id)
     return D_800F4D04;
 }
 
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0C24);
 void func_800E0C24(void)
 {
     if (D_800F4D00 > -1) {
@@ -273,8 +272,8 @@ const char *D_800EB1D8[] = {
 };
 
 extern int D_800F4E68; // movie_test_selected
+
 // movie test prev/next/play
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0D78);
 void func_800E0D78(void)
 {
     if (--D_800F4E68 < 0)
@@ -282,7 +281,6 @@ void func_800E0D78(void)
     func_800E0B54(0x2C00);
 }
 
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0DB8);
 void func_800E0DB8(void)
 {
     if (++D_800F4E68 > NMOVIES - 1)
@@ -314,37 +312,22 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1384);
 extern int D_801A0FA8;
 extern int D_801A0FB0;
 
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1418);
-void func_800E1418(void)
-{
-    RECT r;
-    if (D_801A0FA8 == 1 && D_801A0FB0 != 1) {
-        func_800E6B90();
-        func_800E6940();
-    }
-}
+INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1418);
+// void func_800E1418(void)
+// {
+//     RECT r;
+//     if (D_801A0FA8 == 1 && D_801A0FB0 != 1) {
+//         func_800E6B90();
+//         func_800E6940();
+//     }
+// }
 
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14A4);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14CC);
 
-// mc functions
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1514);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1570);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E15A4);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E15FC);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E189C);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1928);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1A88);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1BCC);
+// menu.c
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1C24);
 
@@ -387,9 +370,26 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1F60);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1FB8);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E2234);
+extern int D_800F4D14;
+extern int D_800F4D18;
+extern int D_800F4E70;
+extern int D_800F4EC0;
+
 // draw logo
-//void func_800E2234(void) {}
+void func_800E2234(int page_index)
+{
+    int brightness = (page_index >= 4 && page_index <= 6) ? 100 : 128;
+    if (D_800F4E70 == 1) {
+        // While animated
+        func_800E5F58(D_800F4D14 - 6, D_800F4D18 - 10, D_800F4EC0);
+    } else {
+        // Static
+        func_800E6300(D_800F4D14 - 6, D_800F4D18 - 10, D_800F4EC0, brightness);
+    }
+
+    // Copyright text
+    func_800E5C00(-6, 200);
+}
 
 u8 text_set_attr(u8 attr);
 void text_set_pos(int x, int y);
@@ -410,8 +410,8 @@ typedef struct {
 */
     // probably another function, for pressing
     void (*click)(void);
-    void (*press_right)(void);
     void (*press_left)(void);
+    void (*press_right)(void);
 } MenuItem;
 
 typedef union {
@@ -587,7 +587,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x18,
         .panel_sprite_id = 10,
         .panel_clut_thing = 2,
-        .items_strings = (short[]){
+        .items_sprites = (short[]){
             16, 17
         },
         .items = {
@@ -607,7 +607,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x18,
         .panel_sprite_id = 11,
         .panel_clut_thing = 2,
-        .items_strings = (short[]){
+        .items_sprites = (short[]){
             16, 17  // also reused with the other dialog
         },
         .items = {
@@ -627,7 +627,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x18,
         .panel_sprite_id = -1,
         .panel_clut_thing = -1,
-        .items_strings = (short[]){
+        .items_sprites = (short[]){
             16, 17  // also reused with the other dialog
         },
         .items = {
@@ -701,8 +701,11 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
     },
 };
 
-// progress enum's strings
+// Progress enum's strings in two encodings
+
+// ASCII, for displaying in the menu
 const char *D_800EB430[] = {
+    "NEW GAME",
     "WORLD 1 ",
     "WORLD 2 ",
     "WORLD 3 ",
@@ -716,6 +719,26 @@ const char *D_800EB430[] = {
     "EXTRA 5 ",
     "EXTRA 6 ",
     "COMPLETE",
+};
+
+// TODO: These should be encoded as SHIFT-JIS. I'm not sure how to do that or
+// if this is correct.
+// Shift-JIS, for use in the save file display text
+const char *D_800EB948[14] = {
+    "\x82\x6D\x82\x85\x82\x97\x81\x40\x82\x66\x82\x81\x82\x8d\x82\x85", // "Ｎｅｗ　Ｇａｍｅ",
+    "\x82\x76\x82\x8f\x82\x92\x82\x8c\x82\x84\x81\x40\x82\x50", // "Ｗｏｒｌｄ　１",
+    "Ｗｏｒｌｄ　２",
+    "Ｗｏｒｌｄ　３",
+    "Ｗｏｒｌｄ　４",
+    "Ｗｏｒｌｄ　５",
+    "Ｗｏｒｌｄ　６",
+    "Ｅｘｔｒａ　１",
+    "Ｅｘｔｒａ　２",
+    "Ｅｘｔｒａ　３",
+    "Ｅｘｔｒａ　４",
+    "Ｅｘｔｒａ　５",
+    "Ｅｘｔｒａ　６",
+    "Ｃｏｍｐｌｅｔｅ",
 };
 
 extern int D_800F4E30;
@@ -751,7 +774,7 @@ void func_800E22D8(int idx)
 }
 
 // unused
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E23C0);
+NOT_IMPL_FN(func_800E23C0)
 
 // printf world status icon
 void func_800E23C8(int c)
@@ -765,6 +788,7 @@ void func_800E23C8(int c)
 
 static inline void text_put_progress(SavedData *save)
 {
+    printf("level is %d\n", save->unkE2);
     text_put_str(D_800EB430[func_800E0FD0(save->unkE2)]);
     func_800E23C8(save->unkE9);
 }
@@ -1093,6 +1117,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
     if (buttons & BUTTONS_ACCEPT) {
         MenuItem *item = &page->items[selection];
         printf("flags is %02X\n", item->flags);
+        printf("dest is %02x\n", item->dest);
         switch (item->flags & 0xF) {
         case 1: func_800E0B54(0x2600); break;
         case 2: func_800E0B54(0x2700); break;
@@ -1107,20 +1132,37 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
         }
 
         if (page_idx == PAGE_LOAD && selection < 3) {
-            // load
-            //
+            if (glob->slot_state[selection] == 0 || glob->slot_state[selection] == 0xff) {
+                switch (glob->unk512) {
+                    case 1: func_800E14A4(1); break;
+                    case 2: func_800E14A4(2); break;
+                    default: func_800E14A4(3); break;
+                }
+                func_800E0B54(0x2900);
+                func_800E7478();
+                goto out;
+            } else {
+                func_800E0B54(0x2600);
+                func_800E7478();
+            }
         }
 
         if (page_idx == PAGE_SAVE && selection < 3) {
-            // save
-            //
+            if (glob->slot_state[selection] == 0xff) {
+                switch (glob->unk512) {
+                    case 1: func_800E14A4(1); break;
+                    default: func_800E14A4(2); break;
+                }
+                func_800E0B54(0x2900);
+                func_800E7478();
+                page_idx = 2;
+                goto out;
+            } else {
+                func_800E0B54(0x2600);
+                func_800E7478();
+            }
         }
 
-        // dialog stuff
-        //
-        //
-        printf("dest is %02x\n", item->dest);
-        printf("item->flags & 0xa0 == %d\n", item->flags & 0xa0);
         if (item->dest == 0xff) {
             func_800E7478();
             page_idx = D_800F4CBC;
@@ -1143,8 +1185,9 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
             if (page_idx == PAGE_MAIN) {
                 selection = D_800F4E48; // last main menu location
             }
-            // some other thing
-            //
+            if (page_idx <= 3 || page_idx >= 7) {
+                D_800F4E38 = 1;
+            }
         }
 
         if (item->flags & 0x80) {
@@ -1192,22 +1235,43 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
             func_800E0B54(0x2600);
         }
 
+        printf("item->flags & 0x40 == %d\n", item->flags & 0x40);
         if (item->flags & 0x40) {
             if (item->click) {
                 D_800F4E20 = page_idx;
                 D_800F4E28 = selection;
                 item->click();
             }
-            //
+            if (page_idx == PAGE_LOAD || page_idx == PAGE_SAVE) {
+                if (glob->unk512 == 2) {
+                    selection = 3;
+                    if (D_800F4CBC == 0) {
+                        func_800E14A4(2);
+                        func_800E0B54(0x2900);
+                    }
+                } else if (glob->unk512 == 1) {
+                    if (D_800F4CBC == 0) {
+                        func_800E0B54(0x2900);
+                    }
+                    selection = 0;
+                    D_800F4E38 = 8;
+                    page_idx = 6;
+                    func_800E7478();
+                }
+            }
         }
 
-        if (page_idx == 3) {
+        if (page_idx == PAGE_SETTINGS) {
             if (glob->debug_features == 2) {
-                page_idx = 7;
+                page_idx = PAGE_SETTINGS_TEST;
             } else {
                 int region = jt.get_region();
                 if (region == REGION_JAPAN || region == REGION_DEBUG) {
-                    page_idx = 8;
+                    // Wait, what?? But the original Japanese version doesn't
+                    // have the widescreen option. So the newer western version
+                    // does show the widescreen option, but only if it's with
+                    // it's region set to Japan. Which can never happen???
+                    page_idx = PAGE_SETTINGS_WIDE;
                 }
             }
         }
@@ -1224,20 +1288,23 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
     //
     //if (selection >= D_800EB8CC[page_idx]->nselections)
 
-
-    printf("new selection: %d\n", selection);
+out:
     return (selection << 16) | page_idx;
 }
 
 // main menu tick
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3BBC);
+//u32 func_800E3BBC(u32 state, u32 )
 
-// bzero
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C48);
+// 800E3C48
+void bzero(void *buf, int n)
+{
+    u8 *p = buf;
+    for (int i = 0; i < n; i++)
+        p[i] = 0;
+}
 
 // init game data
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3C68);
-/*
 void func_800E3C68(void)
 {
     bzero(&glob->curr, sizeof(SavedData));
@@ -1245,10 +1312,14 @@ void func_800E3C68(void)
     bzero(&glob->saved[1], sizeof(SavedData));
     bzero(&glob->saved[2], sizeof(SavedData));
     bzero(&glob->backup, sizeof(SavedData));
-    bzero(&glob->backup, sizeof(SavedData));
-    //
+    bzero(&glob->slot_state, sizeof(glob->slot_state));
+    glob->world = 0;
+    glob->backup.unkE2 = 0;
+    glob->curr.unkE4 = glob->world;
+    ram_strcpy("JUMPFLSH", &glob->backup.signature);
+    glob->backup.checksum = func_800E1514(&glob->backup);
+    glob->curr = glob->backup;
 }
-*/
 
 // unused
 //INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3D9C);
@@ -1377,16 +1448,14 @@ int func_800E4250()
         }
     }
 
-    //
-    //
     u32 buttons;
     int var_s1_2;
     while (1) {
         // loop 10
         var_s1_2 = 0;
         func_800E3EA4();    // setup_graph_env
-        //
-        //
+        jt.music_set_repeat(0);
+        jt.music_play(1);
         D_800F4E50 = 0;
         D_800F4E40 = 1;
         D_800F4E20 = 0;
@@ -1524,12 +1593,11 @@ int func_800E4250()
             if (D_800F4E30 < 0x100) {
                 D_800F4E30 += D_800F4E18 * D_800F4CC4;
             }
-            func_800E4D40(D_800F4CC4, D_800F4E30);    // _the_callback
+            func_800E4D40();    // _the_callback
         }
         func_800E8640("MOVIE\\OPEN.STR", 485);
         D_800F4CF4 = 8;
         glob->unk518 = (u8) (glob->unk518 + 1);
-        //goto loop_10;
     }
 }
 
@@ -1698,8 +1766,13 @@ int func_800E77E4(int port, char *filename)
     return 120 * 1024 - x;
 }
 
-extern char *D_800F05B4[];
+const char *D_800F05B4[3] = {
+    "\x82\x50\x81\x40", // "１　"
+    "\x82\x51\x81\x40", // "２　"
+    "\x82\x52\x81\x40", // "３　"
+};
 
+// TODO: The display name of the save block sometimes comes out mangled.
 int func_800E799C(int port, int slot, u8 *src, int len, char *suffix)
 {
     char filename[128];
@@ -1711,7 +1784,9 @@ int func_800E799C(int port, int slot, u8 *src, int len, char *suffix)
 
     char buffer[128];
     char title[128];
-    ram_strcat("Ｊｕｍｐｉｎｇ\x3000Ｆｌａｓｈ！\x3000ＤＡＴＡ\x3000", D_800F05B4[slot], buffer);
+    // "Ｊｕｍｐｉｎｇ\x3000Ｆｌａｓｈ！\x3000ＤＡＴＡ\x3000"
+    char *sjis_string = "\x82\x69\x82\x95\x82\x8d\x82\x90\x82\x89\x82\x8e\x82\x87\x81\x40\x82\x65\x82\x8c\x82\x81\x82\x93\x82\x88\x81\x49\x81\x40\x82\x63\x82\x60\x82\x73\x82\x60\x81\x40";
+    ram_strcat(sjis_string, D_800F05B4[slot], buffer);
     if (suffix) {
         ram_strcat(buffer, suffix, title);
     } else {

@@ -83,8 +83,7 @@ void ram_memset(u8 *dst, int n, u8 c)
         dst[i] = c;
 }
 
-// exactly the same as the other one. linking shenanigans?
-// unused?
+// Exactly the same as the other one. linking shenanigans?
 // 800230E8
 int ram_strlen2(char *str)
 {
