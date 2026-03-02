@@ -12,6 +12,7 @@
 #define BUTTONS_ACCEPT (Pad1Start | Pad1sqr | Pad1crc)
 #define BUTTONS_CANCEL (Pad1x)
 
+#include <libapi.h>
 typedef struct EXEC EXEC;
 typedef struct DIRENTRY DIRENTRY;
 

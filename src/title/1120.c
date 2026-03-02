@@ -1274,10 +1274,13 @@ extern FGBuffer D_800F4F28[2];
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 
 // a ton of functions inside this one
+// # main stuff
 // glabel func_800E4250 main
 // glabel func_800E4D40 _the_callback
 // glabel func_800E4EE8 load_textures
 // glabel func_800E561C
+
+// # text stuff
 // x text_set_pos
 // x text_clear
 // x text_put_char
@@ -1286,6 +1289,8 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 // glabel func_800E5780 text_put_u16
 // glabel func_800E57B4 text_put_u32
 // text_put_u64
+
+// # graphic stuff
 // glabel func_800E5818 gbuffer_swap
 // glabel func_800E58D4
 // glabel func_800E58E4
@@ -1305,18 +1310,9 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 // glabel func_800E7174
 // glabel func_800E7328
 // glabel func_800E73CC
-// glabel func_800E742C
-// glabel func_800E7478
-// glabel func_800E74A8
-// glabel func_800E77E4
-// glabel func_800E799C
-// glabel func_800E7BD8
-// glabel func_800E7CD8
-
-// glabel func_800E7D78
-// glabel func_800E7DA4
-// glabel func_800E7F78
-
+// glabel func_800E742C update cheat mode
+// glabel func_800E7478 input das nonsense
+// glabel func_800E74A8 input das nonsense
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
 
@@ -1647,6 +1643,138 @@ void func_800E77B8(void)
 {
     if (D_800F4DDC)
         D_800F4DDC();
+}
+
+static inline make_filename(char *buffer, int slot)
+{
+    CLAMP(slot, 0, 2);
+    ram_strcpy(D_800F4F20, buffer);
+    int len = ram_strlen2(D_800F4F20);
+    buffer[len] = '0' + slot;
+    buffer[len + 1] = 0;
+}
+
+// func_800E77E4
+int func_800E77E4(int port, char *filename)
+{
+    int x, y;
+    DIRENTRY dirent, *p, *q;
+
+    // Is this an unrolled loop or something? What on earth is going on
+    x = 0;
+    do {
+        func_800E77B8();
+        p = jt.mc_firstfile(port, "*", &dirent);
+        y = x;
+        if (p == &dirent) {
+            do {
+                x += dirent.size;
+                q = jt.mc_nextfile(p);
+            } while (p == q);
+            func_800E77B8();
+            q = jt.mc_firstfile(port, filename, p);
+            y = x;
+            while (p == q) {
+                y -= dirent.size;
+                p = jt.mc_nextfile(q);
+            }
+        }
+        x = 0;
+        func_800E77B8();
+        p = jt.mc_firstfile(port, "*", &dirent);
+        if (p == &dirent) {
+            do {
+                x += dirent.size;
+                q = jt.mc_nextfile(p);
+            } while (p == q);
+            func_800E77B8();
+            q = jt.mc_firstfile(port, filename, p);
+            while (p == q) {
+                x -= dirent.size;
+                p = jt.mc_nextfile(q);
+            }
+        }
+    } while (y != x);
+    return 120 * 1024 - x;
+}
+
+extern char *D_800F05B4[];
+
+int func_800E799C(int port, int slot, u8 *src, int len, char *suffix)
+{
+    char filename[128];
+    make_filename(filename, slot);
+    int space = func_800E77E4(port, filename);
+    if (space < 15 * 512) {
+        return 0;
+    }
+
+    char buffer[128];
+    char title[128];
+    ram_strcat("Ｊｕｍｐｉｎｇ\x3000Ｆｌａｓｈ！\x3000ＤＡＴＡ\x3000", D_800F05B4[slot], buffer);
+    if (suffix) {
+        ram_strcat(buffer, suffix, title);
+    } else {
+        ram_strcpy(buffer, title);
+    }
+
+    while (1) {
+        int rc;
+        while (1) {
+            while ((rc = jt.mc_file_exists(port, filename)) == -1) {
+                rc = jt.mc_file_exists(port, filename);
+                if (rc == -1)
+                    return -1;
+            }
+            if (rc > -1) break;
+            // What the fuck is happening
+label0:
+            rc = jt.mc_file_exists(port, filename);
+            if (rc == -2)
+                return -2;
+        }
+
+        // I'm too tired to even wanna make sense of this control flow.
+        if (rc != 0) {
+            if (rc == 1) goto label1;
+            goto label0;
+        }
+        rc = jt.mc_file_exists(port, filename);
+        if (rc == 0) {
+            rc = jt.mc_file_create(port, filename, 0x1e00, title);
+            if (rc < 0)
+                return 0;
+label1:
+            rc = jt.mc_file_write(port, filename, src, 0, len);
+            return rc > 0;
+        }
+    }
+}
+
+// func_800E7BD8
+int func_800E7BD8(int port, int slot, u8 *dst, int len)
+{
+    char filename[128];
+    make_filename(filename, slot);
+    int rc, rc2;
+    // I have no idea what the hell is going on here.
+    do {
+        rc = jt.mc_file_read(port, filename, dst, 0, len);
+        if (rc > 0) {
+            return 1;
+        }
+        func_800E77B8();
+        rc2 = jt.mc_file_read(port, filename, dst, 0, len);
+    } while (rc2 > 0);
+    return rc;
+}
+
+// func_800E7CD8
+void func_800E7CD8(int port, int slot)
+{
+    char filename[128];
+    make_filename(filename, slot);
+    jt.mc_delete(port, filename);
 }
 
 extern u8 D_800F4D8E;
