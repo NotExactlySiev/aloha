@@ -1,8 +1,10 @@
 #include "common.h"
-#include <libapi.h>
 
 // Custom string functions because the BIOS ones are slow and libc2.a was not a
 // thing yet. THESE ARE NOT COMPATIBLE WITH libc2.a! Compare the signatures.
+
+// This file is linked to multiple executables. The addresses here are from main
+// but I should probably add their addresses from the other files too.
 
 // 80022EE8
 void ram_strcpy(char *src, char *dst)
@@ -83,20 +85,10 @@ void ram_memset(u8 *dst, int n, u8 c)
 
 // exactly the same as the other one. linking shenanigans?
 // unused?
-/*
 // 800230E8
 int ram_strlen2(char *str)
 {
     int i = 0;
     while (str[i]) i++;
     return i;
-}
-*/
-
-// TODO: move to card.c?
-// 80023110
-void card_write(int port)
-{
-    _new_card();
-    _card_write(port, 0x3F, 0);
 }

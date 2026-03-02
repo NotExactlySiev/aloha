@@ -11,7 +11,7 @@
 #include "tasks.h"
 #include "decode.h"
 #include "jumptable.h"
-#include "util.h"
+#include <util.h>
 #include "pad.h"
 
 u32 saved_ra;

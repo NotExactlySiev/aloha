@@ -2,7 +2,7 @@
 #include <kernel.h>
 #include <libcd.h>
 #include "cd.h"
-#include "../util.h"
+#include <util.h>
 #include "../main.h"
 
 static int iso_read_prv(int fast, char *filename, void *buf, int n);

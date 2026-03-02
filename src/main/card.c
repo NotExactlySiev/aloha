@@ -7,7 +7,7 @@
 #include <libmcrd.h>
 #include "card.h"
 #include "jumptable.h"
-#include "util.h"
+#include <util.h>
 #include "cd/cd.h"
 
 static void do_callback_a(void);

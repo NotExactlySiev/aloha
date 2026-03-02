@@ -1,8 +1,8 @@
 #include "common.h"
 #include "shared.h"
-#include <stdint.h>
 #include <libetc.h>
 #include "sky.h"
+#include "movie.h"
 
 extern GlobalData *glob;
 
@@ -1021,10 +1021,6 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 // robbit cursor anim
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3168);
 
-// is this (and maybe the whole input module) the same one from gameover?
-#define BUTTONS_ACCEPT      (Pad1Start|Pad1sqr|Pad1crc)
-#define BUTTONS_CANCEL      (Pad1x)
-
 int D_800F4CBC = 0;
 int D_800F4CC0 = 0;
 int D_800F4CC4 = 1;
@@ -1033,8 +1029,7 @@ int D_800F4CEC = 0; // Write an executable index here to go to it
 int D_800F4CF0 = 0;
 int D_800F4CF4 = 8;
 int D_800F4CF8 = 0;
-int D_800F4E00 = 0; // movie state
-SpuVolume D_800F4E04 = { INT16_MAX, INT16_MAX }; // movie volume?
+
 int D_800F4E08 = 0;
 int D_800F4E18 = 0;
 int D_800F4E20 = 0;
@@ -1057,7 +1052,6 @@ extern u32 D_800EB97C[4];
 extern u32 D_800EB98C[4];
 
 
-#include <pad.h>
 // menu logic
 //INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);
 // 800E32BC
@@ -1318,17 +1312,13 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 // glabel func_800E799C
 // glabel func_800E7BD8
 // glabel func_800E7CD8
+
 // glabel func_800E7D78
 // glabel func_800E7DA4
 // glabel func_800E7F78
-// glabel jt_ptr
-// glabel func_800E7FA4
-// glabel func_800E7FD4
-// glabel _start
+
+
 INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
-
-void func_800E8640(char *filename, int frame_count);
-
 
 // part of a data structure
 extern int D_800F4CEC;
@@ -1704,85 +1694,7 @@ void text_put_str(char *str)
         text_put_char(c);
 }
 
-// movie.c
-
-// static callback()
-int func_800E8474(void)
-{
-    u32 buttons = jt.PadRead(0);
-    if ((buttons & BUTTONS_ACCEPT) && (D_800F4E00 == 0)) {
-        D_800F4E00 = 1;
-        return 0;
-    }
-
-    switch (D_800F4E00) {
-        case 1:
-            func_800E0B54(0x2600);
-            jt.sound_fade_out(7, 0, 0);
-            jt.cd_flush();
-            D_800F4E00 = 2;
-            return 0;
-
-        case 2:
-            int ret = jt.snd_status() & 2;
-            if (ret == 0) {
-                D_800F4E00 = 0;
-                return 1;
-            } else {
-                return ret;
-            }
-
-        default:
-            return 2;
-    }
-}
-
-#include "movie_args.h"
-// static init_args()
-void func_800E857C(MovieArgs *as, int frame_count)
-{
-    as->frame_count = frame_count;
-    as->ring_size = 0x40;
-    as->buffers[0] = 0x80060000;
-    as->buffers[1] = 0x80088000;
-    as->data_addr = 0x800b0000;
-    as->ring_addr = 0x800b6000;
-    as->mode = 0xc0;
-    as->x1 = 0;
-    as->y1 = 0;
-    as->x2 = 0;
-    as->y2 = 0x100;
-    (as->rect).x = 0;
-    (as->rect).y = 0x18;
-    (as->rect).w = 0x100;
-    (as->rect).h = 0xd0;
-    as->channel = 0;
-    if (jt.get_video_mode() == MODE_PAL)
-        as->rect.y += 0x18;
-}
-
-// play_movie
-void func_800E8640(char *filename, int frame_count)
-{
-    MovieArgs args;
-
-    D_800F4E00 = 0;
-    func_800E857C(&args, frame_count);
-    jt.snd_reset();
-    jt.set_global_volume(&D_800F4E04);
-    jt.snd_set_volume(0x3000);
-    jt.play_movie(filename, &args, func_800E8474);
-    jt.wait_for_vsync();    // argument? TODO
-    jt.SetDispMask(0);
-    jt.snd_reset();
-    jt.ClearImage(&(RECT){
-        .x = 0,
-        .y = 0,
-        .w = 1024,
-        .h = 512,
-    }, 0, 0, 0);
-    jt.DrawSync(0);
-}
+// misc.c ?
 
 void func_800E8790(void)
 {

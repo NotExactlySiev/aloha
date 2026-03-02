@@ -8,4 +8,3 @@ int ram_strlen(char *str);
 int ram_memcmp(int n, void *a, void *b);
 void ram_memcpy(int n, void *src, void *dst);
 void ram_memset(void *dst, int n, u8 c);
-void card_write(int port);

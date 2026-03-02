@@ -16,7 +16,7 @@ class SourceFile:
 
 
 class Executable:
-    def __init__(self, final_name, name, is_comped, libs):
+    def __init__(self, final_name, name, is_comped, libs, common_objects=[]):
         self.name = name
         self.final_name = final_name
         self.is_comped = is_comped
@@ -24,6 +24,7 @@ class Executable:
         self.header = []
         self.libs = libs
         self.data = []
+        self.common_objects = common_objects + ["header.o"]
 
         self.scan_dir(f"src/{self.name}")
         self.scan_dir(f"asm/{self.name}/data")
@@ -47,7 +48,7 @@ class Executable:
                 self.add_file(entry, full_path)
 
     def generate(self):
-        all_deps = ["build/header.o"]
+        all_deps = ["build/" + cobj for cobj in self.common_objects]
         for f in self.source:
             Ninja.build("cc", self.build_dir + f.obj_name, [f.path], [])
             Ninja.param("modid", self.name)
@@ -93,8 +94,9 @@ executables = [
             "libc",
             "libapi",
         ],
+        ["util.o"],
     ),
-    Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"]),
+    Executable("TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o"]),
     # Executable("JM1/MAIN.PEX", "jm1", True, ["libgpu", "libgte", "libetc", "libc", "libapi"]),
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),
@@ -143,7 +145,10 @@ Ninja.build(
         "$jfdir/decomp.c",
     ],
 )
+
+# Common objects
 Ninja.build("cc", "build/header.o", ["src/header.s"])
+Ninja.build("cc", "build/util.o", ["src/util.c"])
 
 exe_paths = []
 for exe in executables:

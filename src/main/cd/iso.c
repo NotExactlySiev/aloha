@@ -1,6 +1,6 @@
 #include "common.h"
 #include "cd.h"
-#include "../util.h"
+#include <util.h>
 
 // 8001D67C
 static int read_unaligned_int(u8 *p) {

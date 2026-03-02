@@ -2,7 +2,7 @@
 #include "cd.h"
 #include <libcd.h>
 #include <memory.h>
-#include "../util.h"
+#include <util.h>
 
 #define CACHE_ENTRIES   10
 

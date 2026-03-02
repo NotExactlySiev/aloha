@@ -8,6 +8,10 @@
 
 #define NULL ((void *)0)
 
+#include <pad.h>
+#define BUTTONS_ACCEPT (Pad1Start | Pad1sqr | Pad1crc)
+#define BUTTONS_CANCEL (Pad1x)
+
 typedef struct EXEC EXEC;
 typedef struct DIRENTRY DIRENTRY;
 
