@@ -1,5 +1,6 @@
 #include <ints.h>
 #include <shared.h>
+#include "sfx.h"
 
 // imported
 void func_800E77A8(void*);
@@ -35,7 +36,26 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E15FC);
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E189C);
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1928);
+void func_800E1928(void)
+{
+    func_800E15FC();
+    if (glob->unk512 == 0 || glob->unk50D == 3) {
+        glob->curr = glob->saved[glob->unk50D];
+        if (glob->unk50D == 3) {
+            glob->curr.unkE2 = 0;
+            glob->world = 0;
+            glob->stage = 0;
+            glob->curr.unkE4 = 0;
+        }
+        glob->world = glob->curr.unkE4;
+        func_800E189C();
+        jt.snd_set_stereo(glob->curr.unkE7 != 0);
+        jt.set_widescreen(glob->curr.unkEA);
+    } else {
+        func_800E14A4();
+        sfx_play(0x2900);
+    }
+}
 
 int func_800E799C(int port, int slot, u8 *src, int len, char *suffix);
 
@@ -52,20 +72,17 @@ void func_800E1A88(void)
     func_800E4D40();
     func_800E4D40();
     int rc = func_800E799C(0, glob->unk50C, (u8 *) &glob->curr, sizeof(glob->curr), D_800EB948[completion]);
-    printf("bruh %d\n", rc);
     func_800E15A4(NULL);
     func_800E15FC();
     if (rc == 1) {
         glob->saved[glob->unk50C] = glob->curr;
-        func_800E0B54(0x2600);
+        sfx_play(0x2600);
     } else {
-        func_800E0B54(0x2900);
+        sfx_play(0x2900);
         func_800E14A4(-rc);
     }
 }
 
-
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1BCC);
 void func_800E1BCC(void)
 {
     func_800E0C24();

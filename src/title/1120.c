@@ -3,6 +3,7 @@
 #include <libetc.h>
 #include "sky.h"
 #include "movie.h"
+#include "sfx.h"
 
 extern GlobalData *glob;
 
@@ -75,47 +76,6 @@ void func_800E0A60(void)
     jt.DrawOTag(D_800F4E10->ot);
 }
 
-// sfx.c
-
-short D_800F4CFC = 0; // sfx handle
-int D_800F4D00 = -1; // sfx counter
-short D_800F4D04 = -1; // sfx return code
-
-// sfx_play
-short func_800E0B54(u32 id)
-{
-    if (id == 0x2900) {
-        if (D_800F4D00 > -1) {
-            jt.sfx_release(D_800F4CFC);
-        }
-        D_800F4CFC = jt.sfx_play(id, 62, 100);
-        D_800F4D00 = 0;
-        D_800F4D04 = D_800F4CFC;
-    } else {
-        D_800F4D04 = jt.sfx_play(id, 62, 100);
-    }
-    return D_800F4D04;
-}
-
-void func_800E0C24(void)
-{
-    if (D_800F4D00 > -1) {
-        jt.sfx_release(D_800F4CFC);
-        D_800F4D00 = -1;
-    }
-}
-
-// sfx_tick
-void func_800E0C74(void)
-{
-    if (D_800F4D00 > -1) {
-        if (++D_800F4D00 >= 32) {
-            jt.sfx_release(D_800F4CFC);
-            D_800F4D00 = -1;
-        }
-    }
-}
-
 // menu.c
 
 // toggle_widescreen
@@ -128,7 +88,7 @@ void func_800E0CD8(void)
         jt.set_widescreen(1);
         glob->curr.unkEA = 1;
     }
-    func_800E0B54(0x2600);
+    sfx_play(0x2600);
 }
 
 char *D_800EB054[] = {
@@ -278,14 +238,14 @@ void func_800E0D78(void)
 {
     if (--D_800F4E68 < 0)
         D_800F4E68 = NMOVIES - 1;
-    func_800E0B54(0x2C00);
+    sfx_play(0x2C00);
 }
 
 void func_800E0DB8(void)
 {
     if (++D_800F4E68 > NMOVIES - 1)
         D_800F4E68 = 0;
-    func_800E0B54(0x2C00);
+    sfx_play(0x2C00);
 }
 
 //INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0E04);
@@ -300,9 +260,78 @@ void func_800E0E04(void)
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0FD0);
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1044);
 
+int D_800F4CBC = 0;
+int D_800F4CC0 = 0;
+int D_800F4CC4 = 1;
+int D_800F4CC8 = 0;
+int D_800F4CEC = 0; // Write an executable index here to go to it
+int D_800F4CF0 = 0;
+int D_800F4CF4 = 8;
+int D_800F4CF8 = 0;
+
+int D_800F4E08 = 0;
+int D_800F4E18 = 0;
+int D_800F4E20 = 0;
+int D_800F4E28 = 0;
+int D_800F4E30 = 0;
+int D_800F4E38 = 0;
+int D_800F4E40 = 0;
+int D_800F4E48 = 0;  // main menu selection (why is it separate?
+int D_800F4E50 = 0;
+int D_800F4E58 = 0;
+int D_800F4E60 = 0;
+int D_800F4E68 = 0;
+int D_800F4E70 = 0;
+int D_800F4E78 = 0;
+int D_800F4E80 = 0;
+//
+/* 800F4ED0 */ BGBuffer *current_bgbuffer = NULL;
+
 // extra mode prev/next
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E10B8);
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E11D0);
+void func_800E10B8(void)
+{
+    int test = 0;
+    if (glob->curr.unkE2 == 0) {
+        glob->world = 0;
+    } else {
+        int spr = func_800E1044(glob->curr.unkE2);
+        int t0 = spr;
+        if (glob->curr.unkE9 & 1) t0++;
+        if (glob->curr.unkE9 & 2) t0++;
+        if (glob->world < t0) {
+            t0 = -1;
+            if (spr <= glob->world) {
+                t0 = D_800F4E60 + 1;
+            }
+            D_800F4E58 = spr <= glob->world;
+            test = 1;
+            D_800F4E60 = t0;
+            glob->world += 1;
+        }
+    }
+    glob->curr.unkE4 = glob->world;
+    if (test)
+        sfx_play(0x2C00);
+}
+
+void func_800E11D0(void)
+{
+    if (glob->curr.unkE2 == 0) {
+        glob->world = 0;
+    } else if (glob->world >= 2) {
+        int spr = func_800E1044(glob->curr.unkE2);
+        glob->world -= 1;
+        if (spr < glob->world) {
+            D_800F4E60 -= 1;
+            D_800F4E58 = 1;
+        } else {
+            D_800F4E60 = -1;
+            D_800F4E58 = 0;
+        }
+        sfx_play(0x2C00);
+    }
+    glob->curr.unkE4 = glob->world;
+}
 
 // more menu stuff
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E12B4);
@@ -338,32 +367,32 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1DB8);
 void toggle_view_ctrl(void)
 {
     glob->curr.unkE3 = !glob->curr.unkE3;
-    func_800E0B54(0x2600);
+    sfx_play(0x2600);
 }
 
 void toggle_pad_mode(void)
 {
     glob->curr.unkE5 = !glob->curr.unkE5;
-    func_800E0B54(0x2600);
+    sfx_play(0x2600);
 }
 
 void toggle_sp_item(void)
 {
     glob->curr.unkE6 = !glob->curr.unkE6;
-    func_800E0B54(0x2600);
+    sfx_play(0x2600);
 }
 
 void toggle_sound_type(void)
 {
     glob->curr.unkE7 = !glob->curr.unkE7;
     jt.snd_set_stereo(glob->curr.unkE7);
-    func_800E0B54(0x2600);
+    sfx_play(0x2600);
 }
 
 void toggle_movie(void)
 {
     glob->curr.unkE8 = !glob->curr.unkE8;
-    func_800E0B54(0x2600);
+    sfx_play(0x2600);
 }
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1F60);
@@ -1044,33 +1073,6 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 // robbit cursor anim
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3168);
 
-int D_800F4CBC = 0;
-int D_800F4CC0 = 0;
-int D_800F4CC4 = 1;
-int D_800F4CC8 = 0;
-int D_800F4CEC = 0; // Write an executable index here to go to it
-int D_800F4CF0 = 0;
-int D_800F4CF4 = 8;
-int D_800F4CF8 = 0;
-
-int D_800F4E08 = 0;
-int D_800F4E18 = 0;
-int D_800F4E20 = 0;
-int D_800F4E28 = 0;
-int D_800F4E30 = 0;
-int D_800F4E38 = 0;
-int D_800F4E40 = 0;
-int D_800F4E48 = 0;  // main menu selection (why is it separate?
-int D_800F4E50 = 0;
-int D_800F4E58 = 0;
-int D_800F4E60 = 0;
-int D_800F4E68 = 0;
-int D_800F4E70 = 0;
-int D_800F4E78 = 0;
-int D_800F4E80 = 0;
-//
-/* 800F4ED0 */ BGBuffer *current_bgbuffer = NULL;
-
 extern u32 D_800EB97C[4];
 extern u32 D_800EB98C[4];
 
@@ -1089,7 +1091,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
         if (++selection > page->nselections - 1) {
             selection = 0;
         }
-        func_800E0B54(0x2C00);
+        sfx_play(0x2C00);
     }
 
     if (buttons & Pad1Up) {
@@ -1097,7 +1099,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
             selection = page->nselections;
         }
         selection--;
-        func_800E0B54(0x2C00);
+        sfx_play(0x2C00);
     }
 
     if (page_idx == 0)
@@ -1116,9 +1118,9 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
     if (buttons & BUTTONS_ACCEPT) {
         MenuItem *item = &page->items[selection];
         switch (item->flags & 0xF) {
-        case 1: func_800E0B54(0x2600); break;
-        case 2: func_800E0B54(0x2700); break;
-        case 3: func_800E0B54(0x2D00); func_800E7478(); break;
+        case 1: sfx_play(0x2600); break;
+        case 2: sfx_play(0x2700); break;
+        case 3: sfx_play(0x2D00); func_800E7478(); break;
         }
 
         if (page_idx == PAGE_CONFIRM_SAVE) {
@@ -1135,11 +1137,11 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
                     case 2: func_800E14A4(2); break;
                     default: func_800E14A4(3); break;
                 }
-                func_800E0B54(0x2900);
+                sfx_play(0x2900);
                 func_800E7478();
                 goto out;
             } else {
-                func_800E0B54(0x2600);
+                sfx_play(0x2600);
                 func_800E7478();
             }
         }
@@ -1150,12 +1152,12 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
                     case 1: func_800E14A4(1); break;
                     default: func_800E14A4(2); break;
                 }
-                func_800E0B54(0x2900);
+                sfx_play(0x2900);
                 func_800E7478();
                 page_idx = 2;
                 goto out;
             } else {
-                func_800E0B54(0x2600);
+                sfx_play(0x2600);
                 func_800E7478();
             }
         }
@@ -1190,7 +1192,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
         if (item->flags & 0x80) {
             if (page_idx == 0 && selection == 1 && !glob->curr.unkE2) {
                 // Can't go into time trial right now.
-                func_800E0B54(0x2900);
+                sfx_play(0x2900);
                 func_800E7478();
                 return 0x10000;
             }
@@ -1229,7 +1231,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
                 }
             }
             D_800F4CEC = 1;
-            func_800E0B54(0x2600);
+            sfx_play(0x2600);
         }
 
         if (item->flags & 0x40) {
@@ -1243,11 +1245,11 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
                     selection = 3;
                     if (D_800F4CBC == 0) {
                         func_800E14A4(2);
-                        func_800E0B54(0x2900);
+                        sfx_play(0x2900);
                     }
                 } else if (glob->unk512 == 1) {
                     if (D_800F4CBC == 0) {
-                        func_800E0B54(0x2900);
+                        sfx_play(0x2900);
                     }
                     selection = 0;
                     D_800F4E38 = 8;

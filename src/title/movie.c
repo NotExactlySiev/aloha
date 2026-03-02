@@ -1,3 +1,5 @@
+#include "movie.h"
+#include "sfx.h"
 #include <movie_args.h>
 #include <libetc.h>
 #include <libspu.h>
@@ -19,7 +21,7 @@ static int func_800E8474(void)
 
     switch (D_800F4E00) {
         case 1:
-            func_800E0B54(0x2600);
+            sfx_play(0x2600);
             jt.sound_fade_out(7, 0, 0);
             jt.cd_flush();
             D_800F4E00 = 2;

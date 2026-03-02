@@ -17,11 +17,11 @@ typedef struct {
     u8  unkE0;
     u8  unkE1;
     u8  unkE2;  // have we beaten the game?
-    u8  unkE3;
-    u8  unkE4;
-    s8  unkE5;
-    s8  unkE6;
-    s8  unkE7;
+    u8  unkE3;  // setting_camera_normal
+    u8  unkE4;  //
+    s8  unkE5;  // setting_pad_mode
+    s8  unkE6;  // setting_sp_item
+    s8  unkE7;  // setting_is_stereo
     s8  unkE8;  // played before?
     s8  unkE9;
     s8  unkEA;  // widescreen

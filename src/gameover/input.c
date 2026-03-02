@@ -1,18 +1,14 @@
-#include "common.h" // TODO: this is from main api, use <>
 #include "shared.h"
 #include <libetc.h>
 
-// ### DAS INPUT FUNCTIONS
 static s32 initial_delay = 0;
 static s32 repeat_delay = 0;
 static s32 face_wait = 0;
 static s32 nav_wait = 0;
 static s32 face_timer = 0;
 static s32 nav_timer = 0;
-
 static u32 face_prev = 0;
 static u32 nav_prev = 0;
-
 static s32 das_state = -1;
 
 // set up DAS times based on framerate
@@ -72,8 +68,7 @@ u32 input_das_read(void)
             face_timer = 0;
             face_wait = repeat_delay;
         }
-    } else
-    if (das_state == 1) {
+    } else if (das_state == 1) {
         if ((nav_raw & nav_prev) == 0 || (++nav_timer > nav_wait)) {
             nav = nav_raw;
             nav_timer = 0;
