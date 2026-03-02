@@ -487,7 +487,7 @@ MenuPage D_800EB468 = {
         { 0x80, 0, 0xFE, 0x02, NULL, NULL, NULL },
         { 0x43, PAGE_LOAD, 0xFE, 0x00, func_800E15FC, func_800E11D0, func_800E10B8 },
         { 0x43, PAGE_SAVE, 0xFE, 0x00, func_800E15FC, NULL, NULL },
-        { 0x03, PAGE_SETTINGS_TEST, 0xFE, 0x00, NULL, NULL, NULL },
+        { 0x03, PAGE_SETTINGS, 0xFE, 0x00, NULL, NULL, NULL },
     },
 };
 
@@ -788,7 +788,6 @@ void func_800E23C8(int c)
 
 static inline void text_put_progress(SavedData *save)
 {
-    printf("level is %d\n", save->unkE2);
     text_put_str(D_800EB430[func_800E0FD0(save->unkE2)]);
     func_800E23C8(save->unkE9);
 }
@@ -1116,8 +1115,6 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
 
     if (buttons & BUTTONS_ACCEPT) {
         MenuItem *item = &page->items[selection];
-        printf("flags is %02X\n", item->flags);
-        printf("dest is %02x\n", item->dest);
         switch (item->flags & 0xF) {
         case 1: func_800E0B54(0x2600); break;
         case 2: func_800E0B54(0x2700); break;
@@ -1235,7 +1232,6 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
             func_800E0B54(0x2600);
         }
 
-        printf("item->flags & 0x40 == %d\n", item->flags & 0x40);
         if (item->flags & 0x40) {
             if (item->click) {
                 D_800F4E20 = page_idx;
@@ -1477,7 +1473,6 @@ int main()
                 D_800F4E40 = 1;
             }
             buttons = func_800E74A8(0);    // read_input
-            //jt.printf("%08X\n", buttons);
             if (buttons != 0) {
                 // reset timers
                 D_800F4E70 = 0;
@@ -1530,8 +1525,6 @@ int main()
                 D_800F4E20 = new_state & 0xffff;
             } else {
                 // Switching executable mode
-
-                printf("switching\n");
 
                 // Block user input during the transition
                 func_800E3BBC(0, D_800F4E20, D_800F4E28);
