@@ -1,5 +1,8 @@
 #include "common.h"
 #include "shared.h"
+#include <stdint.h>
+#include <libetc.h>
+#include "sky.h"
 
 extern GlobalData *glob;
 
@@ -1030,8 +1033,8 @@ int D_800F4CEC = 0; // Write an executable index here to go to it
 int D_800F4CF0 = 0;
 int D_800F4CF4 = 8;
 int D_800F4CF8 = 0;
-int D_800F4E00 = 0;
-// D_800F4E04
+int D_800F4E00 = 0; // movie state
+SpuVolume D_800F4E04 = { INT16_MAX, INT16_MAX }; // movie volume?
 int D_800F4E08 = 0;
 int D_800F4E18 = 0;
 int D_800F4E20 = 0;
@@ -1322,11 +1325,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
 // glabel func_800E7FA4
 // glabel func_800E7FD4
 // glabel _start
-// glabel func_800E7FEC
 INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
-
-
-
 
 void func_800E8640(char *filename, int frame_count);
 
@@ -1705,66 +1704,41 @@ void text_put_str(char *str)
         text_put_char(c);
 }
 
-#include <libgte.h>
-#include <libetc.h>
+// movie.c
 
-extern int D_800F4DE4;
-extern int D_800F4DE8;
-extern int D_800F4DEC;
-
-extern VECTOR D_800F05E0;
-extern SVECTOR D_800F4DF0;
-
-// bg_init
-void func_800E8084(void)
+// static callback()
+int func_800E8474(void)
 {
-    InitGeom();
-    SetGeomScreen(0x80);
-    SetGeomOffset(0xA0, 0x78);
-    SetFogFar(0x1A00, 0x80);
-    func_800E7FEC(&D_800F4DF0, &D_800F05E0);
-    if (jt.get_video_mode() == MODE_PAL) {
-        D_800F4DE4 = 0x1333;
-        D_800F4DE8 = 0x1333;
-        D_800F4DEC = 0x13330;
+    u32 buttons = jt.PadRead(0);
+    if ((buttons & BUTTONS_ACCEPT) && (D_800F4E00 == 0)) {
+        D_800F4E00 = 1;
+        return 0;
+    }
+
+    switch (D_800F4E00) {
+        case 1:
+            func_800E0B54(0x2600);
+            jt.sound_fade_out(7, 0, 0);
+            jt.cd_flush();
+            D_800F4E00 = 2;
+            return 0;
+
+        case 2:
+            int ret = jt.snd_status() & 2;
+            if (ret == 0) {
+                D_800F4E00 = 0;
+                return 1;
+            } else {
+                return ret;
+            }
+
+        default:
+            return 2;
     }
 }
 
-void func_800E83BC(u32 XZ, u32 WL, int Y, int step);
-
-void func_800E8124(int height, int b, int c)
-{
-    // TODO: combine into an inline. have it deal with the invariants
-    func_800E83BC(0xE0000E00, 0x20001E00, height, 0x800);
-    func_800E6E80(8, 2, 0x800, b, c + 0x60);
-
-    func_800E83BC(0xF0000600, 0x10000E00, height, 0x200);
-    func_800E6E80(16, 4, 0x200, b, c + 0x40);
-
-    func_800E83BC(0xFA000400, 0x06000600, height, 0x80);
-    func_800E6E80(24, 4, 0x80, b + 0x20, c + 0x20);
-
-    func_800E83BC(0xFC000200, 0x04000400, height, 0x80);
-    func_800E6E80(16, 4, 0x80, b + 0x40, c);
-
-}
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8238);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8278);
-
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E82A8);
-
-// assembly function, rendering
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E83BC);
-
-// movie.c
-
-// static callback
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8474);
-
 #include "movie_args.h"
-// static init_args
+// static init_args()
 void func_800E857C(MovieArgs *as, int frame_count)
 {
     as->frame_count = frame_count;
@@ -1787,9 +1761,6 @@ void func_800E857C(MovieArgs *as, int frame_count)
         as->rect.y += 0x18;
 }
 
-int func_800E8474();
-extern int D_800F4E00;
-extern SpuVolume D_800F4E04;
 // play_movie
 void func_800E8640(char *filename, int frame_count)
 {
@@ -1800,7 +1771,7 @@ void func_800E8640(char *filename, int frame_count)
     jt.snd_reset();
     jt.set_global_volume(&D_800F4E04);
     jt.snd_set_volume(0x3000);
-    jt.play_movie(filename,&args,func_800E8474);
+    jt.play_movie(filename, &args, func_800E8474);
     jt.wait_for_vsync();    // argument? TODO
     jt.SetDispMask(0);
     jt.snd_reset();
@@ -1813,7 +1784,6 @@ void func_800E8640(char *filename, int frame_count)
     jt.DrawSync(0);
 }
 
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E8790);
 void func_800E8790(void)
 {
     GlobalData *g = jt.globals();
@@ -1825,4 +1795,15 @@ void func_800E8790(void)
     g->unk504 = 3;
 }
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E87DC);
+void func_800E87DC(void)
+{
+    for (int i = 0; i <= 88; i++) {
+        jt.sfx_set_prog_attr(i << 8, 1);
+    }
+
+    for (int i = 57; i <= 86; i++) {
+        jt.sfx_set_prog_attr(i << 8, 0);
+    }
+
+    jt.sfx_set_prog_attr(26 << 8, 0);
+}
