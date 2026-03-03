@@ -129,7 +129,6 @@ int music_play_cdda(int idx, int repeat);
 int music_play_cdda_from_loc();
 int cd_play();
 int cd_demute();
-int cd_stop();
 int cd_fade_wait();
 int music_play_str();
 

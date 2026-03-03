@@ -195,7 +195,6 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FED64,
-        //glabel D_800FED64
         &(EntityTemplate){
             &D_80103164[2],
             &D_800FECF8,
@@ -357,7 +356,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
 
 //extern s32 D_80103164;
 //INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
-// frog render (TODO: shadow)
+// e_frog_render (TODO: shadow)
 void func_800B1BF4(Entity* this)
 {
     SVECTOR *cam = SCRTCHPAD(0x3CA);
@@ -471,26 +470,40 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5304);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B53F0);
 
+// hippo.c
+
+// e_hippo_comp0
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B558C);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5888);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5914);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5A34);
 
+// e_hippo_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5ACC);
 
+// e_hippo_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5E80);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B61E0);
 
+// e_hippo_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B62AC);
 
+// e_hippo_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6430);
 
+// e_hippo_class_ctor
 void func_800B6614(void) {
 }
+
+// block.c
 
 // block update
 void func_800B661C(Entity *this)
@@ -594,23 +607,59 @@ void func_800B6820(Entity *e, Spirit *spirit)
     e->uh0 = e->uh1 = e->uh2 = 0;
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
+int D_8010287C = 0; // handle
+int D_80102884 = 0; // handle
+int D_8010288C = 0;
+int D_80102894 = 0;
+int D_8010289C = 0;
+int D_801028A4 = 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B69A0);
+// Sound maker entity functions
 
-// e_block_class_ctor
-// Creates an invisible entity that makes a wind sound when you're up in the
-// air.
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6C40);
-void _func_800B6C40(void)
+//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
+void func_800B6948(Entity* e, Component* comp)
 {
-    // if (func_800E3B98())
-    //     return;
-
-    // printf("block class ctor\n");
-    //Entity *e = func_800D04E8();
+    D_8010288C += 4;
+    D_80102894 += 3;
+    D_8010289C += 7;
+    D_801028A4 += 5;
 }
 
+// Adjust the volume of the wind sound based on the time variables and player y.
+INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B69A0);
+void func_800B69A0(Entity* e, Component* comp);
+
+// e_block_class_ctor
+void func_800B6C40(void)
+{
+    if (func_800E3B98())
+        return;
+
+    // Create an invisible entity that makes a wind sound when you're up in the
+    // air.
+    Entity *e = entity_create();
+    entity_insert_after(get_list2_head(), e);
+    e->comp0.disabled = 1;
+    e->comp1.func = func_800B6948;
+    e->comp1.disabled = 0;
+    e->comp1.state = 0;
+    e->comp3.func = func_800B69A0;
+    e->comp3.disabled = 0;
+    e->comp3.state = 0;
+    e->render_comp.disabled = 1;
+    D_8010287C = -1;
+    D_80102884 = -1;
+    D_8010288C = 0;
+    D_80102894 = 0;
+    D_8010289C = 0;
+    D_801028A4 = 0;
+    func_800CE168(0xb10, 100, 63, &D_8010287C, 1);
+    func_800CE168(0xb11, 100, 63, &D_80102884, 1);
+}
+
+// beetle.c
+
+// e_beetle_comp0
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6D28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7060);
@@ -619,18 +668,25 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B71C4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7258);
 
+// e_beetle_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B72F0);
 
+// e_beetle_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7574);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7908);
 
+// e_beetle_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B79D4);
 
+// e_beetle_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7B58);
 
+// e_beetle_class_ctor
 void func_800B7D54(void) {
 }
+
+// hari.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7D5C);
 
@@ -654,6 +710,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B9068);
 
 void func_800B9280(void) {
 }
+
+// kumo.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B9288);
 
@@ -719,6 +777,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBD9C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBFD8);
 
+
+//
+
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC004);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC0A8);
@@ -747,23 +808,33 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD4BC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD588);
 
+// e_mosu_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD710);
 
+// e_mosu_class_ctor
 void func_800BD924(void) {
 }
 
+// zeplin.c
+
+// e_zeplin_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD92C);
 
+// e_zeplin_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD9E8);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BDA84);
 
+// e_zeplin_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BDB08);
 
+// spawn_zeplin
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BDB84);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BDD08);
 
+// e_baloon_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BDD44);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BDDC8);

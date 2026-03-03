@@ -40,10 +40,10 @@ struct LinkedList {
 struct Entity {
     /* 00 */ Entity *next;
     /* 04 */ Entity *prev;
-    /* 08 */ Component comp0;
-    /* 18 */ Component comp1;
+    /* 08 */ Component comp0; //
+    /* 18 */ Component comp1; // physics
     /* 28 */ Component render_comp;
-    /* 38 */ Component comp3;
+    /* 38 */ Component comp3; // state machine. behavior and ai
     /* 48 */ u16 model[8]; // model_t
     /* 58 */ u16 unk0; // id
     /* 5A */ u8 unk1;

@@ -1,6 +1,7 @@
 #include "common.h"
 #include <libgpu.h>
 #include <libetc.h>
+#include <stdlib.h>
 #include "gbuffer.h"
 #include "entity.h"
 #include "libgte.h"
@@ -70,6 +71,35 @@ void func_800CD010(void)
     }
 }
 
+// The new version of PsyQ has a broken rsin!!! It returns non-sense numbers
+// for a certain range of angles. What.
+// Here's the original one from the game decompiled.
+extern short rsin_tbl[1024];
+
+static int sin_1(uint angle)
+{
+    if (angle < 0x400)
+        return rsin_tbl[angle];
+    else if (angle >= 0x400 && angle < 0x800)
+        return rsin_tbl[0x7ff - angle];
+    else if (angle >= 0x800 && angle < 0xc00)
+        return -rsin_tbl[angle - 0x800];
+    else if (angle >= 0xc00 && angle < 0x1000)
+        return -rsin_tbl[0xfff - angle];
+    else
+        return 0;
+}
+
+int rsin(int angle)
+{
+    if (angle < 0) {
+        return -sin_1(-angle & 0xfff); // Probably incorrect
+
+    } else {
+        return sin_1(angle & 0xfff);
+    }
+}
+
 s16 sin_lut[4096];
 
 void make_sin_lut(void)
@@ -79,7 +109,7 @@ void make_sin_lut(void)
         // Perhaps something is overwriting its LUT? So we're using csin for now
         // until I figure that out.
         //sin_lut[i] = rsin(i);
-        sin_lut[i] = csin(i);
+        sin_lut[i] = rsin(i);
     }
 }
 
@@ -240,42 +270,48 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0370);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0428);
 
 extern s32 entity_free_count;
-extern Entity  entity_array[128]; // entity array
+extern Entity entity_array[128]; // entity array
 extern Entity *entity_ptrs[128]; // entity pointers
 extern s32 D_801029A4;
 
-
+// 800D0438
 LinkedList *get_list1_head(void)
 {
     return &entity_list_1.head;
 }
 
+// 800D0448
 LinkedList *get_list1_tail(void)
 {
     return &entity_list_1.tail;
 }
 
+// 800D0458
 LinkedList *get_list2_head(void)
 {
     return &entity_list_2.head;
 }
 
+// 800D0468
 LinkedList *get_list2_tail(void)
 {
     return &entity_list_2.tail;
 }
 
+// 800D0478
 LinkedList *get_list0_head(void)
 {
     return &entity_list_0.head;
 }
 
+// 800D0488
 LinkedList *get_list0_tail(void)
 {
     return &entity_list_0.tail;
 }
 
 // shouldn't it be list_insert_before?
+// 800D0498
 void entity_insert_before(LinkedList *list, LinkedList *node)
 {
     LinkedList *oldprev = list->prev;
@@ -285,6 +321,7 @@ void entity_insert_before(LinkedList *list, LinkedList *node)
     oldprev->next = node;
 }
 
+// 800D04B0
 void entity_insert_after(LinkedList *list, LinkedList *node)
 {
     LinkedList *oldnext = list->next;
@@ -294,13 +331,14 @@ void entity_insert_after(LinkedList *list, LinkedList *node)
     oldnext->prev = node;
 }
 
+// 800D04C8
 void entity_detach_from_list(LinkedList *node)
 {
     node->prev->next = node->next;
     node->next->prev = node->prev;
 }
 
-// TODO: better names for these two? new and free? alloc?
+// 800D04E8
 Entity *entity_create(void)
 {
     if (entity_free_count == 0) return 0;
@@ -313,6 +351,7 @@ Entity *entity_create(void)
     return ret;
 }
 
+// 800D053C
 void entity_destroy(Entity *e)
 {
     e->unk2 = 0;
@@ -320,7 +359,6 @@ void entity_destroy(Entity *e)
     entity_insert_after(&entity_list_free.head, e);
     entity_free_count += 1;
 }
-
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D058C);
 
@@ -2236,6 +2274,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3B24);
 int D_801027E0 = 0;
 int D_801027E4 = 0;
 
+// Are we in the bonus level?
 int func_800E3B98(void)
 {
     return D_801027E4;
