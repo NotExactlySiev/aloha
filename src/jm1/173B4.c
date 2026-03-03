@@ -1143,9 +1143,7 @@ void func_800E5458(s16, s16, s16);
 // the control flow is fucked
 void func_800DC4C4(void)
 {
-    //jt.printf("%d\n", player_entity.comp1.state);
     switch (player_entity.comp1.state) {
-
     make_0: // landing
         D_80102C6C = 0;
         D_80102C4C = 0x800;
@@ -1377,7 +1375,7 @@ void func_800DDF04(void)
     // TODO: draw feet too
 
     // player shadow
-    s16 x,y,z;
+    s16 x, y, z;
     if (player_entity.on_air == 0 && player_entity.max_y <= 0) {
         func_800E5E60(
             &(SVECTOR) {
@@ -1411,10 +1409,6 @@ void func_800DE384(u16 x, u16 y)
     my_LoadImage(&rect, debug_font_color);
     my_DrawSync(0);
 }
-
-
-
-//extern void SetSemiTrans(void* p, s32 v);   // SetSemiTrans                   /* extern */
 
 s32 debug_char_x = 0;
 s32 debug_char_y = 0;
@@ -1704,7 +1698,7 @@ reload:
 
         // The real display loop
         while (1) {
-            printf("loop\n");
+            //printf("loop\n");
             if (D_80102CA4) {
                 //
             }
@@ -1721,7 +1715,7 @@ reload:
                 func_800F31C4();
             }
             for (; r > 0; r--) {
-                printf("simulate\n");
+                //printf("simulate\n");
                 if (!func_800F3350()) {
                     if (D_80102CCC < ONE) {
                         int tmp = D_80102CCC + 128;
@@ -1759,6 +1753,31 @@ reload:
             func_800DFE18();
             if (D_80102794) {
                 // debug info
+                //
+                func_800DE920(0);
+                debug_set_pos(1, 13);
+                debug_print_str("SEQ  =");
+                debug_print_hex8(func_800F2CFC());
+                debug_print_char(' ');
+
+                debug_set_pos(1, 17);
+                debug_print_str("REST =");
+                debug_print_hex32(func_800E5DA0());
+
+                debug_set_pos(1, 18);
+                debug_print_str("ADRS =");
+                debug_print_hex32(func_800E3E64());
+
+                debug_set_pos(1, 19);
+                debug_print_str("CHAR =");
+                debug_print_decimal(func_800E6658());
+
+                debug_set_pos(1, 20);
+                debug_print_str("COLOR=");
+                debug_print_decimal(func_800E4FC8());
+
+                //
+                //
                 //func_800E1164
             }
             my_DrawSync(0);

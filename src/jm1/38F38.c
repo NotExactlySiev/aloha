@@ -286,8 +286,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4E4);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 
 // radar
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
-func_800EC5C8() {
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
+void _func_800EC5C8() {
     //
     //
     GBuffer *gbuf = gbuffer_get_current();
@@ -405,8 +405,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EEDB4);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EEF50);
 
 // render hud
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF004);
-void func_800EF004(void)
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF004);
+void _func_800EF004(void)
 {
     //func_800EE06C();  // level start text
     if (func_800DBC24())
@@ -774,9 +774,9 @@ void *draw_mesh(int mesh_with_flag, void *prim, u32 *ot_with_flag, u32 *arg3)
 
 // moving the handwritten assembly stuff to src
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F47B8);   // not disassembled
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F47B8);   // not disassembled
 // FUCK rendering code
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F49A0);   // not disassembled, LOOOONG
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F49A0);   // not disassembled, LOOOONG
 // smol function. assembly?
 //INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C14);   // disassembled
 // weird function with two entry points
@@ -862,8 +862,8 @@ extern int D_8010309C;
 extern SVECTOR D_80141448;  // camera rotation
 
 // render_ground_texture
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F87BC);
-void func_800F87BC(void)
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F87BC);
+void _func_800F87BC(void)
 {
     DRAWENV drawenv;
     GBuffer *gbuf = gbuffer_get_current();

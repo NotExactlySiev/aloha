@@ -24,7 +24,7 @@ glabel func_800F47B8
 /* 44FF4 800F47F4 */ andi   $v0, 0xffff             # base offset
 /* 44FF8 800F47F8 */ addu   $s0, $v0, $s1           # go to first vertex (base)
 /* 44FFC 800F47FC */ lw     $t8, 0($s0)             # load vertex
-/* 45000 800F4800 */ lw     $t9, 4($s0)             
+/* 45000 800F4800 */ lw     $t9, 4($s0)
 /* 45004 800F4804 */ lui    $t2, 0xffff
 /* 45008 800F4808 */ and    $t3, $a3                # add the vector in $t3,$t5
 /* 4500C 800F480C */ and    $t8, $a3                # (offset vector)
@@ -42,7 +42,7 @@ glabel func_800F47B8
 /* 45038 800F4838 */ beq    $a0, $at, .L800F487C    # no more ranges?
 /* 4503C 800F483C */ nop
 /* 45040 800F4840 */ lw     $v0, 0($a0)             # set base and len again
-/* 45044 800F4844 */ nop 
+/* 45044 800F4844 */ nop
 /* 45048 800F4848 */ srl  $s2, $v0, 0x10
 /* 4504C 800F484C */ andi $v0, 0xFFFF
 /* 45050 800F4850 */ addu $s0, $v0, $s1
@@ -59,7 +59,7 @@ glabel func_800F47B8
 /* 45074 800F4874 */ and    $t8, $a3
 /* 45078 800F4878 */ addu   $t9, $t5
 .L800F487C:
-/* 4507C 800F487C */ addiu  $t6, 12                 # go to next translated vector 
+/* 4507C 800F487C */ addiu  $t6, 12                 # go to next translated vector
 /* 45080 800F4880 */ cfc2   $zero, $31              # and write the results (raw and screen)
 /* 45084 800F4884 */ swc2   $25, 0($t6)             # mac1
 /* 45088 800F4888 */ mfc2   $v0, $26                # mac2
@@ -139,4 +139,3 @@ glabel func_800F47B8
 /* 45194 800F4994 */ move   $v1, $s4 # .word 0x02801821
 /* 45198 800F4998 */ jr     $ra # .word 0x03E00008
 /* 4519C 800F499C */ move   $v0, $t2 # .word 0x01401021
-

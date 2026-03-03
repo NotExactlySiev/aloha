@@ -118,46 +118,46 @@ extern struct {
     /* 12F */ int         (*fade_unpause)();
     /* 130 */ int         (*music_play_str)();
     UNK(305, 319);
-    s32         (*play_movie)(char *filename, MovieArgs *args, int (*cb)(void));
+    /* 140 */ s32         (*play_movie)(char *filename, MovieArgs *args, int (*cb)(void));
     UNK(321, 383);
 
     // GPU Functions
-    s32         (*ResetGraph)(s32 mode);
-    void        (*wait_for_vsync)(void);
-    void        (*SetGraphDebug)(s32 level);
-    void        (*SetDispMask)(s32 mask);
-    u32         (*get_frame_counter)(void);
-    DISPENV*    (*PutDispEnv)(DISPENV*);
-    DRAWENV*    (*PutDrawEnv)(DRAWENV*);
-    u32*        (*ClearOTag)(u32* ot, s32 n);
-    void        (*ClearOTagR)(u32* ot, s32 n);
-    void        (*DrawOTag)(u32* ot);
-    s32         (*LoadImage)(RECT*, void*);
-    int         (*ClearImage)(RECT*, u8, u8, u8);
-    s32         (*DrawSync)(s32 mode);
-    void        (*SetDrawMode)(DR_MODE* p, s32 dfe, s32 dtd, s32 tpage, RECT* tw);
-    DISPENV*    (*SetDefDispEnv)(DISPENV*, int x, int y, int w, int h);
-    DRAWENV*    (*SetDefDrawEnv)(DRAWENV*, int x, int y, int w, int h);
-    s32         (*GetGraphType)(void);  /* 400 */
-    s32         (*VSync)(s32 mode);
-    DISPENV*    (*GetDispEnv)(DISPENV*);
-    DRAWENV*    (*GetDrawEnv)(DRAWENV*);
-    void        (*SetDrawEnv)(DR_ENV* p, DRAWENV* env);
-    void        (*SetDrawOffset)(DR_OFFSET* p, u16* ofs);
-    void        (*SetDrawArea)(DR_AREA* p, RECT* r);
-    s32         (*StoreImage)(RECT*, u32*);
-    s32         (*MoveImage)(RECT* src, s32 x, s32 y);
-    void        (*DrawPrim)(void* p);
-    u16         (*LoadTPage)(u32* data, s32 tp, s32 abr, s32 x, s32 y, s32 w, s32 h);
-    u16         (*LoadClut)(u16* data, u32 x, u32 y);
-    u32         (*SetVideoMode)(u32);
-    u32         (*GetVideoMode)(void);
+    /* 180 */ s32         (*ResetGraph)(s32 mode);
+    /* 181 */ void        (*wait_for_vsync)(void);
+    /* 182 */ void        (*SetGraphDebug)(s32 level);
+    /* 183 */ void        (*SetDispMask)(s32 mask);
+    /* 184 */ u32         (*get_frame_counter)(void);
+    /* 185 */ DISPENV*    (*PutDispEnv)(DISPENV*);
+    /* 186 */ DRAWENV*    (*PutDrawEnv)(DRAWENV*);
+    /* 187 */ u32*        (*ClearOTag)(u32* ot, s32 n);
+    /* 188 */ void        (*ClearOTagR)(u32* ot, s32 n);
+    /* 189 */ void        (*DrawOTag)(u32* ot);
+    /* 18A */ s32         (*LoadImage)(RECT*, void*);
+    /* 18B */ int         (*ClearImage)(RECT*, u8, u8, u8);
+    /* 18C */ s32         (*DrawSync)(s32 mode);
+    /* 18D */ void        (*SetDrawMode)(DR_MODE* p, s32 dfe, s32 dtd, s32 tpage, RECT* tw);
+    /* 18E */ DISPENV*    (*SetDefDispEnv)(DISPENV*, int x, int y, int w, int h);
+    /* 18F */ DRAWENV*    (*SetDefDrawEnv)(DRAWENV*, int x, int y, int w, int h);
+    /* 190 */ s32         (*GetGraphType)(void);  /* 400 */
+    /* 191 */ s32         (*VSync)(s32 mode);
+    /* 192 */ DISPENV*    (*GetDispEnv)(DISPENV*);
+    /* 193 */ DRAWENV*    (*GetDrawEnv)(DRAWENV*);
+    /* 194 */ void        (*SetDrawEnv)(DR_ENV* p, DRAWENV* env);
+    /* 195 */ void        (*SetDrawOffset)(DR_OFFSET* p, u16* ofs);
+    /* 196 */ void        (*SetDrawArea)(DR_AREA* p, RECT* r);
+    /* 197 */ s32         (*StoreImage)(RECT*, u32*);
+    /* 198 */ s32         (*MoveImage)(RECT* src, s32 x, s32 y);
+    /* 199 */ void        (*DrawPrim)(void* p);
+    /* 19A */ u16         (*LoadTPage)(u32* data, s32 tp, s32 abr, s32 x, s32 y, s32 w, s32 h);
+    /* 19B */ u16         (*LoadClut)(u16* data, u32 x, u32 y);
+    /* 19C */ u32         (*SetVideoMode)(u32);
+    /* 19D */ u32         (*GetVideoMode)(void);
 
     // I had to also export these three functions in addition. Since the game
     // executable was using them from its own linked libgpu which is bad.
-    /* 19E */ void (*SetSemiTrans)(void *p, int abe);
-    /* 19F */ void (*SetShadeTex)(void *p, int tge);
-    /* 1A0 */ void (*SetTexWindow)(DR_TWIN *p, RECT *tw);
+    /* 19E */ void        (*SetSemiTrans)(void *p, int abe);
+    /* 19F */ void        (*SetShadeTex)(void *p, int tge);
+    /* 1A0 */ void        (*SetTexWindow)(DR_TWIN *p, RECT *tw);
 
     UNK(417, 511);
 
