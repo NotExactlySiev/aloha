@@ -75,7 +75,11 @@ s16 sin_lut[4096];
 void make_sin_lut(void)
 {
     for (int i = 0; i < 4096; i++) {
-        sin_lut[i] = rsin(i);
+        // For some reason rsin is giving incorrect results for a certain range.
+        // Perhaps something is overwriting its LUT? So we're using csin for now
+        // until I figure that out.
+        //sin_lut[i] = rsin(i);
+        sin_lut[i] = csin(i);
     }
 }
 
@@ -1108,7 +1112,61 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBD1C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBD2C);
 
+// player_entity_init
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
+void _func_800DBDB0(void)
+{
+    player_entity.unk0 = 0;
+    //
+    //
+    //
+    player_entity.range_y = 0xD0;
+    player_entity.range_z = 0x40;
+    player_entity.range_x = 0x40;
+    player_entity.carry_z = 0;
+    player_entity.carry_y = 0;
+    player_entity.carry_x = 0;
+    player_entity.vel_z = 0;
+    player_entity.vel_y = 0;
+    player_entity.dangle_z = 0;
+    player_entity.dangle_y = 0;
+    player_entity.dangle_x = 0;
+    player_entity.speed = 0;
+    player_entity.ddangle_z = 0;
+    player_entity.comp1.state = 0;
+    player_entity.comp3.state = 0;
+    player_entity.unk8 = 0;
+    player_entity.unk7 = 0;
+    player_entity.unk6 = 0;
+    //
+    player_entity.unk26 = 0;
+    player_entity.uh2 = 0;
+    player_entity.uh1 = 0;
+    player_entity.uh0 = 0;
+    //
+    //
+    //
+    //
+    //
+    player_entity.on_air = ((player_entity.pos_y >> 12) < player_entity.max_y) - 1;
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+}
 
 // read raw input and process it
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC00C);

@@ -285,27 +285,64 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4E4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 
-// radar
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
-void _func_800EC5C8() {
-    //
-    //
-    GBuffer *gbuf = gbuffer_get_current();
-    POLY_F4 *p = gbuf->nextfree;
+Entity *func_800DBBE4();
 
+// radar
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
+void func_800EC5C8() {
+    MATRIX *m = SCRTCHPAD(0);
+
+    Entity *player = func_800DBBE4();
+    int angle = player->angle_y;
+    *m = (MATRIX){
+        .m = {
+            { cosf(angle), -sinf(angle), 0 },
+            { sinf(angle),  cosf(angle), 0 },
+            {           0,            0, 0 },
+        },
+    };
+    func_800E8738(m, &(SVECTOR){ 21, 24 });
+    func_800E8810();
+    SetRotMatrix(m);
+    GBuffer *gbuf = gbuffer_get_current();
+
+    printf("angle: %04X -> %d\n", angle, sinf(angle));
+    //
+    //
+    // POLY_F4 *p = gbuf->nextfree;
+
+
+    // SVECTOR *v0 = SCRTCHPAD(0);
+    // VECTOR *v1 = SCRTCHPAD(8);
+    // *v0 = (SVECTOR){ 0, 0xF00, 0 };
+    // RotTrans(v0, v1, v0);
+    // setPolyF4(p);
+    // setRGB0(p, 0, 0xD0, 0xD0);
+    // setXYWH(p, v1->vx + 213, v1->vy + 45, 3, 3);
+
+    // addPrim(&gbuf->ot[12], p);  // FAKE NUMBER!
 
     SVECTOR *v0 = SCRTCHPAD(0);
-    VECTOR *v1 = SCRTCHPAD(8);
-    *v0 = (SVECTOR){ 0, 0xF00, 0 };
+    SVECTOR *v1 = SCRTCHPAD(8);
+
+    *v0 = (SVECTOR){ 0, 0xf00, 0 };
     RotTrans(v0, v1, v0);
-    setPolyF4(p);
-    setRGB0(p, 0, 0xD0, 0xD0);
-    setXYWH(p, v1->vx + 213, v1->vy + 45, 3, 3);
 
-    addPrim(&gbuf->ot[12], p);  // FAKE NUMBER!
+    LINE_F2 *p1 = gbuf->nextfree;
+    setLineF2(p1);
+    setSemiTrans(p1, 1);
+    setRGB0(p1, 0, 255, 255);
+    setXY2(p1, v1->vx + 214, 46 - v1->vz, 214 - v1->vx, v1->vz + 45);
+    addPrim(&gbuf->ot[563], p1);
 
+    LINE_F2 *p2 = p1 + 1;
+    setLineF2(p2);
+    setSemiTrans(p2, 1);
+    setRGB0(p2, 0, 255, 255);
+    setXY2(p2, 100, 100, 50, 100);
+    addPrim(&gbuf->ot[563], p2);
 
-    gbuf->nextfree = p + 1;
+    gbuf->nextfree = p2 + 1;
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECD88);
