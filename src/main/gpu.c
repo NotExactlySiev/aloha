@@ -1,112 +1,130 @@
-// caller functions for jumptable
-#include <libgte.h>
-#include <libgpu.h>
-#include <libetc.h>
+#include "gpu.h"
 #include "jumptable.h"
+#include <libetc.h>
+#include <libgpu.h>
+#include <libgte.h>
 
 extern volatile int vsync_counter;
 
-void wait_frame(void);
-
 // 80022854
-int call_StoreImage(RECT *rect, u_long *p) {
+int call_StoreImage(RECT *rect, u_long *p)
+{
     return StoreImage(rect, p);
 }
 
 // 80022874
-int call_MoveImage(RECT *rect, int x, int y) {
+int call_MoveImage(RECT *rect, int x, int y)
+{
     return MoveImage(rect, x, y);
 }
 
 // 80022894
-DISPENV *call_GetDispEnv(DISPENV *env) {
+DISPENV *call_GetDispEnv(DISPENV *env)
+{
     return GetDispEnv(env);
 }
 
 // 800228b4
-DRAWENV *call_GetDrawEnv(DRAWENV *env) {
+DRAWENV *call_GetDrawEnv(DRAWENV *env)
+{
     return GetDrawEnv(env);
 }
 
 // 800228d4
-void call_SetDrawEnv(DR_ENV *dr_env, DRAWENV *env) {
+void call_SetDrawEnv(DR_ENV *dr_env, DRAWENV *env)
+{
     SetDrawEnv(dr_env, env);
 }
 
 // 800228F4
-void call_SetDrawOffset(DR_OFFSET *p, u_short *ofs) {
+void call_SetDrawOffset(DR_OFFSET *p, u_short *ofs)
+{
     SetDrawOffset(p, ofs);
 }
 
 // 80022914
-void call_SetDrawArea(DR_AREA *p, RECT *r) {
+void call_SetDrawArea(DR_AREA *p, RECT *r)
+{
     SetDrawArea(p, r);
 }
 
 // switching to newer psy-q, doesn't have this
 // TODO: get rid of this once all uses of it have been decompiled.
 // 80022934
-int call_GetGraphType(void) {
+int call_GetGraphType(void)
+{
     return 0;
 }
 
 // 80022954
-DISPENV *call_SetDefDispEnv(DISPENV *env, int x, int y, int w, int h) {
+DISPENV *call_SetDefDispEnv(DISPENV *env, int x, int y, int w, int h)
+{
     return SetDefDispEnv(env, x, y, w, h);
 }
 
 // 800229B0
-DRAWENV *call_SetDefDrawEnv(DRAWENV *env, int x, int y, int w, int h) {
+DRAWENV *call_SetDefDrawEnv(DRAWENV *env, int x, int y, int w, int h)
+{
     return SetDefDrawEnv(env, x, y, w, h);
 }
 
 // 800229D4
-void call_SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw) {
+void call_SetDrawMode(DR_MODE *p, int dfe, int dtd, int tpage, RECT *tw)
+{
     SetDrawMode(p, dfe, dtd, tpage, tw);
 }
 
 // 800229F8
-int call_ClearImage(RECT *rect, u_char r, u_char g, u_char b) {
+int call_ClearImage(RECT *rect, u_char r, u_char g, u_char b)
+{
     return ClearImage(rect, r, g, b);
 }
 
 // 80022A20
-int call_LoadImage(RECT *rect, u_long *p) {
+int call_LoadImage(RECT *rect, u_long *p)
+{
     return LoadImage(rect, p);
 }
 
 // 80022A40
-u_long *call_ClearOTag(u_long *ot, int n) {
+u_long *call_ClearOTag(u_long *ot, int n)
+{
     return ClearOTag(ot, n);
 }
 
 // 80022A60
-u_long *call_ClearOTagR(u_long *ot, int n) {
+u_long *call_ClearOTagR(u_long *ot, int n)
+{
     return ClearOTagR(ot, n);
 }
 
 // 80022A80
-void call_DrawOTag(u_long *p) {
+void call_DrawOTag(u_long *p)
+{
     DrawOTag(p);
 }
 
 // 80022AA0
-DISPENV *call_PutDispEnv(DISPENV *env) {
+DISPENV *call_PutDispEnv(DISPENV *env)
+{
     return PutDispEnv(env);
 }
 
 // 80022AC0
-DRAWENV *call_PutDrawEnv(DRAWENV *env) {
+DRAWENV *call_PutDrawEnv(DRAWENV *env)
+{
     return PutDrawEnv(env);
 }
 
 // 80022AE0
-int call_DrawSync(int mode) {
+int call_DrawSync(int mode)
+{
     return DrawSync(mode);
 }
 
 // 80022B00
-void call_ResetGraph(int mode) {
+void call_ResetGraph(int mode)
+{
     static int D_80047E64 = 0;
     if (mode == 0) {
         if (D_80047E64 == 0) {
@@ -119,28 +137,33 @@ void call_ResetGraph(int mode) {
 }
 
 // 80022B54
-void call_wait_frame(void) {
+void call_wait_frame(void)
+{
     wait_frame();
 }
 
 // 80022B74
-int call_VSync(int mode) {
+int call_VSync(int mode)
+{
     return VSync(mode);
 }
 
 // 80022B94
-int get_vsync_event_cnt(void) {
+int get_vsync_event_cnt(void)
+{
     return vsync_counter;
 }
 
 // 80022BA4
-void wait_frame(void) {
+void wait_frame(void)
+{
     int curr = get_vsync_event_cnt();
     while (curr == get_vsync_event_cnt());
 }
 
 // 80022BD8
-int call_SetGraphDebug(int level) {
+int call_SetGraphDebug(int level)
+{
     static int D_80047E68 = 0;
     int ret = 1;
     if (D_80047E68 == 0) {
@@ -151,37 +174,44 @@ int call_SetGraphDebug(int level) {
 }
 
 // 80022C1C
-void call_SetDispMask(int mask) {
+void call_SetDispMask(int mask)
+{
     SetDispMask(mask);
 }
 
 // 80022C3C
-void call_DrawPrim(void *p) {
+void call_DrawPrim(void *p)
+{
     DrawPrim(p);
 }
 
 // 80022C5C
-u_short call_LoadClut(u_long *clut, int x, int y) {
+u_short call_LoadClut(u_long *clut, int x, int y)
+{
     return LoadClut(clut, x, y);
 }
 
 // 80022C7C
-u_short call_LoadTPage(u_long *pix, int tp, int abr, int x, int y, int w, int h) {
+u_short call_LoadTPage(u_long *pix, int tp, int abr, int x, int y, int w, int h)
+{
     return LoadTPage(pix, tp, abr, x, y, w, h);
 }
 
 // 80022CB0
-long call_SetVideoMode(long mode) {
+long call_SetVideoMode(long mode)
+{
     return SetVideoMode(mode);
 }
 
 // 80022CD0
-long call_GetVideoMode(void) {
+long call_GetVideoMode(void)
+{
     return GetVideoMode();
 }
 
 // 80022CF0
-void gpu_init(void) {
+void gpu_init(void)
+{
     jt_set(call_ResetGraph, 0x180);
     jt_set(call_wait_frame, 0x181);
     jt_set(call_SetGraphDebug, 0x182);

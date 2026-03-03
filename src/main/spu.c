@@ -37,7 +37,7 @@ void func_8001DD7C(void)
     spu_set_key_off(SPU_ALLCH);
 }
 
-// snd_mute
+// spu_deinit
 // 8001DE98
 void func_8001DE98(void)
 {

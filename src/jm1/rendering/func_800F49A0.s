@@ -162,17 +162,17 @@ glabel func_800F4B48
 
 .L800F4BC8:
 /* 453C8 800F4BC8 */ lh     $v0, 4($t6) # load Z of each vertex
-/* 453CC 800F4BCC */ lh     $v1, 4($t7) # 
-/* 453D0 800F4BD0 */ lh     $t0, 4($t8) # 
+/* 453CC 800F4BCC */ lh     $v1, 4($t7) #
+/* 453D0 800F4BD0 */ lh     $t0, 4($t8) #
 /* 453D4 800F4BD4 */ or     $at, $v0, $v1 # or them -> at
 /* 453D8 800F4BD8 */ or     $at, $t0 #
 /* 453DC 800F4BDC */ and    $v0, $v1       # and them too -> v0
 /* 453E0 800F4BE0 */ and    $v0, $t0       #
 /* 453E4 800F4BE4 */ andi   $v0, 0x800F   #
 /* 453E8 800F4BE8 */ bnez   $v0, .continue1   # abort if the and isn't zero
-/* 453EC 800F4BEC */ andi   $v0, $at, 0x1FE0   # 
+/* 453EC 800F4BEC */ andi   $v0, $at, 0x1FE0   #
 /* 453F0 800F4BF0 */ beqz   $v0, .L4    # idk what this is for
-/* 453F4 800F4BF4 */ andi   $at, 0x800F # 
+/* 453F4 800F4BF4 */ andi   $at, 0x800F #
 /* 453F8 800F4BF8 */ ori    $s2, 0x800   # remember... something
 .L4:
 /* 453FC 800F4BFC */ .word 0x32420001
@@ -1454,15 +1454,18 @@ glabel func_800F5E04
 .L800F5FCC:
 	jal func_800F68B0               # go to funky color function
     nop
-    andi    $v0, $t5, 1             # not shaded?
-    beq     $v0, $zero, .TRI_FLAT
-    nop    
+
+    andi    $v0, $t5, 1
+    beq     $v0, $zero, .TRI_FLAT   # Not shaded? Skip the shading code.
+    nop
+
+    # It's a shaded tri.
     lh      $v0, 8($a0)
     andi    $v1, $s2, 0x2000
     bgez    $v0, .L800F5FF8
     andi    $v0, 0x7fff
     beq     $v1, $zero, .L800F6038  # what are we bypassing here?
-    nop    
+    nop
 .L800F5FF8:
 	jal     func_800F6798           # step 1 (shading?)
     nop

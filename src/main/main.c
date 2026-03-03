@@ -1,18 +1,26 @@
-#include "common.h"
 #include "main.h"
-#include <kernel.h>
-#include <malloc.h>
-#include <stdio.h>
-#include <libgpu.h>
-#include <libetc.h>
-#include <shared.h>
-#include <libapi.h>
-#include "music.h"
-#include "tasks.h"
+#include "card.h"
+#include "cd/cd.h"
+#include "common.h"
 #include "decode.h"
+#include "gpu.h"
 #include "jumptable.h"
-#include <util.h>
+#include "music.h"
 #include "pad.h"
+#include "sfx.h"
+#include "tasks.h"
+#include <kernel.h>
+#include <libapi.h>
+#include <libetc.h>
+#include <libgpu.h>
+#include <malloc.h>
+#include <shared.h>
+#include <stdio.h>
+#include <util.h>
+
+void fnt_init(void);
+void misc_init(void);
+void VSyncCallbacks(int, int);
 
 u32 saved_ra;
 
@@ -25,7 +33,7 @@ int D_80047D64 = 0;
 
 // over
 
-#define DMUSIC(n,i,c,...)   { .name = n, .type = 1, .id = i, .size = 0x24, .unk0 = 16, .unk1 = 0, .file = 1, .chan = c, .loc = __VA_ARGS__ }
+#define DMUSIC(n, i, c, ...) { .name = n, .type = 1, .id = i, .size = 0x24, .unk0 = 16, .unk1 = 0, .file = 1, .chan = c, .loc = __VA_ARGS__ }
 MusicList D_80034344 = {
     .count = 66,
     .tracks = {
@@ -99,7 +107,7 @@ MusicList D_80034344 = {
     }
 };
 
-#define DFILE(ptr, name)    { (void*) (ptr | 1), name }
+#define DFILE(ptr, name) { (void *)(ptr | 1), name }
 file_t g_Files[42] = {
     DFILE(0x80060000, "TITLE.PEX"),
     DFILE(0x80060000, "SELECT.PEX"),
@@ -151,17 +159,16 @@ s32 game_region = 0;
 u32 tv_system = MODE_NTSC;
 s32 dev_mode = 0;
 
-s32 D_80047E6C;         // 80047e6c
-s32 D_80047E70;         // 80047e70
-s32 vblank_event;          // 80047e74
-s32 exception_event;          // 80047e7c
+s32 D_80047E6C; // 80047e6c
+s32 D_80047E70; // 80047e70
+s32 vblank_event; // 80047e74
+s32 exception_event; // 80047e7c
 char mc_file_name[20];
 
-
-s32     iso_read(const char* addr, void* buf, s32 mode);
-void    wait_frame();   // TODO: args?
-void    execute_compressed(u32* addr, u32 stack);
-s32     iso_exec(char* file, s32 param);
+s32 iso_read(const char *addr, void *buf, s32 mode);
+void wait_frame(); // TODO: args?
+void execute_compressed(u32 *addr, u32 stack);
+s32 iso_exec(char *file, s32 param);
 
 // boot.h
 void reset(void);
@@ -172,14 +179,15 @@ void file_execute_loop(void)
     u32 *addr;
 
     while (1) {
-        if (g_CurrFile == -1) g_CurrFile = 0;
+        if (g_CurrFile == -1)
+            g_CurrFile = 0;
 
         addr = g_Files[g_CurrFile].header;
         printf("now executing: %s\n", g_Files[g_CurrFile].addr);
         if (addr != NULL) {
             // if addr isn't NULL, it's compressed
-            if ((u32) addr & 1) {
-                addr = (u32*) ((u32) addr & ~0xF);
+            if ((u32)addr & 1) {
+                addr = (u32 *)((u32)addr & ~0xF);
                 while (iso_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
                     printf("Exec File Read Error\n");
                 }
@@ -199,9 +207,10 @@ void file_execute_loop(void)
 }
 
 // 80018A3C
-char* get_file_addr(s32 idx)
+char *get_file_addr(s32 idx)
 {
-    if (idx > 42) return 0;
+    if (idx > 42)
+        return 0;
     return g_Files[idx].addr;
 }
 
@@ -230,21 +239,21 @@ void set_widescreen(s32 arg0)
 static inline void sleep_frames(int n)
 {
     for (int i = 0; i < n; i++)
-        wait_frame(0);
+        wait_frame();
 }
 
 // draw_polys
 static inline void SET_POLYS_COL(u8 c, POLY_FT4 *p, int n)
 {
     DrawSync(0);
-    wait_frame(0);
+    wait_frame();
     for (int i = 0; i < n; i++) {
         setRGB0(&p[i], c, c, c);
         DrawPrim(&p[i]);
     }
 }
 
-#define LOGO_FADE_STEP  4
+#define LOGO_FADE_STEP 4
 
 static inline void FADE_IN(POLY_FT4 *p, int n)
 {
@@ -267,18 +276,19 @@ static inline void MAKE_QUADS(POLY_FT4 *polys, int n, int x, int y, int w, int h
         SetShadeTex(&polys[i], 0);
         polys[i].tpage = GetTPage(1, 1, tex_x, 0);
         polys[i].clut = GetClut(0x280, 0x100);
-        setUVWH(polys+i, u, v, tw, th);
-        setXYWH(polys+i, left, y, w, h);
-        left += w; tex_x += td;
+        setUVWH(polys + i, u, v, tw, th);
+        setXYWH(polys + i, left, y, w, h);
+        left += w;
+        tex_x += td;
     }
 }
 
 static inline void LOAD_PRS(u8 *dst, short w, short h)
 {
-    decode_lz1(dst+4, (u8* )0x80060000);
-    LoadImage(&(RECT){ 640, 256, 256, 1 }, (void*) 0x80060014);
+    decode_lz1(dst + 4, (u8 *)0x80060000);
+    LoadImage(&(RECT) { 640, 256, 256, 1 }, (void *)0x80060014);
     DrawSync(0);
-    LoadImage(&(RECT){ 640, 0, w, h }, (void*) 0x80060220);
+    LoadImage(&(RECT) { 640, 0, w, h }, (void *)0x80060220);
     DrawSync(0);
 }
 
@@ -310,19 +320,23 @@ void show_logo(void)
     DrawSync(0);
 
     // clear the screen with black
-    //SetBlockFill(&tile);
-    //setBlockFill(&tile);
+    // SetBlockFill(&tile);
+    // setBlockFill(&tile);
     // switching to psyq 4.7, for some reason doesn't have this
-    setlen(&tile, 3),  setcode(&tile, 0x02);
+    setlen(&tile, 3), setcode(&tile, 0x02);
 
-    tile.r0 = 0; tile.g0 = 0; tile.b0 = 0;
-    tile.x0 = 0; tile.y0 = 0;
-    tile.w = 640; tile.h = 480;
+    tile.r0 = 0;
+    tile.g0 = 0;
+    tile.b0 = 0;
+    tile.x0 = 0;
+    tile.y0 = 0;
+    tile.w = 640;
+    tile.h = 480;
     DrawPrim(&tile);
     DrawSync(0);
 
     do {
-        tmp = iso_read("WARNING.PRS", (u32* )0x80100000, 0); //read file
+        tmp = iso_read("WARNING.PRS", (u32 *)0x80100000, 0); // read file
     } while (tmp == -1);
 
     if (tmp >= 0) {
@@ -330,16 +344,16 @@ void show_logo(void)
         // repeat 4? just put POLYCOUNT in the macros
         MAKE_QUADS(polys, 4, 64, 0, 128, 480, 0, 0, 128, 480, 64);
         LOAD_PRS(&tmpfilebuf, 256, 240);
-        //SLEEP_FRAMES(10);
+        // SLEEP_FRAMES(10);
         sleep_frames(10);
 
-        wait_frame(0);
+        wait_frame();
         SetDispMask(1); // set disp mask to show it
 
-        FADE_IN(polys,4);
+        FADE_IN(polys, 4);
 
         DrawSync(0);
-        wait_frame(0);
+        wait_frame();
 
         SET_POLYS_COL(128, polys, 4);
         sleep_frames(300);
@@ -347,11 +361,11 @@ void show_logo(void)
         FADE_OUT(polys, 4);
     }
 
-    wait_frame(0);
+    wait_frame();
     SetDispMask(0);
 
     do {
-        D_80047D48 = iso_read("TITLE.PRS", (u32* )0x80100000, 0);  // read file
+        D_80047D48 = iso_read("TITLE.PRS", (u32 *)0x80100000, 0); // read file
     } while (D_80047D48 == -1);
 
     if (D_80047D48 == -2) {
@@ -359,18 +373,23 @@ void show_logo(void)
         LOAD_PRS(&D_80032FFC, 256, 96);
         sleep_frames(10);
 
-        wait_frame(0);
+        wait_frame();
         SetDispMask(1);
 
         FADE_IN(polys, 4);
     } else {
-        if (get_region() == 1) { y = 120; h = 240; }
-        else { y = 0; h = 480; }
+        if (get_region() == 1) {
+            y = 120;
+            h = 240;
+        } else {
+            y = 0;
+            h = 480;
+        }
         MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
         LOAD_PRS(&tmpfilebuf, 320, 240);
         sleep_frames(10);
 
-        wait_frame(0);
+        wait_frame();
         SetDispMask(1);
 
         FADE_IN(polys, 5);
@@ -393,7 +412,7 @@ void func_8001926C(void)
     dispenv.pad0 = 0;
     if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
-        dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
+        dispenv.screen.y = (u16)dispenv.screen.y + 0x18;
     }
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
@@ -402,21 +421,26 @@ void func_8001926C(void)
         MAKE_QUADS(polys, 64, 4, 192, 128, 96, 0, 0, 128, 96, 64);
         FADE_OUT(polys, 4);
     } else {
-        if (get_region() == 1) { y = 120; h = 240; }
-        else { y = 0; h = 480; }
+        if (get_region() == 1) {
+            y = 120;
+            h = 240;
+        } else {
+            y = 0;
+            h = 480;
+        }
 
         MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
         FADE_OUT(polys, 5);
     }
 
-    wait_frame(0);
+    wait_frame();
     SetDispMask(0);
     SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
     SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
     dispenv.pad0 = 0;
     if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
-        dispenv.screen.y = (u16) dispenv.screen.y + 0x18;
+        dispenv.screen.y = (u16)dispenv.screen.y + 0x18;
     }
     drawenv.isbg = 1;
     drawenv.r0 = 0;
@@ -424,12 +448,12 @@ void func_8001926C(void)
     drawenv.b0 = 0;
 
     DrawSync(0);
-    wait_frame(0);
+    wait_frame();
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
 
     DrawSync(0);
-    wait_frame(0);
+    wait_frame();
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
 }
@@ -440,16 +464,16 @@ void init_everything(void)
     cd_init();
     read_version();
 
-    wait_frame(0);
+    wait_frame();
     SetVideoMode(get_video_mode() != 0);
 
-    wait_frame(0);
+    wait_frame();
     call_ResetGraph(0);
     call_SetGraphDebug(0);
     call_SetDispMask(0);
 
     // spu set defaults
-    func_8001DD7C();
+    func_8001DD7C(); // spu_init?
 
     gpu_init();
     show_logo();
@@ -479,7 +503,7 @@ void game_shutdown(void)
 }
 
 // 800197C8
-s32 enable_vblank_event(void* handler)
+s32 enable_vblank_event(void *handler)
 {
     s32 event;
     EnterCriticalSection();
@@ -501,7 +525,7 @@ void disable_vblank_event(s32 event)
 }
 
 // 8001987C
-void nop(void) {}
+void nop(void) { }
 
 // 80019884
 void flush_cache_safe(void)
@@ -514,7 +538,7 @@ void flush_cache_safe(void)
 // 800198B4
 void jt_clear(void)
 {
-    void **jmptable = (void **) 0x80010000;
+    void **jmptable = (void **)0x80010000;
     for (int i = 0; i < 1024; i++) {
         jmptable[i] = KSEG0(nop);
     }
@@ -522,9 +546,9 @@ void jt_clear(void)
 }
 
 // 80019908
-void jt_set(void* func, s32 idx)
+void jt_set(void *func, s32 idx)
 {
-    void** jmptable = (void**) &jt;
+    void **jmptable = (void **)&jt;
     jmptable[idx] = KSEG0(func);
     flush_cache_safe();
 }
@@ -636,7 +660,7 @@ void game_init(void)
     jt_set(get_mc_file_name, 11);
 
     // clear global space
-    ram_memset((void*) 0x80014000, 0x4000, 0);
+    ram_memset((void *)0x80014000, 0x4000, 0);
     snd_set_reverb(5, 0);
     sfx_set_reverb(0);
     mc_select_slot(0);
@@ -649,7 +673,7 @@ s32 get_engine_running(void)
 }
 
 // 80019CB4
-void* jt_reset(void)
+void *jt_reset(void)
 {
     jt_clear();
     jt_set(get_engine_version, 255);
@@ -665,13 +689,13 @@ void func_80019D0C(void)
         ExCB *excb[2];
         PCB *pcb;
         TCB *tcb;
-    } *bios_tables = (void*) 0x100;
+    } *bios_tables = (void *)0x100;
 
     TCB *tcb = bios_tables->pcb->current_tcb;
     if (D_80047D58 == 0) {
         D_80047D58 = 1;
         jt_reset();
-        tcb->regs[2] = (int) game_init;
+        tcb->regs[2] = (int)game_init;
     } else {
         tcb->regs[2] = 0;
     }
@@ -685,9 +709,10 @@ void exception_handler(void)
         u32 excb_size;
         PCB *pcb;
         u32 pcb_size;
-        TCB (*tcb)[4];   // usually 4?
+        TCB(*tcb)
+        [4]; // usually 4?
         u32 tcb_size;
-    } *bios_tables = (void*) 0x100;
+    } *bios_tables = (void *)0x100;
 
     // when the exception returns, if v0 is not 0 the exception generating
     // function jumps to it
@@ -695,7 +720,7 @@ void exception_handler(void)
 }
 
 // 80019D78
-s32 enable_exception_event(void* handler)
+s32 enable_exception_event(void *handler)
 {
     EnterCriticalSection();
     // exception event (only cause by the invalid syscall function at the start of every main)
@@ -727,7 +752,7 @@ s32 get_next_exec(void)
 // 80019DF8
 GlobalData *globals(void)
 {
-    return (GlobalData*) 0x80014000;
+    return (GlobalData *)0x80014000;
 }
 
 // 80019E04
@@ -743,7 +768,8 @@ int main(int argc, char *argv[])
     music_set_list(&D_80034344);
     while (1) {
         int rc = iso_read("SYS_SE.VAB", &tmpfilebuf, 0);
-        if (rc > 0 && tmpfilebuf == 0x56414270) break;
+        if (rc > 0 && tmpfilebuf == 0x56414270)
+            break;
         printf("VAB file Reload\n");
     }
     sfx_load_vab(0, &tmpfilebuf, 0);
@@ -765,7 +791,7 @@ int main(int argc, char *argv[])
     file_execute_loop();
 
     // shutdowns
-    wait_frame(0);
+    wait_frame();
     SetDispMask(0);
     snd_reset();
     game_shutdown();

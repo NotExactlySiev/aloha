@@ -306,7 +306,6 @@ void func_800EC5C8() {
     SetRotMatrix(m);
     GBuffer *gbuf = gbuffer_get_current();
 
-    printf("angle: %04X -> %d\n", angle, sinf(angle));
     //
     //
     // POLY_F4 *p = gbuf->nextfree;

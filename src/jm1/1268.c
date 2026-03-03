@@ -56,8 +56,8 @@ typedef struct {
 typedef struct {
     MeshMetadata *unk0;
     EntityResources *unk1;
-    void *unk2;
-    void *unk3;
+    void (*class_ctor)(void); // class constructor (called once when level is loaded)
+    void (*ctor)(Entity*, Spirit*); // object constructor (called when this entity is instantiated)
 } EntityTemplate;
 
 MeshMetadata D_80103164[8];    // only frog, but should be an array
@@ -147,7 +147,7 @@ EntityResources D_800FF474 = {
     .unk0 = "hari_obj.clt",
     .unk2 = "hari_obj.vo2",
 };
- 
+
 extern u16 D_800FF9FC[];
 
 EntityResources D_800FFA0C = {
@@ -227,20 +227,20 @@ EntityTemplate *(*D_800FD454[3])[] = {
 
         //&D_80100554,
         &(EntityTemplate){
-            .unk2 = func_800C5DD8,
-            .unk3 = func_800C5CD0,
+            .class_ctor = func_800C5DD8,
+            .ctor = func_800C5CD0,
         },
 
         //&D_80100564,
         &(EntityTemplate){
-            .unk2 = func_800C6124,
-            .unk3 = func_800C602C,
+            .class_ctor = func_800C6124,
+            .ctor = func_800C602C,
         },
 
         //&D_80100574,
         &(EntityTemplate){
-            .unk2 = func_800C6538,
-            .unk3 = func_800C643C,
+            .class_ctor = func_800C6538,
+            .ctor = func_800C643C,
         },
 
         (void *) -1
@@ -264,7 +264,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
             func_800BBFD8,
             func_800BBD9C,
         },
-        
+
         &D_800FFC50,
         &D_800FFD3C,
         &D_8010048C,
@@ -390,17 +390,17 @@ void func_800B1BF4(Entity* this)
     if (this->unk5 != 0) this->unk5 = -1;
 }
 
-// contrusction
+// e_frog_ctor
 void _func_800B1D78(Entity *this, Spirit *params);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", _func_800B1D78);
 void func_800B1D78(Entity *this, Spirit *params)
 {
     //LinkedList *list = get_list0_head();
-    
+
     _func_800B1D78(this, params);
 }
 
-// destructor
+// e_frog_class_ctor
 void func_800B1F8C(void) {
 }
 
@@ -527,7 +527,7 @@ void func_800B66A0(Entity *this, Component *comp)
         this->spirit->alive = -1;
         entity_destroy(this);
         return;
-    }    
+    }
 }
 
 extern s32 D_801031A4;
@@ -553,7 +553,7 @@ void func_800B6744(Entity* this)
     func_800E5E60(&pos, &rot, D_801031A4 + 1);
 }
 
-// entity_block_ctor
+// e_block_ctor
 void func_800B6820(Entity *e, Spirit *spirit)
 {
     LinkedList *list = get_list2_head();
@@ -585,7 +585,7 @@ void func_800B6820(Entity *e, Spirit *spirit)
     e->angle_x = e->angle_y = e->angle_z = 0;
     e->angle_x = 0x90;
     e->carry_x = e->carry_y = e->carry_z = 0;
-    
+
     e->range_z = 0x100;
     e->range_x = 0x100;
     e->range_y = 0x180;
@@ -598,8 +598,18 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B69A0);
 
-// block_dtor. but these aren't dtors actually.
+// e_block_class_ctor
+// Creates an invisible entity that makes a wind sound when you're up in the
+// air.
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6C40);
+void _func_800B6C40(void)
+{
+    // if (func_800E3B98())
+    //     return;
+
+    // printf("block class ctor\n");
+    //Entity *e = func_800D04E8();
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6D28);
 

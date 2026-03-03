@@ -5,6 +5,8 @@
 
 #define SECTOR_BYTES (SECTOR_SIZE * sizeof(int))
 extern CdlLOC pvd_loc;
+
+void cd_init(void);
 void cd_ready_callback(u8 status, u8 *result);
 
 int try_CdControl(u_char com, void *param, u_char *result);
@@ -41,3 +43,4 @@ void cd_set_vol(SpuVolume *vol);
 void cd_get_vol(SpuVolume *vol);
 int cd_set_reverb(int arg0);
 void cd_fade_stop(void);
+void cd_stop(void);

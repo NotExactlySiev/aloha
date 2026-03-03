@@ -15,6 +15,7 @@ typedef struct {
     u8 frames[3][128];
 } McFileHeader;
 
+void mc_init(void);
 int mc_get_event(void);
 int mc_select_slot(int slot);
 int mc_file_exists(int slot, char *filename);

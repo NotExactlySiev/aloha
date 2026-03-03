@@ -2,6 +2,7 @@
 
 typedef struct VabRealHeader VabRealHeader;
 
+void sfx_init(void);
 int sfx_set_both(u32 handle, u16 pan, u16 vol);
 void sfx_set_prog_attr(u32 id, int arg2);
 int sfx_set_reverb(int val);

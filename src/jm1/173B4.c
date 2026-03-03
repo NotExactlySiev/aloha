@@ -83,6 +83,7 @@ void make_sin_lut(void)
     }
 }
 
+// more rand stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD0BC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD158);
@@ -99,6 +100,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD4D4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD550);
 
+// end of math.c
+
+// model anim stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD684);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6B0);
@@ -381,6 +385,10 @@ void func_800D0AA4(Entity *e, Spirit *spirit)
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0B98);
+void _func_800D0B98(void)
+{
+
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C08);
 
@@ -2225,9 +2233,26 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3A58);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3B24);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3B98);
+int D_801027E0 = 0;
+int D_801027E4 = 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3BA8);
+int func_800E3B98(void)
+{
+    return D_801027E4;
+}
+
+#include <common.h>
+
+void func_800E3BA8(int val)
+{
+    if (val > 0 && val >= D_801027E0)
+        val = D_801027E0 - 1;
+    if (val < 0)
+        val = 0;
+    else if (val > 1)
+        val = 1;
+    D_801027E4 = val;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3BF8);
 
@@ -2483,7 +2508,7 @@ SVECTOR* camera_pos = 0x1F8003C8;
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
 /*u32 func_800E5DD8(SVECTOR *v, u32 index)
 {
-    SVECTOR *vec = (SVECTOR *) SCRTCHPAD(0x0);
+    SVECTOR *vec = SCRTCHPAD(0x0);
     vec->vx = v->vx - camera_pos->vx;
     vec->vy = v->vy - camera_pos->vy;
     vec->vz = v->vz - camera_pos->vz;
@@ -2596,7 +2621,7 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     }
 
     SetLightMatrix(0x1F800030);
-    func_800E87B8(0x1F800010);
+    func_800E87B8(other_rotation);
 
     SVECTOR *cool = SCRTCHPAD(0x1C);
     if (id & 0x1000) {
@@ -2605,10 +2630,9 @@ void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
         cool->vy = cool->vy >> 1;
         cool->vz = cool->vz >> 1;
     }
-    // SetRotMatrix
-    SetRotMatrix(0x1F800010);
-    // SetTransMatrix
-    SetTransMatrix(0x1F800010);
+
+    SetRotMatrix(other_rotation);
+    SetTransMatrix(other_rotation);
 
     GBuffer *gbuf = gbuffer_get_current();
     gbuf->nextfree = func_800F4548(mesh, gbuf->nextfree, gbuf->ot + mag2, 0);
