@@ -1043,9 +1043,6 @@ glabel D_80138078
 glabel D_80138080
 	.space 0x8
 
-glabel D_80138088
-	.space 0x8
-
 glabel D_80138090
 	.space 0x8
 

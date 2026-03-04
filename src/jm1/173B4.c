@@ -600,7 +600,6 @@ void func_800D30E4(Entity *e)
     e->unk5 |= 0x8000;
     if (e->unk5 & 1) return;
 
-
     pos.vx = e->pos_x >> 12;
     pos.vy = e->pos_y >> 12;
     pos.vz = e->pos_z >> 12;
@@ -631,7 +630,6 @@ void func_800D30E4(Entity *e)
     pos.vz += offz / ONE;
 
     func_800E5E60(&pos, &rot, meshid | 0x4000);
-
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D3378);
@@ -759,8 +757,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5D68);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D60C8);
 
 // render robbit. is acting really weird so I'm gonna disable it for now
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
-func_800D6190() {}
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
+//func_800D6190() {}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
 
@@ -2554,135 +2552,179 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
     return func_800F4354(vec, SCRTCHPAD(0x8), &mesh_array[index & 0x3FF]);
 }*/
 
-// main function called for rendering models. disabled for now
-// because the model rendering code is a nightmare and has to
-// be fully disassembled and understood otherwise everything
-// breaks. because spimdasm is dfor nowumb and loads of symbols are
-// lost.
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5E60);
-//__asm__(".section .text\n" "\t.align\t2\n" "\t.globl\t" "_func_800E5E60" "\n" "\t.ent\t" "_func_800E5E60" "\n" "_func_800E5E60" ":\n" ".include \"" "asm/jm1/nonmatchings/173B4" "/" "func_800E5E60" ".s\"\n" "\t.set reorder\n" "\t.set at\n" "\t.end\t" "_func_800E5E60");
-
-
-extern int D_80138088;
-extern s32 D_801380B0;  // lod_distance
-extern u16 D_8013EC48[1024]; // added flags and stuff
+int D_80138088;                 // number of meshes drawn
+extern s32 D_801380B0;          // lod_distance
+extern s16 D_8013E448[1024];    // lod mesh index offsets
+extern u16 D_8013EC48[1024];    // added flags and stuff
 extern s16 D_80141468[1024];    // z offsets
+
 extern int (*D_80102E3C)(int, VECTOR*, u32); // depth adjuster
 extern SVECTOR D_80102E44;
 extern SVECTOR D_801380A0;
 
+// The id parameter in this function has this format:
+//          ffff ffii iiii iiii
+// Where the lower bits are the mesh index and the upper ones are flags defined
+// in this enum.
+
+enum {
+    MODEL_FLAG_BIT0 = 0x400, // Unk
+    MODEL_STATIC_OT = 0x800, // Has static OT layer
+    MODEL_FLAG_BIT2 = 0x1000, // Also has to do with facing the camera
+    MODEL_FLAG_BIT3 = 0x2000, // Face the camera?
+    MODEL_BLACK_SHADOW = 0x4000, // Also has to do with facing the camera
+    MODEL_WHITE_SHADOW = 0x8000,
+    MODEL_SHADE_AT_MEDIUM = 0x10000, // Don't use flat shading for medium distance.
+};
+
+enum {
+    MESH_FLAG_FLAT_SHADE = 0x1,
+};
+
+enum {
+    OT_FLAG_BLACK_SHADOW = 0x1,
+    OT_FLAG_WHITE_SHADOW = 0x2,
+};
+
 // draw_model
-void _func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
+void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
 {
-    angle = NULL;
-    if (id < 0) return;
-
-    // LET's only do the frog for now
-    //if (id != 0x196) return;
     SVECTOR *dir = SCRTCHPAD(0x00);
-    VECTOR *tmp = SCRTCHPAD(0x24);
-    MATRIX *mat = SCRTCHPAD(0x50);
+    MATRIX *rotation = SCRTCHPAD(0x10);
+    MATRIX *light = SCRTCHPAD(0x30);
+    MATRIX *tmp = SCRTCHPAD(0x50);
+    MATRIX *alt_rot = SCRTCHPAD(0x70);
 
+    // World matrices
     SVECTOR *camera = SCRTCHPAD(0x3C8);
-    MATRIX *light = SCRTCHPAD(0x3D0);
-    MATRIX *rotation = SCRTCHPAD(0x3E4);
+    MATRIX *world_light = SCRTCHPAD(0x3D0);
+    MATRIX *world_rotation = SCRTCHPAD(0x3E4);
 
     SVECTOR *third = dir;
 
-    Mesh *mesh = &mesh_array[id & 0x3FF];
+    int mesh_index = id & 0x3ff;
+    Mesh *mesh = &mesh_array[mesh_index];
     dir->vx = pos->vx - camera_pos->vx;
     dir->vy = pos->vy - camera_pos->vy;
     dir->vz = pos->vz - camera_pos->vz;
-    s32 mag2 = func_800F4354(dir, tmp, mesh);
+    s32 mag2 = func_800F4354(dir, rotation->t, mesh);
+    u32 mesh_with_flags = (u32) mesh;
 
-    if (mag2 < 0) return;
+    if (mag2 < 0)
+        return;
+
     if (mag2 >= D_801380B0/4) {
-        // far
-        if (id & 0x4000) {
+        // Medium distance
+        if (id & MODEL_BLACK_SHADOW) {
             return;
         }
-        if (angle && (!(id & 0x10000))) {
-            mesh = ((void*) &mesh_array[id & 0x3ff]) + 1;   // ???
-        }
+
+        // If it's not static geometry, and it's rotated, set the flat shading
+        // flag.
+        if (angle && (!(id & MODEL_SHADE_AT_MEDIUM)))
+            mesh_with_flags |= MESH_FLAG_FLAT_SHADE;
     }
 
+    // Get more flags from this array.
     id |= D_8013EC48[id & 0x3FF] & 0xFC00;
 
     if (mag2 >= D_801380B0) {
-        // very far
-        // TODO
-        //mesh = &mesh_array[(id & 0x3ff) + ]
+        // Far distance
+        // Switch to the LOD model and shade it flat.
+        mesh = &mesh_array[mesh_index + D_8013E448[mesh_index]];
+        mesh_with_flags = (u32) mesh;
+        mesh_with_flags |= MESH_FLAG_FLAT_SHADE;
     }
 
-    if (id & 0x800) {
-        mag2 = (D_8013EC48[id & 0x3ff] & 0x3ff) + 44;
+    int layer;
+    if (id & MODEL_STATIC_OT) {
+        // Get OT layer from the table.
+        layer = (D_8013EC48[mesh_index] & 0x3ff) + 44;
     } else {
-        mag2 = SquareRoot0(mag2);
-        if (D_80102E3C) {
-            mag2 = D_80102E3C(mag2, pos, id);
-        }
-        mag2 += D_80141468[id & 0x3FF];
-        mag2 = mag2 >> 4;
+        // Calculate Z
+        int z = SquareRoot0(mag2);
+        if (D_80102E3C)
+            z = D_80102E3C(z, pos, id);
+        z += D_80141468[mesh_index];
 
-        int diff = mag2;
-        if (mag2 < 1) diff = 1;
-        if (mag2 > 511) diff = 511;
-        mag2 = 558 - diff;
+        // Convert to OT layer
+        layer = z >> 4;
+        CLAMP(layer, 1, 511);
+        layer = 558 - layer;
     }
 
-    MATRIX *rot_p = rotation;
+    // The default rotation space is world space, unless...
+    MATRIX *rot_p = world_rotation;
+
+    // ...we have to deal with weird rotations.
     if (id & 0x7000) {
-        MATRIX *alt_rot = SCRTCHPAD(0x70);
         third = NULL;
         rot_p = alt_rot;
 
         if (id & 0x2000) {
             func_800E563C(alt_rot);
-        } else if (id & 0x4000) {
+        } else if (id & MODEL_BLACK_SHADOW) {
             func_800E8838(rotation, alt_rot);
             third = &D_80102E44;
+            // I'm not sure what's happening here. Is this alt_rot thing ever used?
             alt_rot->m[0][1] = (D_801380A0.vx * alt_rot->m[0][0] + D_801380A0.vz * alt_rot->m[0][2]) / ONE;
             alt_rot->m[1][1] = (D_801380A0.vx * alt_rot->m[1][0] + D_801380A0.vz * alt_rot->m[1][2]) / ONE;
             alt_rot->m[2][1] = (D_801380A0.vx * alt_rot->m[2][0] + D_801380A0.vz * alt_rot->m[2][2]) / ONE;
         } else {
+            // Then it can only be 0x1000
             rot_p = &D_80137CD0;
         }
     }
 
-    MATRIX *other_rotation = SCRTCHPAD(0x10);
     if (angle) {
-        func_800E5668(other_rotation, mat, angle);
-        //
-        // TODO
+        // If the model is rotated, we need to recalculate the rotation and
+        // light matrices.
+        func_800E5668(rotation, tmp, angle);
+        MulMatrix0(world_light, rotation, light);
+        MulMatrix2(rot_p, rotation);
+        if (!(id & 0x7000)) {
+            third = NULL;
+        }
     } else {
-        func_800E8838(rot_p, other_rotation);
-        func_800E8838(light, 0x1F800030);
+        // Otherwise just use the default values.
+        func_800E8838(rot_p, rotation);
+        func_800E8838(world_light, light);
     }
 
-    SetLightMatrix(0x1F800030);
-    func_800E87B8(other_rotation);
+    // The light matrix has been decided upon. Load it up.
+    SetLightMatrix(light);
 
-    SVECTOR *cool = SCRTCHPAD(0x1C);
+    // We still need to do a final bit of calculation for the rotation matrix.
+    func_800E87B8(rotation);
     if (id & 0x1000) {
         third = NULL;
-        cool->vx = cool->vx >> 1;
-        cool->vy = cool->vy >> 1;
-        cool->vz = cool->vz >> 1;
+        rotation->m[2][0] >>= 1;
+        rotation->m[2][1] >>= 1;
+        rotation->m[2][2] >>= 1;
     }
 
-    SetRotMatrix(other_rotation);
-    SetTransMatrix(other_rotation);
+    // And load it up.
+    SetRotMatrix(rotation);
+    SetTransMatrix(rotation);
 
+    // Get the OT pointer and put the required flags in it.
     GBuffer *gbuf = gbuffer_get_current();
-    gbuf->nextfree = func_800F4548(mesh, gbuf->nextfree, gbuf->ot + mag2, 0);
-    SetRotMatrix(0x1F8003E4);
+    u32 *ot = &gbuf->ot[layer];
+    u32 ot_with_flags = ((u32) ot) | ((id & 0xc000) >> 14);
+
+    // Draw the mesh.
+    gbuf->nextfree = func_800F4548(mesh_with_flags, gbuf->nextfree, ot_with_flags, third);
+
+    // Restore the original rotation matrix.
+    SetRotMatrix(world_rotation);
+
+    // Done. Number of meshes drawn.
     D_80138088 += 1;
 }
 
 // ground collision is also lost and you just fall.
 // but the ground texture bug is gone too. so that one's also
 // somewhere in that mess.
-
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E62F0);
 
