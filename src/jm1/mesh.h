@@ -23,9 +23,17 @@ typedef struct {
 } VertList;
 
 typedef struct {
-    u32 size; // in bytes
-    u32 data[]; // this is the subsets structure
-} FaceList;
+    u16 verts_offset; // verts
+    u16 faces_offset; // faces
+} MeshSetHeader;
+
+// This is a MeshSet, isn't it?
+typedef struct {
+    u32 sets_count; // Count less one
+    u32 data[];
+    // MeshSetHeader sets_headers[sets_count+1];
+    // MeshSet sets[sets_count+1];
+} MeshSets;
 
 typedef struct {
     s16 a, b;
@@ -36,7 +44,8 @@ typedef struct {
         u32 data[];
     } *unk1;
 
-    void *unk2;
+    // Points to the `sets_count` field of the mesh data.
+    MeshSets *sets_data;
 } Mesh;
 
 #endif // _MESH_H

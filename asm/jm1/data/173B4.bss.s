@@ -803,9 +803,6 @@ glabel D_8012F32F
 glabel D_8012F368
 	.space 0x200
 
-glabel D_8012F568
-	.space 0x40
-
 glabel D_8012F5A8
 	.space 0xc
 

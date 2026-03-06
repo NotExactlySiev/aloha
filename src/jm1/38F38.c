@@ -2,6 +2,7 @@
 #include <libgpu.h>
 #include <libetc.h>
 #include "gbuffer.h"
+#include "libapi.h"
 #include "mesh.h"
 #include "shared.h"
 
@@ -288,8 +289,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 Entity *func_800DBBE4();
 
 // radar
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
-void func_800EC5C8() {
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
+void _func_800EC5C8() {
     MATRIX *m = SCRTCHPAD(0);
 
     Entity *player = func_800DBBE4();
@@ -344,21 +345,44 @@ void func_800EC5C8() {
     gbuf->nextfree = p2 + 1;
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECD88);
+// objective.c
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECDD0);
+typedef struct {
+    short x, y, z;
+    short id;   // Sprite to use
+} Objective;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECDE0);
+Objective D_8012F568[8]; // bss
+int D_80102EE4 = 0;
 
-void func_800ECE00(void) {
+// objective_add
+void objective_add(short x, short y, short z, short id)
+{
+    if (D_80102EE4 >= 8)
+        return;
+    D_8012F568[D_80102EE4++] = (Objective){ x, y, z, id };
 }
+
+// objective_clear
+void func_800ECDD0(void)
+{
+    D_80102EE4 = 0;
+}
+
+// objective_init
+void func_800ECDE0(void)
+{
+    func_800ECDD0();
+}
+
+void func_800ECE00(void) {}
 
 // render objective text (JETPOD() and EXIT())
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECE08);
-//func_800ECE08() {}
 
-void func_800ED024(void) {
-}
+void func_800ED024(void) {}
+
+// end of objective.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED02C);
 
@@ -743,67 +767,242 @@ int func_800F4354(SVECTOR *in, VECTOR *out, Mesh *m)
 }
 */
 
-// sort faces (sets actually)
+// process and sort sets
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
 // TODO: this breaks and I don't know why. maybe shouldn't be C at all?
-void _func_800F443C(FaceList *facelist)
+void _func_800F443C(MeshSets *sets_data)
 {
-    /*
-    MATRIX *m;
-
-    s32 *dst0 = (s32*) SCRTCHPAD(0x288);
-    u16 *dst1 = (u16*) SCRTCHPAD(0x3A8);
     void *verts = *(void**) SCRTCHPAD(0x3A0);
 
-    //__asm__ volatile( "mfc0   %0, $12; nop;" :  :"r"(sr) : "memory");
+    // Z values for each set.
+    s32 *dst0 = (s32*) SCRTCHPAD(0x288);
 
-    for (int i = 0; i < facelist->size + 1; i++) {
-        EnterCriticalSection();
-        u16 *sets = &facelist->data[i];
-        u32 vertoff = sets[0];  // stores the offset not the index
-        SVECTOR *vert = verts + vertoff;
-        // TODO: do we need to disable interrupts?
-        // Can I just use critical section?
-        gte_ldv0(vert);
+    // Face index offsets for each set.
+    u16 *dst1 = (u16*) SCRTCHPAD(0x3A8);
+
+    u32 sr;
+    __asm__ volatile("mfc0 %0, $12\n nop\n" : "=r"(sr));
+    //__asm__ volatile("mfc0   %0, $12; nop;" : "=r"(sr) : : "memory");
+    u32 no_intr = sr & ~1;
+    printf("SR: %08x\n", sr);
+
+    void *data = sets_data->data;
+
+    int sets_count = sets_data->sets_count + 1;
+
+    MeshSetHeader *headers = data;
+    for (int i = 0; i < sets_count; i++) {
+        SVECTOR *set_origin = verts + headers[i].verts_offset;
+
+        // The first vertex in a set's range is its center point. We need to
+        // transform it.
+        gte_ldv0(set_origin);
+        __asm__ volatile("nop; nop;" ::: "memory");
         gte_rt_b();
-        //__asm__ volatile( "mtc0   %0, $12;" : :"r"(no_intr) : "memory");
 
+        // Disable interrupts
+        // EnterCriticalSection();
+        __asm__ volatile("mtc0 %0, $12\n" :: "r"(no_intr));
+
+        __asm__ volatile("cfc2   $zero, $31;" : : : "memory");
         gte_sqr0_b();
-        ExitCriticalSection();
-        //__asm__ volatile( "mtc0   %0, $12;" : :"r"(sr) : "memory");
-        //gte_stflg(0);
-        VECTOR projected;
-        gte_stlvnl(&projected);
 
-        dst0[i] = ((projected.vx + projected.vy) >> 2) + projected.vz;
-        dst1[i] = sets[1];
+        // Re-enable interrupts
+        // ExitCriticalSection();
+        __asm__ volatile("mtc0 %0, $12\n" :: "r"(sr));
+
+        // Projection of the center point, squared.
+        __asm__ volatile("cfc2   $zero, $31;" : : : "memory");
+
+        //VECTOR projected;
+        int x, y, z;
+        __asm__ volatile(
+            "mfc2   %0, $25;"
+            "mfc2   %1, $26;"
+            "mfc2   %2, $27;"
+            : "=r"(x), "=r"(y), "=r"(z)
+        );
+        //gte_stlvnl(&projected);
+        //gte_st
+
+        // Store the the biased Z value and the faces index offset.
+        dst0[i] = ((x + y) >> 2) + z;
+        dst1[i] = headers[i].faces_offset;
     }
 
-    // now sorting?
-    for (int i = 1; i < facelist->size + 1; i++) {
-        s32 tmp0 = dst0[i];
-        u16 tmp1 = dst1[i];
+    // Now sort by the Z value.
+    int i = sets_count - 1;
+    int *mags_ = SCRTCHPAD(0x288);
+    u16 *faceoffs_ = SCRTCHPAD(0x3A8);
+    do {
+        int *mags_next = mags_ + 1;
+        u16 *faceoffs_next = faceoffs_ + 1;
+        int mag = *mags_next;
+        u16 faceoff = *faceoffs_next;
+        int j = sets_count - 1 - i;
+        do {
+            u16 off = *faceoffs_;
+            if (*mags_ <= mag) break;
+            mags_[1] = *mags_;
+            faceoffs_[1] = off;
+            mags_ = mags_ - 1;
+            faceoffs_ = faceoffs_ - 1;
+            //
+            j = j - 1;
+        } while (j + 1 > 0);
+        mags_[1] = mag;
+        faceoffs_[1] = faceoff;
+        i = i - 1;
+        mags_ = mags_next;
+        faceoffs_ = faceoffs_next;
+        if (i < 1)
+            return;
+    } while (1);
 
-        int j;
-        for (j = i - 1; j >= 0; j--) {
-            if (dst0[j] <= tmp0) break;
-            dst0[j+1] = dst0[j];
-            dst1[j+1] = dst1[j];
-        }
 
-        dst0[j+1] = tmp0;
-        dst1[j+1] = tmp1;
-    }*/
+
+    // for (int i = 1; i <= sets_count; i++) {
+    //     s32 z = dst0[i];
+    //     u16 off = dst1[i];
+
+    //     int i_ = sets_count + 1 - i;
+
+    //     int j;
+    //     for (j = sets_count - i_; j > 0; j--) {
+    //         if (dst0[j] <= z) break;
+    //         dst0[j+1] = dst0[j];
+    //         dst1[j+1] = dst1[j];
+    //     }
+
+    //     dst0[j+1] = z;
+    //     dst1[j+1] = l;
+    // }
 }
+
+void func_800F686C(void);
+void func_800F6878(void);
+void func_800F68A4(void);
+
 
 // draw_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
+void *func_800F4548(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3);
 
-void *draw_mesh(int mesh_with_flag, void *prim, u32 *ot_with_flag, u32 *arg3)
+void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
 {
-    //jt.printf("DRAWING %p : %p\n", mesh_with_flag, arg3);
-    return func_800F4548(mesh_with_flag, prim, ot_with_flag, arg3);
-    //return prim;
+    // printf("MESH: %p\n", mesh_with_flags);
+    return func_800F4548(mesh_with_flags, prim, ot_with_flags, arg3);
+
+    // printf("DRAWING %p at %p: %p\n", mesh_with_flags, ot_with_flags, arg3);
+    Mesh *mesh = (Mesh *) (mesh_with_flags & ~0x1);
+    if (mesh != (Mesh *) 0x80134fb0)
+        return prim;
+
+    u32 ab = *(u32 *)(&mesh->a);
+    if (ab == 0)
+        return prim;
+
+    u32 *ot = (u32 *) (ot_with_flags & ~0x3);
+    void *t5_routine = func_800F686C;
+    if (ot_with_flags & 3) {
+        t5_routine = func_800F6878;
+        if (ot_with_flags & 1) {
+            t5_routine = func_800F68A4;
+        }
+    }
+
+    //
+    //
+
+    // Set up the pointer variables to the mesh data
+    MATRIX *save_rot = SCRTCHPAD(0x380);
+    SVECTOR **verts_p = SCRTCHPAD(0x3A0);
+    void **unk_p = SCRTCHPAD(0x3A4);
+    u16 *faceoffs = SCRTCHPAD(0x3A8);
+
+    MeshSets *sets_data = mesh->sets_data;
+    *verts_p = mesh->verts->data;
+    *unk_p = mesh->unk1->data;
+    int sets_count = sets_data->sets_count + 1;
+
+    // Save it in VXY2 for now
+    __asm__ volatile(
+        "mtc2   %0, $4;"
+        :: "r"(sets_data)
+    );
+
+    // Process and sorts sets
+    if (sets_count > 1) {
+        func_800F443C(sets_data);
+    }
+
+    // Save foreground color in the unused GTE registers VZ2/ZSF3/ZSF4
+    __asm__ volatile(
+        "cfc2   $t0, $21;"
+        "cfc2   $t1, $22;"
+        "cfc2   $t2, $23;"
+
+        "mtc2   $t0, $5;"
+        "ctc2   $t1, $29;"
+        "ctc2   $t2, $30;"
+    );
+
+    //
+    //
+
+    u32 xy = 0;
+    u32 z = 0;
+    if (arg3) {
+        if (t5_routine != func_800F68A4) {
+            gte_ldtr(0, 0, 0);
+        }
+        xy = arg3[0];
+        z = arg3[1];
+    }
+
+    __asm__ volatile(
+        "mtc2   %0, $2;"
+        "mtc2   %1, $3;"
+        :: "r"(xy), "r"(z)
+    );
+
+    //
+    //
+    //
+
+    for (int i = 0; i < sets_count; i++) {
+        void *fs;   // Pointer to the faces section
+        __asm__ volatile(
+            "mfc2   %0, $4;"
+            : "=r"(fs)
+        );
+
+        Face *faces = fs + faceoffs[i];
+        //FaceList *subset_faces = fs + offset;  // Skip past the size field and faces
+        //for (int j = 0; j < )
+    }
+
+    gte_ReadRotMatrix(save_rot);
+    //render_object()
+    gte_SetRotMatrix(save_rot);
+
+    // LOOPS
+    //
+    //
+
+
+    // Restore foreground color
+    __asm__ volatile(
+        "mfc2   $t0, $5;"
+        "cfc2   $t1, $29;"
+        "cfc2   $t2, $30;"
+
+        "ctc2   $t0, $21;"
+        "ctc2   $t1, $22;"
+        "ctc2   $t2, $23;"
+    );
+
+    return prim;
 }
 
 // ## I think the insanity of rendering code is confined to here

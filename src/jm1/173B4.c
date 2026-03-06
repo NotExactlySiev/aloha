@@ -9,6 +9,8 @@
 
 #include "shared.h"
 
+void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id);   // render model
+
 // todo: the OT in this one is wrong. also it's just another gbuffer
 typedef struct {
     s16         count;
@@ -265,7 +267,29 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0138);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0224);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0370);
+extern Entity D_80106EC8[6];
+extern int D_8010294C;
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0370);
+void func_800D0370(void)
+{
+    for (int i = 0; i < 6; i++) {
+        Entity *e = &D_80106EC8[i];
+        func_800E5E60(
+            &(SVECTOR){
+                 e->pos_x >> 12,
+                 e->pos_y >> 12,
+                 e->pos_z >> 12,
+            },
+            &(SVECTOR){
+                e->angle_y,
+                e->angle_x,
+                e->angle_z,
+            },
+            e->unk0 + D_8010294C
+        );
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0428);
 
@@ -402,22 +426,22 @@ void func_800D0AA4(Entity *e, Spirit *spirit)
     // isn't level specific
     switch (type) {
     case 0x40:  // jetpod
-    func_800D2618(e, spirit);
+        func_800D2618(e, spirit);
         break;
     case 0x41:
-    func_800D2A8C(e, spirit);
+        func_800D2A8C(e, spirit);
         break;
     case 0x42:
-    func_800D3D28(e, spirit);
+        func_800D3D28(e, spirit);
         break;
     case 0x43:
-    func_800D45C4(e, spirit);
+        func_800D45C4(e, spirit);
         break;
     case 0x44:
-    func_800D2184(e, spirit);
+        func_800D2184(e, spirit);
         break;
     default:
-    entity_destroy(e);
+        entity_destroy(e);
         break;
     }
 }
@@ -561,7 +585,42 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2184);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D22B4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D239C);
+SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
+
+// jetpod mesh metadata
+extern MeshMetadata D_8011EFA8;
+
+// e_jetpod_render
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D239C);
+void func_800D239C(Entity *e)
+{
+    // Render the jetpod and its text thing
+    SVECTOR pos = {
+        .vx = e->pos_x >> 12,
+        .vy = (e->pos_y >> 12) - 0xa8,
+        .vz = e->pos_z >> 12,
+    };
+
+    SVECTOR rot = {
+        .vy = -e->angle_y,
+        .vx = e->angle_x,
+        .vz = e->angle_z,
+    };
+
+    // Objective text
+    objective_add(pos.vx, pos.vy, pos.vz, 0);
+
+    // Show in radar
+    func_800EC408(pos.vz, pos.vx, 2);
+
+    // Jetpod model
+    func_800E5E60(&pos, &rot, D_8011EFA8.unk0 + e->model.frame_a + 1);
+
+    // Shadow
+    pos.vy = e->max_y + 2;
+    if (camera_pos->vy < pos.vy)
+        func_800E5E60(&pos, &rot, D_8011EFA8.unk0 + 6);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D24C0);
 
@@ -571,7 +630,32 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D277C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D27B4);
 
+// e_exit mesh metadata
+extern MeshMetadata D_8011EFA8;
+
+#include "objective.h"
+
+// e_exit_render
+// I have absolutely no idea what causes this to break
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2824);
+void _func_800D2824(Entity *e)
+{
+    SVECTOR pos;
+
+    pos.vx = (short)(e->pos_x >> 12);
+    pos.vy = (short)(e->pos_y >> 12) - 0x90;
+    pos.vz = (short)(e->pos_z >> 12);
+
+    SVECTOR rot = {
+        .vy = e->angle_y,
+        .vx = -e->angle_x,
+        .vz = e->angle_z,
+    };
+
+    objective_add(pos.vx, pos.vy, pos.vz, 1);
+    func_800EC408(pos.vz, pos.vx, 2);
+    func_800E5E60(&pos, &rot, D_8011EFA8.unk0 + 5);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D29C4);
 
@@ -608,7 +692,7 @@ void func_800D30E4(Entity *e)
     rot.vy = e->angle_y;
     rot.vz = e->angle_z;
 
-    meshid = e->model[1] + D_8011EFB8;
+    meshid = e->model.frame_a + D_8011EFB8;
 
     // bouncing animation and... something else?
     pos.vy += (6 * sinf(e->angle_x) - (e->range_y / 2) * cosf(e->angle_x)) >> 12;
@@ -2540,8 +2624,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5D90);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DA0);
 
-SVECTOR* camera_pos = 0x1F8003C8;
-
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
 /*u32 func_800E5DD8(SVECTOR *v, u32 index)
 {
@@ -2713,7 +2795,7 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     u32 ot_with_flags = ((u32) ot) | ((id & 0xc000) >> 14);
 
     // Draw the mesh.
-    gbuf->nextfree = func_800F4548(mesh_with_flags, gbuf->nextfree, ot_with_flags, third);
+    gbuf->nextfree = draw_mesh(mesh_with_flags, gbuf->nextfree, ot_with_flags, third);
 
     // Restore the original rotation matrix.
     SetRotMatrix(world_rotation);

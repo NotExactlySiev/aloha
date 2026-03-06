@@ -5,23 +5,28 @@
 
 # Rendering
 
+# func_800F49A0(data, void *prim, void *ot, count)
+
 glabel func_800F49A0
     addiu   $sp, 0xfffc
     sw      $ra, 0x0000($sp)
     lw      $s4, 0x0000($a0)
+
     andi    $v0, $a3, 0x800f
     beq     $v0, $zero, .L0
     move    $s2, $zero
-    .word 0x36528000
+    ori     $s2, 0x8000
 .L0:
+
+    # Okay I'm already confused. This is uninitialized so what are we doing?
     addiu   $v1, 0xf800
     bltz    $v1, .L1
     nop
     ori     $s2, 0x1000
 .L1:
+
+    #
     lw      $a3, 0x0004($a0)
-        # lui     $s5, 0x1f7f
-        # ori     $s5, 0xfff4
     la      $s5, 0x1f800000 - 12
 
     lh      $v0, 0x037e($s5)
@@ -30,9 +35,12 @@ glabel func_800F49A0
     addiu   $s4, 0xffe4     # this is the next subset
     or      $s2, $v0
     lw      $s3, 0x03b0($s5)
+
+    # t6 = vert indices
     move    $t6, $a3
     lw      $a3, 0x001c($a0)
-    srl     $t9, $t6, 0x18
+
+    srl     $t9, $t6, 0x18  # t9 <- v3 index
     srl     $t8, $t6, 0x0e
     andi    $t8, 0x03fc
     srl     $t7, $t6, 0x06
@@ -42,9 +50,13 @@ glabel func_800F49A0
     addu    $t6, $s5
     addu    $t7, $s5
     addu    $t8, $s5
+
+    # if v3 >= 3 it's a quad
     addiu   $t9, 0xfffe
     bgtz    $t9,        .QUAD
     addiu   $t9, 0x0002
+
+    # if
     bne     $t6, $t8,   .TRI
     nop
     b                   .LINE
@@ -2041,6 +2053,7 @@ glabel func_800F6808
 /* 47020 800F6820 */ .word 0x4A780010 # invalid instruction
 /* 47024 800F6824 */ jr    $ra
 /* 47028 800F6828 */ nop
+
 glabel func_800F682C
 /* 4702C 800F682C */ .word 0x00531021
 /* 47030 800F6830 */ .word 0x8C420000
@@ -2119,7 +2132,6 @@ glabel func_800F68B0
     ctc2   $t1, $22
     jr     $ra
     ctc2   $v1, $23
-
 
 glabel func_800F6928
     lw     $t0, 8($t6)

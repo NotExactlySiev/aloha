@@ -17,13 +17,6 @@ extern int D_801026B8;
 extern int D_801026BC;
 
 typedef struct {
-    int unk0;
-    int unk1;
-    int unk2;
-    int unk3;
-} MeshMetadata;
-
-typedef struct {
     char *unk0;     // mesh clut name
     char *unk1;     // texture clut name
     char *unk2;     // vo2 name
@@ -368,7 +361,7 @@ void func_800B1BF4(Entity* this)
     rot.vy =  this->angle_y;
     rot.vx = -this->angle_x;
     rot.vz =  this->angle_z;
-    if (func_800E5DD8(&pos, this->model[1] + D_80103164[0].unk0) > -1) {
+    if (func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         if (this->unk5 != 0) {
             meshid |= 0x8000;   // damage blinkW
@@ -378,7 +371,7 @@ void func_800B1BF4(Entity* this)
     // and the shadow
     pos.vy = this->max_y + 2;
     if (cam->vy < pos.vy &&
-        func_800E5DD8(&pos, this->model[1] + D_80103164[0].unk0) > -1) {
+        func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         func_800E5B88(0, 0, 0);
         func_800E5E60(&pos, &rot, meshid | 0x4000);

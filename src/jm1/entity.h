@@ -8,6 +8,7 @@ typedef struct LinkedList LinkedList;
 typedef struct Entity Entity;
 typedef struct Component Component;
 typedef struct Spirit Spirit;
+typedef struct Model Model;
 
 // spirits are what come into existence in the form
 // of entities. when an entity is destroyed and later respawned,
@@ -37,6 +38,15 @@ struct LinkedList {
     LinkedList *prev;
 };
 
+struct Model { // Should be called Anim instead?
+    short current_time;
+    short frame_a;
+    void *next;
+    int *keyframes;
+    short frame_b;
+    short length;
+};
+
 struct Entity {
     /* 00 */ Entity *next;
     /* 04 */ Entity *prev;
@@ -44,7 +54,7 @@ struct Entity {
     /* 18 */ Component comp1; // physics
     /* 28 */ Component render_comp;
     /* 38 */ Component comp3; // state machine. behavior and ai
-    /* 48 */ u16 model[8]; // model_t
+    /* 48 */ Model model; // model_t
     /* 58 */ u16 unk0; // id
     /* 5A */ u8 unk1;
     /* 5B */ u8 unk2;
@@ -104,5 +114,12 @@ struct Entity {
         s16 unk[32];
     } sub;
 };
+
+typedef struct {
+    int unk0;
+    int unk1;
+    int unk2;
+    int unk3;
+} MeshMetadata;
 
 #endif
