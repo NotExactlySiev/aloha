@@ -53,7 +53,8 @@ typedef struct {
     void (*ctor)(Entity*, Spirit*); // object constructor (called when this entity is instantiated)
 } EntityTemplate;
 
-MeshMetadata D_80103164[8];    // only frog, but should be an array
+// Mesh metadata for the level specific entities
+MeshMetadata D_80103164[8];
 extern MeshMetadata D_8010353C;
 
 void func_800B1F8C(void);
@@ -324,7 +325,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0CBC);
 
 // entity functions
 
-// frog stuff
+// frog.c
 
 // frog basic
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0CCC);
@@ -396,7 +397,8 @@ void func_800B1D78(Entity *this, Spirit *params)
 void func_800B1F8C(void) {
 }
 
-// kiwi stuff
+// kiwi.c
+
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1F94);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2354);
@@ -453,6 +455,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B4B14);
 void func_800B4D20(void) {
 }
 
+// hippo.c
+
+// hippo missile
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B4D28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5080);
@@ -462,8 +467,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5138);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B5304);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B53F0);
-
-// hippo.c
 
 // e_hippo_comp0
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B558C);
@@ -657,8 +660,10 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6D28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7060);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B71C4);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7258);
 
 // e_beetle_comp1
@@ -706,7 +711,9 @@ void func_800B9280(void) {
 
 // kumo.c
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B9288);
+
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B92B4);
 
@@ -762,43 +769,61 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BB5D4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BB768);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBB4C);
 
+// e_kumo_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBC18);
 
+// e_kumo_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBD9C);
 
+// e_kumo_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBFD8);
 
 
-//
+// mosu.c
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC004);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC0A8);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC158);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC204);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC290);
 
+// e_mosu_comp0
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC3F0);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BC834);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BCA08);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BCB94);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BCD08);
 
+// e_mosu_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BCEB4);
 
+// e_mosu_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD158);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD4BC);
 
+// e_mosu_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD588);
 
 // e_mosu_ctor
@@ -941,90 +966,131 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C32E0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C33AC);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3524);
 
+// e_boss1_comp0
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3798);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3B7C);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3C88);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3E90);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3F28);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4000);
 
+// e_boss1_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C40A4);
 
+// e_boss1_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C44A8);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4B8C);
 
+// e_boss1_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4C58);
 
+// e_boss1_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4DE8);
 
+// e_boss1_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5044);
 
+// e_yuge_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5074);
 
+// e_yuge_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5188);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5240);
 
+// e_yuge_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C52B8);
 
+// e_yuge_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5368);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C557C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C55B8);
 
+
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C55D8);
 
+// e_yuge_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C55F8);
 
+// e_jyou_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5628);
 
+// e_jyou_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5718);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C57D0);
 
+// e_jyou_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5848);
 
+// e_jyou_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C58D4);
 
+// static unused
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5A98);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5AD4);
 
+// static unused
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5AF4);
 
+// e_jyou_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5B14);
 
+// e_unk8_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5B44);
 
+// e_unk8_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5C34);
 
+// e_unk8_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5CD0);
 
+// e_unk8_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5DD8);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5DF8);
 
+// e_unk9_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5EC0);
 
+// e_unk9_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C602C);
 
+// e_unk9_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6124);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6144);
 
+// e_unkA_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C620C);
 
+// e_unkA_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C643C);
 
+// e_unkA_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6538);
 
 // unused:

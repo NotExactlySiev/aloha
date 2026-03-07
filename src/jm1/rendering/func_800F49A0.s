@@ -2149,6 +2149,8 @@ glabel func_800F6940
     jr     $ra
     nop
 
+
+#
 glabel func_800F6958
     andi   $t1, $t5, 2          # set something from attribute flags
     or     $t0, $t1

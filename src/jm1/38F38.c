@@ -15,6 +15,9 @@ extern s16 sin_lut[4096];
 
 POLY_FT4 *func_800E9FDC(u32 x, u32 y, u32 id, u32 color, u32 trans, POLY_F4* prims, u32 *ot);
 
+// The functions here look very similar to GTE functions. But as far as I can
+// tell they're not from libgte. I can't actually find them there.
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8738);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E87B8);
@@ -41,30 +44,27 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8960);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E89B8);
 
+// two functions in this one
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8A40);
 
+// empty_ot
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8B5C);
 
+// a bunch of math gte functions
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8B98);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8C34);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8C94);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8CB0);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8CF8);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8D84);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8E0C);
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8EBC);
 
 // decompress_lz1 (the c version)
 // TODO: can I just replace it with the asm one?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", decompress_lz1_c);
 
+// map_image
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E91F4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E929C);
@@ -72,15 +72,39 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E929C);
 // polar to cart
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9324);
 
+// math thing
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E939C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9540);
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9540);
+int func_800E9540(void)
+{
+    switch (jt.get_region()) {
+        case REGION_JAPAN:
+        case REGION_DEBUG:
+            return jt.get_widescreen();
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95A0);
+        default:
+            return 0;
+    }
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95D0);
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95A0);
+int func_800E95A0(void)
+{
+    return jt.get_video_mode();
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9600);
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95D0);
+DISPENV *func_800E95D0(DISPENV *env)
+{
+    return jt.PutDispEnv(env);
+}
+
+//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9600);
+u32 func_800E9600(int id)
+{
+    return jt.PadRead(id);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9630);
 
@@ -274,6 +298,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC1DC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC2F4);
 
+// radar.c
+
+// radar_add
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC408);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC450);
@@ -288,7 +315,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 
 Entity *func_800DBBE4();
 
-// radar
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
 void _func_800EC5C8() {
     MATRIX *m = SCRTCHPAD(0);
@@ -345,6 +371,8 @@ void _func_800EC5C8() {
     gbuf->nextfree = p2 + 1;
 }
 
+// end of radar.c
+
 // objective.c
 
 typedef struct {
@@ -384,6 +412,8 @@ void func_800ED024(void) {}
 
 // end of objective.c
 
+// special.c
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED02C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED1EC);
@@ -416,6 +446,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED5D4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED60C);
 
+// timestop.c
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED63C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED65C);
@@ -428,7 +460,10 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ED68C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EDA14);
 
+// time_stop_init
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EDD54);
+
+// seizure.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EDDAC);
 
@@ -491,6 +526,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF150);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF160);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF170);
+
+// sky.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF340);
 

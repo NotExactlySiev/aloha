@@ -559,13 +559,30 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D154C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D156C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1798);
+extern MeshMetadata D_8011EF98;
+extern MeshMetadata D_8011EFA8; // jetpod
+extern MeshMetadata D_8011EFB8; // coin
+extern MeshMetadata D_8011EFC8;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D17CC);
+void func_800D1798(MeshMetadata *data)
+{
+    D_8011EF98 = *data;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1800);
+void func_800D17CC(MeshMetadata *data)
+{
+    D_8011EFA8 = *data;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1834);
+void func_800D1800(MeshMetadata *data)
+{
+    D_8011EFB8 = *data;
+}
+
+void func_800D1834(MeshMetadata *data)
+{
+    D_8011EFC8 = *data;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1868);
 
@@ -585,10 +602,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2184);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D22B4);
 
-SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
+#include "objective.h"
 
-// jetpod mesh metadata
-extern MeshMetadata D_8011EFA8;
+SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
 
 // e_jetpod_render
 // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D239C);
@@ -633,8 +649,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D27B4);
 // e_exit mesh metadata
 extern MeshMetadata D_8011EFA8;
 
-#include "objective.h"
-
 // e_exit_render
 // I have absolutely no idea what causes this to break
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2824);
@@ -665,11 +679,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2B74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2F58);
 
-// actually mesh metadata struct TODOs
-extern u32 D_8011EFB8;
-
 //INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D30E4);
-// entity_coin_render
+// e_coin_render
 // TODO: this isn't complete
 void func_800D30E4(Entity *e)
 {
@@ -692,7 +703,7 @@ void func_800D30E4(Entity *e)
     rot.vy = e->angle_y;
     rot.vz = e->angle_z;
 
-    meshid = e->model.frame_a + D_8011EFB8;
+    meshid = e->model.frame_a + D_8011EFB8.unk0;
 
     // bouncing animation and... something else?
     pos.vy += (6 * sinf(e->angle_x) - (e->range_y / 2) * cosf(e->angle_x)) >> 12;
@@ -704,7 +715,7 @@ void func_800D30E4(Entity *e)
 
     // draw shadow
     // TODO: make sin_lut lookup a macro?
-    s32 tmp = (e->range_y / 2) * sin_lut[e->angle_x & 0xFFF];
+    s32 tmp = (e->range_y / 2) * sinf(e->angle_x);
     tmp /= ONE;
 
     s32 offz = tmp * sin_lut[(e->angle_y + 0xC00) & 0xFFF];
@@ -2393,6 +2404,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3D78);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3D88);
 
+// level data stuff
+
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3D9C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3DAC);
@@ -2408,6 +2421,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3E64);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3E74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3E94);
+
+// color.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E3EF0);
 
@@ -2436,6 +2451,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4510);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E46EC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4828);
+
+// texture.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4890);
 

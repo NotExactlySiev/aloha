@@ -80,7 +80,7 @@ extern struct {
     u32         (*routine_task_add)(void* callback, u16 interval);
     void        (*routine_task_remove)(u32 taskid);
     UNK(226, 239);
-    u32         (*PadRead)();
+    u32         (*PadRead)(int id);
     UNK(241, 254);
     u32         (*get_engine_version)(void);
 
