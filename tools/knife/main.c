@@ -136,7 +136,6 @@ int main(int argc, char *argv[])
 
     char *input_path = argv[3];
 
-
     size_t input_size;
     void *input_data = map_file_for_read(input_path, &input_size);
 

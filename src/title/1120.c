@@ -1,4 +1,5 @@
 #include "common.h"
+#include "libspu.h"
 #include "pad.h"
 #include "shared.h"
 #include <libetc.h>
@@ -6,7 +7,7 @@
 #include "movie.h"
 #include "sfx.h"
 
-extern GlobalData *glob;
+GlobalData *glob;
 
 // cheat sequence. unlock all levels
 const u32 D_800EBA3C[] = {
@@ -275,8 +276,31 @@ void func_800E0E04(void)
 }
 
 // level math
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0FD0);
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1044);
+int func_800E0FD0(int arg)
+{
+    if (arg >= 1 && arg <= 34) {
+        arg += 1;
+    }
+
+    switch (arg) {
+        case 0: return 0;
+        case 36: return 13;
+        default: return (arg + 2) / 3;
+    }
+}
+
+int func_800E1044(int arg)
+{
+    if (arg >= 1 && arg <= 34) {
+        arg += 1;
+    }
+
+    switch (arg) {
+        case 0: return 0;
+        case 36: return 12;
+        default: return (arg + 2) / 3;
+    }
+}
 
 int D_800F4CBC = 0;
 int D_800F4CC0 = 0;
@@ -369,18 +393,47 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1418);
 //     }
 // }
 
+int D_801A0FA8;
+int D_801A0FB0;
+int D_801A0F98;
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14A4);
+void func_800E14A4(int arg)
+{
+    D_801A0FA8 = 1;
+    D_801A0FB0 = arg;
+    D_801A0F98 = 0xb4;
+}
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14CC);
 
 // menu.c
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1C24);
+// void func_800E1C24(void)
+// {
+//     int idx = glob->unk513;
+//     if (!(jt.cd_status() & 0x40)) {
+//         idx
+//     }
+// }
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1D48);
+void func_800E1D48(void)
+{
+    if (!(jt.cd_status() & 0x40)) {
+        if (--glob->unk513 == (u8) -1) {
+            glob->unk513 = 68;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1DB8);
+void func_800E1DB8(void)
+{
+    if (!(jt.cd_status() & 0x40)) {
+        if (++glob->unk513 == 69) {
+            glob->unk513 = 0;
+        }
+    }
+}
 
 void toggle_view_ctrl(void)
 {
@@ -413,7 +466,24 @@ void toggle_movie(void)
     sfx_play(0x2600);
 }
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1F60);
+extern int D_800F4E78;
+extern int D_800F4E80;
+extern int D_800F4E88;
+extern int D_800F4E90;
+extern int D_800F4E98;
+extern int D_800F4EA8;
+extern int D_800F4EB0;
+
+void func_800E1F60(void)
+{
+    D_800F4E78 = 0;
+    D_800F4E80 = -0x69000;
+    D_800F4E88 = 0xe000;
+    D_800F4E90 = 0;
+    D_800F4E98 = 0;
+    D_800F4EA8 = 0;
+    D_800F4EB0 = 1;
+}
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1FB8);
 
@@ -1309,8 +1379,20 @@ out:
 }
 
 // main menu tick
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3BBC);
-//u32 func_800E3BBC(u32 state, u32 )
+u32 func_800E3BBC(u32 buttons, u32 page_idx, u32 selection)
+{
+    u32 new_vals = func_800E32BC(buttons, page_idx, selection);
+    page_idx = new_vals & 0xffff;
+    selection = new_vals >> 16;
+
+    if (page_idx >= 4 && page_idx <= 6) {
+        func_800E2438(D_800F4CBC, D_800F4CC0, 0);
+    }
+
+    func_800E2438(page_idx, selection, 0);
+    func_800E3168(page_idx, selection);
+    return new_vals;
+}
 
 // 800E3C48
 void bzero(void *buf, int n)
@@ -1356,9 +1438,77 @@ void func_800E3DF8(char *str, RECT *rect)
 }
 
 extern FGBuffer D_800F4F28[2];
+extern SpuVolume D_800F4CB8;
+extern int D_800F4D0C;
+extern int D_800F4D10;
+extern int D_800F4EC8;
 
 // cache_big_strings
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3EA4);
+// but it initializes a bunch more stuff, not just that. init_menu?
+void func_800E3EA4(void)
+{
+    // TODO
+    func_800E1F60();
+    D_800F4E30 = 0x100;
+    D_800F4E38 = 1;
+    func_800E7478();
+    D_801A0FA8 = 0;
+    D_800F4E70 = 1;
+    D_800F4CBC = 0;
+    D_800F4CC0 = 0;
+    func_800E4EE8();
+
+    RECT rect = { 0x380, 0, 0x80, 0x100 };
+    jt.ClearImage(&rect, 0, 0, 0);
+    jt.DrawSync(0);
+
+    rect.y = 0x20;
+    func_800E3DF8("       Memory Card is Full     ", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x30;
+    func_800E3DF8("          Load Fault         ", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x40;
+    func_800E3DF8("       No Memory Card Found      ", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x50;
+    func_800E3DF8("          No Data Found    ", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x0;
+    func_800E3DF8("          Load Fault        ", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x10;
+    func_800E3DF8("          Initialize ?       ", &rect);
+    jt.DrawSync(0);
+
+    func_800E561C(0, 2);
+    jt.snd_reset();
+    jt.set_global_volume(&D_800F4CB8);
+    jt.snd_set_volume(0x3000);
+    jt.sfx_set_reverb(0);
+    jt.snd_set_stereo(glob->curr.unkE7 != 0);
+    jt.set_widescreen(glob->curr.unkEA);
+    D_800F4E40 = 0;
+    if (jt.get_video_mode == MODE_PAL) {
+        D_800F4D0C = 0x800 * 6 / 5; // 0x999
+        D_800F4D10 = 0x4000 * 6 / 5; // 0x4ccc
+        D_800F4E08 = 1200 * 6 / 5; // 1440
+        D_800F4E18 = 9;
+        D_800F4EC8 = 8;
+    } else {
+        D_800F4D0C = 0x800;
+        D_800F4D10 = 0x4000;
+        D_800F4E08 = 1200;
+        D_800F4E18 = 8;
+        D_800F4EC8 = 10;
+    }
+    func_800E09EC();
+    func_800E0A60();
+    func_800E09EC();
+    func_800E0A60();
+    jt.wait_for_vsync();
+    jt.SetDispMask(1);
+}
 
 // a ton of functions inside this one
 // # main stuff
@@ -1629,7 +1779,7 @@ int main()
 }
 
 extern RECT D_800F4D90;
-extern u8 D_801A0FF0;   // brightness
+u8 D_801A0FF0;   // brightness
 extern int D_800F4EE0;
 
 void _func_800E6B90(RECT *r, short x, short y)
