@@ -1,42 +1,23 @@
-#include <errno.h>
-#include <fcntl.h>
+#include "utility.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #define countof(arr) (int)(sizeof(arr) / sizeof(*arr))
 
-int output_file_open(char *path)
-{
-    return open(path, O_RDWR | O_CREAT, 0644);
-}
-
-void *output_file_map(int fd, size_t size)
-{
-    int rc = ftruncate(fd, size);
-    if (rc == -1) {
-        printf("ftruncate error: %s %d\n", strerror(errno), errno);
-        exit(1);
-    }
-
-    void *ret = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (ret == MAP_FAILED) {
-        printf("mmap error: %s %d\n", strerror(errno), errno);
-        exit(1);
-    }
-    return ret;
-}
-
-int ear_extract(const void *data, size_t size, char *output_path)
-{
-    // TODO
-}
-
 int pex_compress(const void *data, size_t size, char *output_path);
 int pex_decompress(const void *data, size_t size, char *output_path);
+int ear_extract(const void *data, size_t size, char *output_path);
+
+const char *program_name = "Exact-O-Knife";
+const char *executable_name = "knife";
+const char *usage_string = "<file type> <command> <input file>";
+
+static void print_usage(void)
+{
+    printf("%s\nUsage: %s %s\n\n", program_name, executable_name, usage_string);
+}
 
 typedef struct {
     char *name;
@@ -72,7 +53,7 @@ FileType file_types[] = {
     },
 };
 
-FileType *get_file_type(char *name)
+static FileType *get_file_type(char *name)
 {
     for (int i = 0; i < countof(file_types); i++) {
         if (strcmp(name, file_types[i].name) == 0) {
@@ -83,7 +64,7 @@ FileType *get_file_type(char *name)
     return NULL;
 }
 
-Command *get_command(FileType *ft, char *name)
+static Command *get_command(FileType *ft, char *name)
 {
     for (Command *cmd = &ft->commands[0]; cmd->name != NULL; cmd++) {
         if (strcmp(name, cmd->name) == 0) {
@@ -92,31 +73,6 @@ Command *get_command(FileType *ft, char *name)
     }
 
     return NULL;
-}
-
-const char *program_name = "Exact-O-Knife";
-const char *executable_name = "knife";
-const char *usage_string = "<file type> <command> <input file>";
-
-void print_usage(void)
-{
-    printf("%s\nUsage: %s %s\n\n", program_name, executable_name, usage_string);
-}
-
-int map_file(char *path, void **out_data, size_t *out_size)
-{
-    int fd = open(path, O_RDONLY);
-    struct stat st;
-    fstat(fd, &st);
-    size_t size = st.st_size;
-    void *p = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
-    if (!p) {
-        return -1;
-    }
-
-    *out_data = p;
-    *out_size = size;
-    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -166,13 +122,9 @@ int main(int argc, char *argv[])
 
     char *input_path = argv[3];
 
-    void *input_data;
+
     size_t input_size;
-    int rc = map_file(input_path, &input_data, &input_size);
-    if (rc < 0) {
-        printf("mmap error\n");
-        exit(1);
-    }
+    void *input_data = map_file_for_read(input_path, &input_size);
 
     if (argc == 4) {
         print_usage();
@@ -181,53 +133,12 @@ int main(int argc, char *argv[])
     }
 
     char *output_path = argv[4];
-    // FILE *output_file = fopen(output_path, "w");
-    // if (!output_file) {
-    //     printf("can't open output file\n");
-    //     exit(1);
-    // }
 
-    rc = command->func(input_data, input_size, output_path);
+    int rc = command->func(input_data, input_size, output_path);
     if (rc < 0) {
         printf("command failed with code %d\n", rc);
         exit(1);
     }
 
-    // fclose(output_file);
-
     return 0;
-
-    // FILE *outfile;
-    // int command;
-
-    // if (strcmp(*argv, "decomp") == 0)
-    //     command = COM_DECOMPRESS;
-    // else if (strcmp(*argv, "comp") == 0)
-    //     command = COM_COMPRESS;
-    // else {
-    //     printf(USAGE);
-    //     return -1;
-    // }
-
-    // infile = fopen(*argv++, "r");
-    // if (!infile) {
-    //     printf("FUCK\n");
-    //     return -1;
-    // }
-
-    //
-
-    // switch (command) {
-    // case COM_DECOMPRESS:
-    //     decompress_file(infile, outfile);
-    //     break;
-    // case COM_COMPRESS:
-    //     compress_file(infile, outfile);
-    //     break;
-    // }
-
-    // fclose(infile);
-    // fclose(outfile);
-
-    // return 0;
 }
