@@ -64,7 +64,7 @@ class Executable:
         exe_name = f"build/{self.name}.exe"
         if self.is_comped:
             Ninja.build("objcopy", exe_name, [elf_path])
-            Ninja.build("comp", self.final_path, [exe_name], ["$jfcomp"])
+            Ninja.build("comp", self.final_path, [exe_name], ["$knife"])
         else:
             Ninja.build("objcopy", self.final_path, [elf_path])
 
@@ -106,8 +106,8 @@ executables = [
 
 # Ninja setup
 Ninja.set("cross", "mipsel-unknown-none-elf-")
-Ninja.set("jfdir", "tools/jfcomp")
-Ninja.set("jfcomp", "$jfdir/jfcomp")
+Ninja.set("knifedir", "tools/knife")
+Ninja.set("knife", "$knifedir/knife")
 Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
 Ninja.set(
@@ -127,8 +127,8 @@ Ninja.rule(
 )
 Ninja.rule("objcopy", "${cross}objcopy -O binary $in $out")
 Ninja.rule("copy", "cp $in $out")
-Ninja.rule("decomp", "$jfcomp decomp $in $out")
-Ninja.rule("comp", "$jfcomp comp $in $out")
+Ninja.rule("decomp", "$knife decomp $in $out")
+Ninja.rule("comp", "$knife pex compress $in $out")
 Ninja.param("description", "Compressing $out")
 Ninja.rule("mkiso", "$makeiso -y $in -o $out")
 Ninja.param("description", "Generating Disc Image")
@@ -137,14 +137,14 @@ Ninja.param("description", "Updating build.ninja")
 Ninja.param("generator", "1")
 
 # Build tools
-Ninja.build("phony", "tools", ["$jfcomp"])
+Ninja.build("phony", "tools", ["$knife"])
 Ninja.build(
     "ccnat",
-    "$jfcomp",
+    "$knife",
     [
-        "$jfdir/main.c",
-        "$jfdir/comp.c",
-        "$jfdir/decomp.c",
+        "$knifedir/main.c",
+        "$knifedir/press.c",
+        "$knifedir/pex.c",
     ],
 )
 

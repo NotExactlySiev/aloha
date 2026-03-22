@@ -1464,7 +1464,7 @@ glabel func_800F5E04
 /* 467C4 800F5FC4 */ .word 0x05A1002C
 /* 467C8 800F5FC8 */ nop
 .L800F5FCC:
-	jal func_800F68B0               # go to funky color function
+    jal func_800F68B0               # go to funky color function
     nop
 
     andi    $v0, $t5, 1
@@ -1479,10 +1479,10 @@ glabel func_800F5E04
     beq     $v1, $zero, .L800F6038  # what are we bypassing here?
     nop
 .L800F5FF8:
-	jal     func_800F6798           # step 1 (shading?)
+    jal     func_800F6798           # step 1 (shading?)
     nop
 .TRI_FLAT:
-	jal     func_800F6808           # I think we run this on every vertex
+    jal     func_800F6808           # I think we run this on every vertex
     lh      $t1, 4($t6)
 	jal     func_800F6928           # set 2 of the verts
     nop
@@ -2149,7 +2149,6 @@ glabel func_800F6940
     jr     $ra
     nop
 
-
 #
 glabel func_800F6958
     andi   $t1, $t5, 2          # set something from attribute flags
@@ -2166,13 +2165,13 @@ glabel func_800F6970
 glabel func_800F697C
     lui     $v0, 0xE100
     ori     $v0, 0x0600
-    sw      $v0, 4($a1)
-    swl     $a2, 2($a1)
+    sw      $v0, 4($a1) # word one <- E1000600
+    swl     $a2, 2($a1) # link to next command
     sll     $a2, $a1, 8
     cfc2    $zero, $31
-    swc2    $22, 0x10($a1)
+    swc2    $22, 0x10($a1) # color
     b       .continue2
-    addu    $a1, $t0
+    addu    $a1, $t0 # go to next free prim
 
 # actual function
 glabel func_800F69A0
