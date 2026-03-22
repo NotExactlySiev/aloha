@@ -107,7 +107,7 @@ executables = [
 # Ninja setup
 Ninja.set("cross", "mipsel-unknown-none-elf-")
 Ninja.set("knifedir", "tools/knife")
-Ninja.set("knife", "$knifedir/knife")
+Ninja.set("knife", "build/knife")
 Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
 Ninja.set(

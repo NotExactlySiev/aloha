@@ -19,6 +19,8 @@ int pex_compress(const void *data, size_t size, char *output_path)
     size_t srcsize = (((size - sizeof(ExeLayout)) + 7) >> 3) << 3;
 
     // Add some room to be safe. Shouldn't be needed.
+    // This is a first guess. We'll update it after doing the actual compression
+    // and truncate the file.
     size_t dstsize = srcsize * 1.1;
 
     size_t output_size = sizeof(ExeLayout) + dstsize;
@@ -26,7 +28,7 @@ int pex_compress(const void *data, size_t size, char *output_path)
     ExeLayout *output_pex = output_file_map(output_fd, output_size);
 
     memcpy(output_pex->header, input_pex->header, HEADER_SIZE);
-    exact_compress(output_pex->data, input_pex->data, srcsize);
+    dstsize = exact_compress(output_pex->data, input_pex->data, srcsize);
     output_file_truncate(output_fd, sizeof(ExeLayout) + dstsize);
     output_file_close(output_fd);
 
