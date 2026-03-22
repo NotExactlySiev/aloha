@@ -1,0 +1,7 @@
+---
+BasedOnStyle: WebKit
+ExperimentalAutoDetectBinPacking: true
+PointerAlignment: Right
+QualifierAlignment: Left
+SeparateDefinitionBlocks: Always
+
