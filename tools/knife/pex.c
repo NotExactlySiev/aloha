@@ -1,3 +1,4 @@
+#include "fcntl.h"
 #include "utility.h"
 #include "press.h"
 #include <stdint.h>
@@ -24,7 +25,7 @@ int pex_compress(const void *data, size_t size, char *output_path)
     size_t dstsize = srcsize * 1.1;
 
     size_t output_size = sizeof(ExeLayout) + dstsize;
-    int output_fd = output_file_open(output_path);
+    int output_fd = output_file_openat(AT_FDCWD, output_path);
     ExeLayout *output_pex = output_file_map(output_fd, output_size);
 
     memcpy(output_pex->header, input_pex->header, HEADER_SIZE);
@@ -49,7 +50,7 @@ int pex_decompress(const void *data, size_t size, char *output_path)
     printf("  Compressed Size: %ld\n", size);
     printf("Uncompressed Size: %d (0x%x)\n", expected_size, expected_size);
 
-    int output_fd = output_file_open(output_path);
+    int output_fd = output_file_openat(AT_FDCWD, output_path);
     ExeLayout *output_pex = output_file_map(output_fd, HEADER_SIZE + expected_size);
 
     memcpy(output_pex->header, input_pex->header, HEADER_SIZE);

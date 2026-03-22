@@ -8,11 +8,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-int output_file_open(char *path)
+int output_file_openat(int dirfd, char *path)
 {
-    int rc = open(path, O_RDWR | O_CREAT, 0644);
+    int rc = openat(dirfd, path, O_RDWR | O_CREAT, 0644);
     if (rc == -1) {
-        printf("open error: %s %d\n", strerror(errno), errno);
+        printf("openat error: %s %d\n", strerror(errno), errno);
         exit(1);
     }
     return rc;

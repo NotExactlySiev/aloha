@@ -1,7 +1,7 @@
 #pragma once
 #include <stddef.h>
 
-int output_file_open(char *path);
+int output_file_openat(int dirfd, char *path);
 void *output_file_map(int fd, size_t size);
 void output_file_truncate(int fd, size_t size);
 void output_file_close(int fd);
