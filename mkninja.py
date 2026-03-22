@@ -143,9 +143,10 @@ Ninja.build(
     "$knife",
     [
         "$knifedir/main.c",
-        "$knifedir/press.c",
+        "$knifedir/ear.c",
         "$knifedir/pex.c",
         "$knifedir/utility.c",
+        "$knifedir/press.c",
     ],
 )
 

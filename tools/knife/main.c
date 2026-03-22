@@ -51,6 +51,20 @@ FileType file_types[] = {
             { 0 },
         },
     },
+
+    {
+        .name = "ear",
+        .description = "Exact Archive",
+        .commands = (Command[]) {
+            {
+                .name = "extract",
+                .description = "Extract the archive into a directory",
+                .func = ear_extract,
+            },
+
+            { 0 },
+        },
+    },
 };
 
 static FileType *get_file_type(char *name)
