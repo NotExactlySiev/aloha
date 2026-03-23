@@ -512,20 +512,13 @@ u8 text_set_attr(u8 attr);
 void text_set_pos(int x, int y);
 void text_clear(void);
 void text_put_char(u16 c);
-void text_put_str(char *str);
+void text_put_str(const char *str);
 
 typedef struct {
     u8 flags; // and sfx. bitfield?
     u8 dest;
     u8 unk0;
     u8 unk1; // 1 = launch normal play, 2 = launch time trial
-    // I think this is padding lol?
-/*
-    u8 field1_0x1;
-    u8 field2_0x2;
-    u8 field3_0x3;
-*/
-    // probably another function, for pressing
     void (*click)(void);
     void (*press_left)(void);
     void (*press_right)(void);
@@ -2067,7 +2060,7 @@ void text_put_char(u16 c)
 }
 
 // 800E56FC
-void text_put_str(char *str)
+void text_put_str(const char *str)
 {
     char c;
     while ((c = *str++))
