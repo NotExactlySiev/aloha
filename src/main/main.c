@@ -709,8 +709,7 @@ void exception_handler(void)
         u32 excb_size;
         PCB *pcb;
         u32 pcb_size;
-        TCB(*tcb)
-        [4]; // usually 4?
+        TCB(*tcb)[4]; // usually 4?
         u32 tcb_size;
     } *bios_tables = (void *)0x100;
 

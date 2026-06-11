@@ -250,6 +250,8 @@ const char *D_800EB1D8[] = {
     "END ALOHA2",
 };
 
+extern int D_800EB248[28];
+
 extern int D_800F4E68; // movie_test_selected
 
 // movie test prev/next/play
@@ -272,6 +274,12 @@ void func_800E0E04(void)
 {
     printf("Now playing %s\n", D_800EB168[D_800F4E68]);
     // TODO
+    //
+
+    //
+    func_800E8640(D_800EB168[D_800F4E68], D_800EB248[D_800F4E68]);
+
+    //
     //
 }
 
@@ -1412,8 +1420,7 @@ void func_800E3C68(void)
     glob->curr = glob->backup;
 }
 
-// unused
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3D9C);
+NOT_IMPL_FN(func_800E3D9C)
 
 void func_800E6D1C(char*, int, RECT*);
 

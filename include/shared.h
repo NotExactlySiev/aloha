@@ -18,7 +18,7 @@ typedef struct {
     u8  unkE1;
     u8  unkE2;  // have we beaten the game?
     u8  unkE3;  // setting_camera_normal
-    u8  unkE4;  //
+    u8  unkE4;  // world?
     s8  unkE5;  // setting_pad_mode
     s8  unkE6;  // setting_sp_item
     s8  unkE7;  // setting_is_stereo
