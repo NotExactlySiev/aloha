@@ -112,7 +112,7 @@ Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
 Ninja.set(
     "cflags",
-    "-Wall -Iinclude -Ipsyq/include -Iassets -O1 -G0 -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic",
+    "-Wall -Iinclude -Ipsyq/include -Iassets -O1 -G0 -DLANGUAGE_C -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic -DVERSION_WORLD",
 )
 Ninja.set("ldflags", "--no-check-sections -nostdlib -s")
 Ninja.set("cflagsnat", "-O2")

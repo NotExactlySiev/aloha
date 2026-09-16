@@ -125,15 +125,19 @@ int call_DrawSync(int mode)
 // 80022B00
 void call_ResetGraph(int mode)
 {
+#ifdef VERSION_WORLD
     static int D_80047E64 = 0;
     if (mode == 0) {
         if (D_80047E64 == 0) {
             ResetGraph(0);
             D_80047E64 = 1;
         }
-    } else {
-        ResetGraph(mode);
+        
+        return;
     }
+#endif
+
+    ResetGraph(mode);
 }
 
 // 80022B54

@@ -1,4 +1,5 @@
 #include "main.h"
+#include "asm.h"
 #include "card.h"
 #include "cd/cd.h"
 #include "common.h"
@@ -458,10 +459,13 @@ void func_8001926C(void)
     PutDispEnv(&dispenv);
 }
 
-// 80019680
+// US: 80019680
+// JP: 80018E18
 void init_everything(void)
 {
     cd_init();
+
+#ifdef VERSION_WORLD
     read_version();
 
     wait_frame();
@@ -471,10 +475,10 @@ void init_everything(void)
     call_ResetGraph(0);
     call_SetGraphDebug(0);
     call_SetDispMask(0);
+#endif
 
     // spu set defaults
     func_8001DD7C(); // spu_init?
-
     gpu_init();
     show_logo();
     pad_init();
@@ -484,7 +488,7 @@ void init_everything(void)
     fnt_init();
 }
 
-// 8001972C
+// US: 8001972C
 void game_shutdown(void)
 {
     cd_stop();
@@ -505,9 +509,11 @@ void game_shutdown(void)
 // 800197C8
 s32 enable_vblank_event(void *handler)
 {
-    s32 event;
+#ifndef VERSION_WORLD
+    VSyncCallbacks(0, 0);
+#endif
     EnterCriticalSection();
-    event = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, handler);
+    int event = OpenEvent(RCntCNT3, EvSpINT, EvMdINTR, handler);
     SetRCnt(RCntCNT3, 1, EvMdINTR);
     StartRCnt(RCntCNT3);
     EnableEvent(event);
@@ -519,7 +525,9 @@ s32 enable_vblank_event(void *handler)
 void disable_vblank_event(s32 event)
 {
     EnterCriticalSection();
+#ifdef VERSION_WORLD
     StopRCnt(RCntCNT3);
+#endif
     CloseEvent(event);
     ExitCriticalSection();
 }
@@ -627,7 +635,8 @@ char *get_mc_file_name(void)
     return mc_file_name;
 }
 
-// 80019B1C
+// US: 80019B1C
+// JP: 80019068
 void game_init(void)
 {
     // setup events and handlers
@@ -636,7 +645,9 @@ void game_init(void)
     StopRCnt(RCntCNT1);
     StopRCnt(RCntCNT2);
     StopRCnt(RCntCNT3);
+#ifdef VERSION_WORLD
     VSyncCallbacks(0, 0);
+#endif
     vblank_event = enable_vblank_event(tasks_tick);
     tasks_set_enabled(1);
 
@@ -653,11 +664,14 @@ void game_init(void)
     jt_set(set_next_exec, 3);
     jt_set(get_next_exec, 4);
     jt_set(globals, 5);
+
+#ifdef VERSION_WORLD
     jt_set(get_video_mode, 7);
     jt_set(get_region, 8);
     jt_set(get_widescreen, 9);
     jt_set(set_widescreen, 10);
     jt_set(get_mc_file_name, 11);
+#endif
 
     // clear global space
     ram_memset((void *)0x80014000, 0x4000, 0);
@@ -667,12 +681,14 @@ void game_init(void)
 }
 
 // 80019CA4
+// engine_is_running
 s32 get_engine_running(void)
 {
     return D_80047E6C;
 }
 
 // 80019CB4
+// engine_init
 void *jt_reset(void)
 {
     jt_clear();
@@ -750,19 +766,31 @@ s32 enable_syscall(void *handler)
     return event;
 }
 
+static inline u32 VERSION(u16 major, u16 minor)
+{
+    return (major << 8) | minor;
+}
+
 // 80019DCC
+// engine_version
 u32 get_engine_version(void)
 {
-    return 0x10002;
+#ifdef VERSION_WORLD
+    return VERSION(1, 2);
+#else
+    return VERSION(1, 0);
+#endif
 }
 
 // 80019DD8
+// engine_set_next_exec
 void set_next_exec(s32 id)
 {
     next_exec = id;
 }
 
 // 80019DE8
+// engine_get_next_exec
 s32 get_next_exec(void)
 {
     return next_exec;
@@ -777,7 +805,10 @@ GlobalData *globals(void)
 // 80019E04
 int main(int argc, char *argv[])
 {
+#ifdef VERSION_WORLD
     printf("MAX ADR:%x\n", malloc(4));
+#endif
+
     D_80047E6C = 1;
 
     // initialization
@@ -796,14 +827,18 @@ int main(int argc, char *argv[])
     // fade logo?
     func_8001926C();
 
+#ifdef VERSION_WORLD
     // activate debug mode? (it's actually never checked)
     if (PadRead(0) == (PADL1 | PADR2)) {
         D_80047D50 = 1;
     }
+#endif
 
+#ifdef CUSTOM_PATCHES
     // # custom stuff:
     globals()->debug_features = 1;
     jt_set(printf, 1001);
+#endif
 
     // run the game
     set_next_exec(0);

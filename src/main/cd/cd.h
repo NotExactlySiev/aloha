@@ -13,7 +13,15 @@ int try_CdControl(u_char com, void *param, u_char *result);
 int try_CdControlB(u_char com, void *param, u_char *result);
 int try_CdGetSector(void *madr, int size);
 int try_CdRead(int sectors, void *buf, int mode);
+
+#ifdef VERSION_WORLD
 int cd_verify_read(int mode, u8 *result);
+#else
+static inline int cd_verify_read(int mode, u8 *result)
+{
+    return CdReady(mode, result);
+}
+#endif
 
 void sector_cache_clear(void);
 int sector_cache_get(CdlLOC *loc, u8 *data);

@@ -145,14 +145,18 @@ static int iso_read_prv(int fast, char *filename, void *buf, int n)
 // 8001CA84
 NOT_IMPL_FN(cd_fs_load_exe)
 
-// 8001CCC0
+// US: 8001CCC0
+// JP: 8001BE6C
 s32 iso_exec(char* file, s32 param) {
     EXEC header;
 
     if (cd_fs_load_exe(file, param, &header) != 0)
         return -1;
 
+#ifdef VERSION_WORLD
     flush_cache_safe();
+#endif
+
     set_next_exec(0);
     Exec(&header, 1, 0);
     return 0;

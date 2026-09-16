@@ -57,14 +57,16 @@ static void init_decoder(Decoder *dec, MovieArgs *args)
     };
 }
 
-// 80021F7C
+// US: 80021F7C
+// JP: 80020E18
 static void seek_and_stream(CdlLOC *loc, u32 mode)
 {
     while (CdControl(CdlSeekL, (u8*) loc, NULL) == 0);
     while (CdRead2(mode | CdlModeStream) == 0);
 }
 
-// 80021FD0
+// US: 80021FD0
+// JP: 80020E6C
 static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 {
     func_8001E608(0);
@@ -75,7 +77,10 @@ static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
     frame_count = args->frame_count;
     StSetStream(1, 1, -1, NULL, NULL);
     seek_and_stream(loc, args->mode);
+
+#if VERSION_WORLD
     fading_out = 0;
+#endif
 }
 
 // 80022074
@@ -169,7 +174,8 @@ static void wait_for_decode(Decoder *dec)
     dec->img_loaded = 0;
 }
 
-// 80022474
+// US: 80022474
+// JP: 800212B4
 int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
 {
     int ret = 0;
@@ -211,9 +217,38 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
         int other = decoder.curr_rect != 1;
         call_VSync();
         call_SetDefDispEnv(&dispenv, decoder.img_rects[other].x, decoder.img_rects[other].y, decoder.img_rects[other].w, decoder.img_rects[other].h);
+
+#ifdef VERSION_WORLD
         if (get_video_mode() == MODE_PAL)
             dispenv.screen.y += 24;
-        SetDefDrawEnv(&drawenv, decoder.img_rects[other].x, decoder.img_rects[other].y, decoder.img_rects[other].w, decoder.img_rects[other].h);
+#endif
+
+#ifdef VERSION_WORLD
+        SetDefDrawEnv(
+            &drawenv,
+            decoder.img_rects[other].x,
+            decoder.img_rects[other].y,
+            decoder.img_rects[other].w,
+            decoder.img_rects[other].h
+        );
+#else
+        // TODO: We don't have this macro for now.
+        // setDefDrawEnv(
+        //     &drawenv,
+        //     decoder.img_rects[other].x,
+        //     decoder.img_rects[other].y,
+        //     decoder.img_rects[other].w,
+        //     decoder.img_rects[other].h
+        // );
+        SetDefDrawEnv(
+            &drawenv,
+            decoder.img_rects[other].x,
+            decoder.img_rects[other].y,
+            decoder.img_rects[other].w,
+            decoder.img_rects[other].h
+        );
+#endif
+
         dispenv.screen = args->rect;
         dispenv.isrgb24 = 1;
         dispenv.disp.w = (2 * dispenv.disp.w) / 3;
@@ -227,13 +262,21 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
     u8 cdparam[8] = { CdlModeSpeed };
     u8 buffer[SECTOR_BYTES];
     while (CdControlB(CdlSetmode, cdparam, NULL) != 1);
+
+#ifdef VERSION_WORLD
     if (CdReady(1, NULL) == 1) {
         CdGetSector(buffer, 512);
     }
+#endif
+
     DecDCToutCallback(0);
     CdDataCallback(0);
     CdReadyCallback(0);
+
+#ifdef VERSION_WORLD
     StUnSetRing();
+#endif
+
     while (CdControlB(CdlPause, NULL, NULL) != 1);
     return ret;
 }

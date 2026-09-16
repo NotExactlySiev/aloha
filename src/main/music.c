@@ -48,20 +48,28 @@ void func_8001B9D8(void)
 
 extern s8 D_80047EC4[];
 
-// 8001BA50
+// US: 8001BA50
+// JP: 8001AE2C
 void func_8001BA50(void) {
     music_really_unpause();
     cd_command(0xFC, &D_80047D8C, 0);
     cd_command(0xFE, NULL, 0);
+#ifdef VERSION_WORLD
     cd_mute();
+#endif
     cd_pause();
     cd_command(CdlSetmode, &D_80047EC4, 0);
     cd_command(CdlSetfilter, &D_80047ECC, 0);
     cd_command(CdlSeekL, &D_8004D0E0, 0);
     cd_command(CdlPause, NULL, 0);
+#ifdef VERSION_WORLD
     cd_command(CdlReadS, &D_8004D0E0, 0);
+#endif
     cd_demute();
     cd_command(SNQ_SET_SCALED, &vol_full, 0);
+#ifndef VERSION_WORLD
+    cd_command(CdlReadS, &D_8004D0E0, 0);
+#endif
     cd_command(SNQ_FUNC9, D_80047EEC, 0);
     cd_command(SNQ_SET_FE, 2, 0);
     D_80047DE4 = 1;
@@ -98,7 +106,8 @@ void func_8001BB50(int arg0, CdlLOC *loc) {
 
 //INCLUDE_ASM("asm/main/nonmatchings/274C", music_play_str);
 // plays background music
-// 8001BD00
+// US: 8001BD00
+// JP: 8001B0A0
 void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
 {
     if (music_state == 3) {
@@ -120,16 +129,21 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     D_80047ECC.file = file;
     D_80047ECC.chan = chan;
 
+#ifdef VERSION_WORLD
     if (get_video_mode() == MODE_PAL) {
         unbcd(loc->minute) * 60;
         while (1);
-    } else {
+    } else
+#endif
+    {
         int seconds = unbcd(loc->minute) * 60 + unbcd(loc->second);
         D_80047EEC = seconds * 60 + (unbcd(loc->track) * 60) / 100;
     }
 
+#ifdef VERSION_WORLD
     D_80047EEC *= get_video_mode() == MODE_PAL ? 203 : 200;
     D_80047EEC /= 200;
+#endif
     printf("bgm is %d frames long\n", D_80047EEC);
     D_80047EC4[0] = arg3;   // mode
     cd_command(0xFB, 0, 0);
@@ -137,7 +151,6 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     func_8001BA50();
     D_80047F24 = 2;
     D_800548EC = 1;
-
 }
 
 // 8001C03C

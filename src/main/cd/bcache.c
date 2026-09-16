@@ -4,7 +4,11 @@
 #include <memory.h>
 #include <util.h>
 
-#define CACHE_ENTRIES   10
+#ifdef VERSION_WORLD
+#  define CACHE_ENTRIES   10
+#else
+#  define CACHE_ENTRIES   16
+#endif
 
 typedef struct {
     u32    last_access;
@@ -55,10 +59,32 @@ int sector_cache_get(CdlLOC *loc, u8 *data)
 
     // it's not cached, load from disc
     CdSync(0, 0);
+#ifdef VERSION_WORLD
     do {
         try_CdControl(2, &loc->minute, 0);
         try_CdRead(1, (u_long*) data, 0x80);
     } while (cd_verify_read(0, 0) == -1);
+#else
+
+    int rc;
+    try_CdControl(2, &loc->minute, 0);
+
+    // Try once.
+    try_CdRead(1, (u_long*) data, 0x80);
+    rc = CdReady(0, NULL);
+    if (rc != -1) goto read_done;
+
+    // Try twice.
+    try_CdRead(1, (u_long*) data, 0x80);
+    rc = CdReady(0, NULL);
+    if (rc != -1) goto read_done;
+
+    // Give up.
+    return 0;
+
+read_done:
+#endif
+
     try_CdControl(9, 0, 0); //pause
 
     // and then try to cache it. first look for an empty entry

@@ -34,6 +34,12 @@ void func_80019F4C(s32 arg0) {
     lock = 0;
 }
 
+#ifdef VERSION_WORLD
+#  define LOG(x)
+#else
+#  define LOG(x) printf(x)
+#endif
+
 // 80019FB8
 void cd_ready_callback(u8 status, u8 *result)
 {
@@ -45,33 +51,44 @@ void cd_ready_callback(u8 status, u8 *result)
     }
 }
 
-// 8001A16C
+// US: 8001A16C
+// JP: 80019744
 int try_CdControl(u_char com, void *param, u_char *result) {
     while (CdControl(com, param, result) != 1);
     return 1;
 }
 
-// 8001A1CC
+// US: 8001A1CC
+// JP: 800197A4
 int try_CdControlB(u_char com, void *param, u_char *result) {
     while (CdControlB(com, param, result) != 1);
     return 1;
 }
 
-// 8001A22C
+#ifdef VERSION_WORLD
+
+// US: 8001A22C
 int try_CdGetSector(void *madr, int size) {
     while (CdGetSector(madr, size) == 0);
     return 1;
 }
 
-// 8001A270
+#endif
+
+// US: 8001A270
+// JP: 80019624
 int try_CdRead(int sectors, void *buf, int mode) {
-    while (CdRead(sectors, buf, mode) == 0);
+    int rc;
+    while ((rc = CdRead(sectors, buf, mode)) == 0) {
+        LOG("CdRead Set Error\n");
+    }
     return 1;
 }
 
 extern s32 pvd_is_cached;
 
-// 8001A2C8
+#ifdef VERSION_WORLD
+// US: 8001A2C8
 int cd_verify_read(int mode, u8 *result)
 {
     int rc;
@@ -89,32 +106,41 @@ int cd_verify_read(int mode, u8 *result)
     }
     return ret;
 }
+#endif
 
-// 8001A318
-s32 try_CdMix(CdlATV* vol)
+// US: 8001A318
+// JP: 8001968C
+int try_CdMix(CdlATV* vol)
 {
-    while (CdMix(vol) == 0);
+    int rc;
+    while ((rc = CdMix(vol)) == 0) {
+        LOG("CdMix Set Error\n");
+    }
     return 1;
 }
 
-// 8001A348
+// US: 8001A348
+// JP: 800196D4
 s32 cd_get_status(u8* result)
 {
     return CdControl(CdlNop, 0, result);
 }
 
-// 8001A370
+// US: 8001A370
+// JP: 800196FC
 void cd_read_callback(u8 status, u8 *result) {}
 
 // must have been some debug thing?
 // or get next free? returning 0 always clears it
-// 8001A378
+// US: 8001A378
+// JP: 80019704
 int func_8001A378(CdlLOC arr[])
 {
     return 0;
 }
 
-// 8001A380
+// US: 8001A380
+// JP: 8001970C
 void func_8001A380(void)
 {
     CdReadyCallback(cd_ready_callback);
@@ -174,7 +200,8 @@ extern int fading_in;
 extern int D_80047F24;
 extern int D_800548EC;
 
-// 8001A3B8
+// US: 8001A3B8
+// JP: 80019804
 void cd_init(void)
 {
     static int D_80047D74 = 0;  // cd subsystem initialized
@@ -230,7 +257,9 @@ void cd_init(void)
     jt_set(cd_seek_safe, 0x114);
     jt_set(iso_read_fast, 0x115);
     jt_set(iso_seek, 0x116);
+#ifdef VERSION_WORLD
     jt_set(iso_never_called, 0x117);
+#endif
     jt_set(music_play_cdda, 0x120);
     jt_set(music_play_cdda_from_loc, 0x121);
     jt_set(cd_pause, 0x122);
@@ -258,7 +287,8 @@ void cd_init(void)
     jt_set(func_8001CF38, 0x151);   // movie_get_loc?
 }
 
-// 8001A74C
+// US: 8001A74C
+// JP: 80019B88
 void func_8001A74C(void)
 {
     CdReadyCallback(0);
