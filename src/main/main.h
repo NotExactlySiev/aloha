@@ -27,24 +27,11 @@ extern s32 D_80047D58; // 80047d58
 extern s32 D_80047D64;
 extern s32 D_80047D48;
 
-typedef struct {
-    int *elements;
-    int _pad;
-} ExCB;
+typedef struct ExCB ExCB;
+typedef struct TCB TCB;
 
 typedef struct {
-    int status;
-    int _pad;
-    int regs[32];
-    int epc;
-    int hi, lo;
-    int sr;
-    int cause;
-    int _pad2[9];
-} TCB;
-
-typedef struct {
-    TCB *current_tcb;
+    TCB *current_thread;
 } PCB;
 
 void file_execute_loop(void);
@@ -68,9 +55,6 @@ s32 get_region(void);
 char *get_mc_file_name(void);
 void game_init(void);
 s32 get_engine_running(void);
-void func_80019D0C(void);
-void exception_handler(void);
-s32 enable_exception_event(void *);
 u32 get_engine_version(void);
 void set_next_exec(s32);
 s32 get_next_exec(void);

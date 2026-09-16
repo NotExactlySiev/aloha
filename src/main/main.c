@@ -162,7 +162,7 @@ s32 dev_mode = 0;
 s32 D_80047E6C; // 80047e6c
 s32 D_80047E70; // 80047e70
 s32 vblank_event; // 80047e74
-s32 exception_event; // 80047e7c
+s32 syscall_event; // 80047e7c
 char mc_file_name[20];
 
 s32 iso_read(const char *addr, void *buf, s32 mode);
@@ -495,7 +495,7 @@ void game_shutdown(void)
     StopCallback();
     PadStop();
     disable_vblank_event(vblank_event);
-    CloseEvent(exception_event);
+    CloseEvent(syscall_event);
     StopRCnt(RCntCNT0);
     StopRCnt(RCntCNT1);
     StopRCnt(RCntCNT2);
@@ -682,50 +682,70 @@ void *jt_reset(void)
     return game_init;
 }
 
-// 80019D0C
-void func_80019D0C(void)
-{
-    struct {
-        ExCB *excb[2];
-        PCB *pcb;
-        TCB *tcb;
-    } *bios_tables = (void *)0x100;
+// The engine defines a custom syscall of sorts here. It's done by setting a
+// handler for the "invalid syscall" event in the BIOS and writing to the thread
+// control block in order to "return" a value.
+//
+// This syscall is then called by every other executable immediately after they
+// are launched, at the beginning of their main() function. The point appears to
+// be informing the engine so it can if any initializations are needed before
+// said executable begins its real activities.
+//
+// If the engine decides that some initialization function needs to be run by
+// the launched executable, it will return the pointer to that functions, and
+// the executable will run it. Otherwise the engine will return NULL and the
+// executable continues as normal.
+//
+// Except, it turns out, that no such initializations were ever needed. The only
+// implementation of this syscall that's ever used does nothing but return NULL.
 
-    TCB *tcb = bios_tables->pcb->current_tcb;
+// The first few entries of the "Table of Tables", in a more useful form than
+// what PsyQ provides us.
+typedef struct {
+    ExCB *excb;
+    u32 excb_size;
+    PCB *pcb;
+    u32 pcb_size;
+    TCB *tcb;
+    u32 tcb_size;
+} BiosTables;
+
+#define BIOS_TABLES (*(BiosTables *)0x100)
+
+// Set the v0 register in the caller's context.
+static void SYSCALL_RETURN(void *v)
+{
+    BIOS_TABLES.pcb->current_thread->reg[R_V0] = v;
+}
+
+// Unused implementation. Checks if the engine needs to be reinitialized, and if
+// so does half the job by itself and asks the running executable to do the
+// other half.
+// 80019D0C
+void sys_reset(void)
+{
     if (D_80047D58 == 0) {
         D_80047D58 = 1;
         jt_reset();
-        tcb->regs[2] = (int)game_init;
+        SYSCALL_RETURN(game_init);
     } else {
-        tcb->regs[2] = 0;
+        SYSCALL_RETURN(NULL);
     }
 }
 
+// The real implementation. Doesn't do anything.
 // 80019D64
-void exception_handler(void)
+void sys_nothing(void)
 {
-    struct {
-        ExCB *excb;
-        u32 excb_size;
-        PCB *pcb;
-        u32 pcb_size;
-        TCB(*tcb)[4]; // usually 4?
-        u32 tcb_size;
-    } *bios_tables = (void *)0x100;
-
-    // when the exception returns, if v0 is not 0 the exception generating
-    // function jumps to it
-    bios_tables->pcb->current_tcb->regs[2] = 0;
+    SYSCALL_RETURN(NULL);
 }
 
 // 80019D78
-s32 enable_exception_event(void *handler)
+s32 enable_syscall(void *handler)
 {
     EnterCriticalSection();
-    // exception event (only cause by the invalid syscall function at the start of every main)
     int event = OpenEvent(HwCPU, EvSpSYSCALL, EvMdINTR, handler);
     EnableEvent(event);
-
     ExitCriticalSection();
     return event;
 }
@@ -763,7 +783,7 @@ int main(int argc, char *argv[])
     // initialization
     jt_reset();
     game_init();
-    exception_event = enable_exception_event(exception_handler);
+    syscall_event = enable_syscall(sys_nothing);
     music_set_list(&D_80034344);
     while (1) {
         int rc = iso_read("SYS_SE.VAB", &tmpfilebuf, 0);
