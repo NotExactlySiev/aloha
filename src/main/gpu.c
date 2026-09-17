@@ -1,7 +1,6 @@
 #include "gpu.h"
 #include "jumptable.h"
 #include <libetc.h>
-#include <libgpu.h>
 #include <libgte.h>
 
 extern volatile int vsync_counter;
@@ -59,7 +58,11 @@ int call_GetGraphType(void)
 // 80022954
 DISPENV *call_SetDefDispEnv(DISPENV *env, int x, int y, int w, int h)
 {
-    return SetDefDispEnv(env, x, y, w, h);
+    DISPENV *ret = SetDefDispEnv(env, x, y, w, h);
+#ifdef VERSION_WORLD
+    env->pad0 = get_video_mode() == MODE_PAL ? 1 : 0;
+#endif
+    return ret;
 }
 
 // 800229B0
@@ -132,7 +135,7 @@ void call_ResetGraph(int mode)
             ResetGraph(0);
             D_80047E64 = 1;
         }
-        
+
         return;
     }
 #endif
@@ -162,12 +165,14 @@ int get_vsync_event_cnt(void)
 void wait_frame(void)
 {
     int curr = get_vsync_event_cnt();
-    while (curr == get_vsync_event_cnt());
+    while (curr == get_vsync_event_cnt())
+        ;
 }
 
 // 80022BD8
 int call_SetGraphDebug(int level)
 {
+#ifdef VERSION_WORLD
     static int D_80047E68 = 0;
     int ret = 1;
     if (D_80047E68 == 0) {
@@ -175,6 +180,9 @@ int call_SetGraphDebug(int level)
         D_80047E68 = 1;
     }
     return ret;
+#else
+    return SetGraphDebug(level);
+#endif
 }
 
 // 80022C1C
@@ -241,13 +249,17 @@ void gpu_init(void)
     jt_set(call_SetDrawArea, 0x196);
     jt_set(call_StoreImage, 0x197);
     jt_set(call_MoveImage, 0x198);
+
+#ifdef VERSION_WORLD
     jt_set(call_DrawPrim, 0x199);
     jt_set(call_LoadTPage, 0x19A);
     jt_set(call_LoadClut, 0x19B);
     jt_set(call_SetVideoMode, 0x19C);
     jt_set(call_GetVideoMode, 0x19D);
+#endif
 
     // Extra exports not done by the original game
+    // TODO: ifdef NEW_PSYQ
     jt_set(SetSemiTrans, 0x19E);
     jt_set(SetShadeTex, 0x19F);
     jt_set(SetTexWindow, 0x1A0);

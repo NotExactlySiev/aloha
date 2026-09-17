@@ -246,8 +246,8 @@ static inline void sleep_frames(int n)
 // draw_polys
 static inline void SET_POLYS_COL(u8 c, POLY_FT4 *p, int n)
 {
-    DrawSync(0);
-    wait_frame();
+    call_DrawSync(0);
+    call_wait_frame();
     for (int i = 0; i < n; i++) {
         setRGB0(&p[i], c, c, c);
         DrawPrim(&p[i]);
@@ -304,22 +304,34 @@ void show_logo(void)
     s32 y;
     u32 h;
 
+#ifndef VERSION_WORLD
+    wait_frame();
+    call_ResetGraph(0);
+    call_SetGraphDebug(0);
+    call_SetDispMask(0);
+#endif
+
     // set the enviroment
     // TODO: should I get rid of the  stuff? They do nothing
-    SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
-    SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
+    call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
+    call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
     drawenv.isbg = 0;
     drawenv.dtd = 1;
     drawenv.dfe = 1;
+
+#ifdef VERSION_WORLD
     dispenv.pad0 = 0;
     if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y += 24;
     }
+#endif
+
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
-    DrawSync(0);
 
+#ifdef VERSION_WORLD
+    DrawSync(0);
     // clear the screen with black
     // SetBlockFill(&tile);
     // setBlockFill(&tile);
@@ -336,6 +348,7 @@ void show_logo(void)
     DrawPrim(&tile);
     DrawSync(0);
 
+    // Show the warning file if it's there.
     do {
         tmp = iso_read("WARNING.PRS", (u32 *)0x80100000, 0); // read file
     } while (tmp == -1);
@@ -395,6 +408,13 @@ void show_logo(void)
 
         FADE_IN(polys, 5);
     }
+#else
+    // TODO: Japan's logo code.
+    sleep_frames(10);
+    wait_frame();
+    SetDispMask(1);
+    DrawSync(0);
+#endif
 }
 
 // 8001926C
@@ -410,18 +430,20 @@ void func_8001926C(void)
     drawenv.isbg = 0;
     drawenv.dtd = 1;
     drawenv.dfe = 1;
+
+#ifdef VERSION_WORLD
     dispenv.pad0 = 0;
     if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y = (u16)dispenv.screen.y + 0x18;
     }
+#endif
+
     PutDrawEnv(&drawenv);
     PutDispEnv(&dispenv);
 
-    if (D_80047D48 == -2) {
-        MAKE_QUADS(polys, 64, 4, 192, 128, 96, 0, 0, 128, 96, 64);
-        FADE_OUT(polys, 4);
-    } else {
+#ifdef VERSION_WORLD
+    if (D_80047D48 != -2) {
         if (get_region() == 1) {
             y = 120;
             h = 240;
@@ -432,31 +454,40 @@ void func_8001926C(void)
 
         MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
         FADE_OUT(polys, 5);
+    } else
+#endif
+    {
+        MAKE_QUADS(polys, 64, 4, 192, 128, 96, 0, 0, 128, 96, 64);
+        FADE_OUT(polys, 4);
     }
 
-    wait_frame();
-    SetDispMask(0);
-    SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
-    SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
+    call_wait_frame();
+    call_SetDispMask(0);
+    call_SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
+    call_SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
+
+#ifdef VERSION_WORLD
     dispenv.pad0 = 0;
     if (get_video_mode() == 1) {
         dispenv.pad0 = 1;
         dispenv.screen.y = (u16)dispenv.screen.y + 0x18;
     }
+#endif
+
     drawenv.isbg = 1;
     drawenv.r0 = 0;
     drawenv.g0 = 0;
     drawenv.b0 = 0;
 
-    DrawSync(0);
-    wait_frame();
-    PutDrawEnv(&drawenv);
-    PutDispEnv(&dispenv);
+    call_DrawSync(0);
+    call_wait_frame();
+    call_PutDrawEnv(&drawenv);
+    call_PutDispEnv(&dispenv);
 
-    DrawSync(0);
-    wait_frame();
-    PutDrawEnv(&drawenv);
-    PutDispEnv(&dispenv);
+    call_DrawSync(0);
+    call_wait_frame();
+    call_PutDrawEnv(&drawenv);
+    call_PutDispEnv(&dispenv);
 }
 
 // US: 80019680
@@ -466,11 +497,14 @@ void init_everything(void)
     cd_init();
 
 #ifdef VERSION_WORLD
+    // Query which region and TV standard we're running on.
     read_version();
-
     wait_frame();
     SetVideoMode(get_video_mode() != 0);
+#endif
 
+#ifdef VERSION_WORLD
+    // The Japanese version does this initialization in show_logo() instead.
     wait_frame();
     call_ResetGraph(0);
     call_SetGraphDebug(0);
@@ -561,6 +595,8 @@ void jt_set(void *func, s32 idx)
     flush_cache_safe();
 }
 
+#ifdef VERSION_WORLD
+
 // 80019948
 void vblank_disable(void)
 {
@@ -634,6 +670,8 @@ char *get_mc_file_name(void)
         return 0;
     return mc_file_name;
 }
+
+#endif
 
 // US: 80019B1C
 // JP: 80019068

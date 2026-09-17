@@ -105,15 +105,19 @@ void fade_in_routine(void)
     }
 }
 
-// 8001AB88
+// US: 8001AB88
+// JP: 80019FC4
 s32 fade_out(s32 duration, s32 dstvol, void *callback)
 {
     if (fade_out_active == 1)
         return 0;
 
+#ifdef VERSION_WORLD
     if (MODE_PAL == get_video_mode()) {
         duration = (duration * 5) / 6 - 1;
     }
+#endif
+
     fade_out_active = 1;
     CLAMP(1, 1024, duration);
     CLAMP(0, VOL_FULL, dstvol);
@@ -131,16 +135,20 @@ s32 fade_out(s32 duration, s32 dstvol, void *callback)
     return 1;
 }
 
-// 8001AD0C
-s32 fade_in(s32 duration, s32 dstvol, void *callback)
+// US: 8001AD0C
+// JP: 8001A0C4
+int fade_in(s32 duration, s32 dstvol, void *callback)
 {
     if (fade_in_active == 1)
         return 0;
 
+#ifdef VERSION_WORLD
     if (MODE_PAL == get_video_mode()) {
         duration = (duration * 5) / 6 - 1;
         // if (duration < 1) duration = 1;
     }
+#endif
+
     fade_in_active = 1;
     CLAMP(1, 1024, duration);
     CLAMP(0, VOL_FULL, dstvol);
@@ -180,9 +188,9 @@ int func_8001B94C(void)
     ret = 0;
     if (music_state != 3) {
         cd_pause();
-        cd_command(0xE, (u32) &D_80047DA0, 0);
+        cd_command(0xE, (u32)&D_80047DA0, 0);
         cd_mute();
-        cd_command(0xFC, (u32) &D_80047D8C, 0);
+        cd_command(0xFC, (u32)&D_80047D8C, 0);
         cd_command(0xFE, 3, 0);
         ret = cd_flush();
     }

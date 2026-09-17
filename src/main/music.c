@@ -1,8 +1,8 @@
 #include "music.h"
-#include "common.h"
-#include <libspu.h>
-#include <libetc.h>
 #include "cd/cd.h"
+#include "common.h"
+#include <libetc.h>
+#include <libspu.h>
 
 extern SpuVolume D_80047D8C;
 extern SpuVolume vol_full;
@@ -21,7 +21,7 @@ CdlLOC cdda_loc;
 CdlFILTER D_80047ECC;
 CdlFILE D_8004D0E0;
 int music_state;
-int D_80047E00 = -1;  // bgm regular task handle
+int D_80047E00 = -1; // bgm regular task handle
 static int bgm_counter;
 static int bgm_target;
 static int bgm_finished;
@@ -29,7 +29,7 @@ static int bgm_finished;
 void music_really_unpause(void);
 
 // 8001B9D8
-NOT_IMPL_FN(func_8001B9D8);    // CD MUSIC
+NOT_IMPL_FN(func_8001B9D8); // CD MUSIC
 /*
 void func_8001B9D8(void)
 {
@@ -50,7 +50,8 @@ extern s8 D_80047EC4[];
 
 // US: 8001BA50
 // JP: 8001AE2C
-void func_8001BA50(void) {
+void func_8001BA50(void)
+{
     music_really_unpause();
     cd_command(0xFC, &D_80047D8C, 0);
     cd_command(0xFE, NULL, 0);
@@ -90,24 +91,27 @@ static inline int unbcd(int x)
 }
 
 // 8001BB50
-void func_8001BB50(int arg0, CdlLOC *loc) {
-    int sector;
-    int seconds;
-    int second;
+void func_8001BB50(int arg0, CdlLOC *loc)
+{
+#ifdef VERSION_WORLD
+    int factor = get_video_mode() == MODE_PAL ? 203 : 200;
+    int factorDiv = 200;
+#else
+    int factor = 100;
+    int factorDiv = 100;
+#endif
 
-    seconds = get_video_mode() == MODE_PAL ? 203 : 200;
-    sector = ((arg0 % 2048) * seconds) / 200;
-    second = sector / 75;
-
+    int sector = ((arg0 / 2048) * factor) / factorDiv;
+    int second = sector / 75;
     loc->sector = bcd(sector % 75);
     loc->minute = bcd(second / 60);
     loc->second = bcd(second % 60);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", music_play_str);
-// plays background music
-// US: 8001BD00
-// JP: 8001B0A0
+// INCLUDE_ASM("asm/main/nonmatchings/274C", music_play_str);
+//  plays background music
+//  US: 8001BD00
+//  JP: 8001B0A0
 void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
 {
     if (music_state == 3) {
@@ -115,7 +119,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     }
 
     D_80047D78 = repeat == 1;
-    //printf("PLAYING %s\n", filename);
+    // printf("PLAYING %s\n", filename);
 
     if (cd_fs_get_file(&D_8004D0E0, filename) == 0) {
         printf("can't find file :(\n");
@@ -123,7 +127,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
         return;
     }
 
-    //printf("%X:%X:%X:%X\n", f.pos.track, f.pos.minute, f.pos.second, f.pos.sector);
+    // printf("%X:%X:%X:%X\n", f.pos.track, f.pos.minute, f.pos.second, f.pos.sector);
     printf("%X:%X:%X:%X\n", loc->track, loc->minute, loc->second, loc->sector);
     D_80047F24 = 0;
     D_80047ECC.file = file;
@@ -132,7 +136,8 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
 #ifdef VERSION_WORLD
     if (get_video_mode() == MODE_PAL) {
         unbcd(loc->minute) * 60;
-        while (1);
+        while (1)
+            ;
     } else
 #endif
     {
@@ -145,7 +150,7 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
     D_80047EEC /= 200;
 #endif
     printf("bgm is %d frames long\n", D_80047EEC);
-    D_80047EC4[0] = arg3;   // mode
+    D_80047EC4[0] = arg3; // mode
     cd_command(0xFB, 0, 0);
     cd_command(0xFA, 0, 0);
     func_8001BA50();
@@ -154,10 +159,11 @@ void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int
 }
 
 // 8001C03C
-NOT_IMPL_FN(music_play_cdda);  // CD MUSIC
+NOT_IMPL_FN(music_play_cdda); // CD MUSIC
 
 // 8001C20C
-void music_play_cdda_from_loc(CdlLOC *loc) {   // CD MUSIC
+void music_play_cdda_from_loc(CdlLOC *loc)
+{ // CD MUSIC
     D_80047D78 = 0;
     D_80047F24 = 0;
     cdda_loc.minute = loc->minute;
@@ -175,28 +181,33 @@ void music_play_cdda_from_loc(CdlLOC *loc) {   // CD MUSIC
 }
 
 // 8001C2F4
-void cd_pause(void) {
+void cd_pause(void)
+{
     cd_command(CdlPause, 0, 0);
 }
 
 // 8001C31C
-void cd_play(void) {
+void cd_play(void)
+{
     cd_command(CdlPlay, 0, 0);
     cd_demute();
 }
 
 // 8001C34C
-void cd_mute(void) {
+void cd_mute(void)
+{
     cd_command(CdlMute, 0, 0);
 }
 
 // 8001C374
-void cd_demute(void) {
+void cd_demute(void)
+{
     cd_command(CdlDemute, 0, 0);
 }
 
 // 8001C39C
-s32 cd_set_stereo(s32 arg0) {
+s32 cd_set_stereo(s32 arg0)
+{
     CdlATV vol;
     s32 ret;
 
@@ -221,9 +232,9 @@ s32 cd_set_stereo(s32 arg0) {
     return ret;
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", cd_get_vol);
-// TODO: the assembly for this is weird
-// 8001CD0C
+// INCLUDE_ASM("asm/main/nonmatchings/274C", cd_get_vol);
+//  TODO: the assembly for this is weird
+//  8001CD0C
 void cd_get_vol(SpuVolume *out)
 {
     *out = vol_full;
@@ -263,23 +274,27 @@ void func_8001CDC8(s32 arg0) {
 */
 
 // 8001CDF0
-void cd_fade_wait(void) {
+void cd_fade_wait(void)
+{
     cd_command(SNQ_FUNC8, 0, 0);
 }
 
 // 8001CE18
-s32 func_8001CE18(void) {
+s32 func_8001CE18(void)
+{
     return bgm_finished;
 }
 
 // 8001CE28
-void music_pause(void) {
+void music_pause(void)
+{
     cd_pause();
     cd_command(SNQ_SET_PAUSED, 1, 0);
 }
 
 // 8001CE58
-void music_unpause(void) {
+void music_unpause(void)
+{
     if (bgm_paused == 1) {
         cd_command(CdlReadS, 0, 0);
         cd_command(SNQ_SET_PAUSED, 0, 0);
@@ -287,7 +302,8 @@ void music_unpause(void) {
 }
 
 // 8001CEA0
-void music_really_unpause(void) {
+void music_really_unpause(void)
+{
     cd_command(SNQ_SET_PAUSED, 0, 0);
 }
 
@@ -298,7 +314,7 @@ void func_8001CEC8(void)
     if ((bgm_finished == 0) && (bgm_paused == 0))
         bgm_counter += 1;
 
-    //printf("%d\t/ %d\n", bgm_counter, bgm_target);
+    // printf("%d\t/ %d\n", bgm_counter, bgm_target);
     if (bgm_counter > bgm_target)
         bgm_finished = 1;
 }

@@ -61,28 +61,30 @@ typedef struct {
 #define UNK(a,b)    void *unk##a[b - a + 1]
 extern struct {
     // General Functions
-    void        (*nop)(void);
-    void        (*jt_set)(void*, s32);
-    s32         (*is_game_running)(void);
-    void        (*execs_set_next)(s32);
-    s32         (*execs_get_next)(void);
-    GlobalData* (*globals)(void);
-    char*       (*execs_get_path)(s32);
-    s32         (*get_video_mode)(void);
-    s32         (*get_region)(void);
-    int         (*get_widescreen)(void);
-    void        (*set_widescreen)(int);
-    char*       (*get_mc_file_name)(void);
+    /*   0 */ void        (*nop)(void);
+    /*   1 */ void        (*jt_set)(void*, s32);
+    /*   2 */ s32         (*is_game_running)(void);
+    /*   3 */ void        (*execs_set_next)(s32);
+    /*   4 */ s32         (*execs_get_next)(void);
+    /*   5 */ GlobalData* (*globals)(void);
+    /*   6 */ char*       (*execs_get_path)(s32);
+#ifdef VERSION_WORLD
+    /*   7 */ s32         (*get_video_mode)(void);
+    /*   8 */ s32         (*get_region)(void);
+    /*   9 */ int         (*get_widescreen)(void);
+    /*   A */ void        (*set_widescreen)(int);
+    /*   B */ char*       (*get_mc_file_name)(void);
+#endif
     UNK(12, 191);
-    void        (*decompress_rle)(u32,void* src,void* dst);
-    void        (*decompress_lz1)(void* src,void* dst);
+    /*  C0 */ void        (*decompress_rle)(u32,void* src,void* dst);
+    /*  C1 */ void        (*decompress_lz1)(void* src,void* dst);
     UNK(194, 223);
-    u32         (*routine_task_add)(void* callback, u16 interval);
-    void        (*routine_task_remove)(u32 taskid);
+    /*  E0 */ u32         (*routine_task_add)(void* callback, u16 interval);
+    /*  E1 */ void        (*routine_task_remove)(u32 taskid);
     UNK(226, 239);
-    u32         (*PadRead)(int id);
+    /*  F0 */ u32         (*PadRead)(int id);
     UNK(241, 254);
-    u32         (*get_engine_version)(void);
+    /*  FF */ u32         (*get_engine_version)(void);
 
     // CD functions
     /* 100 */ int         (*cd_status)();
@@ -98,7 +100,9 @@ extern struct {
     /* 114 */ int         (*cd_seek_safe)();
     /* 115 */ int         (*iso_read_fast)();
     /* 116 */ int         (*iso_seek)();
+#ifdef VERSION_WORLD
     /* 117 */ int         (*iso_never_called)();
+#endif
     UNK(280, 287);
     /* 120 */ int         (*music_play_cdda)(int idx, int repeat);
     /* 121 */ int         (*music_play_cdda_from_loc)();
@@ -147,12 +151,13 @@ extern struct {
     /* 196 */ void        (*SetDrawArea)(DR_AREA* p, RECT* r);
     /* 197 */ s32         (*StoreImage)(RECT*, u32*);
     /* 198 */ s32         (*MoveImage)(RECT* src, s32 x, s32 y);
+#ifdef VERSION_WORLD
     /* 199 */ void        (*DrawPrim)(void* p);
     /* 19A */ u16         (*LoadTPage)(u32* data, s32 tp, s32 abr, s32 x, s32 y, s32 w, s32 h);
     /* 19B */ u16         (*LoadClut)(u16* data, u32 x, u32 y);
     /* 19C */ u32         (*SetVideoMode)(u32);
     /* 19D */ u32         (*GetVideoMode)(void);
-
+#endif
     // I had to also export these three functions in addition. Since the game
     // executable was using them from its own linked libgpu which is bad.
     /* 19E */ void        (*SetSemiTrans)(void *p, int abe);

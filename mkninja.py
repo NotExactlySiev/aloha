@@ -1,8 +1,17 @@
 import os
+import sys
 
 import ninja as Ninja
 
 LINKER_SHARED = "linker/shared.ld"
+
+if len(sys.argv) != 2:
+    print("Usage: mkninja.py <version>")
+    print("\tversion: one of us, eu, or jp")
+    sys.exit(1)
+
+# "us", "eu", or "jp"
+version = sys.argv[1]
 
 
 class SourceFile:
@@ -74,7 +83,7 @@ class Executable:
 
     @property
     def final_path(self):
-        return f"build/disc/{self.final_name}"
+        return f"build/disc_{version}/{self.final_name}"
 
 
 # Setup
@@ -96,15 +105,27 @@ executables = [
         ],
         ["util.o"],
     ),
-    Executable(
-        "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
-    ),
-    Executable("JM1/MAIN.PEX", "jm1", True, ["libgte", "libetc", "libc", "libapi"]),
+    # Executable(
+    #     "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
+    # ),
+    # Executable("JM1/MAIN.PEX", "jm1", True, ["libgte", "libetc", "libc", "libapi"]),
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),
 ]
 
+versionFlag = ""
+match version:
+    case "us" | "eu":
+        versionFlag = " -DVERSION_WORLD"
+
+    case "jp":
+        versionFlag = " -DVERSION_JAPAN"
+
+    case _:
+        print(f"Version {version} is unknown.")
+
 # Ninja setup
+Ninja.set("version", version)
 Ninja.set("cross", "mipsel-unknown-none-elf-")
 Ninja.set("knifedir", "tools/knife")
 Ninja.set("knife", "build/knife")
@@ -112,13 +133,34 @@ Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
 Ninja.set(
     "cflags",
-    "-Wall -Iinclude -Ipsyq/include -Iassets -O1 -G0 -DLANGUAGE_C -fno-zero-initialized-in-bss -msoft-float -mips1 -march=mips1 -mabi=32 -EL -mno-abicalls -fno-stack-protector -Wa,--no-pad-sections -fno-builtin -fno-pic -DVERSION_WORLD",
+    " ".join(
+        [
+            "-Wall",
+            "-Iinclude",
+            "-Ipsyq/include",
+            "-Iassets",
+            "-O1",
+            "-G0",
+            "-DLANGUAGE_C",
+            "-fno-zero-initialized-in-bss",
+            "-msoft-float",
+            "-mips1",
+            "-march=mips1",
+            "-mabi=32",
+            "-EL",
+            "-mno-abicalls",
+            "-fno-stack-protector",
+            "-Wa,--no-pad-sections",
+            "-fno-builtin",
+            "-fno-pic",
+        ]
+    ),
 )
 Ninja.set("ldflags", "--no-check-sections -nostdlib -s")
 Ninja.set("cflagsnat", "-O2")
 
 Ninja.rule("ccnat", "gcc $cflagsnative $in -o $out")
-Ninja.rule("cc", "${cross}gcc $cflags -Iassets/$modid -c $in -o $out")
+Ninja.rule("cc", "${cross}gcc $cflags -Iassets/$modid -c $in -o $out " + versionFlag)
 Ninja.rule(
     "link",
     "${cross}ld $ldflags -Map=build/$modid.map -T linker/symbols.$modid.ld -T "
@@ -132,7 +174,7 @@ Ninja.rule("comp", "$knife pex compress $in $out")
 Ninja.param("description", "Compressing $out")
 Ninja.rule("mkiso", "$makeiso -y $in -o $out")
 Ninja.param("description", "Generating Disc Image")
-Ninja.rule("REGENERATE", "python $in")
+Ninja.rule("REGENERATE", "python $in $version")
 Ninja.param("description", "Updating build.ninja")
 Ninja.param("generator", "1")
 
@@ -155,11 +197,19 @@ Ninja.build("cc", "build/header.o", ["src/header.s"])
 Ninja.build("cc", "build/start.o", ["src/start.s"])
 Ninja.build("cc", "build/util.o", ["src/util.c"])
 
+extra_deps = []
 exe_paths = []
 for exe in executables:
     exe.generate()
     exe_paths.append(exe.final_path)
 
-Ninja.build("mkiso", "build/aloha.bin", ["us.xml"], exe_paths)
+if version in ["us", "eu"]:
+    Ninja.rule("mkcountry", "python mkcountry.py $version")
+    Ninja.build("cc", "build/disc_world/COUNTRY.TXT", ["src/header.s"])
+    extra_deps.append("build/disc_world/COUNTRY.TXT")
+
+Ninja.build(
+    "mkiso", f"build/aloha_{version}.bin", [f"{version}.xml"], exe_paths + extra_deps
+)
 Ninja.build("REGENERATE", "build.ninja", ["mkninja.py"], ["ninja.py"])
 Ninja.write_to_file("build.ninja")
