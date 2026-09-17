@@ -4,4 +4,6 @@ ExperimentalAutoDetectBinPacking: true
 PointerAlignment: Right
 QualifierAlignment: Left
 SeparateDefinitionBlocks: Always
-
+IndentPPDirectives: BeforeHash
+PPIndentWidth: 4
+AllowShortLoopsOnASingleLine: true
