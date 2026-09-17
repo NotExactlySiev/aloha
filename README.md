@@ -53,3 +53,7 @@ ninja
 ```
 
 Finally run `build/aloha_*.bin` on an emulator or real hardware.
+
+## Disclaimer
+
+No part of this project was done with the assistance of artificial intelligence.
