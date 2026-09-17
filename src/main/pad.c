@@ -4,14 +4,16 @@
 
 u32 call_PadRead(s32 id);
 
-// 8001E33C
+// US: 8001E33C
+// JP: 8001D240
 void pad_init(void)
 {
     PadInit(0);
     jt_set(call_PadRead, 0xf0);
 }
 
-// 8001E36C
+// US: 8001E36C
+// JP: 8001D270
 u32 call_PadRead(s32 id)
 {
     return PadRead(id);

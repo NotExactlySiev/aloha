@@ -143,33 +143,37 @@ void call_ResetGraph(int mode)
     ResetGraph(mode);
 }
 
-// 80022B54
+// US: 80022B54
+// JP: 800218BC
 void call_wait_frame(void)
 {
     wait_frame();
 }
 
-// 80022B74
+// US: 80022B74
+// JP: 800218DC
 int call_VSync(int mode)
 {
     return VSync(mode);
 }
 
-// 80022B94
+// US: 80022B94
+// JP: 800218FC
 int get_vsync_event_cnt(void)
 {
     return vsync_counter;
 }
 
-// 80022BA4
+// US: 80022BA4
+// JP: 8002190C
 void wait_frame(void)
 {
     int curr = get_vsync_event_cnt();
-    while (curr == get_vsync_event_cnt())
-        ;
+    while (curr == get_vsync_event_cnt());
 }
 
-// 80022BD8
+// US: 80022BD8
+// JP: 80021940
 int call_SetGraphDebug(int level)
 {
 #ifdef VERSION_WORLD
@@ -185,43 +189,47 @@ int call_SetGraphDebug(int level)
 #endif
 }
 
-// 80022C1C
+// US: 80022C1C
+// JP: 80021960
 void call_SetDispMask(int mask)
 {
     SetDispMask(mask);
 }
 
-// 80022C3C
+#ifdef VERSION_WORLD
+// US: 80022C3C
 void call_DrawPrim(void *p)
 {
     DrawPrim(p);
 }
 
-// 80022C5C
+// US: 80022C5C
 u_short call_LoadClut(u_long *clut, int x, int y)
 {
     return LoadClut(clut, x, y);
 }
 
-// 80022C7C
+// US: 80022C7C
 u_short call_LoadTPage(u_long *pix, int tp, int abr, int x, int y, int w, int h)
 {
     return LoadTPage(pix, tp, abr, x, y, w, h);
 }
 
-// 80022CB0
+// US: 80022CB0
 long call_SetVideoMode(long mode)
 {
     return SetVideoMode(mode);
 }
 
-// 80022CD0
+// US: 80022CD0
 long call_GetVideoMode(void)
 {
     return GetVideoMode();
 }
+#endif
 
-// 80022CF0
+// US: 80022CF0
+// JP: 80021980
 void gpu_init(void)
 {
     jt_set(call_ResetGraph, 0x180);

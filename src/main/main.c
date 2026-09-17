@@ -23,13 +23,15 @@ void fnt_init(void);
 void misc_init(void);
 void VSyncCallbacks(int, int);
 
-u32 saved_ra;
+/* US:80048044 JP:80044868 */ u32 saved_ra;
 
 // stuff from 1D530.data.s
 int D_80047D48 = -2;
+#ifdef VERSION_WORLD
 int widescreen = 0;
+#endif
 int D_80047D50 = 0;
-int D_80047D58 = 0;
+/* US:80047D58 JP:80044320 */ int D_80047D58 = 0;
 int D_80047D64 = 0;
 
 // over
@@ -109,9 +111,15 @@ MusicList D_80034344 = {
 };
 
 #define DFILE(ptr, name) { (void *)(ptr | 1), name }
-file_t g_Files[42] = {
+file_t g_Files[] = {
     DFILE(0x80060000, "TITLE.PEX"),
+
+#ifdef VERSION_WORLD
     DFILE(0x80060000, "SELECT.PEX"),
+#else
+    { (void *)(0x00000000), "SELECT.PEX" },
+#endif
+
     DFILE(0x80080000, "JM1\\MAIN.PEX"),
     DFILE(0x80080000, "JM1\\MAIN.PEX"),
     DFILE(0x80080000, "JM1\\MAIN.PEX"),
@@ -134,6 +142,8 @@ file_t g_Files[42] = {
     DFILE(0x80080000, "JM2\\MAIN.PEX"),
     DFILE(0x80080000, "JM3\\MAIN.PEX"),
     DFILE(0x80080000, "GAMEOVER.PEX"),
+
+#ifdef VERSION_WORLD
     DFILE(0x80080000, "JM1B\\MAIN.PEX"),
     DFILE(0x80080000, "JM1B\\MAIN.PEX"),
     DFILE(0x80080000, "JM1B\\MAIN.PEX"),
@@ -152,6 +162,7 @@ file_t g_Files[42] = {
     DFILE(0x80080000, "JM6B\\MAIN.PEX"),
     DFILE(0x80080000, "JM6B\\MAIN.PEX"),
     DFILE(0x80080000, "JM6B\\MAIN.PEX"),
+#endif
 };
 
 s32 g_CurrFile = 0;
@@ -160,10 +171,9 @@ s32 game_region = 0;
 u32 tv_system = MODE_NTSC;
 s32 dev_mode = 0;
 
-s32 D_80047E6C; // 80047e6c
-s32 D_80047E70; // 80047e70
-s32 vblank_event; // 80047e74
-s32 syscall_event; // 80047e7c
+/* US:80047E6C JP:80044698 */ int D_80047E6C;
+/* US:80047E74 JP:800446A0 */ int vblank_event;
+/* US:80047E7C JP:800446A8 */ int syscall_event;
 char mc_file_name[20];
 
 s32 iso_read(const char *addr, void *buf, s32 mode);
@@ -174,16 +184,15 @@ s32 iso_exec(char *file, s32 param);
 // boot.h
 void reset(void);
 
-// 800188C8
+// US: 800188C8
+// JP: 80018724
 void file_execute_loop(void)
 {
-    u32 *addr;
-
     while (1) {
         if (g_CurrFile == -1)
             g_CurrFile = 0;
 
-        addr = g_Files[g_CurrFile].header;
+        u32 *addr = g_Files[g_CurrFile].header;
         printf("now executing: %s\n", g_Files[g_CurrFile].addr);
         if (addr != NULL) {
             // if addr isn't NULL, it's compressed
@@ -207,27 +216,30 @@ void file_execute_loop(void)
     }
 }
 
-// 80018A3C
+// US: 80018A3C
+// JP: 80018898
 char *get_file_addr(s32 idx)
 {
-    if (idx > 42)
+
+    if (idx > countof(g_Files))
         return 0;
     return g_Files[idx].addr;
 }
 
-// 80018A6C
+#ifdef VERSION_WORLD
+// US: 80018A6C
 s32 func_80018A6C(void)
 {
     return D_80047D50;
 }
 
-// 80018A7C
+// US: 80018A7C
 s32 get_widescreen(void)
 {
     return widescreen;
 }
 
-// 80018A8C
+// US: 80018A8C
 void set_widescreen(s32 arg0)
 {
     if (arg0 != 0)
@@ -235,6 +247,7 @@ void set_widescreen(s32 arg0)
     else
         widescreen = 0;
 }
+#endif
 
 // move splash.c to another file?
 static inline void sleep_frames(int n)
@@ -293,17 +306,10 @@ static inline void LOAD_PRS(u8 *dst, short w, short h)
     DrawSync(0);
 }
 
-// 80018AB4
+// US: 80018AB4
+// JP: 800188C8
 void show_logo(void)
 {
-    DRAWENV drawenv;
-    DISPENV dispenv;
-    POLY_FT4 polys[5];
-    TILE tile;
-    s32 tmp;
-    s32 y;
-    u32 h;
-
 #ifndef VERSION_WORLD
     wait_frame();
     call_ResetGraph(0);
@@ -311,8 +317,9 @@ void show_logo(void)
     call_SetDispMask(0);
 #endif
 
-    // set the enviroment
-    // TODO: should I get rid of the  stuff? They do nothing
+    // Set the enviroment.
+    DRAWENV drawenv;
+    DISPENV dispenv;
     call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
     call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
     drawenv.isbg = 0;
@@ -417,7 +424,8 @@ void show_logo(void)
 #endif
 }
 
-// 8001926C
+// US: 8001926C
+// JP: 80018BA8
 void func_8001926C(void)
 {
     DRAWENV drawenv;
@@ -523,6 +531,7 @@ void init_everything(void)
 }
 
 // US: 8001972C
+// JP: 80018E78
 void game_shutdown(void)
 {
     cd_stop();
@@ -540,7 +549,8 @@ void game_shutdown(void)
     StopRCnt(RCntCNT3);
 }
 
-// 800197C8
+// US: 800197C8
+// JP: 80018F14
 s32 enable_vblank_event(void *handler)
 {
 #ifndef VERSION_WORLD
@@ -555,7 +565,8 @@ s32 enable_vblank_event(void *handler)
     return event;
 }
 
-// 8001983C
+// US: 8001983C
+// JP: 80018F98
 void disable_vblank_event(s32 event)
 {
     EnterCriticalSection();
@@ -566,18 +577,22 @@ void disable_vblank_event(s32 event)
     ExitCriticalSection();
 }
 
-// 8001987C
+// US: 8001987C
+// JP: 80018FCC
 void nop(void) { }
 
-// 80019884
+#ifdef VERSION_WORLD
+// US: 80019884
 void flush_cache_safe(void)
 {
     EnterCriticalSection();
     FlushCache();
     ExitCriticalSection();
 }
+#endif
 
-// 800198B4
+// US: 800198B4
+// JP: 80018FD4
 void jt_clear(void)
 {
     void **jmptable = (void **)0x80010000;
@@ -587,7 +602,8 @@ void jt_clear(void)
     flush_cache_safe();
 }
 
-// 80019908
+// US: 80019908
+// JP: 80019028
 void jt_set(void *func, s32 idx)
 {
     void **jmptable = (void **)&jt;
@@ -596,8 +612,7 @@ void jt_set(void *func, s32 idx)
 }
 
 #ifdef VERSION_WORLD
-
-// 80019948
+// US: 80019948
 void vblank_disable(void)
 {
     if (D_80047D64 != 1) {
@@ -606,7 +621,7 @@ void vblank_disable(void)
     }
 }
 
-// 80019990
+// US: 80019990
 s32 vblank_enable(void)
 {
     s32 ret = 0;
@@ -618,13 +633,13 @@ s32 vblank_enable(void)
     return ret;
 }
 
-// 800199D4
+// US: 800199D4
 s32 get_video_mode(void)
 {
     return tv_system;
 }
 
-// 800199E4
+// US: 800199E4
 void read_version(void)
 {
     int rc;
@@ -656,21 +671,20 @@ void read_version(void)
     }
 }
 
-// 80019AE8
+// US: 80019AE8
 s32 get_region(void)
 {
     return game_region;
 }
 
 // this is the save file name for the debug version
-// 80019AF8
+// US: 80019AF8
 char *get_mc_file_name(void)
 {
     if (dev_mode == 0)
         return 0;
     return mc_file_name;
 }
-
 #endif
 
 // US: 80019B1C
@@ -718,14 +732,16 @@ void game_init(void)
     mc_select_slot(0);
 }
 
-// 80019CA4
+// US: 80019CA4
+// JP: 80019194
 // engine_is_running
 s32 get_engine_running(void)
 {
     return D_80047E6C;
 }
 
-// 80019CB4
+// US: 80019CB4
+// JP: 800191A4
 // engine_init
 void *jt_reset(void)
 {
@@ -775,7 +791,8 @@ static void SYSCALL_RETURN(void *v)
 // Unused implementation. Checks if the engine needs to be reinitialized, and if
 // so does half the job by itself and asks the running executable to do the
 // other half.
-// 80019D0C
+// US: 80019D0C
+// JP: 800191FC
 void sys_reset(void)
 {
     if (D_80047D58 == 0) {
@@ -788,14 +805,16 @@ void sys_reset(void)
 }
 
 // The real implementation. Doesn't do anything.
-// 80019D64
+// US: 80019D64
+// JP: 80019254
 void sys_nothing(void)
 {
     SYSCALL_RETURN(NULL);
 }
 
-// 80019D78
-s32 enable_syscall(void *handler)
+// US: 80019D78
+// JP: 80019268
+int enable_syscall(void *handler)
 {
     EnterCriticalSection();
     int event = OpenEvent(HwCPU, EvSpSYSCALL, EvMdINTR, handler);
@@ -809,7 +828,8 @@ static inline u32 VERSION(u16 major, u16 minor)
     return (major << 8) | minor;
 }
 
-// 80019DCC
+// US: 80019DCC
+// JP: 800192BC
 // engine_version
 u32 get_engine_version(void)
 {
@@ -820,27 +840,31 @@ u32 get_engine_version(void)
 #endif
 }
 
-// 80019DD8
+// US: 80019DD8
+// JP: 800192C4
 // engine_set_next_exec
-void set_next_exec(s32 id)
+void set_next_exec(int id)
 {
     next_exec = id;
 }
 
-// 80019DE8
+// US: 80019DE8
+// JP: 800192D4
 // engine_get_next_exec
 s32 get_next_exec(void)
 {
     return next_exec;
 }
 
-// 80019DF8
+// US: 80019DF8
+// JP: 800192E4
 GlobalData *globals(void)
 {
     return (GlobalData *)0x80014000;
 }
 
-// 80019E04
+// US: 80019E04
+// JP: 800192F0
 int main(int argc, char *argv[])
 {
 #ifdef VERSION_WORLD

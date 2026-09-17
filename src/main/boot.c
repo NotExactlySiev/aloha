@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef void (*boot_f)(char*,char*);
+typedef void (*boot_f)(char *, char *);
 
 void reboot(char *conf, char *exec);
 void _boot(char *conf, char *exec);
@@ -18,41 +18,45 @@ typedef struct {
     u32 console_type;
 } BiosHeader;
 
-#define BIOS_HEADER (*(BiosHeader *) 0xBFC00100)
+#define BIOS_HEADER (*(BiosHeader *)0xBFC00100)
 
 // This _boot is not the _boot in libapi. It's _96_boot or something. That's
 // why we haven't included libapi.h
 
-// 80023800
+// US: 80023800
+// JP: 80022440
 __asm__(".section .text\n"
         ".align 2\n"
         ".set noreorder\n"
         ".set noat\n"
         ".global _boot\n"
         "_boot:\n"
-            "addiu      $t2, $zero, 0xA0\n"
-            "jr         $t2\n"
-            "addiu      $t1, $zero, 0xA0\n"
-            "nop\n"
+        "addiu      $t2, $zero, 0xA0\n"
+        "jr         $t2\n"
+        "addiu      $t1, $zero, 0xA0\n"
+        "nop\n"
         ".set reorder\n"
         ".set at\n");
 
-// 80023810
+// US: 80023810
+// JP: 80022450
 void reset(void)
 {
-    u8 *kernelbuf = (u8 *) 0xA000DF00;
+    u8 *kernelbuf = (u8 *)0xA000DF00;
     strcpy(kernelbuf, "PSDEMO");
     reboot("PSEXE", "SYSTEM.CNF");
 }
 
-// 80023850
+// US: 80023850
+// JP: 80022490
 void reset2(void)
 {
     reboot("PSEXE", "SYSTEM.CNF");
 }
 
-// 8002387C
-void reboot(char* exec, char* conf)
+// US: 8002387C
+// JP: 800224BC
+void reboot(char *exec, char *conf)
 {
     char confAddr[20];
     char execAddr[20];
@@ -71,7 +75,7 @@ void reboot(char* exec, char* conf)
     EnterCriticalSection();
 
     if ((BIOS_HEADER.console_type == 0x2000) && (BIOS_HEADER.kernel_date == 0x19940728)) {
-        (*((boot_f) 0xbfc0e228))(confAddr, execAddr);
+        (*((boot_f)0xbfc0e228))(confAddr, execAddr);
     } else {
         _boot(confAddr, execAddr);
     }

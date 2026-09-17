@@ -1,4 +1,5 @@
 #include "common.h"
+#include "libapi.h"
 #include "shared.h"
 #include <kernel.h>
 
@@ -46,7 +47,15 @@ void game_shutdown(void);
 s32 enable_vblank_event(void *);
 void disable_vblank_event(s32);
 void nop(void);
+
+// The Japanese version forgets to enter a critical section before flushing
+// the cache. It doesn't have this function and calls FlushCache() directly.
+#ifdef VERSION_WORLD
 void flush_cache_safe(void);
+#else
+static void flush_cache_safe(void) { return FlushCache(); }
+#endif
+
 void vblank_disable(void);
 s32 vblank_enable(void);
 s32 get_video_mode(void);

@@ -4,12 +4,14 @@
 
 .section .text, "ax"
 
-# 8002373C
+# US: 8002373C
+# JP: 8002237C
 glabel __main
         jr         $ra
         nop
 
-# 80023744
+# US: 80023744
+# JP: 80022384
 glabel _start
         /* clear the bss segment */
         la      $v0, __bss_start
@@ -70,6 +72,8 @@ ram_size:
 
 .section .data
 
+# US:80047440
+# JP:800314BC
 glabel stack_size
         .word   0x00008000
         .word   0x00800000

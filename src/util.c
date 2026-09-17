@@ -6,7 +6,8 @@
 // This file is linked to multiple executables. The addresses here are from main
 // but I should probably add their addresses from the other files too.
 
-// 80022EE8
+// US: 80022EE8
+// JP: 80021B28
 void ram_strcpy(char *src, char *dst)
 {
     while (*src)
@@ -14,7 +15,8 @@ void ram_strcpy(char *src, char *dst)
     *dst = 0;
 }
 
-// 80022F14
+// US: 80022F14
+// JP: 80021B54
 void ram_strcat(char *a, char *b, char *dst)
 {
     char *src = a;
@@ -27,7 +29,8 @@ void ram_strcat(char *a, char *b, char *dst)
 }
 
 // TODO: this is not actually strchr :P it returns a bool
-// 80022F64
+// US: 80022F64
+// JP: 80021BA4
 int ram_strchr(char *str, char c)
 {
     while (*str)
@@ -36,7 +39,8 @@ int ram_strchr(char *str, char c)
     return 0;
 }
 
-// 80022F9C
+// US: 80022F9C
+// JP: 80021BDC
 void ram_strupper(char *src, char *dst)
 {
     char c;
@@ -48,7 +52,8 @@ void ram_strupper(char *src, char *dst)
     *dst = 0;
 }
 
-// 80022FDC
+// US: 80022FDC
+// JP: 80021C1C
 int ram_strlen(char *str)
 {
     int i = 0;
@@ -56,10 +61,12 @@ int ram_strlen(char *str)
     return i;
 }
 
-// 80023004
+// US: 80023004
+// JP: 80021C44
 NOT_IMPL_FN(basename)
 
-// 80023060
+// US: 80023060
+// JP: 80021CA0
 int ram_memcmp(int n, u8 *a, u8 *b)
 {
     for (int i = 0; i < n; i++) {
@@ -69,14 +76,16 @@ int ram_memcmp(int n, u8 *a, u8 *b)
     return 1;
 }
 
-// 800230A0
+// US: 800230A0
+// JP: 80021CE0
 void ram_memcpy(int n, u8 *src, u8 *dst)
 {
     for (int i = 0; i < n; i++)
         dst[i] = src[i];
 }
 
-// 800230C8
+// US: 800230C8
+// JP: 80021D08
 void ram_memset(u8 *dst, int n, u8 c)
 {
     for (int i = 0; i < n; i++)
@@ -84,7 +93,8 @@ void ram_memset(u8 *dst, int n, u8 c)
 }
 
 // Exactly the same as the other one. linking shenanigans?
-// 800230E8
+// US: 800230E8
+// JP: 80021D28
 int ram_strlen2(char *str)
 {
     int i = 0;

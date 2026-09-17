@@ -11,7 +11,8 @@ extern RoutineTask D_80023370[40];
 // why is the freaking array backwards
 // these are all fucked
 
-// 80023144
+// US: 80023144
+// JP: 80021D84
 int tasks_add(TaskFunc fn, short interval)
 {
     for (int i = 0; i < 32; i++) {
@@ -26,7 +27,8 @@ int tasks_add(TaskFunc fn, short interval)
     return -1;
 }
 
-// 80023188
+// US: 80023188
+// JP: 80021DC8
 int tasks_add_reserved(TaskFunc fn, short interval)
 {
     for (int i = 32; i < 40; i++) {
@@ -41,7 +43,8 @@ int tasks_add_reserved(TaskFunc fn, short interval)
     return -1;
 }
 
-// 800231CC
+// US: 800231CC
+// JP: 80021E0C
 void tasks_remove(int handle)
 {
     tasks_set_enabled(0);
@@ -55,7 +58,8 @@ void tasks_remove(int handle)
     tasks_set_enabled(1);
 }
 
-// 80023260
+// US: 80023260
+// JP: 80021EA0
 void tasks_remove_reserved(int handle)
 {
     tasks_set_enabled(0);
@@ -67,7 +71,8 @@ void tasks_remove_reserved(int handle)
     tasks_set_enabled(1);
 }
 
-// 800232C4
+// US: 800232C4
+// JP: 80021F04
 void tasks_set_enabled(int val)
 {
     extern int tasks_enabled;

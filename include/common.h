@@ -27,6 +27,7 @@ enum {
 };
 
 #define SCRTCHPAD(p) ((void *)(0x1F800000 + (p)))
+#define countof(p) (sizeof(p) / sizeof(*p))
 
 int printf(const char *fmt, ...);
 

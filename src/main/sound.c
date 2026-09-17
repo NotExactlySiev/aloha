@@ -1,8 +1,8 @@
-#include "common.h"
-#include "tasks.h"
-#include "spu.h"
-#include "sfx.h"
 #include "sound.h"
+#include "common.h"
+#include "sfx.h"
+#include "spu.h"
+#include "tasks.h"
 
 static void set_volume(short arg0, short arg1);
 int D_80047E20 = 0;
@@ -169,7 +169,7 @@ int snd_fade_out(int step, int target, void *cb)
     step = step > 0x400 ? 0x400 : step;
     target = target < 0 ? 0 : target;
     target = target > 0x400 ? 0x400 : target;
-    fade_out_step = 0x400 / step;  // this isn't step... it's duration!
+    fade_out_step = 0x400 / step; // this isn't step... it's duration!
     fade_out_target = target;
     fade_out_callback = cb;
     fade_out_task = tasks_add_reserved(fade_out_tick, 1);
@@ -202,7 +202,7 @@ int snd_fade_in(int step, int target, void *cb)
     step = step > 0x400 ? 0x400 : step;
     target = target < 0 ? 0 : target;
     target = target > 0x400 ? 0x400 : target;
-    fade_in_step = 0x400 / step;  // this isn't step... it's duration!
+    fade_in_step = 0x400 / step; // this isn't step... it's duration!
     fade_in_target = target;
     fade_in_callback = cb;
     fade_in_task = tasks_add_reserved(fade_in_tick, 1);

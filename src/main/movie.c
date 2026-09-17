@@ -1,10 +1,10 @@
+#include "movie.h"
+#include "cd/cd.h"
 #include "common.h"
 #include <libcd.h>
-#include <libpress.h>
-#include <libgpu.h>
 #include <libetc.h>
-#include "cd/cd.h"
-#include "movie.h"
+#include <libgpu.h>
+#include <libpress.h>
 
 typedef struct {
     // TODO: rename these to something better later
@@ -13,7 +13,7 @@ typedef struct {
     u32 *img_data;
     RECT img_rects[2];
     int curr_rect;
-    RECT rect;  // macroblock rect
+    RECT rect; // macroblock rect
     u32 img_loaded;
 } Decoder;
 
@@ -26,7 +26,8 @@ static int curr_frame;
 static int fading_out;
 static int finished;
 
-// 80021EF4
+// US: 80021EF4
+// JP: 80020D90
 static void init_decoder(Decoder *dec, MovieArgs *args)
 {
     *dec = (Decoder) {
@@ -61,7 +62,7 @@ static void init_decoder(Decoder *dec, MovieArgs *args)
 // JP: 80020E18
 static void seek_and_stream(CdlLOC *loc, u32 mode)
 {
-    while (CdControl(CdlSeekL, (u8*) loc, NULL) == 0);
+    while (CdControl(CdlSeekL, (u8 *)loc, NULL) == 0);
     while (CdRead2(mode | CdlModeStream) == 0);
 }
 
@@ -83,7 +84,8 @@ static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 #endif
 }
 
-// 80022074
+// US: 80022074
+// JP: 80020F08
 static u32 *next_frame(Decoder *dec)
 {
     u32 *addr;
@@ -91,8 +93,10 @@ static u32 *next_frame(Decoder *dec)
     int timeout = 0x800000;
     while (1) {
         timeout -= 1;
-        if (StGetNext(&addr, &hdr) == 0) break;
-        if (timeout == 0) return NULL;
+        if (StGetNext(&addr, &hdr) == 0)
+            break;
+        if (timeout == 0)
+            return NULL;
     }
 
     if (addr[0] != hdr->dummy1 || addr[1] != hdr->dummy2)
@@ -125,7 +129,8 @@ static u32 *next_frame(Decoder *dec)
     return addr;
 }
 
-// 80022260
+// US: 80022260
+// JP: 800210A0
 static void dct_out_callback(void)
 {
     extern u_long StCdIntrFlag;
@@ -147,7 +152,8 @@ static void dct_out_callback(void)
     }
 }
 
-// 8002237C
+// US: 8002237C
+// JP: 800211BC
 static void prepare_frame(Decoder *dec)
 {
     uint *bs = 0;
@@ -157,7 +163,8 @@ static void prepare_frame(Decoder *dec)
     StFreeRing(bs);
 }
 
-// 800223EC
+// US: 800223EC
+// JP: 8002122C
 static void wait_for_decode(Decoder *dec)
 {
     int timeout = 0x800000;
@@ -229,8 +236,7 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
             decoder.img_rects[other].x,
             decoder.img_rects[other].y,
             decoder.img_rects[other].w,
-            decoder.img_rects[other].h
-        );
+            decoder.img_rects[other].h);
 #else
         // TODO: We don't have this macro for now.
         // setDefDrawEnv(
@@ -245,8 +251,7 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
             decoder.img_rects[other].x,
             decoder.img_rects[other].y,
             decoder.img_rects[other].w,
-            decoder.img_rects[other].h
-        );
+            decoder.img_rects[other].h);
 #endif
 
         dispenv.screen = args->rect;

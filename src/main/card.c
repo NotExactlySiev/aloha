@@ -1,55 +1,69 @@
 
+#include "card.h"
+#include "cd/cd.h"
 #include "common.h"
+#include "jumptable.h"
+#include <file.h>
 #include <libapi.h>
 #include <libetc.h>
-#include <sys/file.h>
-#include <file.h>
 #include <libmcrd.h>
-#include "card.h"
-#include "jumptable.h"
+#include <sys/file.h>
 #include <util.h>
-#include "cd/cd.h"
 
 static void do_callback_a(void);
 
-static void (*mc_callback_a)(void) = 0;
-static int event_sw_ioe;
-static int event_sw_err;
-static int event_sw_tim;
-static int event_sw_new;
-static int event_sw_unk;
-static int event_hw_ioe;
-static int event_hw_err;
-static int event_hw_tim;
-static int event_hw_new;
-static int event_hw_unk;
+/* US:80047E18 JP:800443C4 */ static int D_80047E18 = 1; // card not available
+/* US:80047E1C JP:800443C8 */ static void (*mc_callback_a)(void) = 0;
 
-static char D_800521F8[32];
-static int D_80047E18 = 1;  // card not available
+/* US:80047FB4 JP:800447E0 */ static int event_sw_ioe;
+/* US:80047FBC JP:800447E8 */ static int event_sw_err;
+/* US:80047FC4 JP:800447F0 */ static int event_sw_tim;
+/* US:80047FCC JP:800447F8 */ static int event_sw_new;
+/* US:80047FD4 JP:80044800 */ static int event_sw_unk;
+/* US:80047FDC JP:80044808 */ static int event_hw_ioe;
+/* US:80047FE4 JP:80044810 */ static int event_hw_err;
+/* US:80047FEC JP:80044818 */ static int event_hw_tim;
+/* US:80047FF4 JP:80044820 */ static int event_hw_new;
+/* US:80047FFC JP:80044828 */ static int event_hw_unk;
 
-// 8001FC5C
+/* US:800521F8 JP:800443C8 */ static char D_800521F8[32];
+
+// US: 8001FC5C
+// JP: 8001EAC4
 int mc_get_event(void)
 {
-    if (TestEvent(event_sw_ioe) == 1) return EvSpIOE;
-    if (TestEvent(event_sw_err) == 1) return EvSpERROR;
-    if (TestEvent(event_sw_tim) == 1) return EvSpTIMOUT;
-    if (TestEvent(event_sw_new) == 1) return EvSpNEW;
-    if (TestEvent(event_sw_unk) == 1) return EvSpUNKNOWN;
+    if (TestEvent(event_sw_ioe) == 1)
+        return EvSpIOE;
+    if (TestEvent(event_sw_err) == 1)
+        return EvSpERROR;
+    if (TestEvent(event_sw_tim) == 1)
+        return EvSpTIMOUT;
+    if (TestEvent(event_sw_new) == 1)
+        return EvSpNEW;
+    if (TestEvent(event_sw_unk) == 1)
+        return EvSpUNKNOWN;
     return 0;
 }
 
-// 8001FCF4
+// US: 8001FCF4
+// JP: 8001EB5C
 int mc_get_event_hw(void)
 {
-    if (TestEvent(event_hw_ioe) == 1) return EvSpIOE;
-    if (TestEvent(event_hw_err) == 1) return EvSpERROR;
-    if (TestEvent(event_hw_tim) == 1) return EvSpTIMOUT;
-    if (TestEvent(event_hw_new) == 1) return EvSpNEW;
-    if (TestEvent(event_hw_unk) == 1) return EvSpUNKNOWN;
+    if (TestEvent(event_hw_ioe) == 1)
+        return EvSpIOE;
+    if (TestEvent(event_hw_err) == 1)
+        return EvSpERROR;
+    if (TestEvent(event_hw_tim) == 1)
+        return EvSpTIMOUT;
+    if (TestEvent(event_hw_new) == 1)
+        return EvSpNEW;
+    if (TestEvent(event_hw_unk) == 1)
+        return EvSpUNKNOWN;
     return 0;
 }
 
-// 8001FD8C
+// US: 8001FD8C
+// JP: 8001EBF4
 void mc_clear_hw_events(void)
 {
     TestEvent(event_hw_ioe);
@@ -59,9 +73,11 @@ void mc_clear_hw_events(void)
     TestEvent(event_hw_unk);
 }
 
-// 8001FDF4
+// US: 8001FDF4
+// JP: 8001EC5C
 static int select_slot(int slot)
 {
+    slot &= 0x1f;
     const int timeout = 1000;
     int ev;
     // TODO: inline this
@@ -88,7 +104,8 @@ static int select_slot(int slot)
 
     switch (ev) {
     case EvSpIOE:
-        if (D_80047E18 != 1) break;
+        if (D_80047E18 != 1)
+            break;
         [[fallthrough]];
 
     case EvSpNEW:
@@ -138,30 +155,35 @@ static int select_slot(int slot)
     }
 }
 
-// 8001FFC4
+// US: 8001FFC4
+// JP: 8001EE2C
 void mc_set_callback_a(void (*fn)(void))
 {
     mc_callback_a = fn;
 }
 
-// 8001FFD4
+// US: 8001FFD4
+// JP: 8001EE3C
 static void do_callback_a(void)
 {
     if (mc_callback_a)
         mc_callback_a();
 }
 
-// 80020000
+// US: 80020000
+// JP: 8001EE68
 int mc_select_slot(int slot)
 {
     return select_slot(slot);
 }
 
-// 80020020
-static int prefix_address(u32 slot, char* src, char* dst)
+// US: 80020020
+// JP: 8001EE88
+static int prefix_address(u32 slot, char *src, char *dst)
 {
     int rc = mc_select_slot(slot);
-    if (1 != rc) return rc;
+    if (1 != rc)
+        return rc;
 
     dst[0] = 'b';
     dst[1] = 'u';
@@ -171,12 +193,12 @@ static int prefix_address(u32 slot, char* src, char* dst)
     c += c > 9 ? 'W' : '0';
     dst[3] = c;
     dst[4] = ':';
-    ram_strcpy(src, dst+5);
+    ram_strcpy(src, dst + 5);
     return 1;
 }
 
-// this is actually just mc_file_exists
-// 800200C8
+// US: 800200C8
+// JP: 8001EF30
 int mc_file_exists(int slot, char *filename)
 {
     int rc = prefix_address(slot, filename, D_800521F8);
@@ -188,38 +210,44 @@ int mc_file_exists(int slot, char *filename)
     return p == &ent;
 }
 
-// 8002011C
-int mc_create(s32 slot, char* file, u32 size)
+// US: 8002011C
+// JP: 8001EF84
+int mc_create(s32 slot, char *file, u32 size)
 {
     s32 fd;
 
     if (1 != prefix_address(slot, file, D_800521F8))
         return 0;
     size += 0x2000 - 1;
-    if (size < 0) size += 0x2000 - 1 + 0x2000 - 1;
+    if (size < 0)
+        size += 0x2000 - 1 + 0x2000 - 1;
     size >>= 13;
     fd = open(D_800521F8, (size << 16) | O_CREAT);
-    if (fd == -1) return 0;
+    if (fd == -1)
+        return 0;
     close(fd);
     return 1;
 }
 
-// 800201A0
+// US: 800201A0
+// JP: 8001F008
 int mc_open(s32 slot, char *file, u32 mode)
 {
     if (1 != prefix_address(slot, file, D_800521F8))
         return -1;
-    //printf("opening %s\n", D_800521F8);
+    // printf("opening %s\n", D_800521F8);
     return open(D_800521F8, mode);
 }
 
-// 80020208
+// US: 80020208
+// JP: 8001F070
 int mc_close(s32 fd)
 {
     return close(fd);
 }
 
-// 80020228
+// US: 80020228
+// JP: 8001F090
 int mc_delete(u32 slot, char *file)
 {
     if (1 != prefix_address(slot, file, D_800521F8))
@@ -227,13 +255,15 @@ int mc_delete(u32 slot, char *file)
     return erase(D_800521F8);
 }
 
-// 8002026C
+// US: 8002026C
+// JP: 8001F0D4
 int mc_write(int fd, void *buf, int len)
 {
     return write(fd, buf, (len + 127) & ~127);
 }
 
-// 800202A0
+// US: 800202A0
+// JP: 8001F13C
 int mc_write_block(int fd, void *buf, int len)
 {
     int rounded = (len + 127) & ~127;
@@ -242,39 +272,43 @@ int mc_write_block(int fd, void *buf, int len)
 }
 
 // mc_read, read with fine size
-// 800202FC
+// US: 800202FC
+// JP: 8001F198
 NOT_IMPL_FN(func_800202FC)
 
-// 800203AC
+// US: 800203AC
+// JP: 8001F248
 int mc_read_block(int fd, void *buf, long len)
 {
     while (read(fd, buf, (len + 127) & ~127) != 0);
     return len;
 }
 
-// 80020414
+// US: 80020414
+// JP: 8001F2B0
 long mc_seek(int fd, long a, long b)
 {
     return lseek(fd, a, b);
 }
 
 // make the header
-// 80020434
+// US: 80020434
+// JP: 8001F2D0
 int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 *palette, u8 frame0[128], u8 frame1[128], u8 frame2[128])
 {
     // so much of this is redundent lol
     // size in words
     int totalsize = 0x80;
     if (iconflag == 0x11)
-        totalsize = 0x40;   // 2 blocks
+        totalsize = 0x40; // 2 blocks
 
     if (iconflag == 0x12)
-        totalsize = 0x60;   // 3 blocks
+        totalsize = 0x60; // 3 blocks
 
     if (iconflag == 0x13)
-        totalsize = 0x80;   // 4 blocks
+        totalsize = 0x80; // 4 blocks
 
-    u32 *p = (u32 *) header;
+    u32 *p = (u32 *)header;
     for (int i = 0; i < totalsize; i++) {
         p[i] = 0;
     }
@@ -289,23 +323,23 @@ int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 
         header->titleframe.palette[i] = palette[i];
     }
 
-    p = (u32 *) frame0;
-    u32 *dst = (u32 *) header->frames[0];
+    p = (u32 *)frame0;
+    u32 *dst = (u32 *)header->frames[0];
     for (int i = 0; i < 32; i++) {
         dst[i] = p[i];
     }
 
     if (iconflag > 0x11) {
-        p = (u32 *) frame1;
-        dst = (u32 *) header->frames[1];
+        p = (u32 *)frame1;
+        dst = (u32 *)header->frames[1];
         for (int i = 0; i < 32; i++) {
             dst[i] = p[i];
         }
     }
 
     if (iconflag == 0x13) {
-        p = (u32 *) frame2;
-        dst = (u32 *) header->frames[2];
+        p = (u32 *)frame2;
+        dst = (u32 *)header->frames[2];
         for (int i = 0; i < 32; i++) {
             dst[i] = p[i];
         }
@@ -314,7 +348,8 @@ int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 
     return totalsize * sizeof(u32);
 }
 
-// 800205C4
+// US: 800205C4
+// JP: 8001F460
 struct DIRENTRY *mc_firstfile(int slot, char *filename, struct DIRENTRY *out)
 {
     int rc = prefix_address(slot, filename, D_800521F8);
@@ -324,14 +359,17 @@ struct DIRENTRY *mc_firstfile(int slot, char *filename, struct DIRENTRY *out)
     return firstfile2(D_800521F8, out);
 }
 
-// 80020610
+// US: 80020610
+// JP: 8001F4AC
 struct DIRENTRY *mc_nextfile(struct DIRENTRY *dir)
 {
     return nextfile(dir);
 }
 
 extern int D_80047E18;
-// 80020630
+
+// US: 80020630
+// JP: 8001F4CC
 int mc_format(long slot)
 {
     if (mc_select_slot(slot) == -2)
@@ -352,13 +390,16 @@ int mc_format(long slot)
 }
 
 // 2 big almost identical functions
-// 800206E4
+// US: 800206E4
+// JP: 8001F580
 NOT_IMPL_FN(func_800206E4)
 
-// 80020808
+// US: 80020808
+// JP: 8001F6A4
 NOT_IMPL_FN(func_80020808)
 
-// 8002092C
+// US: 8002092C
+// JP: 8001F7C8
 void mc_init(void)
 {
     InitCARD2(1);
@@ -367,15 +408,15 @@ void mc_init(void)
     _card_auto(0);
     mc_callback_a = 0;
     EnterCriticalSection();
-    event_sw_ioe = OpenEvent(SwCARD, EvSpIOE    , EvMdNOINTR, NULL);
-    event_sw_err = OpenEvent(SwCARD, EvSpERROR  , EvMdNOINTR, NULL);
-    event_sw_tim = OpenEvent(SwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
-    event_sw_new = OpenEvent(SwCARD, EvSpNEW    , EvMdNOINTR, NULL);
+    event_sw_ioe = OpenEvent(SwCARD, EvSpIOE, EvMdNOINTR, NULL);
+    event_sw_err = OpenEvent(SwCARD, EvSpERROR, EvMdNOINTR, NULL);
+    event_sw_tim = OpenEvent(SwCARD, EvSpTIMOUT, EvMdNOINTR, NULL);
+    event_sw_new = OpenEvent(SwCARD, EvSpNEW, EvMdNOINTR, NULL);
     event_sw_unk = OpenEvent(SwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
-    event_hw_ioe = OpenEvent(HwCARD, EvSpIOE    , EvMdNOINTR, NULL);
-    event_hw_err = OpenEvent(HwCARD, EvSpERROR  , EvMdNOINTR, NULL);
-    event_hw_tim = OpenEvent(HwCARD, EvSpTIMOUT , EvMdNOINTR, NULL);
-    event_hw_new = OpenEvent(HwCARD, EvSpNEW    , EvMdNOINTR, NULL);
+    event_hw_ioe = OpenEvent(HwCARD, EvSpIOE, EvMdNOINTR, NULL);
+    event_hw_err = OpenEvent(HwCARD, EvSpERROR, EvMdNOINTR, NULL);
+    event_hw_tim = OpenEvent(HwCARD, EvSpTIMOUT, EvMdNOINTR, NULL);
+    event_hw_new = OpenEvent(HwCARD, EvSpNEW, EvMdNOINTR, NULL);
     event_hw_unk = OpenEvent(HwCARD, EvSpUNKNOWN, EvMdNOINTR, NULL);
     EnableEvent(event_sw_ioe);
     EnableEvent(event_sw_err);
@@ -391,14 +432,14 @@ void mc_init(void)
     jt_set(mc_get_event, 0x280);
     jt_set(mc_select_slot, 0x281);
     jt_set(mc_file_exists, 0x282);
-    jt_set(func_80020434, 0x283);   // make header
-    jt_set(func_80020808, 0x284);   // not used
-    jt_set(func_800206E4, 0x285);   // not used
+    jt_set(func_80020434, 0x283); // make header
+    jt_set(func_80020808, 0x284); // not used
+    jt_set(func_800206E4, 0x285); // not used
     jt_set(mc_set_callback_a, 0x286);
     jt_set(mc_create, 0x290);
     jt_set(mc_open, 0x291);
     jt_set(mc_close, 0x292);
-    jt_set(func_800202FC, 0x293);   // mc_read, not used
+    jt_set(func_800202FC, 0x293); // mc_read, not used
     jt_set(mc_write, 0x294);
     jt_set(mc_seek, 0x295);
     jt_set(mc_delete, 0x296);
@@ -409,7 +450,8 @@ void mc_init(void)
     jt_set(mc_write_block, 0x2A1);
 }
 
-// 80020C8C
+// US: 80020C8C
+// JP: 8001FB28
 void mc_deinit(void)
 {
     EnterCriticalSection();

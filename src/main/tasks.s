@@ -3,6 +3,8 @@
 
 .section .text, "ax"
 
+# US: 800232D4
+# JP: 80021F14
 glabel tasks_tick
     addi       $sp, $sp, -12
 
@@ -55,12 +57,17 @@ glabel tasks_tick
     jr        $ra
     addi      $sp, $sp, 12
 
-
+# US:80023370
+# JP:80021FB0
 glabel D_80023370
     .fill 40, 8, 0
 
+# US:800234B0
+# JP:800220F0
 glabel vsync_counter
     .word 0
 
+# US:800234B4
+# JP:800220F4
 glabel tasks_enabled
     .word 0

@@ -1,23 +1,25 @@
-#include "common.h"
+#include "../jumptable.h"
 #include "../main.h"
 #include "../movie.h"
 #include "../spu.h"
-#include "../jumptable.h"
 #include "cd.h"
+#include "common.h"
 
 // general state
 extern int D_80047DD8;
 extern int music_state;
 
-CdlLOC pvd_loc = { 0, 2, 22, 0 };
+/* US:80047DAC JP:80044364 */ CdlLOC pvd_loc = { 0, 2, 22, 0 };
 
-u8 _cd_last_status[8] = {0};
+u8 _cd_last_status[8] = { 0 };
 
 // update_state, gets called with the return value of CdSync(1,0)
 // 80019F4C
-void func_80019F4C(s32 arg0) {
-    static int lock = 0;  // lock
-    if (lock == 1) return;
+void func_80019F4C(s32 arg0)
+{
+    static int lock = 0; // lock
+    if (lock == 1)
+        return;
     lock = 1;
 
     switch (arg0) {
@@ -35,9 +37,9 @@ void func_80019F4C(s32 arg0) {
 }
 
 #ifdef VERSION_WORLD
-#  define LOG(x)
+#define LOG(x)
 #else
-#  define LOG(x) printf(x)
+#define LOG(x) printf(x)
 #endif
 
 // 80019FB8
@@ -53,23 +55,29 @@ void cd_ready_callback(u8 status, u8 *result)
 
 // US: 8001A16C
 // JP: 80019744
-int try_CdControl(u_char com, void *param, u_char *result) {
-    while (CdControl(com, param, result) != 1);
+int try_CdControl(u_char com, void *param, u_char *result)
+{
+    while (CdControl(com, param, result) != 1)
+        ;
     return 1;
 }
 
 // US: 8001A1CC
 // JP: 800197A4
-int try_CdControlB(u_char com, void *param, u_char *result) {
-    while (CdControlB(com, param, result) != 1);
+int try_CdControlB(u_char com, void *param, u_char *result)
+{
+    while (CdControlB(com, param, result) != 1)
+        ;
     return 1;
 }
 
 #ifdef VERSION_WORLD
 
 // US: 8001A22C
-int try_CdGetSector(void *madr, int size) {
-    while (CdGetSector(madr, size) == 0);
+int try_CdGetSector(void *madr, int size)
+{
+    while (CdGetSector(madr, size) == 0)
+        ;
     return 1;
 }
 
@@ -77,7 +85,8 @@ int try_CdGetSector(void *madr, int size) {
 
 // US: 8001A270
 // JP: 80019624
-int try_CdRead(int sectors, void *buf, int mode) {
+int try_CdRead(int sectors, void *buf, int mode)
+{
     int rc;
     while ((rc = CdRead(sectors, buf, mode)) == 0) {
         LOG("CdRead Set Error\n");
@@ -110,7 +119,7 @@ int cd_verify_read(int mode, u8 *result)
 
 // US: 8001A318
 // JP: 8001968C
-int try_CdMix(CdlATV* vol)
+int try_CdMix(CdlATV *vol)
 {
     int rc;
     while ((rc = CdMix(vol)) == 0) {
@@ -121,14 +130,14 @@ int try_CdMix(CdlATV* vol)
 
 // US: 8001A348
 // JP: 800196D4
-s32 cd_get_status(u8* result)
+s32 cd_get_status(u8 *result)
 {
     return CdControl(CdlNop, 0, result);
 }
 
 // US: 8001A370
 // JP: 800196FC
-void cd_read_callback(u8 status, u8 *result) {}
+void cd_read_callback(u8 status, u8 *result) { }
 
 // must have been some debug thing?
 // or get next free? returning 0 always clears it
@@ -185,7 +194,7 @@ int D_80047D78 = 0; // music_repeat
 int D_80047D7C = 0;
 int D_80047D80 = 1; // music_cdda_idx_bcd
 int D_80047D84 = 1; // music_cdda_idx
-SpuVolume D_80047D8C = {0};
+SpuVolume D_80047D8C = { 0 };
 
 extern int bgm_paused;
 CdlLOC D_8005475C[100];
@@ -204,7 +213,7 @@ extern int D_800548EC;
 // JP: 80019804
 void cd_init(void)
 {
-    static int D_80047D74 = 0;  // cd subsystem initialized
+    static int D_80047D74 = 0; // cd subsystem initialized
     if (D_80047D74 == 1)
         return;
 
@@ -282,9 +291,9 @@ void cd_init(void)
     jt_set(music_pause, 0x13A);
     jt_set(music_unpause, 0x13B);
     jt_set(music_really_unpause, 0x13C);
-    jt_set(play_movie, 0x140);      // movie_play
-    jt_set(func_8001BB50, 0x150);   // movie_int_to_pos?
-    jt_set(func_8001CF38, 0x151);   // movie_get_loc?
+    jt_set(play_movie, 0x140); // movie_play
+    jt_set(func_8001BB50, 0x150); // movie_int_to_pos?
+    jt_set(func_8001CF38, 0x151); // movie_get_loc?
 }
 
 // US: 8001A74C
@@ -299,7 +308,8 @@ void func_8001A74C(void)
 static inline void sync_and_check(void)
 {
     CdSync(0, NULL);
-    while (cd_get_status(&cd_last_status) != 1);
+    while (cd_get_status(&cd_last_status) != 1)
+        ;
 }
 
 // 8001A77C
@@ -314,14 +324,14 @@ void func_8001A77C(void)
 
     do {
         while (cd_last_status & CdlStatShellOpen) {
-            //CdSync(0, NULL);
-            //CdControl(0U, NULL, &cd_last_status);
-            sync_and_check();   // this is exactly the same as above
+            // CdSync(0, NULL);
+            // CdControl(0U, NULL, &cd_last_status);
+            sync_and_check(); // this is exactly the same as above
             sync_and_check();
         }
         sync_and_check();
-        CdControl(CdlSetloc, (u_char*) &pvd_loc, NULL);
-        try_CdRead(1, (u_long*) buf, CdlModeSpeed);
+        CdControl(CdlSetloc, (u_char *)&pvd_loc, NULL);
+        try_CdRead(1, (u_long *)buf, CdlModeSpeed);
     } while (cd_verify_read(0, NULL) == -1);
     pvd_is_cached = 0;
     sector_cache_clear();

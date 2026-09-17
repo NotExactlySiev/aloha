@@ -1,17 +1,18 @@
 #include "card.h"
 #include "decode.h"
+#include "jumptable.h"
 #include "main.h"
 #include "music.h"
 #include "sfx.h"
 #include "sound.h"
 #include <libapi.h>
 #include <sys/file.h>
-#include "jumptable.h"
 #include <util.h>
 
-static void (*mc_callback_b)(void) = 0;
+/* US:80047E58 JP:80044404 */ static void (*mc_callback_b)(void) = 0;
 
-// 80021808
+// US: 80021808
+// JP: 800206A4
 void execute_compressed(void *addr, u32 stack)
 {
     EXEC header;
@@ -22,13 +23,15 @@ void execute_compressed(void *addr, u32 stack)
     Exec(&header, 1, 0);
 }
 
-// 800218A0
+// US: 800218A0
+// JP: 8002073C
 void mc_set_callback_b(void (*fn)(void))
 {
     mc_callback_b = fn;
 }
 
-// 800218B0
+// US: 800218B0
+// JP: 8002074C
 static void do_callback_b(void)
 {
     if (mc_callback_b != 0) {
@@ -36,7 +39,8 @@ static void do_callback_b(void)
     }
 }
 
-// 800218DC
+// US: 800218DC
+// JP: 80020778
 int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
 {
     // printf("read bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
@@ -60,7 +64,8 @@ int mc_file_read(int slot, char *filename, void *dst, int offset, int len)
     return len & -(uint)(rc == EvSpIOE);
 }
 
-// 800219DC
+// US: 800219DC
+// JP: 80020878
 int mc_file_write(int slot, char *filename, void *src, int offset, int len, char *title)
 {
     // printf("write bu%d:/%s: %d bytes at %d\n", slot, filename, len, offset);
@@ -112,7 +117,8 @@ extern struct {
     u16 palette[16];
 } D_80032E5C;
 
-// 80021BCC
+// US: 80021BCC
+// JP: 80020A68
 int mc_file_create(int slot, char *filename, int len, char *title)
 {
     int rc = mc_select_slot(slot);
@@ -143,7 +149,8 @@ int mc_file_create(int slot, char *filename, int len, char *title)
 
 // TODO: this might return void
 // never called?
-// 80021D08
+// US: 80021D08
+// JP: 80020BA4
 int mc_file_delete(int slot, char *filename)
 {
     int rc = mc_select_slot(slot);
@@ -152,7 +159,8 @@ int mc_file_delete(int slot, char *filename)
     return rc;
 }
 
-// 80021D54
+// US: 80021D54
+// JP: 80020BF0
 void misc_init(void)
 {
     mc_callback_b = 0;

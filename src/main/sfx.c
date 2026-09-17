@@ -1,18 +1,18 @@
-#include "common.h"
-#include <libspu.h>
-#include <libsnd.h>
-#include "main.h"
-#include "tasks.h"
-#include "spu.h"
 #include "sfx.h"
+#include "common.h"
 #include "jumptable.h"
+#include "main.h"
+#include "spu.h"
+#include "tasks.h"
+#include <libsnd.h>
+#include <libspu.h>
 
-#define NCHANNELS   24
+#define NCHANNELS 24
 
-#define MAX_VABS    4
-#define MAX_PROGS   512
-#define MAX_TONES   256
-#define MAX_VAGS    256
+#define MAX_VABS 4
+#define MAX_PROGS 512
+#define MAX_TONES 256
+#define MAX_VAGS 256
 
 typedef struct {
     int unk0;
@@ -34,8 +34,8 @@ struct VabRealHeader {
 typedef struct {
     VabHdr hdr;
     ProgAtr *progs;
-    VagAtr  *tones;
-    u32 p2;     // spu_addr
+    VagAtr *tones;
+    u32 p2; // spu_addr
     u16 *offsets;
     u16 nprogs;
     u16 ntones;
@@ -67,19 +67,21 @@ int D_80047E14 = 1;
 
 u8 D_80047F9C[4];
 
-// 8001E654
-static void sfx_tick(void) {
+// US: 8001E654
+// JP: 8001D4BC
+static void sfx_tick(void)
+{
     SpuGetAllKeysStatus(D_800521E0);
     u32 mask = 0;
     for (int i = 0; i < NCHANNELS; i++) {
         Channel *p = &channels[i];
         if (p->active != 1) {
-            //printf("|    ");
+            // printf("|    ");
             continue;
         }
 
-        //printf("| %02d ", p->time);
-        if ((u16) p->time < 0x7FFFU) {
+        // printf("| %02d ", p->time);
+        if ((u16)p->time < 0x7FFFU) {
             p->time++;
         }
 
@@ -93,13 +95,14 @@ static void sfx_tick(void) {
             p->unk2 = 0;
         }
     }
-    //printf("\n");
+    // printf("\n");
     if (mask)
         sfx_release_voices(mask);
-    //func_8001E2F4();    // is a nop
+    // func_8001E2F4();    // is a nop
 }
 
-// 8001E744
+// US: 8001E744
+// JP: 8001D5AC
 u32 sfx_get_mask(void)
 {
     u32 ret = 0;
@@ -110,13 +113,15 @@ u32 sfx_get_mask(void)
     return ret;
 }
 
-// 8001E790
+// US: 8001E790
+// JP: 8001D5F8
 long call_SpuClearReverbWorkArea(long mode)
 {
     return SpuClearReverbWorkArea(mode);
 }
 
-// 8001E7B0
+// US: 8001E7B0
+// JP: 8001D618
 void sfx_init(void)
 {
     vab_progs_next = &loaded_progs[0];
@@ -138,7 +143,7 @@ void sfx_init(void)
         channels[i].unk0 = 0;
     }
 
-    jt_set(sfx_set_reverb, 0x306);  // deferred (why?)
+    jt_set(sfx_set_reverb, 0x306); // deferred (why?)
     jt_set(sfx_play_simple, 0x310);
     jt_set(sfx_play, 0x311);
     jt_set(sfx_play_modulated, 0x312);
@@ -156,14 +161,16 @@ void sfx_init(void)
     tick_task = tasks_add_reserved(sfx_tick, 1);
 }
 
-// 8001E998
-static s16 load_metadata(VabRealHeader *arg, s16 idx) {
+// US: 8001E998
+// JP: 8001D800
+static s16 load_metadata(VabRealHeader *arg, s16 idx)
+{
     // TODO: refactor this insanity
     u16 vagoff;
     u16 vcount;
 
     u16 nprogs;
-    u16* vag_sizes;
+    u16 *vag_sizes;
     u8 ntones;
     ProgAtr *progattrs;
 
@@ -171,7 +178,8 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
 
     if (idx == -1) {
         for (int i = 0; i < MAX_VABS; i++) {
-            if (loaded_vabs[i].a == 0) break;
+            if (loaded_vabs[i].a == 0)
+                break;
             idx = i;
         }
 
@@ -182,11 +190,15 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     if (idx >= MAX_VABS)
         return -1;
 
-    if (loaded_vabs[idx].a == 1) return -1;
-    if (arg->header.ps + progs_count >= MAX_PROGS) return -1;
-    if (arg->header.ts + tones_count >= MAX_TONES) return -1;
+    if (loaded_vabs[idx].a == 1)
+        return -1;
+    if (arg->header.ps + progs_count >= MAX_PROGS)
+        return -1;
+    if (arg->header.ts + tones_count >= MAX_TONES)
+        return -1;
     progattrs = arg->progattrs;
-    if (arg->header.vs + vags_count >= MAX_VAGS) return -1;
+    if (arg->header.vs + vags_count >= MAX_VAGS)
+        return -1;
 
     loaded_vabs[idx].hdr = arg->header;
 
@@ -194,11 +206,11 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     loaded_vabs[idx].progs = vab_progs_next;
     int tone_off = 0;
     for (int i = 0; i < ui; i++) {
-        if (progattrs[i].tones == 0)    // empty ones don't count
+        if (progattrs[i].tones == 0) // empty ones don't count
             ui += 1;
         *vab_progs_next = progattrs[i];
         vab_progs_next->attr = 2;
-        vab_progs_next->reserved2 = tone_off;    // tone accum index start thing
+        vab_progs_next->reserved2 = tone_off; // tone accum index start thing
         tone_off += vab_progs_next->tones;
         vab_progs_next += 1;
     }
@@ -227,7 +239,7 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     loaded_vabs[idx].nvags = vcount;
     loaded_vabs[idx].offsets = vab_offsets_next;
     vags_count += vcount;
-    vag_sizes = (u16*) arg->toneattrs[arg->header.ps];  // over tone attrs
+    vag_sizes = (u16 *)arg->toneattrs[arg->header.ps]; // over tone attrs
     for (int i = 0; i < vcount; i++) {
         vagoff += vag_sizes[i];
         *vab_offsets_next++ = vagoff;
@@ -236,25 +248,26 @@ static s16 load_metadata(VabRealHeader *arg, s16 idx) {
     loaded_vabs[idx].a = 1;
     loaded_vabs[idx].b = 0;
     loaded_vabs[idx].hdr.fsize -= sizeof(VabRealHeader)
-                                + sizeof(VagAtr[16]) * arg->header.ps
-                                + sizeof(u16[256]);
+        + sizeof(VagAtr[16]) * arg->header.ps
+        + sizeof(u16[256]);
     D_80047F9C[vabs_count++] = idx;
 
     return idx;
 }
 
 // upload_vab
-// 8001EEA4
+// US: 8001EEA4
+// JP: 8001DD0C
 int func_8001EEA4(VabRealHeader *header, void *data, short idx)
 {
     if (data == 0) {
         data = &header->toneattrs[header->header.ps];
-        data += 512;    // past the sizes
+        data += 512; // past the sizes
     }
     VabFile *v = &loaded_vabs[idx];
-    if (v->a == 0)  // not in the array
+    if (v->a == 0) // not in the array
         return -2;
-    if (v->b == 1)  // already uploaded
+    if (v->b == 1) // already uploaded
         return 1;
 
     u32 ptr = SpuMalloc(v->hdr.fsize);
@@ -264,23 +277,27 @@ int func_8001EEA4(VabRealHeader *header, void *data, short idx)
     call_SpuSetTransferStartAddr(ptr);
     call_SpuWrite(data, v->hdr.fsize);
     call_SpuIsTransferCompleted(1);
-    v->b = 1;   // TODO: this field is is_uploaded
+    v->b = 1; // TODO: this field is is_uploaded
     return 0;
 }
 
 // free_vab
-// 8001EFAC
+// US: 8001EFAC
+// JP: 8001DE14
 int func_8001EFAC(s16 idx)
 {
-    if (vabs_count == 0) return -1;
+    if (vabs_count == 0)
+        return -1;
     if (idx == -1)
-        idx = D_80047F9C[vabs_count-1];
-    if (idx != D_80047F9C[vabs_count-1]) return -2; // huh?
+        idx = D_80047F9C[vabs_count - 1];
+    if (idx != D_80047F9C[vabs_count - 1])
+        return -2; // huh?
 
     VabFile *v = &loaded_vabs[idx];
-    if (v->a == 0) return -1;
+    if (v->a == 0)
+        return -1;
     if (v->b == 1) {
-        call_SpuFree((u32) v->p2);
+        call_SpuFree((u32)v->p2);
         vags_count -= v->nvags;
         vab_offsets_next -= v->nvags;
     }
@@ -294,7 +311,8 @@ int func_8001EFAC(s16 idx)
     return idx;
 }
 
-// 8001F17C
+// US: 8001F17C
+// JP: 8001DFE4
 void sfx_set_prog_attr(u32 id, int attr)
 {
     if (attr < 0)
@@ -305,39 +323,47 @@ void sfx_set_prog_attr(u32 id, int attr)
     u32 vab_idx = id >> 0x18;
     u32 prog_idx = (id >> 8) & 0x7F;
 
-    if (vab_idx >= MAX_VABS) return;
+    if (vab_idx >= MAX_VABS)
+        return;
     VabFile *vab = &loaded_vabs[vab_idx];
 
-    if (vab->a == 0) return;
-    if (prog_idx >= vab->nprogs) return;
+    if (vab->a == 0)
+        return;
+    if (prog_idx >= vab->nprogs)
+        return;
 
     vab->progs[prog_idx].attr = attr;
 }
 
 // NOTE: I wouldn't bet my life on the correctness of this function. but it seems
 // to be behaving just like the original as far as I can tell.
-// 8001F200
+// US: 8001F200
+// JP: 8001E068
 static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, int vol, u16 note, u16 cent)
 {
     Channel *temp_s1 = &channels[channel];
 
-    if (prog_idx >= 0x80) return -1;
-    if (tone_idx >= 0x10) return -1;
-    if ((s16) vol > 255) {
+    if (prog_idx >= 0x80)
+        return -1;
+    if (tone_idx >= 0x10)
+        return -1;
+    if ((s16)vol > 255) {
         vol = 255;
     }
-    if ((s16) vol < -255) {
+    if ((s16)vol < -255) {
         vol = -255;
     }
-    if ((u8) temp_s1->active == 1) return -2;
+    if ((u8)temp_s1->active == 1)
+        return -2;
 
     VabFile *vab = &loaded_vabs[vab_idx];
     VagAtr *vag = &vab->tones[tone_idx + vab->progs[prog_idx].reserved2];
 
-    if (vag->vag == 0) return -1;
+    if (vag->vag == 0)
+        return -1;
 
     if (pan == -1) {
-        pan = (u32) vag->pan;
+        pan = (u32)vag->pan;
     }
 
     pan = (pan << 16) >> 16;
@@ -385,7 +411,8 @@ static int play(int channel, u16 vab_idx, u16 prog_idx, u16 tone_idx, int pan, i
     return 0;
 }
 
-// 8001F4F0
+// US: 8001F4F0
+// JP: 8001E358
 void sfx_kill_voices(u32 mask)
 {
     for (int i = 0; i < NCHANNELS; i++) {
@@ -397,7 +424,7 @@ void sfx_kill_voices(u32 mask)
             p->unk6 = 2;
         }
     }
-    set_voice_attr(&(SpuVoiceAttr){
+    set_voice_attr(&(SpuVoiceAttr) {
         .mask = 3,
         .volume.left = 0,
         .volume.right = 0,
@@ -406,7 +433,8 @@ void sfx_kill_voices(u32 mask)
     spu_set_key_on(mask);
 }
 
-// 8001F578
+// US: 8001F578
+// JP: 8001E3E0
 void sfx_release_voices(u32 mask)
 {
     for (int i = 0; i < NCHANNELS; i++) {
@@ -423,36 +451,45 @@ void sfx_release_voices(u32 mask)
 
 short sfx_play_modulated(u32 arg0, s32 arg1, s16 arg2, s16 arg3, u16 arg4, s32 prio);
 
-// 8001F5DC
+// US: 8001F5DC
+// JP: 8001E444
 short sfx_play_simple(int id)
 {
     return sfx_play_modulated(id, 0x3F, 100, 0, 0, -1);
 }
 
 // TODO: Apparently this should return a short?
-// 8001F610
+// US: 8001F610
+// JP: 8001E478
 short sfx_play(int id, short pan, short vol)
 {
     return sfx_play_modulated(id, pan, vol, 0x3C, 0, -1);
 }
 
-//INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_play_modulated);
+// INCLUDE_ASM("asm/main/nonmatchings/274C", sfx_play_modulated);
 // FIXME: this is not entirely correct, even though it works
-// 8001F64C
-short sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio) {
+// US: 8001F64C
+// JP: 8001E4B4
+short sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio)
+{
     u32 vab_idx = id >> 0x18;
     u32 prog_idx = (id >> 8) & 0x7F;
     u32 tone_idx = id & 0xF;
 
-    if (vab_idx >= MAX_VABS) return -1;
+    if (vab_idx >= MAX_VABS)
+        return -1;
     VabFile *vp = &loaded_vabs[vab_idx];
-    if (vp->a == 0) return -1;
-    if (vp->b == 0) return -1;
-    if (prog_idx > vp->nprogs) return -1;
+    if (vp->a == 0)
+        return -1;
+    if (vp->b == 0)
+        return -1;
+    if (prog_idx > vp->nprogs)
+        return -1;
 
     ProgAtr *prog = &vp->progs[prog_idx];
     u8 ntones = prog->tones;
-    if ((tone_idx >= ntones) || (ntones == 0)) return -1;
+    if ((tone_idx >= ntones) || (ntones == 0))
+        return -1;
 
     int channel = -1;
 
@@ -479,7 +516,8 @@ short sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio)
     for (int i = 2; (i >= (prio & 0xFFFF)) && (i != 0); i--) {
         // find the effect that's been playing the longest
         for (int j = 0; j < NCHANNELS; j++) {
-            if (channels[j].unk6 != i) continue;
+            if (channels[j].unk6 != i)
+                continue;
             u16 val = channels[j].time;
             if (max < val) {
                 max = val;
@@ -487,17 +525,18 @@ short sfx_play_modulated(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio)
             }
         }
 
-        if (max_index == -1) continue;
+        if (max_index == -1)
+            continue;
         channel = max_index;
         goto found;
     }
 
     // FIXME: this is uninitialized. where did it come from?
-    //if (!(var_s2 & 0xFFFF)) return -1;
+    // if (!(var_s2 & 0xFFFF)) return -1;
 
     // screw it, look for anything
     for (int i = 0; i < NCHANNELS; i++) {
-        if ((u8) channels[i].unk6 != 0) {
+        if ((u8)channels[i].unk6 != 0) {
             channel = i;
             goto found;
         }
@@ -516,45 +555,54 @@ found:
 }
 
 // TODO: "handle" macros
-// 8001F8D4
+// US: 8001F8D4
+// JP: 8001E73C
 void sfx_kill(u32 handle)
 {
-    if (sfx_is_valid(handle) == -1) return;
+    if (sfx_is_valid(handle) == -1)
+        return;
     sfx_kill_voices(1 << (handle & 0x1F));
 }
 
-// 8001F918
+// US: 8001F918
+// JP: 8001E780
 void sfx_release(u32 handle)
 {
-    if (sfx_is_valid(handle) == -1) return;
+    if (sfx_is_valid(handle) == -1)
+        return;
     sfx_release_voices(1 << (handle & 0x1F));
 }
 
-// 8001F95C
+// US: 8001F95C
+// JP: 8001E7C4
 int sfx_set_pan(u32 handle, u16 pan)
 {
     return sfx_set_both(handle, pan, channels[handle & 0x1F].vol);
 }
 
-// 8001F9A4
+// US: 8001F9A4
+// JP: 8001E80C
 int sfx_set_vol(u32 handle, u16 vol)
 {
     return sfx_set_both(handle, channels[handle & 0x1F].pan, vol);
 }
 
-// 8001F9EC
+// US: 8001F9EC
+// JP: 8001E854
 int sfx_set_both(u32 handle, u16 pan, u16 vol)
 {
     int idx = handle & 0x1F;
-    if (channels[idx].active == 0) return -1;
-    if (channels[idx].epoch != (handle & 0x7FE0)) return -1;
+    if (channels[idx].active == 0)
+        return -1;
+    if (channels[idx].epoch != (handle & 0x7FE0))
+        return -1;
 
     // why are these constants so weird
-    const u16 MIDDLE = 126/2-1;
+    const u16 MIDDLE = 126 / 2 - 1;
 
-    if ((s16) pan < 0)
+    if ((s16)pan < 0)
         pan = 0;
-    if ((s16) pan > 126)
+    if ((s16)pan > 126)
         pan = 126;
 
     s16 vol_ = vol;
@@ -570,7 +618,7 @@ int sfx_set_both(u32 handle, u16 pan, u16 vol)
     u16 right = pan > MIDDLE ? MIDDLE : pan;
     u16 left = pan < MIDDLE ? MIDDLE : (126 - pan);
 
-    set_voice_attr(&(SpuVoiceAttr){
+    set_voice_attr(&(SpuVoiceAttr) {
         .voice = 1 << idx,
         .mask = 3,
         .volume = {
@@ -583,27 +631,33 @@ int sfx_set_both(u32 handle, u16 pan, u16 vol)
 }
 
 // TODO: these types are all messed up
-// 8001FB38
+// US: 8001FB38
+// JP: 8001E9A0
 int sfx_get_pan(uint handle)
 {
     return channels[handle & 0x1F].pan;
 }
 
-// 8001FB58
+// US: 8001FB58
+// JP: 8001E9C0
 int sfx_get_vol(uint handle)
 {
     return channels[handle & 0x1F].vol;
 }
 
-// 8001FB78
+// US: 8001FB78
+// JP: 8001E9E0
 int sfx_is_valid(u32 handle)
 {
-    if (channels[handle & 0x1F].active != 1) return handle;
-    if (channels[handle & 0x1F].epoch == (handle & 0x7FE0)) return handle;
+    if (channels[handle & 0x1F].active != 1)
+        return handle;
+    if (channels[handle & 0x1F].epoch == (handle & 0x7FE0))
+        return handle;
     return -1;
 }
 
-// 8001FBC0
+// US: 8001FBC0
+// JP: 8001EA28
 int sfx_set_reverb(int val)
 {
     int ret = D_80047E10;
@@ -612,7 +666,8 @@ int sfx_set_reverb(int val)
     return ret;
 }
 
-// 8001FBE4
+// US: 8001FBE4
+// JP: 8001EA4C
 void func_8001FBE4(void)
 {
     if (D_80047E14 == 1 && D_80047E10 == 1) {
@@ -621,13 +676,15 @@ void func_8001FBE4(void)
     }
 }
 
-// 8001FC34
+// US: 8001FC34
+// JP: 8001EA9C
 int sfx_is_active(u32 handle)
 {
     return channels[handle & 0x1F].active == 1;
 }
 
-// 80020D5C
+// US: 80020D5C
+// JP: 8001FBF8
 int sfx_load_vab(short index, VabRealHeader *header, void *data)
 {
     index = load_metadata(header, index);
@@ -637,8 +694,8 @@ int sfx_load_vab(short index, VabRealHeader *header, void *data)
     return func_8001EEA4(header, data, index);
 }
 
-// trivial or easy functions related to audio
-// 80020DC4
+// US: 80020DC4
+// JP: 8001FC60
 int sfx_free_vab(s16 idx)
 {
     return func_8001EFAC(idx);
