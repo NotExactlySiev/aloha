@@ -1,14 +1,12 @@
 {
-  description = "Minimal PSX Development Environment";
-
-  # TODO: add my super awesome Nix build of PCSX-Redux
+  description = "Project Aloha Development Environment";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
   outputs =
-    { self, nixpkgs }:
+    { nixpkgs, ... }:
     let
       lib = nixpkgs.lib;
       forAllSystems = lib.genAttrs lib.systems.flakeExposed;
@@ -32,32 +30,25 @@
           };
         in
         {
-          default = pkgs.mkShell rec {
+          default = pkgs.mkShell {
             packages = [
               crossPkgs.buildPackages.gcc-unwrapped
               crossPkgs.buildPackages.binutils-unwrapped
-              (pkgs.callPackage ./wren.nix { })
             ];
 
-            buildInputs = with pkgs; [
-              expat
-              fontconfig
-              freetype
-              freetype.dev
-              libGL
+            # buildInputs = with pkgs; [
+            #   expat
+            #   fontconfig
+            #   freetype
+            # ];
+
+            nativeBuildInputs = with pkgs; [
               pkg-config
-              xorg.libX11
-              xorg.libXcursor
-              xorg.libXi
-              xorg.libXrandr
-              wayland
-              libxkbcommon
-            ];
-            nativeBuildInputs = [
-              pkgs.pkg-config
-            ];
 
-            # LD_LIBRARY_PATH = builtins.foldl' (a: b: "${a}:${b}/lib") "${pkgs.vulkan-loader}/lib" buildInputs;
+              # The user is probably gonna have python installed anyway. Let's
+              # not download it for no reason.
+              # python3
+            ];
           };
         }
       );
