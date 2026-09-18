@@ -149,7 +149,6 @@ static int iso_read_prv(int fast, char *filename, void *buf, int n)
         int fine = n % SECTOR_BYTES;
 
         if (sectors) {
-#ifdef VERSION_WORLD
             try_CdControl(CdlSetloc, &file.pos, NULL);
             try_CdRead(sectors, dst, 0x80);
             if (cd_verify_read(0, NULL) == -1) {
@@ -162,22 +161,20 @@ static int iso_read_prv(int fast, char *filename, void *buf, int n)
             dst += sectors * SECTOR_SIZE;
         }
 
-        printf("now for the fine part, %d bytes\n", fine);
-
         if (fine) {
             u32 tmpbuf[SECTOR_SIZE];
-    #ifdef VERSION_WORLD
+#ifdef VERSION_WORLD
             int file_start = CdPosToInt(&file.pos);
             CdlLOC last_sector;
             CdIntToPos(file_start + sectors, &last_sector);
             try_CdControl(CdlSetloc, &last_sector, NULL);
-    #endif
+#endif
             try_CdRead(1, tmpbuf, 0x80);
             if (cd_verify_read(0, NULL) == -1) {
                 // this time it's gonna work I pwomise ^_^
-    #ifdef VERSION_WORLD
+#ifdef VERSION_WORLD
                 try_CdControl(CdlSetloc, &last_sector, NULL);
-    #endif
+#endif
                 try_CdRead(1, tmpbuf, 0x80);
                 if (cd_verify_read(0, NULL) == -1)
                     return -1;
@@ -208,9 +205,9 @@ s32 iso_exec(char *file, s32 param)
     if (cd_fs_load_exe(file, param, &header) != 0)
         return -1;
 
-    #ifdef VERSION_WORLD
+#ifdef VERSION_WORLD
     flush_cache_safe();
-    #endif
+#endif
 
     set_next_exec(0);
     Exec(&header, 1, 0);

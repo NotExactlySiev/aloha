@@ -213,7 +213,7 @@ void cd_init(void)
         return;
 
     CdInit();
-    CdSetDebug(10);
+    CdSetDebug(0);
 
     D_80047E8C = func_8001A378(D_8005475C);
     D_80047D74 = 1;
