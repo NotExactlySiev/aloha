@@ -53,7 +53,7 @@ void nop(void);
 #ifdef VERSION_WORLD
 void flush_cache_safe(void);
 #else
-static void flush_cache_safe(void) { return FlushCache(); }
+static inline void flush_cache_safe(void) { FlushCache(); }
 #endif
 
 void vblank_disable(void);

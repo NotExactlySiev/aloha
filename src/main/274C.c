@@ -1,4 +1,5 @@
 #include "cd/cd.h"
+#include "libcd.h"
 #include "music.h"
 #include "sfx.h"
 #include "sound.h"
@@ -176,7 +177,7 @@ void cd_fade_stop(void)
 }
 
 // and then these functinos actually use those 4 to do stuff
-u8 D_80047DA0[8] = { 8, 0, 0, 0, 0, 0, 0, 0 };
+u8 D_80047DA0[8] = { 0x80, 0, 0, 0, 0, 0, 0, 0 };
 
 // 8001B94C
 int func_8001B94C(void)
@@ -188,10 +189,10 @@ int func_8001B94C(void)
     ret = 0;
     if (music_state != 3) {
         cd_pause();
-        cd_command(0xE, (u32)&D_80047DA0, 0);
+        cd_command(CdlSetmode, (u32)&D_80047DA0, 0);
         cd_mute();
-        cd_command(0xFC, (u32)&D_80047D8C, 0);
-        cd_command(0xFE, 3, 0);
+        cd_command(SNQ_SET_SCALED, (u32)&D_80047D8C, 0);
+        cd_command(SNQ_SET_FE, 3, 0);
         ret = cd_flush();
     }
     return ret;
@@ -253,7 +254,7 @@ void fade_unpause(void)
 int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
 {
     func_8001D104();
-    func_8001A77C();
+    cd_check_disc_presence();
     cd_flush();
     call_DrawSync(0);
     cd_demute();

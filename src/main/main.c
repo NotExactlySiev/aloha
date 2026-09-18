@@ -310,6 +310,12 @@ static inline void LOAD_PRS(u8 *dst, short w, short h)
 // JP: 800188C8
 void show_logo(void)
 {
+    POLY_FT4 polys[5];
+    TILE tile;
+    s32 tmp;
+    s32 y;
+    u32 h;
+
 #ifndef VERSION_WORLD
     wait_frame();
     call_ResetGraph(0);
@@ -418,9 +424,9 @@ void show_logo(void)
 #else
     // TODO: Japan's logo code.
     sleep_frames(10);
-    wait_frame();
     SetDispMask(1);
     DrawSync(0);
+    sleep_frames(10);
 #endif
 }
 
@@ -431,10 +437,9 @@ void func_8001926C(void)
     DRAWENV drawenv;
     DISPENV dispenv;
     POLY_FT4 polys[5];
-    s32 y, h;
 
-    SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
-    SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
+    call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
+    call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
     drawenv.isbg = 0;
     drawenv.dtd = 1;
     drawenv.dfe = 1;
@@ -447,11 +452,12 @@ void func_8001926C(void)
     }
 #endif
 
-    PutDrawEnv(&drawenv);
-    PutDispEnv(&dispenv);
+    call_PutDrawEnv(&drawenv);
+    call_PutDispEnv(&dispenv);
 
 #ifdef VERSION_WORLD
     if (D_80047D48 != -2) {
+        int y, h;
         if (get_region() == 1) {
             y = 120;
             h = 240;
@@ -465,15 +471,15 @@ void func_8001926C(void)
     } else
 #endif
     {
-        MAKE_QUADS(polys, 64, 4, 192, 128, 96, 0, 0, 128, 96, 64);
-        FADE_OUT(polys, 4);
+        // TODO
+        // MAKE_QUADS(polys, 64, 4, 192, 128, 96, 0, 0, 128, 96, 64);
+        // FADE_OUT(polys, 4);
     }
 
     call_wait_frame();
     call_SetDispMask(0);
     call_SetDefDrawEnv(&drawenv, 0, 0, 0x140, 0xF0);
     call_SetDefDispEnv(&dispenv, 0, 0, 0x140, 0xF0);
-
 #ifdef VERSION_WORLD
     dispenv.pad0 = 0;
     if (get_video_mode() == 1) {
@@ -489,13 +495,13 @@ void func_8001926C(void)
 
     call_DrawSync(0);
     call_wait_frame();
-    call_PutDrawEnv(&drawenv);
-    call_PutDispEnv(&dispenv);
+    PutDrawEnv(&drawenv);
+    PutDispEnv(&dispenv);
 
     call_DrawSync(0);
     call_wait_frame();
-    call_PutDrawEnv(&drawenv);
-    call_PutDispEnv(&dispenv);
+    PutDrawEnv(&drawenv);
+    PutDispEnv(&dispenv);
 }
 
 // US: 80019680

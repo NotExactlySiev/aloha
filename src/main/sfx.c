@@ -9,10 +9,17 @@
 
 #define NCHANNELS 24
 
-#define MAX_VABS 4
-#define MAX_PROGS 512
-#define MAX_TONES 256
-#define MAX_VAGS 256
+#ifdef VERSION_WORLD
+    #define MAX_VABS 4
+    #define MAX_PROGS 512
+    #define MAX_TONES 256
+    #define MAX_VAGS 256
+#else
+    #define MAX_VABS 8
+    #define MAX_PROGS 512
+    #define MAX_TONES 512
+    #define MAX_VAGS 512
+#endif
 
 typedef struct {
     int unk0;

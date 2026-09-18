@@ -36,17 +36,11 @@ void func_80019F4C(s32 arg0)
     lock = 0;
 }
 
-#ifdef VERSION_WORLD
-#define LOG(x)
-#else
-#define LOG(x) printf(x)
-#endif
-
 // 80019FB8
 void cd_ready_callback(u8 status, u8 *result)
 {
     cd_last_status = result[0];
-    if ((cd_last_status & CdlStatSeek == 0) && music_state == 1) {
+    if (!(cd_last_status & CdlStatSeek) && music_state == 1) {
         // more CD-DA stuff that's never ran
         // this breaks the cd queue abstraction by calling queue_add_unsafe
         NOT_IMPL("handling cd callback for CD-DA")
@@ -57,8 +51,7 @@ void cd_ready_callback(u8 status, u8 *result)
 // JP: 80019744
 int try_CdControl(u_char com, void *param, u_char *result)
 {
-    while (CdControl(com, param, result) != 1)
-        ;
+    while (CdControl(com, param, result) != 1);
     return 1;
 }
 
@@ -66,8 +59,7 @@ int try_CdControl(u_char com, void *param, u_char *result)
 // JP: 800197A4
 int try_CdControlB(u_char com, void *param, u_char *result)
 {
-    while (CdControlB(com, param, result) != 1)
-        ;
+    while (CdControlB(com, param, result) != 1);
     return 1;
 }
 
@@ -76,8 +68,7 @@ int try_CdControlB(u_char com, void *param, u_char *result)
 // US: 8001A22C
 int try_CdGetSector(void *madr, int size)
 {
-    while (CdGetSector(madr, size) == 0)
-        ;
+    while (CdGetSector(madr, size) == 0);
     return 1;
 }
 
@@ -89,7 +80,9 @@ int try_CdRead(int sectors, void *buf, int mode)
 {
     int rc;
     while ((rc = CdRead(sectors, buf, mode)) == 0) {
-        LOG("CdRead Set Error\n");
+#ifndef VERSION_WORLD
+        printf("CdRead Set Error\n");
+#endif
     }
     return 1;
 }
@@ -123,7 +116,9 @@ int try_CdMix(CdlATV *vol)
 {
     int rc;
     while ((rc = CdMix(vol)) == 0) {
-        LOG("CdMix Set Error\n");
+#ifndef VERSION_WORLD
+        printf("CdMix Set Error\n");
+#endif
     }
     return 1;
 }
@@ -218,7 +213,7 @@ void cd_init(void)
         return;
 
     CdInit();
-    CdSetDebug(0);
+    CdSetDebug(10);
 
     D_80047E8C = func_8001A378(D_8005475C);
     D_80047D74 = 1;
@@ -308,12 +303,12 @@ void func_8001A74C(void)
 static inline void sync_and_check(void)
 {
     CdSync(0, NULL);
-    while (cd_get_status(&cd_last_status) != 1)
-        ;
+    while (cd_get_status(&cd_last_status) != 1);
 }
 
-// 8001A77C
-void func_8001A77C(void)
+// US: 8001A77C
+// JP: 80019BB8
+void cd_check_disc_presence(void)
 {
     u8 buf[2048];
 
@@ -324,9 +319,9 @@ void func_8001A77C(void)
 
     do {
         while (cd_last_status & CdlStatShellOpen) {
-            // CdSync(0, NULL);
-            // CdControl(0U, NULL, &cd_last_status);
-            sync_and_check(); // this is exactly the same as above
+            CdSync(0, NULL);
+            CdControl(0U, NULL, &cd_last_status);
+            // sync_and_check(); // this is exactly the same as above
             sync_and_check();
         }
         sync_and_check();

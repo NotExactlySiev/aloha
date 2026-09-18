@@ -245,4 +245,10 @@ extern struct {
 } jt;
 #undef UNK
 
+#ifdef VERSION_WORLD
+    #define SOUND_FADE_TIME 12
+#else
+    #define SOUND_FADE_TIME 16
+#endif
+
 #endif

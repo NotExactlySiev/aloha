@@ -17,6 +17,8 @@ int try_CdRead(int sectors, void *buf, int mode);
 #ifdef VERSION_WORLD
 int cd_verify_read(int mode, u8 *result);
 #else
+// This function doesn't exist in the Japanese version and instead the code just
+// calls CdReady. This is... not correct. Oh well.
 static inline int cd_verify_read(int mode, u8 *result)
 {
     return CdReady(mode, result);
@@ -52,3 +54,4 @@ void cd_get_vol(SpuVolume *vol);
 int cd_set_reverb(int arg0);
 void cd_fade_stop(void);
 void cd_stop(void);
+void cd_check_disc_presence(void);

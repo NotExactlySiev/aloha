@@ -1,7 +1,7 @@
+#include "cd.h"
 #include "common.h"
 #include <libcd.h>
 #include <libspu.h>
-#include "cd.h"
 
 // TODO: these don't belong here
 extern SpuVolume vol_full;
@@ -13,22 +13,20 @@ extern s32 D_800548EC;
 extern int D_80047F24;
 
 typedef struct {
-    u8     com;
-    u32    arg0;
-    u32    arg1;
+    u8 com;
+    u32 arg0;
+    u32 arg1;
 } QueueEntry;
 
 static QueueEntry queue[256];
 
 s8 D_80047EC4[8];
-u8 D_80047D94 = SNQ_FINISHED;
+/* US:80047D94 JP:8004434C */ u8 D_80047D94 = SNQ_FINISHED;
 
+/* US:80047E94 JP:800446C0 */ int D_80047E94;
 
-
-s32 D_80047E94;      // this one just gets 0 written to it
-
-s32 D_80047DD8 = 1;  // this is still a mystery. probably enum. gets set in the first function here
-s32 D_80047DE0 = 0;  // step? no idea. maybe a state machine
+s32 D_80047DD8 = 1; // this is still a mystery. probably enum. gets set in the first function here
+s32 D_80047DE0 = 0; // step? no idea. maybe a state machine
 s32 bgm_paused = 0;
 
 int cd_queue_is_empty = 0;
@@ -37,7 +35,7 @@ static u16 queue_head;
 static u16 queue_tail;
 static u16 queue_size;
 static int queue_lock = 0;
-static int try_again = 0;
+/* US: JP:80044360 */ static int try_again = 0;
 static u8 curr_command = SNQ_FINISHED;
 static void *curr_param = NULL;
 static void *curr_result = NULL;
@@ -51,7 +49,7 @@ int fade_out_step = 0;
 int fade_out_dest = 0;
 int fade_in_dest = 1024;
 
-char D_80047DF8[] = "cdrom:\\";     // unused
+char D_80047DF8[] = "cdrom:\\"; // unused
 
 extern SpuVolume D_80047D8C;
 extern s32 fade_out_task;
@@ -68,7 +66,8 @@ extern int D_80047D80; // music_cdda_idx_bcd
 extern int D_80047D84; // music_cdda_idx
 
 // 8001AED8
-void cd_clear_queue(void) {
+void cd_clear_queue(void)
+{
     queue_tail = 0;
     queue_head = 0;
     D_80047E94 = 0;
@@ -86,10 +85,11 @@ static int queue_add(u8 arg0, u32 arg1, u32 arg2)
 
     task = &queue[queue_tail];
 
-    if (queue_lock == 1 || queue_size > 192) return 0;
+    if (queue_lock == 1 || queue_size > 192)
+        return 0;
 
     queue_lock = 1;
-    queue[(queue_tail+1)%256].com = -1;
+    queue[(queue_tail + 1) % 256].com = -1;
     task->com = arg0;
     task->arg0 = arg1;
     task->arg1 = arg2;
@@ -116,9 +116,11 @@ int cd_run_block(void)
 {
     int rc;
 
-    if (cd_queue_is_running == 1) return 0;
+    if (cd_queue_is_running == 1)
+        return 0;
     cd_queue_is_running = 1;
 
+#ifdef VERSION_WORLD
     if (try_again == 1) {
         rc = CdControl(curr_command, curr_param, curr_result);
         if (rc != 1) {
@@ -130,6 +132,7 @@ int cd_run_block(void)
         D_80047DE0 = 1; // just did a try again
         goto flush_cache;
     }
+#endif
 
     if (D_80047DE0 == 1) {
         music_state = 0;
@@ -137,24 +140,50 @@ int cd_run_block(void)
         CdControl(0, NULL, &cd_last_status);
         while (cd_get_status(&cd_last_status) != 1);
         if (cd_last_status & CdlStatShellOpen)
+#ifdef VERSION_WORLD
             goto flush_cache;
+#else
+            goto done;
+#endif
         set_vol_scaled(&D_80047D8C, 0x400);
         rc = D_80047F24;
         D_80047DE0 = 0;
+#ifndef VERSION_WORLD
+        pvd_is_cached = 0;
+        sector_cache_clear();
+#endif
         // TODO: what is this control flow
         if (D_80047F24 == 1) {
             music_play_cdda(D_80047D84, D_80047D78);
-            D_80047F24 = 1;
+            // D_80047F24 = 1;
         } else if (D_80047F24 == 2) {
             func_8001BA50();
-            D_80047F24 = rc;
-        } else goto skip_out;
+            // D_80047F24 = rc;
+        }
+#if VERSION_WORLD
+        else {
+            goto skip_out;
+        }
         D_800548EC = 1;
+#endif
     }
+
+#ifndef VERSION_WORLD
+    if (try_again == 1) {
+        rc = CdControl(curr_command, curr_param, curr_result);
+        if (rc != 1) {
+            try_again = 1;
+        } else {
+            try_again = 0;
+        }
+        goto done;
+    }
+#endif
+
 skip_out:
     rc = CdSync(1, 0);
-    func_80019F4C(rc, 0);
-    if (2 == music_state && func_8001CE18()) {
+    func_80019F4C(rc);
+    if (2 == music_state && (1 == func_8001CE18())) {
         music_state = 0;
         set_vol_scaled(&D_80047D8C, 0x400);
         if (1 == D_80047D78) {
@@ -174,20 +203,59 @@ skip_out:
             D_800548EC = 0;
         }
     }
-    // ... more shit
+
+    if (D_80047DD8 != 1) {
+#if VERSION_WORLD
+        cd_queue_is_running = 0;
+        if (D_80047DD8 == 2) {
+            try_again = 1;
+        }
+        return 0;
+#else
+        int ret = 0;
+        if (D_80047DD8 == 2) {
+            int rc = cd_get_status(&cd_last_status);
+            if (rc == 1 && (cd_last_status & CdlStatShellOpen)) {
+                D_80047DE0 = 1;
+            }
+
+            if (D_80047E94 < 32) {
+                D_80047DD8 = 0;
+                int rc = CdControl(curr_command, curr_param, curr_result);
+                try_again = rc != 1;
+                D_80047E94 += 1;
+                ret = 1;
+            } else {
+                D_80047DE0 = 1;
+                D_80047D78 = 0;
+                cd_queue_is_running = 0;
+                ret = -1;
+            }
+        }
+
+        cd_queue_is_running = 0;
+        return ret;
+#endif
+    }
+
     CdSync(0, 0);
     rc = cd_get_status(&cd_last_status);
     if (rc == 1) {
         if (cd_last_status & CdlStatShellOpen) {
-            try_again = 1;
+            D_80047DE0 = 1;
+#ifdef VERSION_WORLD
             goto flush_cache;
-        }
-        if (cd_last_status & CdlStatSeek)
+#else
             goto done;
+#endif
+        }
+        if (cd_last_status & CdlStatSeek) {
+            goto done;
+        }
     }
 
     // and then the actual queue
-    QueueEntry* t;
+    QueueEntry *t;
     u32 next = 0xDEADBEEF;
 
     while (1) {
@@ -204,7 +272,7 @@ skip_out:
 
         curr_command = t->com;
         D_80047D94 = t->com;
-        if (curr_command == SNQ_SET_FE) {   // done
+        if (curr_command == SNQ_SET_FE) {
             // this has to do with the background track being played
             s32 newval = t->arg0;
             printf("setting FE to %d\n", newval);
@@ -220,7 +288,7 @@ skip_out:
         } else if (curr_command == SNQ_SET_SCALED) {
             set_vol_scaled(t->arg0, vol_scale);
             next = queue_head + 1;
-        } else if (curr_command == SNQ_FADE_OUT) {     // done
+        } else if (curr_command == SNQ_FADE_OUT) {
             fade_out_active = t->arg0;
             fading_out = t->arg0;
             if (fade_out_active == 1) {
@@ -229,17 +297,19 @@ skip_out:
                     tasks_remove_reserved(fade_in_task);
                     fade_in_active = 0;
                     fading_in = 0;
-                    if (fade_in_callback != 0) (*fade_in_callback)();
+                    if (fade_in_callback != 0)
+                        (*fade_in_callback)();
                     fade_in_callback = 0;
                 }
             } else {
                 // turn fadeout off
-                if (-1 < fade_out_task) tasks_remove_reserved(fade_out_task);
+                if (-1 < fade_out_task)
+                    tasks_remove_reserved(fade_out_task);
                 vol_scale = 1024;
                 fade_paused = 0;
             }
             next = queue_head + 1;
-        } else if (curr_command == SNQ_FADE_IN) {      // done
+        } else if (curr_command == SNQ_FADE_IN) {
             fade_in_active = t->arg0;
             fading_in = t->arg0;
             if (fade_in_active == 1) {
@@ -248,17 +318,19 @@ skip_out:
                     tasks_remove_reserved(fade_out_task);
                     fade_out_active = 0;
                     fading_out = 0;
-                    if (fade_out_callback != 0) (*fade_out_callback)();
+                    if (fade_out_callback != 0)
+                        (*fade_out_callback)();
                     fade_out_callback = 0;
                 }
             } else {
                 // turn fadein off
-                if (-1 < fade_in_task) tasks_remove_reserved(fade_in_task);
+                if (-1 < fade_in_task)
+                    tasks_remove_reserved(fade_in_task);
                 vol_scale = 1024;
                 fade_paused = 0;
             }
             next = queue_head + 1;
-        } else if (curr_command == SNQ_SET_REVERB) {   // done
+        } else if (curr_command == SNQ_SET_REVERB) {
             SpuCommonAttr attr;
             attr.mask = 0x100;
             attr.cd.reverb = t->arg0;
@@ -266,16 +338,17 @@ skip_out:
             D_80047EA4 = t->arg0;
             func_8001FBE4();
             next = queue_head + 1;
-        } else if (curr_command == SNQ_FUNC8) {    // done
-            if (fade_out_active == 1 || fade_in_active == 1) goto done;
+        } else if (curr_command == SNQ_FUNC8) {
+            if (fade_out_active == 1 || fade_in_active == 1)
+                goto done;
             next = queue_head + 1;
-        } else if (curr_command == SNQ_FUNC9) {    // done
+        } else if (curr_command == SNQ_FUNC9) {
             func_8001D0AC(t->arg0);
             next = queue_head + 1;
-        } else if (curr_command == SNQ_SET_PAUSED) {   // done
+        } else if (curr_command == SNQ_SET_PAUSED) {
             bgm_paused = t->arg0;
             next = queue_head + 1;
-        } else {   // done
+        } else {
             // normal cd control functions
             D_80047DD8 = 0;
 
@@ -308,9 +381,10 @@ done:
 int cd_flush(void)
 {
     int ret = 0;
-    if (cd_queue_is_empty == 0) do {
-        ret = cd_run_block();
-    } while (cd_queue_is_empty == 0 && ret != -1);
+    if (cd_queue_is_empty == 0)
+        do {
+            ret = cd_run_block();
+        } while (cd_queue_is_empty == 0 && ret != -1);
     CdSync(0, 0);
     return ret;
 }

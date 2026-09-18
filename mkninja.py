@@ -86,10 +86,26 @@ class Executable:
         return f"build/disc_{version}/{self.final_name}"
 
 
+match version:
+    case "us":
+        versionFlag = " -DVERSION_WORLD"
+        mainExeName = "SCUS_941.03"
+
+    case "eu":
+        versionFlag = " -DVERSION_WORLD"
+        mainExeName = "SCES_000.03"
+
+    case "jp":
+        versionFlag = " -DVERSION_JAPAN"
+        mainExeName = "PSX.EXE"
+
+    case _:
+        print(f"Version {version} is unknown.")
+
 # Setup
 executables = [
     Executable(
-        "SCUS_941.03",
+        mainExeName,
         "main",
         False,
         [
@@ -112,17 +128,6 @@ executables = [
     # Executable("SELECT.PEX", "select", True, ["libc"]),
     # Executable("GAMEOVER.PEX", "gameover", True, []),
 ]
-
-versionFlag = ""
-match version:
-    case "us" | "eu":
-        versionFlag = " -DVERSION_WORLD"
-
-    case "jp":
-        versionFlag = " -DVERSION_JAPAN"
-
-    case _:
-        print(f"Version {version} is unknown.")
 
 # Ninja setup
 Ninja.set("version", version)
@@ -153,6 +158,7 @@ Ninja.set(
             "-Wa,--no-pad-sections",
             "-fno-builtin",
             "-fno-pic",
+            "-DPSYQ47_FIXES",
         ]
     ),
 )

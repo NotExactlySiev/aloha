@@ -1,11 +1,11 @@
 #include "movie.h"
 #include "sfx.h"
-#include <movie_args.h>
 #include <libetc.h>
 #include <libspu.h>
+#include <movie_args.h>
 #include <shared.h>
 
-#define INT16_MAX   ((1 << 15) - 1)
+#define INT16_MAX ((1 << 15) - 1)
 
 static int D_800F4E00 = 0; // movie state
 static SpuVolume D_800F4E04 = { INT16_MAX, INT16_MAX }; // movie volume?
@@ -20,24 +20,24 @@ static int func_800E8474(void)
     }
 
     switch (D_800F4E00) {
-        case 1:
-            sfx_play(0x2600);
-            jt.sound_fade_out(7, 0, 0);
-            jt.cd_flush();
-            D_800F4E00 = 2;
-            return 0;
+    case 1:
+        sfx_play(0x2600);
+        jt.sound_fade_out(7, 0, 0);
+        jt.cd_flush();
+        D_800F4E00 = 2;
+        return 0;
 
-        case 2:
-            int ret = jt.snd_status() & 2;
-            if (ret == 0) {
-                D_800F4E00 = 0;
-                return 1;
-            } else {
-                return ret;
-            }
+    case 2:
+        int ret = jt.snd_status() & 2;
+        if (ret == 0) {
+            D_800F4E00 = 0;
+            return 1;
+        } else {
+            return ret;
+        }
 
-        default:
-            return 2;
+    default:
+        return 2;
     }
 }
 
@@ -60,8 +60,10 @@ static void func_800E857C(MovieArgs *as, int frame_count)
     (as->rect).w = 0x100;
     (as->rect).h = 0xd0;
     as->channel = 0;
+#ifdef VERSION_WORLD
     if (jt.get_video_mode() == MODE_PAL)
         as->rect.y += 0x18;
+#endif
 }
 
 // play_movie
@@ -75,14 +77,17 @@ void func_800E8640(char *filename, int frame_count)
     jt.set_global_volume(&D_800F4E04);
     jt.snd_set_volume(0x3000);
     jt.play_movie(filename, &args, func_800E8474);
-    jt.wait_for_vsync();    // argument? TODO
+    jt.wait_for_vsync(); // argument? TODO
     jt.SetDispMask(0);
     jt.snd_reset();
-    jt.ClearImage(&(RECT){
-        .x = 0,
-        .y = 0,
-        .w = 1024,
-        .h = 512,
-    }, 0, 0, 0);
+    jt.ClearImage(
+        &(RECT) {
+            .x = 0,
+            .y = 0,
+            .w = 1024,
+            .h = 512,
+        },
+        0, 0, 0
+    );
     jt.DrawSync(0);
 }

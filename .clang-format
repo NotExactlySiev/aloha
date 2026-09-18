@@ -7,3 +7,4 @@ SeparateDefinitionBlocks: Always
 IndentPPDirectives: BeforeHash
 PPIndentWidth: 4
 AllowShortLoopsOnASingleLine: true
+AlignAfterOpenBracket: BlockIndent
