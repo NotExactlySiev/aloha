@@ -18,7 +18,7 @@ static MusicTrack *get_track_by_id(u8 id)
     while (count--) {
         if (p->id == id)
             return p;
-        p = &p->name[p->size - 22]; // why is the next one there?
+        p = (MusicTrack *)&p->name[p->size - 22]; // why is the next one there?
     }
     return NULL;
 }

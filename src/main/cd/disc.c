@@ -149,27 +149,9 @@ void func_8001A380(void)
     CdReadCallback(cd_read_callback);
 }
 
-// TODO: move these to their appropriate headers
-// int func_8001C734();
-// int music_really_unpause();
-// int func_8001BB50();
-// int func_8001CF38();
-
-int fade_out();
-int fade_in();
-int fade_pause();
-int fade_unpause();
-// int play_movie();
-extern int D_80047E9E;
-
 int D_80047E8C;
 
 CdlLOC D_8005475C[100];
-
-extern int fade_out_active;
-extern int fading_out;
-extern int fade_in_active;
-extern int fading_in;
 
 // US: 8001A3B8
 // JP: 80019804

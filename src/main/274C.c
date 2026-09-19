@@ -1,5 +1,6 @@
 #include "cd/priv.h"
 #include "libcd.h"
+#include "main.h"
 #include "sfx.h"
 #include "spu.h"
 #include "tasks.h"
@@ -46,7 +47,7 @@ extern s32 fade_in_dest;
 /* US:80047F14 JP: */ int (*fade_in_callback)() = 0;
 
 // 8001A978
-void fade_out_routine(void)
+static void fade_out_routine(void)
 {
     if (fade_paused || !fading_out)
         return;
@@ -66,7 +67,7 @@ void fade_out_routine(void)
 }
 
 // 8001AA80
-void fade_in_routine(void)
+static void fade_in_routine(void)
 {
     if (fade_paused || !fading_in)
         return;
@@ -87,7 +88,7 @@ void fade_in_routine(void)
 
 // US: 8001AB88
 // JP: 80019FC4
-s32 fade_out(s32 duration, s32 dstvol, void *callback)
+int fade_out(s32 duration, s32 dstvol, void *callback)
 {
     if (fade_out_active == 1)
         return 0;

@@ -1,5 +1,6 @@
 #include <ints.h>
-#include <kernel.h>
+// #include <kernel.h>
+#include <libapi.h>
 
 // int get_widescreen(void);
 // void set_widescreen(int arg0);

@@ -88,7 +88,7 @@ static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 
 // US: 80022074
 // JP: 80020F08
-static u32 *next_frame(Decoder *dec)
+static u_long *next_frame(Decoder *dec)
 {
     u_long *addr;
     StHEADER *hdr;
@@ -158,7 +158,7 @@ static void dct_out_callback(void)
 // JP: 800211BC
 static void prepare_frame(Decoder *dec)
 {
-    uint *bs = 0;
+    u_long *bs = 0;
     while ((bs = next_frame(dec)) == 0);
     dec->curr_buffer = dec->curr_buffer != 1;
     DecDCTvlc(bs, dec->vlc_buffers[dec->curr_buffer]);
@@ -269,10 +269,10 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
     // cleanup
     CdSync(0, NULL);
     u8 cdparam[8] = { CdlModeSpeed };
-    u8 buffer[SECTOR_BYTES];
     while (CdControlB(CdlSetmode, cdparam, NULL) != 1);
 
 #ifdef VERSION_WORLD
+    u8 buffer[SECTOR_BYTES];
     if (CdReady(1, NULL) == 1) {
         CdGetSector(buffer, 512);
     }

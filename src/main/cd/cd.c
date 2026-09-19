@@ -1,3 +1,6 @@
+#include "../gpu.h"
+#include "../movie.h"
+#include "../tasks.h"
 #include "priv.h"
 
 /* US: 80047EA4 */ int D_80047EA4;
@@ -18,11 +21,9 @@ void cd_get_vol(SpuVolume *out)
 // 8001CD30
 s32 cd_set_reverb(s32 arg0)
 {
-    s32 temp_s0;
-
-    temp_s0 = D_80047EA4;
+    int ret = D_80047EA4;
     cd_command(SNQ_SET_REVERB, arg0, 0);
-    return temp_s0;
+    return ret;
 }
 
 // 8001CD68

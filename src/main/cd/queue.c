@@ -1,13 +1,10 @@
+#include "../sfx.h"
 #include "../tasks.h"
+#include "cd.h"
 #include "common.h"
 #include "priv.h"
 #include <libcd.h>
 #include <libspu.h>
-
-// TODO: these don't belong here
-extern int D_80047EEC; // SpuVolume ptr?
-extern CdlFILTER D_80047ECC;
-extern CdlFILE D_8004D0E0;
 
 typedef struct {
     u8 com;
@@ -15,7 +12,12 @@ typedef struct {
     u32 arg1;
 } QueueEntry;
 
-/* US:80047EC4 JP: */ s8 D_80047EC4[8];
+/* US:80047D78 JP:         */ int D_80047D78 = 0; // music_repeat
+/* US:80047D7C JP:         */ int D_80047D7C = 0;
+/* US:80047D80 JP:         */ int D_80047D80 = 1; // music_cdda_idx_bcd
+/* US:80047D84 JP:         */ int D_80047D84 = 1; // music_cdda_idx
+/* US:80047D88 JP:         */ s32 is_mono = 0;
+/* US:80047D8C JP:         */ SpuVolume D_80047D8C = { 0 };
 /* US:80047D94 JP:8004434C */ u8 D_80047D94 = SNQ_FINISHED;
 /* US:80047DB4 JP:8004436C */ int fade_out_active = 0;
 /* US:80047DB8 JP:80044370 */ int fading_out = 0;
@@ -29,37 +31,32 @@ typedef struct {
 /* US:80047DDC JP:80044394 */ int cd_queue_is_empty = 0;
 /* US:80047DE0 JP:80044398 */ s32 D_80047DE0 = 0; // cd_disc_busy
 /* US:80047DEC JP:800443A4 */ s32 bgm_paused = 0;
-/* US:80047E94 JP:800446C0 */ int D_80047E94;
 /* US:80047EF4 JP:80044720 */ int cd_queue_is_running;
+int music_state;
 
 /* US:80047D93 JP:8004434B */ static u8 curr_command = SNQ_FINISHED;
+/* US:80047DA0 JP:         */ static u8 D_80047DA0[8] = { 0x80, 0, 0, 0, 0, 0, 0, 0 };
 /* US:80047DA8 JP:80044360 */ static int try_again = 0;
+/* US:80047DE4 JP:         */ static int D_80047DE4 = 1;
+/* US:80047DE8 JP:         */ static int D_80047DE8 = 0;
 /* US:80047DF4 JP:800443AC */ static int queue_lock = 0;
-/* US:80047EB4 JP:800446E0 */ static void *curr_param = NULL;
-/* US:80047EBC JP:800446E8 */ static void *curr_result = NULL;
-/* US:80047F2C JP:80044758 */ static u16 queue_tail;
-/* US:80047F34 JP:80044760 */ static u16 queue_head;
-/* US:80047F3C JP:80044768 */ static u16 queue_size;
-
-/* US:8004D0F8 JP:8004CA74 */ static QueueEntry queue[256];
-
 #ifdef VERSION_WORLD
 /* US:80047DF8 */ char D_80047DF8[] = "cdrom:\\"; // unused
 #endif
 
-extern s32 fade_out_task;
-extern s32 fade_in_task;
-extern int (*fade_out_callback)();
-extern int (*fade_in_callback)();
-extern s32 vol_scale;
-extern s32 D_80047EA4;
-
-/* US:80047D78 */ int D_80047D78 = 0; // music_repeat
-/* US:80047D7C */ int D_80047D7C = 0;
-/* US:80047D80 */ int D_80047D80 = 1; // music_cdda_idx_bcd
-/* US:80047D84 */ int D_80047D84 = 1; // music_cdda_idx
-/* US:80047D88 */ s32 is_mono = 0;
-/* US:80047D8C */ SpuVolume D_80047D8C = { 0 };
+/* US:80047E94 JP:800446C0 */ static int D_80047E94;
+/* US:80047EAC JP:         */ static s32 D_80047EAC;
+/* US:80047EB4 JP:800446E0 */ static void *curr_param = NULL;
+/* US:80047EBC JP:800446E8 */ static void *curr_result = NULL;
+/* US:80047EC4 JP:         */ static s8 D_80047EC4[8];
+/* US:80047ECC JP:         */ static CdlFILTER D_80047ECC;
+/* US:80047EEC JP:         */ static int D_80047EEC; // SpuVolume ptr?
+/* US:80047F2C JP:80044758 */ static u16 queue_tail;
+/* US:80047F34 JP:80044760 */ static u16 queue_head;
+/* US:80047F3C JP:80044768 */ static u16 queue_size;
+/* US:8004D0F8 JP:8004CA74 */ static QueueEntry queue[256];
+static CdlLOC cdda_loc;
+static CdlFILE D_8004D0E0;
 
 // US: 8001AED8
 // JP: 8001A20C
@@ -101,13 +98,13 @@ static int queue_add(u8 arg0, u32 arg1, u32 arg2)
 
 // US: 8001B020
 // JP: 8001A354
-void cd_command(u8 arg0, void *arg1, void *arg2)
+void cd_command(u8 arg0, u32 arg1, u32 arg2)
 {
     if (cd_queue_is_running == 0) {
         while (queue_size > 192)
             cd_run_block();
     }
-    queue_add(arg0, (u32)arg1, (u32)arg2);
+    queue_add(arg0, arg1, arg2);
 }
 
 // US: 8001B0A0
@@ -190,12 +187,12 @@ skip_out:
             // THIS RESTARTS THE BACKGROUND MUSIC YOU MORON!
             // a ton of duplicated calls from func_8001BA50
             queue_add(CdlPause, 0, 0);
-            queue_add(CdlSetmode, &D_80047EC4, 0);
-            queue_add(CdlSetfilter, &D_80047ECC, 0);
-            queue_add(CdlSeekL, &D_8004D0E0, 0);
-            queue_add(CdlPause, NULL, 0);
-            queue_add(CdlReadS, &D_8004D0E0, 0);
-            queue_add(SNQ_SET_SCALED, &vol_full, 0);
+            queue_add(CdlSetmode, (u32)&D_80047EC4, 0);
+            queue_add(CdlSetfilter, (u32)&D_80047ECC, 0);
+            queue_add(CdlSeekL, (u32)&D_8004D0E0, 0);
+            queue_add(CdlPause, 0, 0);
+            queue_add(CdlReadS, (u32)&D_8004D0E0, 0);
+            queue_add(SNQ_SET_SCALED, (u32)&vol_full, 0);
             queue_add(SNQ_FUNC9, D_80047EEC, 0);
             queue_add(SNQ_SET_FE, 2, 0);
         } else {
@@ -283,10 +280,10 @@ skip_out:
             music_state = newval;
             next = queue_head + 1;
         } else if (curr_command == SNQ_SET_FULL) {
-            cd_set_vol(t->arg0);
+            cd_set_vol((SpuVolume *)t->arg0);
             next = queue_head + 1;
         } else if (curr_command == SNQ_SET_SCALED) {
-            set_vol_scaled(t->arg0, vol_scale);
+            set_vol_scaled((SpuVolume *)t->arg0, vol_scale);
             next = queue_head + 1;
         } else if (curr_command == SNQ_FADE_OUT) {
             fade_out_active = t->arg0;
@@ -352,8 +349,8 @@ skip_out:
             // normal cd control functions
             D_80047DD8 = 0;
 
-            curr_param = t->arg0;
-            curr_result = t->arg1;
+            curr_param = (void *)t->arg0;
+            curr_result = (void *)t->arg1;
             rc = CdControl(curr_command, curr_param, curr_result);
             if (rc == 1) {
                 try_again = 0;
@@ -387,5 +384,223 @@ int cd_flush(void)
             ret = cd_run_block();
         } while (cd_queue_is_empty == 0 && ret != -1);
     CdSync(0, 0);
+    return ret;
+}
+
+// US: 8001B94C
+// JP: 8001AD28
+int func_8001B94C(void)
+{
+    int ret;
+
+    D_80047F24 = 3;
+    D_800548EC = 0;
+    ret = 0;
+    if (music_state != 3) {
+        cd_pause();
+        cd_command(CdlSetmode, (u32)&D_80047DA0, 0);
+        cd_mute();
+        cd_command(SNQ_SET_SCALED, (u32)&D_80047D8C, 0);
+        cd_command(SNQ_SET_FE, 3, 0);
+        ret = cd_flush();
+    }
+    return ret;
+}
+
+// 8001B9D8
+void func_8001B9D8(void)
+{
+    func_8001D104();
+    if (music_state == 3) {
+        func_8001A380();
+    }
+    cd_pause();
+    cd_command(SNQ_SET_FE, 1, 0);
+    D_80047DE8 = 0;
+    D_80047F24 = 1;
+    D_800548EC = 1;
+    D_80047DE4 = 1;
+}
+
+// US: 8001BA50
+// JP: 8001AE2C
+void func_8001BA50(void)
+{
+    music_really_unpause();
+    cd_command(0xFC, (u32)&D_80047D8C, 0);
+    cd_command(0xFE, 0, 0);
+#ifdef VERSION_WORLD
+    cd_mute();
+#endif
+    cd_pause();
+    cd_command(CdlSetmode, (u32)&D_80047EC4, 0);
+    cd_command(CdlSetfilter, (u32)&D_80047ECC, 0);
+    cd_command(CdlSeekL, (u32)&D_8004D0E0, 0);
+    cd_command(CdlPause, 0, 0);
+#ifdef VERSION_WORLD
+    cd_command(CdlReadS, (u32)&D_8004D0E0, 0);
+#endif
+    cd_demute();
+    cd_command(SNQ_SET_SCALED, (u32)&vol_full, 0);
+#ifndef VERSION_WORLD
+    cd_command(CdlReadS, (u32)&D_8004D0E0, 0);
+#endif
+    cd_command(SNQ_FUNC9, D_80047EEC, 0);
+    cd_command(SNQ_SET_FE, 2, 0);
+    D_80047DE4 = 1;
+}
+
+// 2 functions for converting between frame number and byte offset in videos
+// I have no idea why but these actually use div for dividing by constants
+// and do some other weird stuff that doesn't make any sense
+
+static inline int bcd(int x)
+{
+    return ((x / 10) << 4) + (x % 10);
+}
+
+static inline int unbcd(int x)
+{
+    return (x >> 4) * 10 + (x & 0xF);
+}
+
+// 8001BB50
+void func_8001BB50(int arg0, CdlLOC *loc)
+{
+#ifdef VERSION_WORLD
+    int factor = get_video_mode() == MODE_PAL ? 203 : 200;
+    int factorDiv = 200;
+#else
+    int factor = 100;
+    int factorDiv = 100;
+#endif
+
+    int sector = ((arg0 / 2048) * factor) / factorDiv;
+    int second = sector / 75;
+    loc->sector = bcd(sector % 75);
+    loc->minute = bcd(second / 60);
+    loc->second = bcd(second % 60);
+}
+
+// INCLUDE_ASM("asm/main/nonmatchings/274C", music_play_str);
+// plays background music
+// US: 8001BD00
+// JP: 8001B0A0
+void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat)
+{
+    if (music_state == 3) {
+        func_8001A380();
+    }
+
+    D_80047D78 = repeat == 1;
+    // printf("PLAYING %s\n", filename);
+
+    if (cd_fs_get_file(&D_8004D0E0, filename) == 0) {
+        printf("can't find file :(\n");
+        // FIXME: code here
+        return;
+    }
+
+    // printf("%X:%X:%X:%X\n", f.pos.track, f.pos.minute, f.pos.second, f.pos.sector);
+    printf("%X:%X:%X:%X\n", loc->track, loc->minute, loc->second, loc->sector);
+    D_80047F24 = 0;
+    D_80047ECC.file = file;
+    D_80047ECC.chan = chan;
+
+#ifdef VERSION_WORLD
+    if (get_video_mode() == MODE_PAL) {
+        unbcd(loc->minute) * 60;
+        while (1);
+    } else
+#endif
+    {
+        int seconds = unbcd(loc->minute) * 60 + unbcd(loc->second);
+        D_80047EEC = seconds * 60 + (unbcd(loc->track) * 60) / 100;
+    }
+
+#ifdef VERSION_WORLD
+    D_80047EEC *= get_video_mode() == MODE_PAL ? 203 : 200;
+    D_80047EEC /= 200;
+#endif
+    printf("bgm is %d frames long\n", D_80047EEC);
+    D_80047EC4[0] = arg3; // mode
+    cd_command(0xFB, 0, 0);
+    cd_command(0xFA, 0, 0);
+    func_8001BA50();
+    D_80047F24 = 2;
+    D_800548EC = 1;
+}
+
+// 8001C03C
+NOT_IMPL_FN(music_play_cdda, int idx, int repeat); // CD MUSIC
+
+// 8001C20C
+void music_play_cdda_from_loc(CdlLOC *loc)
+{ // CD MUSIC
+    D_80047D78 = 0;
+    D_80047F24 = 0;
+    cdda_loc.minute = loc->minute;
+    cdda_loc.second = loc->second;
+    cdda_loc.sector = loc->sector;
+    D_80047EAC = CdPosToInt(loc);
+    cd_command(SNQ_SET_SCALED, (u32)&D_80047D8C, 0);
+    cd_command(SNQ_SET_FE, 0, 0);
+    cd_demute();
+    cd_command(CdlSeekP, (u32)loc, 0);
+    cd_command(CdlPlay, 0, 0);
+    cd_command(SNQ_FADE_OUT, 0, 0);
+    cd_command(SNQ_SET_FULL, (u32)&vol_full, 0);
+    func_8001B9D8();
+}
+
+// 8001C2F4
+void cd_pause(void)
+{
+    cd_command(CdlPause, 0, 0);
+}
+
+// 8001C31C
+void cd_play(void)
+{
+    cd_command(CdlPlay, 0, 0);
+    cd_demute();
+}
+
+// 8001C34C
+void cd_mute(void)
+{
+    cd_command(CdlMute, 0, 0);
+}
+
+// 8001C374
+void cd_demute(void)
+{
+    cd_command(CdlDemute, 0, 0);
+}
+
+// 8001C39C
+int cd_set_stereo(s32 arg0)
+{
+    CdlATV vol;
+    s32 ret;
+
+    ret = is_mono;
+    is_mono = arg0;
+
+    cd_flush();
+
+    if (arg0 == 0) {
+        vol.val0 = 0x80;
+        vol.val1 = 0;
+        vol.val2 = 0x80;
+        vol.val3 = 0;
+    } else {
+        vol.val0 = 0x5B;
+        vol.val1 = 0x5B;
+        vol.val2 = 0x5B;
+        vol.val3 = 0x5B;
+    }
+
+    try_CdMix(&vol);
     return ret;
 }

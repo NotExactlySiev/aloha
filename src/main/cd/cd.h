@@ -71,11 +71,12 @@ extern s32 is_mono;
 extern SpuVolume D_80047D8C;
 
 void cd_clear_queue(void); // cd_queue_clear
-void cd_command(u8 arg0, void *arg1, void *arg2); // cd_command
+void cd_command(u8 arg0, u32 arg1, u32 arg2); // cd_enqueue?
 int cd_run_block(void); // cd_queue_run
 int cd_flush(void); // cd_queue_flush
 
 // fs.c
+int cd_fs_get_file(CdlFILE *file, char *filename);
 int iso_file_size();
 int cd_seek_safe();
 int iso_seek(char *file, uint offset);
@@ -86,6 +87,7 @@ int iso_read_fast(char *filename, u8 *buf, int n);
 int cd_fs_exec(char *file, u32 stack);
 
 // music.c
+int cd_set_stereo(s32 arg0);
 void music_play_str(char *filename, u8 file, u8 chan, CdlLOC *loc, int arg3, int repeat);
 int music_play_cdda(int idx, int repeat);
 void music_play_cdda_from_loc(CdlLOC *loc);
@@ -109,10 +111,15 @@ int func_8001CF38();
 
 // Other
 void cd_set_vol(SpuVolume *vol);
-void cd_fade_stop(void);
+
 int func_8001B94C(void);
 u32 cd_status(void);
 void music_stop(void);
+int fade_out(s32 duration, s32 dstvol, void *callback);
+int fade_in(s32 duration, s32 dstvol, void *callback);
+void cd_fade_stop(void);
+void fade_pause(void);
+void fade_unpause(void);
 
 #include "movie_args.h"
 int play_movie(char *filename, MovieArgs *args, int (*cb)(void));

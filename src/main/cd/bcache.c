@@ -47,7 +47,7 @@ int sector_cache_get(CdlLOC *loc, void *data)
 {
     int i;
     u32 oldest_access;
-    cache_entry_t *entry;
+    cache_entry_t *entry = NULL; // Originally uninitialized.
     for (i = 0; i < CACHE_ENTRIES; i++) {
         if (cache_entries[i].last_access
             && ram_memcmp(3, loc, &cache_entries[i].loc)) {

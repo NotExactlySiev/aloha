@@ -29,4 +29,3 @@ typedef struct {
 void music_set_list(MusicList *val);
 int music_play(u8 id);
 void music_set_repeat(int val);
-int func_8001CE18(void);
