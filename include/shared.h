@@ -1,5 +1,4 @@
-#ifndef _JMPTABLE_H
-#define _JMPTABLE_H
+#pragma once
 
 #include "common.h"
 #include "movie_args.h"
@@ -74,6 +73,8 @@ extern struct {
     /*   9 */ int         (*get_widescreen)(void);
     /*   A */ void        (*set_widescreen)(int);
     /*   B */ char*       (*get_mc_file_name)(void);
+#else
+    UNK(7, 11);
 #endif
     UNK(12, 191);
     /*  C0 */ void        (*decompress_rle)(u32,void* src,void* dst);
@@ -102,6 +103,8 @@ extern struct {
     /* 116 */ int         (*iso_seek)();
 #ifdef VERSION_WORLD
     /* 117 */ int         (*iso_never_called)();
+#else
+    UNK(117, 117);
 #endif
     UNK(280, 287);
     /* 120 */ int         (*music_play_cdda)(int idx, int repeat);
@@ -157,7 +160,10 @@ extern struct {
     /* 19B */ u16         (*LoadClut)(u16* data, u32 x, u32 y);
     /* 19C */ u32         (*SetVideoMode)(u32);
     /* 19D */ u32         (*GetVideoMode)(void);
+#else
+    UNK(409, 413);
 #endif
+
     // I had to also export these three functions in addition. Since the game
     // executable was using them from its own linked libgpu which is bad.
     /* 19E */ void        (*SetSemiTrans)(void *p, int abe);
@@ -249,6 +255,4 @@ extern struct {
     #define SOUND_FADE_TIME 12
 #else
     #define SOUND_FADE_TIME 16
-#endif
-
 #endif

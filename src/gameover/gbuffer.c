@@ -1,7 +1,6 @@
-#include "common.h"
-#include <libspu.h>
-#include <libgpu.h>
 #include <libetc.h>
+#include <libgpu.h>
+#include <libspu.h>
 
 #include "shared.h"
 
@@ -10,8 +9,8 @@
 
 #include "gbuffer.h"
 
-static  s32      gbuffer_current_idx;
-static  GBuffer  gbuffers[2];
+static s32 gbuffer_current_idx;
+static GBuffer gbuffers[2];
 
 GBuffer *gbuffer_current;
 
@@ -39,12 +38,17 @@ void gbuffer_init(void)
 
         draw->dtd = 0;
         draw->dfe = 0;
-        int tv_standard = jt.get_video_mode();
         disp->screen.x = 4;
-        disp->screen.y = tv_standard == MODE_PAL ? 36 : 12;
+        disp->screen.y = 12;
         disp->screen.w = 248;
         disp->screen.h = 216;
-        disp->pad0 = tv_standard == MODE_PAL ? 1 : 0;
+
+#ifdef VERSION_WORLD
+        if (jt.get_video_mode() == MODE_PAL) {
+            disp->screen.y = 36;
+            disp->pad0 = tv_standard == MODE_PAL ? 1 : 0;
+        }
+#endif
     }
 }
 
@@ -60,12 +64,10 @@ void gbuffer_swap(void)
 
 void gbuffer_draw(void)
 {
-    jt.snd_queue_exec();
+    jt.cd_run_block();
     jt.DrawSync(0);
     jt.VSync(0);
-    // put env and draw
     jt.PutDispEnv(&gbuffer_current->disp);
     jt.PutDrawEnv(&gbuffer_current->draw);
-    // draw ot
     jt.DrawOTag(gbuffer_current->ot);
 }

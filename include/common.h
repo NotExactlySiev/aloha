@@ -12,6 +12,7 @@
 #include <pad.h>
 #define BUTTONS_ACCEPT (Pad1Start | Pad1sqr | Pad1crc)
 #define BUTTONS_CANCEL (Pad1x)
+#define BUTTONS_NAVIGATE (Pad1Up | Pad1Down | Pad1Left | Pad1Right)
 
 #include <libapi.h>
 typedef struct EXEC EXEC;

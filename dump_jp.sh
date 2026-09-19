@@ -1,10 +1,11 @@
 dumpsxiso -x build/disc_jp -s jp.xml original/jp.bin
 
-mkdir assets
-mkdir assets/main
-mkdir assets/gameover
+mkdir -p assets/main
+mkdir -p assets/gameover
 
-# dd if=build/disc/SCUS_941.03 of=assets/main/fontdata.bin bs=1 skip=107028 count=4152
-# dd if=build/disc/SCUS_941.03 of=assets/main/asciifont.bin bs=1 skip=111180 count=1024
-# dd if=build/disc/SCUS_941.03 of=assets/main/mcicon.bin bs=1 skip=112220 count=416
-# dd if=build/disc/SCUS_941.03 of=assets/main/logo.prs.bin bs=1 skip=112636 count=4936
+dd if=./execs/gameover_jp.exe of=assets/gameover/sprtdata.bin bs=1 skip=2048 count=2804
+dd if=./execs/gameover_jp.exe of=assets/gameover/sprttiles.bin bs=1 skip=4852 count=40704
+dd if=./execs/gameover_jp.exe of=assets/gameover/clut0.bin bs=1 skip=45556 count=512
+dd if=./execs/gameover_jp.exe of=assets/gameover/clut1.bin bs=1 skip=46068 count=512
+dd if=./execs/gameover_jp.exe of=assets/gameover/clut2.bin bs=1 skip=46580 count=512
+dd if=./execs/gameover_jp.exe of=assets/gameover/bunny.bin bs=1 skip=47092 count=2312

@@ -11,6 +11,7 @@ static u32 face_prev = 0;
 static u32 nav_prev = 0;
 static s32 das_state = -1;
 
+#ifdef VERSION_WORLD
 // set up DAS times based on framerate
 void input_das_setup(void)
 {
@@ -24,24 +25,19 @@ void input_das_setup(void)
     face_wait = initial_delay;
     nav_wait = initial_delay;
 }
+#endif
 
-u32 input_das_read(void)
+u32 input_das_read(int id)
 {
-    u32 raw;
-    u32 face_raw;
-    u32 nav_raw;
-
-    u32 face;
-    u32 nav;
-
-    raw = jt.PadRead();
-    face_raw = raw & 0xF000;
-    nav_raw  = raw & 0x08E0;
-    face = 0;
-    nav = 0;
+    u32 raw = jt.PadRead(id);
+    u32 face_raw = raw & 0xF000;
+    u32 nav_raw = raw & 0x08E0;
+    u32 face = 0;
+    u32 nav = 0;
 
     // state -1, no button is pressed
-    if ((face_raw | nav_raw) == 0) das_state = -1;
+    if ((face_raw | nav_raw) == 0)
+        das_state = -1;
 
     // positive edge, trigger input and start initial delay timer
     if (das_state == -1) {

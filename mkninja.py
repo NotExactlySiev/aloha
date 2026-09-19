@@ -125,8 +125,9 @@ executables = [
     #     "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
     # ),
     # Executable("JM1/MAIN.PEX", "jm1", True, ["libgte", "libetc", "libc", "libapi"]),
+    # TODO: Should be SELECT.EXE and not compressed for Japan.
     # Executable("SELECT.PEX", "select", True, ["libc"]),
-    # Executable("GAMEOVER.PEX", "gameover", True, []),
+    Executable("GAMEOVER.PEX", "gameover", True, [], ["start.o"]),
 ]
 
 # Ninja setup

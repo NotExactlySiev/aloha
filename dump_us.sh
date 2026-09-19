@@ -1,8 +1,7 @@
 dumpsxiso -x build/disc_us -s us.xml original/us.bin
 
-mkdir assets
-mkdir assets/main
-mkdir assets/gameover
+mkdir -p assets/main
+mkdir -p assets/gameover
 
 dd if=build/disc_us/SCUS_941.03 of=assets/main/fontdata.bin bs=1 skip=107028 count=4152
 dd if=build/disc_us/SCUS_941.03 of=assets/main/asciifont.bin bs=1 skip=111180 count=1024
