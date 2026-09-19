@@ -1,23 +1,21 @@
-#include "common.h"
+#include "sprite.h"
+#include "gameover.h"
+#include "gbuffer.h"
 #include "shared.h"
 #include <libgpu.h>
 
-#include "gameover.h"
-#include "gbuffer.h"
-
-#include "sprite.h"
-
 // I think this exact module is also used in SELECT?
 
-// tiles
-extern u32 D_800E0000[]; // sprite metadata (pos and uv)
-extern u32 D_800E0AEC[]; // big texture of tiles 256x256
-// cluts
-extern u16 D_800EA96C[256];
-extern u16 D_800EAB6C[256];
-extern u16 D_800EAD6C[256];
-// TODO: struct this:
-extern u16 D_800EAF6C[1156];
+#define ASSET(x) _binary_assets_gameover_##x##_bin_start
+
+/* US:800E0000 JP:800E0000 */ extern u32 ASSET(sprtdata)[];
+/* US:800E0AEC JP:800E0AF4 */ extern u32 ASSET(sprttiles)[];
+/* US:800EA96C JP:800EA9F4 */ extern u16 ASSET(clut0)[256];
+/* US:800EAB6C JP:800EABF4 */ extern u16 ASSET(clut1)[256];
+/* US:800EAD6C JP:800EADF4 */ extern u16 ASSET(clut2)[256];
+/* US:800EAF6C JP:800EAFF4 */ extern u16 ASSET(bunny)[];
+
+// TODO: Struct the bunny texture format.
 
 Sprite *sprt_data[64];
 s32 D_800ED42C = 0; // max sprite index (sprite count)
@@ -26,13 +24,13 @@ SpriteSet D_8012DF64; // sprite cluts and tpage
 
 void sprite_init(void)
 {
-    sprite_load_data(D_800E0000); // load sprites
+    sprite_load_data(ASSET(sprtdata));
     // TODO: this should be a struct. but why? context? palette?
     D_8012DF64.tpage = getTPage(1, 0, 256, 0);
     D_8012DF64.cluts[0] = getClut(0, 240);
     D_8012DF64.cluts[1] = getClut(0, 241);
     D_8012DF64.cluts[2] = getClut(0, 242);
-    sprite_load_tiles(D_800E0AEC, 256, 0); // load tiles into vram
+    sprite_load_tiles(ASSET(sprttiles), 256, 0);
 }
 
 // load sprite heads
@@ -112,15 +110,15 @@ void sprite_load_tiles(u32 *raw, int x, int y)
     rect.h = 1;
 
     rect.y = 240;
-    jt.LoadImage(&rect, D_800EA96C);
+    jt.LoadImage(&rect, ASSET(clut0));
     jt.DrawSync(0);
 
     rect.y = 241;
-    jt.LoadImage(&rect, D_800EAB6C);
+    jt.LoadImage(&rect, ASSET(clut1));
     jt.DrawSync(0);
 
     rect.y = 242;
-    jt.LoadImage(&rect, D_800EAD6C);
+    jt.LoadImage(&rect, ASSET(clut2));
     jt.DrawSync(0);
 
     // load the bunny image
@@ -128,6 +126,6 @@ void sprite_load_tiles(u32 *raw, int x, int y)
     rect.y = 256;
     rect.w = 24;
     rect.h = 48;
-    jt.LoadImage(&rect, D_800EAF6C + 4);
+    jt.LoadImage(&rect, ASSET(bunny) + 4);
     jt.DrawSync(0);
 }

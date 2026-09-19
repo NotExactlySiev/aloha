@@ -25,7 +25,7 @@ class SourceFile:
 
 
 class Executable:
-    def __init__(self, final_name, name, is_comped, libs, common_objects=[]):
+    def __init__(self, final_name, name, is_comped, libs=[], objs=[], assets=[]):
         self.name = name
         self.final_name = final_name
         self.is_comped = is_comped
@@ -33,10 +33,12 @@ class Executable:
         self.header = []
         self.libs = libs
         self.data = []
-        self.common_objects = common_objects + ["header.o"]
+        self.common_objects = objs + ["header.o"]
+        self.assets = assets
 
         self.scan_dir(f"src/{self.name}")
         self.scan_dir(f"asm/{self.name}/data")
+        # TODO: Automatically scan the asset dir too.
 
     def add_file(self, name, path):
         if path.endswith(".c") or path.endswith(".s"):
@@ -64,6 +66,10 @@ class Executable:
             all_deps.append(self.build_dir + f.obj_name)
         for lib in self.libs:
             all_deps.append(f"psyq/libs/{lib}.a")
+        for asset in self.assets:
+            obj_path = self.build_dir + asset + ".elf"
+            Ninja.build("embed", obj_path, [asset], [])
+            all_deps.append(obj_path)
 
         elf_path = f"build/{self.name}.elf"
         symbols_file = f"linker/symbols.{self.name}.ld"
@@ -90,17 +96,22 @@ match version:
     case "us":
         versionFlag = " -DVERSION_WORLD"
         mainExeName = "SCUS_941.03"
+        selectIsCompressed = True
 
     case "eu":
         versionFlag = " -DVERSION_WORLD"
         mainExeName = "SCES_000.03"
+        selectIsCompressed = True
 
     case "jp":
         versionFlag = " -DVERSION_JAPAN"
         mainExeName = "PSX.EXE"
+        selectIsCompressed = False
 
     case _:
         print(f"Version {version} is unknown.")
+
+selectExeName = "SELECT." + "PEX" if selectIsCompressed else "EXE"
 
 # Setup
 executables = [
@@ -108,7 +119,7 @@ executables = [
         mainExeName,
         "main",
         False,
-        [
+        libs=[
             "libpress",
             "libcd",
             "libds",
@@ -119,15 +130,28 @@ executables = [
             "libc",
             "libapi",
         ],
-        ["util.o"],
+        objs=["util.o"],
     ),
     # Executable(
     #     "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
     # ),
     # Executable("JM1/MAIN.PEX", "jm1", True, ["libgte", "libetc", "libc", "libapi"]),
     # TODO: Should be SELECT.EXE and not compressed for Japan.
-    # Executable("SELECT.PEX", "select", True, ["libc"]),
-    Executable("GAMEOVER.PEX", "gameover", True, [], ["start.o"]),
+    # Executable(selectExeName, "select", selectIsCompressed, ["libc"]),
+    Executable(
+        "GAMEOVER.PEX",
+        "gameover",
+        True,
+        objs=["start.o"],
+        assets=[
+            "assets/gameover/sprtdata.bin",
+            "assets/gameover/sprttiles.bin",
+            "assets/gameover/clut0.bin",
+            "assets/gameover/clut1.bin",
+            "assets/gameover/clut2.bin",
+            "assets/gameover/bunny.bin",
+        ],
+    ),
 ]
 
 # Ninja setup
@@ -179,11 +203,14 @@ Ninja.rule("copy", "cp $in $out")
 Ninja.rule("decomp", "$knife decomp $in $out")
 Ninja.rule("comp", "$knife pex compress $in $out")
 Ninja.param("description", "Compressing $out")
+Ninja.rule("embed", "${cross}objcopy -I binary -O elf32-littlemips $in $out")
+Ninja.param("description", "Turning binary file $in into embeddable elf")
 Ninja.rule("mkiso", "$makeiso -y $in -o $out")
 Ninja.param("description", "Generating Disc Image")
 Ninja.rule("REGENERATE", "python $in $version")
 Ninja.param("description", "Updating build.ninja")
 Ninja.param("generator", "1")
+
 
 # Build tools
 Ninja.build("phony", "tools", ["$knife"])
