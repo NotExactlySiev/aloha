@@ -1,16 +1,18 @@
 #include "movie.h"
 #include "cd/cd.h"
 #include "common.h"
+#include "gpu.h"
+#include "main.h"
+#include "mdec.h"
 #include <libcd.h>
 #include <libetc.h>
 #include <libgpu.h>
-#include <libpress.h>
 
 typedef struct {
     // TODO: rename these to something better later
     void *vlc_buffers[2];
     int curr_buffer;
-    u32 *img_data;
+    u_long *img_data;
     RECT img_rects[2];
     int curr_rect;
     RECT rect; // macroblock rect
@@ -70,7 +72,7 @@ static void seek_and_stream(CdlLOC *loc, u32 mode)
 // JP: 80020E6C
 static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 {
-    func_8001E608(0);
+    mdec_init(0);
     finished = 0;
     DecDCToutCallback(cb);
     StSetRing(args->ring_addr, args->ring_size);
@@ -88,12 +90,12 @@ static void start_stream(CdlLOC *loc, MovieArgs *args, void (*cb)(void))
 // JP: 80020F08
 static u32 *next_frame(Decoder *dec)
 {
-    u32 *addr;
+    u_long *addr;
     StHEADER *hdr;
     int timeout = 0x800000;
     while (1) {
         timeout -= 1;
-        if (StGetNext(&addr, &hdr) == 0)
+        if (StGetNext(&addr, (u_long **)&hdr) == 0)
             break;
         if (timeout == 0)
             return NULL;
@@ -222,7 +224,7 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
         printf("");
 
         int other = decoder.curr_rect != 1;
-        call_VSync();
+        call_VSync(0);
         call_SetDefDispEnv(&dispenv, decoder.img_rects[other].x, decoder.img_rects[other].y, decoder.img_rects[other].w, decoder.img_rects[other].h);
 
 #ifdef VERSION_WORLD
@@ -236,7 +238,8 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
             decoder.img_rects[other].x,
             decoder.img_rects[other].y,
             decoder.img_rects[other].w,
-            decoder.img_rects[other].h);
+            decoder.img_rects[other].h
+        );
 #else
         // TODO: We don't have this macro for now.
         // setDefDrawEnv(
@@ -251,7 +254,8 @@ int play_movie_str(char *filename, MovieArgs *args, int (*cb)(void))
             decoder.img_rects[other].x,
             decoder.img_rects[other].y,
             decoder.img_rects[other].w,
-            decoder.img_rects[other].h);
+            decoder.img_rects[other].h
+        );
 #endif
 
         dispenv.screen = args->rect;

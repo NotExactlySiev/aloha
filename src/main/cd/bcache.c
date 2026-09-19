@@ -1,6 +1,4 @@
 #include "cd.h"
-#include "common.h"
-#include <libcd.h>
 #include <memory.h>
 #include <util.h>
 
@@ -45,7 +43,7 @@ void sector_cache_clear(void)
 
 // US: 8001D440
 // JP: 8001C5B8
-int sector_cache_get(CdlLOC *loc, u8 *data)
+int sector_cache_get(CdlLOC *loc, void *data)
 {
     int i;
     u32 oldest_access;
@@ -69,25 +67,10 @@ int sector_cache_get(CdlLOC *loc, u8 *data)
     } while (cd_verify_read(0, 0) == -1);
 #else
 
-    int rc;
-    try_CdControl(2, &loc->minute, 0);
+    try_CdControl(CdlSetloc, loc, 0);
 
-    // Try once.
-    try_CdRead(1, (u_long *)data, 0x80);
-    rc = CdReady(0, NULL);
-    if (rc != -1)
-        goto read_done;
-
-    // Try twice.
-    try_CdRead(1, (u_long *)data, 0x80);
-    rc = CdReady(0, NULL);
-    if (rc != -1)
-        goto read_done;
-
-    // Give up.
-    return 0;
-
-read_done:
+    if (try_reading_twice(1, data, loc) == -1)
+        return 0;
 #endif
 
     try_CdControl(9, 0, 0); // pause

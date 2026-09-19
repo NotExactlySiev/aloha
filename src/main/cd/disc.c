@@ -2,16 +2,15 @@
 #include "../main.h"
 #include "../movie.h"
 #include "../spu.h"
-#include "cd.h"
 #include "common.h"
+#include "priv.h"
 
 // general state
 extern int D_80047DD8;
 extern int music_state;
 
-/* US:80047DAC JP:80044364 */ CdlLOC pvd_loc = { 0, 2, 22, 0 };
-
-u8 _cd_last_status[8] = { 0 };
+/* US:80047EDC JP:80044708 */ u8 _cd_last_status[8] = { 0 };
+/* US:80047EE4 JP:80044710 */ int pvd_is_cached;
 
 // update_state, gets called with the return value of CdSync(1,0)
 // 80019F4C
@@ -36,7 +35,8 @@ void func_80019F4C(s32 arg0)
     lock = 0;
 }
 
-// 80019FB8
+// US: 80019FB8
+// JP: 80019470
 void cd_ready_callback(u8 status, u8 *result)
 {
     cd_last_status = result[0];
@@ -87,8 +87,6 @@ int try_CdRead(int sectors, void *buf, int mode)
     return 1;
 }
 
-extern s32 pvd_is_cached;
-
 #ifdef VERSION_WORLD
 // US: 8001A2C8
 int cd_verify_read(int mode, u8 *result)
@@ -125,7 +123,7 @@ int try_CdMix(CdlATV *vol)
 
 // US: 8001A348
 // JP: 800196D4
-s32 cd_get_status(u8 *result)
+int cd_get_status(u8 *result)
 {
     return CdControl(CdlNop, 0, result);
 }
@@ -152,57 +150,26 @@ void func_8001A380(void)
 }
 
 // TODO: move these to their appropriate headers
-int cd_status();
-int func_8001C734();
-int iso_never_called();
-int music_play_cdda(int idx, int repeat);
-int music_play_cdda_from_loc();
-int cd_play();
-int cd_demute();
-int cd_fade_wait();
-int music_play_str();
+// int func_8001C734();
+// int music_really_unpause();
+// int func_8001BB50();
+// int func_8001CF38();
 
-int music_stop();
-int music_pause();
-int music_unpause();
-int music_really_unpause();
-int func_8001BB50();
-int cd_status();
-int func_8001CF38();
-int cd_read_full();
-int iso_read();
-int iso_file_size();
-int iso_exec();
-int cd_seek_safe();
-int iso_read_fast();
-int iso_seek();
 int fade_out();
 int fade_in();
 int fade_pause();
 int fade_unpause();
-int play_movie();
-extern int D_80047EA4;
+// int play_movie();
 extern int D_80047E9E;
 
 int D_80047E8C;
-int D_80047D78 = 0; // music_repeat
-int D_80047D7C = 0;
-int D_80047D80 = 1; // music_cdda_idx_bcd
-int D_80047D84 = 1; // music_cdda_idx
-SpuVolume D_80047D8C = { 0 };
 
-extern int bgm_paused;
 CdlLOC D_8005475C[100];
-extern int cd_queue_is_running;
-extern SpuVolume vol_full;
-extern u32 cache_epoch;
-extern int fade_paused;
+
 extern int fade_out_active;
 extern int fading_out;
 extern int fade_in_active;
 extern int fading_in;
-extern int D_80047F24;
-extern int D_800548EC;
 
 // US: 8001A3B8
 // JP: 80019804
@@ -232,7 +199,7 @@ void cd_init(void)
     cd_queue_is_running = 0;
     bgm_paused = 0;
     sector_cache_clear();
-    func_8001DD7C();
+    spu_init();
 
     SpuCommonAttr attr = {
         .mask = 0x3C0,
@@ -254,10 +221,11 @@ void cd_init(void)
     jt_set(cd_run_block, 0x102);
     jt_set(cd_flush, 0x103);
     jt_set(func_8001C734, 0x104);
+
     jt_set(cd_read_full, 0x110);
     jt_set(iso_read, 0x111);
     jt_set(iso_file_size, 0x112);
-    jt_set(iso_exec, 0x113);
+    jt_set(cd_fs_exec, 0x113);
     jt_set(cd_seek_safe, 0x114);
     jt_set(iso_read_fast, 0x115);
     jt_set(iso_seek, 0x116);
@@ -293,7 +261,7 @@ void cd_init(void)
 
 // US: 8001A74C
 // JP: 80019B88
-void func_8001A74C(void)
+void cd_deinit(void)
 {
     CdReadyCallback(0);
     CdReadCallback(0);

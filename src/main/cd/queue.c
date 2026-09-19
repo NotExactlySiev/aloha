@@ -1,16 +1,13 @@
-#include "cd.h"
+#include "../tasks.h"
 #include "common.h"
+#include "priv.h"
 #include <libcd.h>
 #include <libspu.h>
 
 // TODO: these don't belong here
-extern SpuVolume vol_full;
 extern int D_80047EEC; // SpuVolume ptr?
 extern CdlFILTER D_80047ECC;
 extern CdlFILE D_8004D0E0;
-extern int pvd_is_cached;
-extern s32 D_800548EC;
-extern int D_80047F24;
 
 typedef struct {
     u8 com;
@@ -18,54 +15,54 @@ typedef struct {
     u32 arg1;
 } QueueEntry;
 
-static QueueEntry queue[256];
-
-s8 D_80047EC4[8];
+/* US:80047EC4 JP: */ s8 D_80047EC4[8];
 /* US:80047D94 JP:8004434C */ u8 D_80047D94 = SNQ_FINISHED;
-
+/* US:80047DB4 JP:8004436C */ int fade_out_active = 0;
+/* US:80047DB8 JP:80044370 */ int fading_out = 0;
+/* US:80047DBC JP:80044374 */ int fade_in_active = 0;
+/* US:80047DC0 JP:80044378 */ int fading_in = 0;
+/* US:80047DC4 JP:8004437C */ int fade_in_step = 0;
+/* US:80047DC8 JP:80044380 */ int fade_out_step = 0;
+/* US:80047DCC JP:80044384 */ int fade_out_dest = 0;
+/* US:80047DD0 JP:80044388 */ int fade_in_dest = 1024;
+/* US:80047DD8 JP:80044390 */ s32 D_80047DD8 = 1; // this is still a mystery. probably enum. gets set in the first function here
+/* US:80047DDC JP:80044394 */ int cd_queue_is_empty = 0;
+/* US:80047DE0 JP:80044398 */ s32 D_80047DE0 = 0; // cd_disc_busy
+/* US:80047DEC JP:800443A4 */ s32 bgm_paused = 0;
 /* US:80047E94 JP:800446C0 */ int D_80047E94;
+/* US:80047EF4 JP:80044720 */ int cd_queue_is_running;
 
-s32 D_80047DD8 = 1; // this is still a mystery. probably enum. gets set in the first function here
-s32 D_80047DE0 = 0; // step? no idea. maybe a state machine
-s32 bgm_paused = 0;
+/* US:80047D93 JP:8004434B */ static u8 curr_command = SNQ_FINISHED;
+/* US:80047DA8 JP:80044360 */ static int try_again = 0;
+/* US:80047DF4 JP:800443AC */ static int queue_lock = 0;
+/* US:80047EB4 JP:800446E0 */ static void *curr_param = NULL;
+/* US:80047EBC JP:800446E8 */ static void *curr_result = NULL;
+/* US:80047F2C JP:80044758 */ static u16 queue_tail;
+/* US:80047F34 JP:80044760 */ static u16 queue_head;
+/* US:80047F3C JP:80044768 */ static u16 queue_size;
 
-int cd_queue_is_empty = 0;
-int cd_queue_is_running;
-static u16 queue_head;
-static u16 queue_tail;
-static u16 queue_size;
-static int queue_lock = 0;
-/* US: JP:80044360 */ static int try_again = 0;
-static u8 curr_command = SNQ_FINISHED;
-static void *curr_param = NULL;
-static void *curr_result = NULL;
+/* US:8004D0F8 JP:8004CA74 */ static QueueEntry queue[256];
 
-int fade_out_active = 0;
-int fading_out = 0;
-int fade_in_active = 0;
-int fading_in = 0;
-int fade_in_step = 0;
-int fade_out_step = 0;
-int fade_out_dest = 0;
-int fade_in_dest = 1024;
+#ifdef VERSION_WORLD
+/* US:80047DF8 */ char D_80047DF8[] = "cdrom:\\"; // unused
+#endif
 
-char D_80047DF8[] = "cdrom:\\"; // unused
-
-extern SpuVolume D_80047D8C;
 extern s32 fade_out_task;
 extern s32 fade_in_task;
 extern int (*fade_out_callback)();
 extern int (*fade_in_callback)();
-extern int music_state;
 extern s32 vol_scale;
 extern s32 D_80047EA4;
-extern s32 fade_paused;
 
-extern int D_80047D78; // music_repeat
-extern int D_80047D80; // music_cdda_idx_bcd
-extern int D_80047D84; // music_cdda_idx
+/* US:80047D78 */ int D_80047D78 = 0; // music_repeat
+/* US:80047D7C */ int D_80047D7C = 0;
+/* US:80047D80 */ int D_80047D80 = 1; // music_cdda_idx_bcd
+/* US:80047D84 */ int D_80047D84 = 1; // music_cdda_idx
+/* US:80047D88 */ s32 is_mono = 0;
+/* US:80047D8C */ SpuVolume D_80047D8C = { 0 };
 
-// 8001AED8
+// US: 8001AED8
+// JP: 8001A20C
 void cd_clear_queue(void)
 {
     queue_tail = 0;
@@ -78,7 +75,8 @@ void cd_clear_queue(void)
     queue_size = 0;
 }
 
-// 8001AF28
+// US: 8001AF28
+// JP: 8001A25C
 static int queue_add(u8 arg0, u32 arg1, u32 arg2)
 {
     QueueEntry *task;
@@ -101,17 +99,19 @@ static int queue_add(u8 arg0, u32 arg1, u32 arg2)
     return 1;
 }
 
-// 8001B020
-void cd_command(u8 arg0, u32 arg1, u32 arg2)
+// US: 8001B020
+// JP: 8001A354
+void cd_command(u8 arg0, void *arg1, void *arg2)
 {
     if (cd_queue_is_running == 0) {
         while (queue_size > 192)
             cd_run_block();
     }
-    queue_add(arg0, arg1, arg2);
+    queue_add(arg0, (u32)arg1, (u32)arg2);
 }
 
-// 8001B0A0
+// US: 8001B0A0
+// JP: 8001A3D4
 int cd_run_block(void)
 {
     int rc;
@@ -377,7 +377,8 @@ done:
     return 0;
 }
 
-// 8001B8DC
+// US: 8001B8DC
+// JP: 8001ACB8
 int cd_flush(void)
 {
     int ret = 0;

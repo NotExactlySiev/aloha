@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ints.h>
 #include <libcd.h>
 
@@ -24,11 +26,7 @@ typedef struct {
     MusicTrack tracks[];
 } MusicList;
 
-extern int music_state;
-
-// private?
-extern s32 bgm_paused;
-
 void music_set_list(MusicList *val);
 int music_play(u8 id);
 void music_set_repeat(int val);
+int func_8001CE18(void);

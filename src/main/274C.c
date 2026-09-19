@@ -1,34 +1,16 @@
-#include "cd/cd.h"
+#include "cd/priv.h"
 #include "libcd.h"
-#include "music.h"
 #include "sfx.h"
-#include "sound.h"
 #include "spu.h"
 #include "tasks.h"
 #include <libetc.h>
 
-s32 is_mono = 0;
-CdlFILE D_80048068;
-
-// regular task vars, they're in the assembly
-extern s32 D_80047D78;
-extern SpuVolume D_80047D8C;
-s32 D_80047EA4;
-s32 D_80047F24 = 0;
+/* US:80047F24 */ s32 D_80047F24 = 0;
+/* US:80048068 */ CdlFILE D_80048068;
 
 SpuVolume vol_full;
 
-void cd_demute(void);
-
 #define VOL_FULL 1024
-
-#define CLAMP(a, b, x) \
-    {                  \
-        if (x < a)     \
-            x = a;     \
-        if (x > b)     \
-            x = b;     \
-    }
 
 // 8001A8A0
 void set_vol_scaled(SpuVolume *vol, s32 scale)
@@ -50,21 +32,18 @@ void cd_set_vol(SpuVolume *vol)
 }
 
 int D_800548EC;
-extern int fade_out_active;
-extern int fading_out;
-extern int fade_in_active;
-extern int fading_in;
+
 extern s32 fade_in_step;
 extern s32 fade_out_step;
 extern s32 fade_out_dest;
 extern s32 fade_in_dest;
 
-s32 vol_scale = VOL_FULL;
-int fade_paused = 0;
-s32 fade_out_task = 0;
-s32 fade_in_task = 0;
-int (*fade_out_callback)() = 0;
-int (*fade_in_callback)() = 0;
+/* US: JP: */ s32 vol_scale = VOL_FULL;
+/* US:80047ED4 JP: */ int fade_paused = 0;
+/* US:80047EFC JP: */ s32 fade_out_task = 0;
+/* US:80047F04 JP: */ s32 fade_in_task = 0;
+/* US:80047F0C JP: */ int (*fade_out_callback)() = 0;
+/* US:80047F14 JP: */ int (*fade_in_callback)() = 0;
 
 // 8001A978
 void fade_out_routine(void)
@@ -174,170 +153,4 @@ void cd_fade_stop(void)
     cd_command(0xFB, 0, 0);
     cd_flush();
     fade_paused = 0;
-}
-
-// and then these functinos actually use those 4 to do stuff
-u8 D_80047DA0[8] = { 0x80, 0, 0, 0, 0, 0, 0, 0 };
-
-// 8001B94C
-int func_8001B94C(void)
-{
-    int ret;
-
-    D_80047F24 = 3;
-    D_800548EC = 0;
-    ret = 0;
-    if (music_state != 3) {
-        cd_pause();
-        cd_command(CdlSetmode, (u32)&D_80047DA0, 0);
-        cd_mute();
-        cd_command(SNQ_SET_SCALED, (u32)&D_80047D8C, 0);
-        cd_command(SNQ_SET_FE, 3, 0);
-        ret = cd_flush();
-    }
-    return ret;
-}
-
-extern s32 cd_queue_is_empty;
-extern u8 D_80047D94;
-extern s32 D_80047DE0;
-
-// TODO: make an enum for these flags
-// cd_flags
-// 8001D13C
-u32 cd_status(void)
-{
-    u32 ret = 0;
-    if (D_80047DE0 == 1)
-        ret |= 0x80000000;
-    ret |= (music_state & 0x7F) << 24;
-    ret |= D_80047D94 << 16;
-    if (fade_out_active == 1 || fade_in_active == 1)
-        ret |= 0x8000;
-    if (fading_out == 1 || fading_in == 1)
-        ret |= 0x4000;
-    if (cd_queue_is_empty == 1)
-        ret |= 0x2000;
-    if (D_800548EC == 1)
-        ret |= 0x1000;
-    if (func_8001CE18() == 1)
-        ret |= 0x0800;
-    ret |= cd_last_status;
-    return ret;
-}
-
-// 8001D248
-void music_stop(void)
-{
-    D_800548EC = 0;
-    cd_command(0xFE, 0, 0);
-    cd_pause();
-    cd_flush();
-}
-
-// 8001D288
-void fade_pause(void)
-{
-    fade_paused = 1;
-}
-
-// 8001D29C
-void fade_unpause(void)
-{
-    fade_paused = 0;
-}
-
-#include "movie.h"
-
-// FIXME: the world 1 intro movie doesn't play correctly
-// 8001D2AC
-int play_movie(char *filename, MovieArgs *args, int (*cb)(void))
-{
-    func_8001D104();
-    cd_check_disc_presence();
-    cd_flush();
-    call_DrawSync(0);
-    cd_demute();
-    cd_command(CdlPause, 0, 0);
-    cd_command(0xFE, 4, 0);
-    cd_flush();
-    int rc = play_movie_str(filename, args, cb);
-    cd_set_stereo(is_mono);
-    SpuVolume vol;
-    cd_get_vol(&vol);
-    cd_set_vol(&vol);
-    cd_command(0xF9, D_80047EA4, 0);
-    cd_command(0xFE, 0, 0);
-    cd_flush();
-    func_8001A380();
-    return rc;
-}
-
-#include <libpress.h>
-
-// 8001E608
-void func_8001E608(int mode)
-{
-    static int D_80047E0C = 0; // is mdec initialized?
-    if (mode == 0) {
-        if (D_80047E0C == 0) {
-            D_80047E0C = 1;
-        } else {
-            mode = 0;
-        }
-    }
-    DecDCTReset(mode);
-}
-
-int D_80047E4C = 0; // music should repeat?
-MusicList *D_80047E50 = NULL; // bgm_list_ptr
-
-// 80020FC0
-void music_set_list(MusicList *val)
-{
-    D_80047E50 = val;
-}
-
-// static
-// 80020FD0
-MusicTrack *get_track_by_id(u8 id)
-{
-    u16 count = D_80047E50->count;
-    MusicTrack *p = &D_80047E50->tracks[0];
-    while (count--) {
-        if (p->id == id)
-            return p;
-        p = &p->name[p->size - 22]; // why is the next one there?
-    }
-    return NULL;
-}
-
-// 80021028
-int music_play(u8 id)
-{
-    if (D_80047E50 == NULL)
-        return 0;
-
-    MusicTrack *t = get_track_by_id(id);
-    if (t == NULL)
-        return 0;
-
-    switch (t->type) {
-    case MUSIC_TYPE_CDDA:
-        music_play_cdda(t->file, D_80047E4C);
-        return 1;
-
-    case MUSIC_TYPE_STR:
-        music_play_str(t->name, t->file, t->chan, &t->loc, t->loc.track, D_80047E4C);
-        return 1;
-
-    default:
-        return 0;
-    }
-}
-
-// 800210D4
-void music_set_repeat(int val)
-{
-    D_80047E4C = val;
 }

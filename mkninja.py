@@ -21,7 +21,7 @@ class SourceFile:
 
     @property
     def obj_name(self):
-        return f"{self.name}.o"
+        return f"{self.path.removeprefix('src/')}.o"
 
 
 class Executable:
@@ -79,7 +79,7 @@ class Executable:
 
     @property
     def build_dir(self):
-        return f"build/{self.name}/"
+        return "build/"
 
     @property
     def final_path(self):

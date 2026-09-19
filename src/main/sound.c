@@ -1,5 +1,5 @@
 #include "sound.h"
-#include "common.h"
+#include "cd/cd.h"
 #include "sfx.h"
 #include "spu.h"
 #include "tasks.h"

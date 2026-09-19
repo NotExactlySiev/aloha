@@ -1,5 +1,7 @@
-#include "common.h"
-#include <libspu.h>
+#pragma once
+
+#include <ints.h>
+// #include <libspu.h>
 
 void snd_reset(void);
 int snd_set_stereo(int mono);

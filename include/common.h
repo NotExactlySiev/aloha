@@ -6,6 +6,7 @@
 #include <ints.h>
 #include <sys/types.h>
 
+#undef NULL
 #define NULL ((void *)0)
 
 #include <pad.h>
@@ -31,16 +32,14 @@ enum {
 
 int printf(const char *fmt, ...);
 
-#define NOT_IMPL_FN(fn)                                      \
-    int fn()                                                 \
+#define NOT_IMPL_FN(fn, ...)                                 \
+    int fn(__VA_ARGS__)                                      \
     {                                                        \
         printf("called non-implemented function " #fn "\n"); \
-        while (1)                                            \
-            ;                                                \
+        while (1);                                           \
     }
 #define NOT_IMPL(s)                                                          \
     printf(__FILE__ ":%d %s: not implemented: " s "\n", __LINE__, __func__); \
-    while (1)                                                                \
-        ;
+    while (1);
 
 #endif

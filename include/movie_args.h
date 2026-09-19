@@ -18,7 +18,7 @@ typedef struct {
     int frame_count;
     int ring_size;
     u32 *buffers[2];
-    u32 *data_addr;
-    StHEADER *ring_addr;
+    u_long *data_addr;
+    u_long *ring_addr;
     int channel;
 } MovieArgs;

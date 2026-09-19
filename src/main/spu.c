@@ -12,7 +12,7 @@
 
 // US: 8001DD7C
 // JP: 8001CCA0
-void func_8001DD7C(void)
+void spu_init(void)
 {
     /* US:80047E04 JP:800443B4 */ static int D_80047E04 = 0;
     if (D_80047E04 == 1)
@@ -45,7 +45,7 @@ void func_8001DD7C(void)
 // spu_deinit
 // US: 8001DE98
 // JP: 8001CDBC
-void func_8001DE98(void)
+void spu_deinit(void)
 {
     call_SpuSetCommonAttr(&(SpuCommonAttr) {
         .mask = 3,

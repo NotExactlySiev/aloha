@@ -10,6 +10,16 @@
 #include <sys/file.h>
 #include <util.h>
 
+// Old versions of the card syscalls that aren't available in the newer Psy-Q
+// headers. But we still link to them.
+void InitCARD2(long val);
+long StartCARD2(void);
+long StopCARD2(void);
+DIRENTRY *firstfile2(char *, DIRENTRY *);
+
+// And this one from card_write.c
+void card_write(int port);
+
 static void do_callback_a(void);
 
 /* US:80047E18 JP:800443C4 */ static int D_80047E18 = 1; // card not available
@@ -350,18 +360,18 @@ int func_80020434(McFileHeader *header, u8 iconflag, int size, char *title, u16 
 
 // US: 800205C4
 // JP: 8001F460
-struct DIRENTRY *mc_firstfile(int slot, char *filename, struct DIRENTRY *out)
+DIRENTRY *mc_firstfile(int slot, char *filename, DIRENTRY *out)
 {
     int rc = prefix_address(slot, filename, D_800521F8);
     if (rc != 1)
-        return -1;
+        return (DIRENTRY *)-1;
 
     return firstfile2(D_800521F8, out);
 }
 
 // US: 80020610
 // JP: 8001F4AC
-struct DIRENTRY *mc_nextfile(struct DIRENTRY *dir)
+DIRENTRY *mc_nextfile(DIRENTRY *dir)
 {
     return nextfile(dir);
 }
@@ -386,7 +396,7 @@ int mc_format(long slot)
     D_800521F8[4] = ':';
     D_800521F8[5] = 0;
     D_80047E18 = 1;
-    return _card_format(D_800521F8);
+    return format(D_800521F8);
 }
 
 // 2 big almost identical functions

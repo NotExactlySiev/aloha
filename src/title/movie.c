@@ -49,7 +49,7 @@ static void func_800E857C(MovieArgs *as, int frame_count)
     as->buffers[0] = 0x80060000;
     as->buffers[1] = 0x80088000;
     as->data_addr = 0x800b0000;
-    as->ring_addr = 0x800b6000;
+    as->ring_addr = (u_long *)0x800b6000;
     as->mode = 0xc0;
     as->x1 = 0;
     as->y1 = 0;

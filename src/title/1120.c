@@ -1,11 +1,11 @@
 #include "common.h"
 #include "libspu.h"
-#include "pad.h"
-#include "shared.h"
-#include <libetc.h>
-#include "sky.h"
 #include "movie.h"
+#include "pad.h"
 #include "sfx.h"
+#include "shared.h"
+#include "sky.h"
+#include <libetc.h>
 
 GlobalData *glob;
 
@@ -14,7 +14,7 @@ const u32 D_800EBA3C[] = {
     Pad1Up, Pad1Up, Pad1Down, Pad1Down,
     Pad1x, Pad1x, Pad1Left, Pad1Right,
     Pad1Left, Pad1Right, Pad1x, Pad1tri,
-    Pad1x, Pad1tri, 0, 0x08200000, // What is this final number doing here?
+    Pad1x, Pad1tri, 0, 0x08200000 // What is this final number doing here?
 };
 
 // enable debug mode. cheat mode should be on.
@@ -38,7 +38,7 @@ const char *D_800EB8F0[6][3] = {
 // load level vab
 void func_800E0920(void)
 {
-    u32 *buffer = (u32 *) 0x80060000;
+    u32 *buffer = (u32 *)0x80060000;
     jt.iso_read(D_800EB8F0[glob->world][glob->stage], buffer, 0);
     while (buffer[0] != 0x56414270) {
         jt.iso_read(D_800EB8F0[glob->world][glob->stage], buffer, 0);
@@ -60,14 +60,14 @@ typedef struct {
     char unk[12];
     u16 arr[30][64];
     char unk2[72960];
-    u_long prims[64*1024];
+    u_long prims[64 * 1024];
     u_long ot[5];
     void *next;
 } BGBuffer;
 
-extern int D_800F4CC8;  // fg buffer index
+extern int D_800F4CC8; // fg buffer index
 extern FGBuffer D_800F4F28[2];
-extern FGBuffer *D_800F4E10;    // current
+extern FGBuffer *D_800F4E10; // current
 
 // swap both buffers
 void func_800E09EC(void)
@@ -97,8 +97,9 @@ void func_800E0A60(void)
 
 // menu.c
 
-// toggle_widescreen
-void func_800E0CD8(void)
+#ifdef VERSION_WORLD
+// US: 800E0CD8
+void toggle_widescreen(void)
 {
     if (jt.get_widescreen()) {
         jt.set_widescreen(0);
@@ -109,6 +110,7 @@ void func_800E0CD8(void)
     }
     sfx_play(0x2600);
 }
+#endif
 
 char *D_800EB054[] = {
     "STOP",
@@ -215,7 +217,7 @@ const char *D_800EB168[] = {
     "MOVIE\\EX_END3.STR",
 };
 
-#define NMOVIES (sizeof(D_800EB168)/sizeof(*D_800EB168))
+#define NMOVIES (sizeof(D_800EB168) / sizeof(*D_800EB168))
 
 const char *D_800EB1D8[] = {
     "OPENING",
@@ -269,7 +271,7 @@ void func_800E0DB8(void)
     sfx_play(0x2C00);
 }
 
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0E04);
+// INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E0E04);
 void func_800E0E04(void)
 {
     printf("Now playing %s\n", D_800EB168[D_800F4E68]);
@@ -291,9 +293,12 @@ int func_800E0FD0(int arg)
     }
 
     switch (arg) {
-        case 0: return 0;
-        case 36: return 13;
-        default: return (arg + 2) / 3;
+    case 0:
+        return 0;
+    case 36:
+        return 13;
+    default:
+        return (arg + 2) / 3;
     }
 }
 
@@ -304,16 +309,19 @@ int func_800E1044(int arg)
     }
 
     switch (arg) {
-        case 0: return 0;
-        case 36: return 12;
-        default: return (arg + 2) / 3;
+    case 0:
+        return 0;
+    case 36:
+        return 12;
+    default:
+        return (arg + 2) / 3;
     }
 }
 
-int D_800F4CBC = 0;
-int D_800F4CC0 = 0;
-int D_800F4CC4 = 1;
-int D_800F4CC8 = 0;
+int D_800F4CBC = 0; // dialog_window
+int D_800F4CC0 = 0; // dialog_selection
+/* US:800F4CC4 JP:800F63E4 */ int D_800F4CC4 = 1; //
+/* US:800F4CC8 JP:800F63E8 */ int D_800F4CC8 = 0; // fg_buffer_index
 int D_800F4CEC = 0; // Write an executable index here to go to it
 int D_800F4CF0 = 0;
 int D_800F4CF4 = 8;
@@ -326,7 +334,7 @@ int D_800F4E28 = 0;
 int D_800F4E30 = 0;
 int D_800F4E38 = 0;
 int D_800F4E40 = 0;
-int D_800F4E48 = 0;  // main menu selection (why is it separate?
+int D_800F4E48 = 0; // main menu selection (why is it separate?
 int D_800F4E50 = 0;
 int D_800F4E58 = 0;
 int D_800F4E60 = 0;
@@ -334,6 +342,7 @@ int D_800F4E68 = 0;
 int D_800F4E70 = 0;
 int D_800F4E78 = 0;
 int D_800F4E80 = 0;
+
 //
 /* 800F4ED0 */ BGBuffer *current_bgbuffer = NULL;
 
@@ -346,8 +355,10 @@ void func_800E10B8(void)
     } else {
         int spr = func_800E1044(glob->curr.unkE2);
         int t0 = spr;
-        if (glob->curr.unkE9 & 1) t0++;
-        if (glob->curr.unkE9 & 2) t0++;
+        if (glob->curr.unkE9 & 1)
+            t0++;
+        if (glob->curr.unkE9 & 2)
+            t0++;
         if (glob->world < t0) {
             t0 = -1;
             if (spr <= glob->world) {
@@ -417,6 +428,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E14CC);
 // menu.c
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1C24);
+
 // void func_800E1C24(void)
 // {
 //     int idx = glob->unk513;
@@ -428,7 +440,7 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1C24);
 void func_800E1D48(void)
 {
     if (!(jt.cd_status() & 0x40)) {
-        if (--glob->unk513 == (u8) -1) {
+        if (--glob->unk513 == (u8)-1) {
             glob->unk513 = 68;
         }
     }
@@ -539,7 +551,7 @@ typedef union {
 
 typedef struct {
     int items_type; // just type, dictates more than items
-    RECT offset;    // where entries start
+    RECT offset; // where entries start
     u8 field2_0xc;
     u8 field3_0xd;
     u8 field4_0xe;
@@ -555,10 +567,12 @@ typedef struct {
     short panel_y;
     int panel_sprite_id;
     int panel_clut_thing;
+
     union {
         char **items_strings;
         short *items_sprites;
     };
+
     MenuItem items[];
 } MenuPage;
 
@@ -588,32 +602,43 @@ void func_800E1DB8(void);
 // TODO: move this back in when everything is decomped. the address is needed
 MenuPage D_800EB468 = {
     .items_type = 3,
+#ifdef VERSION_WORLD
     .offset = { 9, 10, 21, 5 },
+#else
+    .offset = { 9, 11, 21, 5 },
+#endif
     .field8_0x12 = 8,
+#ifdef VERSION_WORLD
     .rect = { 0x30, 0x6E, 0xC8, 0x3C },
+#else
+    .rect = { 0x30, 0x7C, 0xC8, 0x38 },
+#endif
     .field11_0x1c = 0,
     .nselections = 5,
     .panel_x = 0,
     .panel_y = 0,
     .panel_sprite_id = -1,
     .panel_clut_thing = -1,
-    .items_sprites = (short[]){
-        8, 9, 10, 11, 12,
+    .items_sprites = (short[]) {
+        8,
+        9,
+        10,
+        11,
+        12,
     },
     .items = {
         { 0x80, 0, 0xFE, 0x01, NULL, func_800E11D0, func_800E10B8 },
         { 0x80, 0, 0xFE, 0x02, NULL, NULL, NULL },
-        { 0x43, PAGE_LOAD, 0xFE, 0x00, func_800E15FC, func_800E11D0, func_800E10B8 },
+        { 0x43, PAGE_LOAD, 0xFE, 0x00, func_800E15FC, NULL, NULL },
         { 0x43, PAGE_SAVE, 0xFE, 0x00, func_800E15FC, NULL, NULL },
         { 0x03, PAGE_SETTINGS, 0xFE, 0x00, NULL, NULL, NULL },
     },
 };
 
-
 MenuPage *D_800EB8CC[PAGES_COUNT] = {
     [PAGE_MAIN] = &D_800EB468,
 
-    [PAGE_LOAD] = &(MenuPage){
+    [PAGE_LOAD] = &(MenuPage) {
         .items_type = 0,
         .offset = { 9, 11, 16, 5 },
         .field8_0x12 = 8,
@@ -624,7 +649,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x6C,
         .panel_sprite_id = 10,
         .panel_clut_thing = 2,
-        .items_strings = (char*[]){
+        .items_strings = (char *[]) {
             "   DATA 1",
             "   DATA 2",
             "   DATA 3",
@@ -640,7 +665,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
     },
 
-    [PAGE_SAVE] = &(MenuPage){
+    [PAGE_SAVE] = &(MenuPage) {
         .items_type = 0,
         .offset = { 9, 12, 16, 4 },
         .field8_0x12 = 8,
@@ -651,7 +676,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x78,
         .panel_sprite_id = 11,
         .panel_clut_thing = 2,
-        .items_strings = (char*[]){
+        .items_strings = (char *[]) {
             "   DATA 1",
             "   DATA 2",
             "   DATA 3",
@@ -665,7 +690,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
     },
 
-    [PAGE_SETTINGS] = &(MenuPage){
+    [PAGE_SETTINGS] = &(MenuPage) {
         .items_type = 0,
         .offset = { 5, 10, 29, 6 },
         .field8_0x12 = 8,
@@ -676,7 +701,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x6C,
         .panel_sprite_id = 12,
         .panel_clut_thing = 2,
-        .items_strings = (char*[]){
+        .items_strings = (char *[]) {
             "   VIEW CTRL",
             "   PAD MODE",
             "   SP.ITEM",
@@ -694,7 +719,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
     },
 
-    [PAGE_CONFIRM_LOAD] = &(MenuPage){
+    [PAGE_CONFIRM_LOAD] = &(MenuPage) {
         .items_type = 1,
         .offset = { 13, 5, 8, 2 },
         .field8_0x12 = 8,
@@ -705,16 +730,14 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x18,
         .panel_sprite_id = 10,
         .panel_clut_thing = 2,
-        .items_sprites = (short[]){
-            16, 17
-        },
+        .items_sprites = (short[]) { 16, 17 },
         .items = {
             { 0x41, 0xFF, 0xFF, 0, func_800E1928, NULL, NULL },
             { 0x02, 0xFF, 0xFF, 0, NULL, NULL, NULL },
         },
     },
 
-    [PAGE_CONFIRM_SAVE] = &(MenuPage){
+    [PAGE_CONFIRM_SAVE] = &(MenuPage) {
         .items_type = 1,
         .offset = { 13, 5, 8, 2 },
         .field8_0x12 = 8,
@@ -725,8 +748,8 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x18,
         .panel_sprite_id = 11,
         .panel_clut_thing = 2,
-        .items_sprites = (short[]){
-            16, 17  // also reused with the other dialog
+        .items_sprites = (short[]) {
+            16, 17 // also reused with the other dialog
         },
         .items = {
             { 0x41, 0xFF, 0xFF, 0, func_800E1A88, NULL, NULL },
@@ -734,7 +757,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
     },
 
-    [PAGE_YES_NO] = &(MenuPage){
+    [PAGE_YES_NO] = &(MenuPage) {
         .items_type = 1,
         .offset = { 13, 6, 31, 2 },
         .field8_0x12 = 8,
@@ -745,8 +768,8 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x18,
         .panel_sprite_id = -1,
         .panel_clut_thing = -1,
-        .items_sprites = (short[]){
-            16, 17  // also reused with the other dialog
+        .items_sprites = (short[]) {
+            16, 17 // also reused with the other dialog
         },
         .items = {
             { 0x41, 0xFF, 0xFF, 0, func_800E1BCC, NULL, NULL },
@@ -754,7 +777,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
     },
 
-    [PAGE_SETTINGS_TEST] = &(MenuPage){
+    [PAGE_SETTINGS_TEST] = &(MenuPage) {
         .items_type = 0,
         .offset = { 5, 8, 29, 8 },
         .field8_0x12 = 8,
@@ -765,7 +788,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x54,
         .panel_sprite_id = 12,
         .panel_clut_thing = 2,
-        .items_strings = (char*[]){
+        .items_strings = (char *[]) {
             "   MOVIE TEST",
             "   MUSIC TEST",
             "   VIEW CTRL",
@@ -787,7 +810,7 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         },
     },
 
-    [PAGE_SETTINGS_WIDE] = &(MenuPage){
+    [PAGE_SETTINGS_WIDE] = &(MenuPage) {
         .items_type = 0,
         .offset = { 5, 9, 29, 7 },
         .field8_0x12 = 8,
@@ -798,8 +821,12 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
         .panel_y = 0x60,
         .panel_sprite_id = 12,
         .panel_clut_thing = 2,
-        .items_strings = (char*[]){
+        .items_strings = (char *[]) {
+#ifdef VERSION_WORLD
             "   TV   MODE",
+#else
+            "   MOVIE TEST",
+#endif
             "   VIEW CTRL",
             "   PAD  MODE",
             "   SP.  ITEM",
@@ -808,7 +835,11 @@ MenuPage *D_800EB8CC[PAGES_COUNT] = {
             "   EXIT",
         },
         .items = {
-            { 0x60, 0, 0, 0, func_800E0CD8, func_800E0CD8, func_800E0CD8 },
+#ifdef VERSION_WORLD
+            { 0x60, 0, 0, 0, toggle_widescreen, toggle_widescreen, toggle_widescreen },
+#else
+            { 0x60, 0, 0, 0, func_800E0E04, func_800E0D78, func_800E0DB8 },
+#endif
             { 0x60, 0, 0, 0, toggle_view_ctrl, toggle_view_ctrl, toggle_view_ctrl },
             { 0x60, 0, 0, 0, toggle_pad_mode, toggle_pad_mode, toggle_pad_mode },
             { 0x60, 0, 0, 0, toggle_sp_item, toggle_sp_item, toggle_sp_item },
@@ -839,7 +870,7 @@ const char *D_800EB430[] = {
     "COMPLETE",
 };
 
-// TODO: These should be encoded as SHIFT-JIS. I'm not sure how to do that or
+// TODO: These should be encoded as Shift-JIS. I'm not sure how to do that or
 // if this is correct.
 // Shift-JIS, for use in the save file display text
 const char *D_800EB948[14] = {
@@ -860,12 +891,12 @@ const char *D_800EB948[14] = {
 };
 
 extern int D_800F4E30;
-extern int D_800F4CC0;  // slot selected to overwrite
+extern int D_800F4CC0; // slot selected to overwrite
 extern int D_800F4E68;
 extern int D_800F4E38;
 
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E22D8);
-// draw menu box
+// INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E22D8);
+//  draw menu box
 void func_800E22D8(int idx)
 {
     RECT *r = &D_800EB8CC[idx]->rect;
@@ -876,7 +907,7 @@ void func_800E22D8(int idx)
     short h = r->h;
     // opening animation
     if (D_800F4E38 < 8) {
-        y = (h/2 + y) - (h/2 * D_800F4E38) / 8;
+        y = (h / 2 + y) - (h / 2 * D_800F4E38) / 8;
         h = (h * D_800F4E38) / 8;
     }
 
@@ -887,7 +918,7 @@ void func_800E22D8(int idx)
             .w = r->w + 12,
             .h = h + 16,
         };
-        func_800E6940(&rect, 4*D_800F4E38);
+        func_800E6940(&rect, 4 * D_800F4E38);
     }
 }
 
@@ -898,16 +929,24 @@ NOT_IMPL_FN(func_800E23C0)
 void func_800E23C8(int c)
 {
     switch (c) {
-    case 1: text_put_char(0xB6); break;
-    case 2: text_put_char(0xB5); break;
-    case 3: text_put_char(0xB6); break;
+    case 1:
+        text_put_char(0xB6);
+        break;
+    case 2:
+        text_put_char(0xB5);
+        break;
+    case 3:
+        text_put_char(0xB6);
+        break;
     }
 }
 
 static inline void text_put_progress(SavedData *save)
 {
     text_put_str(D_800EB430[func_800E0FD0(save->unkE2)]);
+#ifdef VERSION_WORLD
     func_800E23C8(save->unkE9);
+#endif
 }
 
 // draw_menu
@@ -933,7 +972,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         for (int i = 0; i < page->nselections; i++) {
             int off = (i & 1) ? D_800F4E30 : -D_800F4E30;
             int x = page->offset.x * 8 + 20 + off;
-            int y = 12*(page->offset.y + i) + 6;
+            int y = 12 * (page->offset.y + i) + 6;
             func_800E5BBC(page->items_sprites[i], x, y, selected == i);
         }
     }
@@ -1053,17 +1092,14 @@ void func_800E2438(int page_id, uint selected, u8 attr)
         break;
 
     case PAGE_YES_NO:
-        func_800E6B90(&(RECT){
-            .x = 0,
-            .y = 0,
-            .w = 240,
-            .h = 16,
-        }, page->rect.x + 16, page->rect.y + 12);
-        func_800E6B90(&(RECT){
-            .y = 16,
-            .w = 240,
-            .h = 16
-        }, page->rect.x + 16, page->rect.y + 12);
+        func_800E6B90(&(RECT) {
+                          .x = 0,
+                          .y = 0,
+                          .w = 240,
+                          .h = 16,
+                      },
+                      page->rect.x + 16, page->rect.y + 12);
+        func_800E6B90(&(RECT) { .y = 16, .w = 240, .h = 16 }, page->rect.x + 16, page->rect.y + 12);
         break;
 
     case PAGE_SETTINGS_TEST:
@@ -1115,10 +1151,14 @@ void func_800E2438(int page_id, uint selected, u8 attr)
     case PAGE_SETTINGS_WIDE:
         text_set_attr(selected == 0);
         text_set_pos(page->offset.x + 15, page->offset.y);
-        if (jt.get_widescreen == 0)
+#ifdef VERSION_WORLD
+        if (jt.get_widescreen() == 0)
             text_put_str("4:3");
         else
             text_put_str("16:9(WIDE)");
+#else
+        text_put_str(D_800EB1D8[D_800F4E68]);
+#endif
 
         text_set_attr(selected == 1);
         text_set_pos(page->offset.x + 15, page->offset.y + 1);
@@ -1165,9 +1205,8 @@ INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3168);
 extern u32 D_800EB97C[4];
 extern u32 D_800EB98C[4];
 
-
 // menu logic
-//INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);
+// INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);
 // 800E32BC
 u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
 {
@@ -1207,9 +1246,16 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
     if (buttons & BUTTONS_ACCEPT) {
         MenuItem *item = &page->items[selection];
         switch (item->flags & 0xF) {
-        case 1: sfx_play(0x2600); break;
-        case 2: sfx_play(0x2700); break;
-        case 3: sfx_play(0x2D00); func_800E7478(); break;
+        case 1:
+            sfx_play(0x2600);
+            break;
+        case 2:
+            sfx_play(0x2700);
+            break;
+        case 3:
+            sfx_play(0x2D00);
+            func_800E7478();
+            break;
         }
 
         if (page_idx == PAGE_CONFIRM_SAVE) {
@@ -1222,9 +1268,15 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
         if (page_idx == PAGE_LOAD && selection < 3) {
             if (glob->slot_state[selection] == 0 || glob->slot_state[selection] == 0xff) {
                 switch (glob->unk512) {
-                    case 1: func_800E14A4(1); break;
-                    case 2: func_800E14A4(2); break;
-                    default: func_800E14A4(3); break;
+                case 1:
+                    func_800E14A4(1);
+                    break;
+                case 2:
+                    func_800E14A4(2);
+                    break;
+                default:
+                    func_800E14A4(3);
+                    break;
                 }
                 sfx_play(0x2900);
                 func_800E7478();
@@ -1238,8 +1290,12 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
         if (page_idx == PAGE_SAVE && selection < 3) {
             if (glob->slot_state[selection] == 0xff) {
                 switch (glob->unk512) {
-                    case 1: func_800E14A4(1); break;
-                    default: func_800E14A4(2); break;
+                case 1:
+                    func_800E14A4(1);
+                    break;
+                default:
+                    func_800E14A4(2);
+                    break;
                 }
                 sfx_play(0x2900);
                 func_800E7478();
@@ -1285,12 +1341,13 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
                 func_800E7478();
                 return 0x10000;
             }
-            jt.sound_fade_out(12, 0, 0);
+
+            jt.sound_fade_out(SOUND_FADE_TIME, 0, 0);
             D_800F4CEC = item->unk1;
             func_800E8790();
             glob->curr.unkE4 = glob->world;
             glob->unk516 = 0;
-
+#ifdef VERSION_WORLD
             if (D_800F4E58 == 1) {
                 glob->unk516 = 2;
                 glob->stage = 0;
@@ -1300,7 +1357,13 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
                     glob->world = 7;
                 }
             }
-
+#else
+            if (glob->world == 7) {
+                glob->unk516 = 2;
+                glob->world = 0;
+                glob->stage = 0;
+            }
+#endif
             // This code is strange. Maybe there used to be seperate executables
             // for these functions before they were all unified into TITLE.PEX
             // and this is trying to patch around that.
@@ -1352,6 +1415,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
             if (glob->debug_features == 2) {
                 page_idx = PAGE_SETTINGS_TEST;
             } else {
+#ifdef VERSION_WORLD
                 int region = jt.get_region();
                 if (region == REGION_JAPAN || region == REGION_DEBUG) {
                     // Wait, what?? But the original Japanese version doesn't
@@ -1360,6 +1424,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
                     // it's region set to Japan. Which can never happen???
                     page_idx = PAGE_SETTINGS_WIDE;
                 }
+#endif
             }
         }
     }
@@ -1373,7 +1438,7 @@ u32 func_800E32BC(u32 buttons, u32 page_idx, u32 selection)
     }
 
     //
-    //if (selection >= D_800EB8CC[page_idx]->nselections)
+    // if (selection >= D_800EB8CC[page_idx]->nselections)
 
 out:
     return (selection << 16) | page_idx;
@@ -1422,7 +1487,7 @@ void func_800E3C68(void)
 
 NOT_IMPL_FN(func_800E3D9C)
 
-void func_800E6D1C(char*, int, RECT*);
+void func_800E6D1C(char *, int, RECT *);
 
 // draw_big_string
 void func_800E3DF8(char *str, RECT *rect)
@@ -1462,6 +1527,7 @@ void func_800E3EA4(void)
     jt.ClearImage(&rect, 0, 0, 0);
     jt.DrawSync(0);
 
+#ifdef VERSION_WORLD
     rect.y = 0x20;
     func_800E3DF8("       Memory Card is Full     ", &rect);
     jt.DrawSync(0);
@@ -1480,6 +1546,34 @@ void func_800E3EA4(void)
     rect.y = 0x10;
     func_800E3DF8("          Initialize ?       ", &rect);
     jt.DrawSync(0);
+#else
+    // TODO: These need to be shift-jis.
+    rect.y = 0x20;
+    // "メモリーカードに空きがありません"
+    func_800E3DF8("\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xc9\x8b\xf3\x82\xab\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x30;
+    // "　メモリーカードが未接続です"
+    func_800E3DF8("\x81\x40\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xaa\x96\xa2\x90\xda\x91\xb1\x82\xc5\x82\xb7", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x40;
+    // "　メモリーカードが壊れています"
+    func_800E3DF8("\x81\x40\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xaa\x89\xf3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x50;
+    // "　　　データが存在しません"
+    func_800E3DF8("\x81\x40\x81\x40\x81\x40\x83\x66\x81\x5b\x83\x5e\x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x0;
+    // "メモリーカードが壊れています"
+    func_800E3DF8("\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xaa\x89\xf3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7", &rect);
+    jt.DrawSync(0);
+    rect.y = 0x10;
+    // "初期化してよろしいでしょうか？"
+    func_800E3DF8("\x8f\x89\x8a\xfa\x89\xbb\x82\xb5\x82\xc4\x82\xe6\x82\xeb\x82\xb5\x82\xa2\x82\xc5\x82\xb5\x82\xe5\x82\xa4\x82\xa9\x81\x48", &rect);
+    jt.DrawSync(0);
+
+#endif
 
     func_800E561C(0, 2);
     jt.snd_reset();
@@ -1487,8 +1581,14 @@ void func_800E3EA4(void)
     jt.snd_set_volume(0x3000);
     jt.sfx_set_reverb(0);
     jt.snd_set_stereo(glob->curr.unkE7 != 0);
+
+#ifdef VERSION_WORLD
     jt.set_widescreen(glob->curr.unkEA);
+#endif
+
     D_800F4E40 = 0;
+
+#ifdef VERSION_WORLD
     if (jt.get_video_mode == MODE_PAL) {
         D_800F4D0C = 0x800 * 6 / 5; // 0x999
         D_800F4D10 = 0x4000 * 6 / 5; // 0x4ccc
@@ -1502,6 +1602,8 @@ void func_800E3EA4(void)
         D_800F4E18 = 8;
         D_800F4EC8 = 10;
     }
+#endif
+
     func_800E09EC();
     func_800E0A60();
     func_800E09EC();
@@ -1572,8 +1674,19 @@ int func_800E73CC(int arg, u32 buttons)
 extern int D_800F4CEC;
 int D_800F4D74 = 0;
 
-int main()
+#ifdef VERSION_WORLD
+    #define INTRO_MOVIE_NAME "MOVIE\\OPEN.STR"
+    #define INTRO_MOVIE_LENGTH 485
+#else
+    #define INTRO_MOVIE_NAME "MOVIE\\01.STR"
+    #define INTRO_MOVIE_LENGTH 482
+#endif
+
+// US: 800E4250
+// JP: 800E3B54
+int main(void)
 {
+    printf("hellos\n");
     __main();
     D_800F4E68 = 0;
     announce_entering_main();
@@ -1582,12 +1695,16 @@ int main()
     jt.wait_for_vsync();
     jt.ResetGraph(0);
     func_800E8084();
+
+#ifdef VERSION_WORLD
     func_800E76D4();
     func_800E70F4();
+#endif
+
     func_800E742C();
     glob = jt.globals();
     if (glob->intro_played == 0) {
-        func_800E8640("MOVIE\\OPEN.STR", 485);
+        func_800E8640(INTRO_MOVIE_NAME, 485);
         glob->unk518 = 1U;
         if (glob->intro_played == 0) {
             func_800E3C68();
@@ -1599,16 +1716,17 @@ int main()
     if ((glob->curr.unkE2 != 0) && (glob->curr.unkE4 == 0)) {
         glob->curr.unkE4 = 1U;
     }
-    glob->world = (u8) glob->curr.unkE4;
+    glob->world = (u8)glob->curr.unkE4;
 
+#ifdef VERSION_WORLD
     func_800E189C();
+#endif
     jt.SetDefDispEnv(&D_800F4F28[0].disp, 0, 0, 0x140, 0xF0);
     jt.SetDefDispEnv(&D_800F4F28[1].disp, 0, 0x100, 0x140, 0xF0);
     jt.SetDefDrawEnv(&D_800F4F28[0].draw, 0, 0x100, 0x140, 0xF0);
     jt.SetDefDrawEnv(&D_800F4F28[1].draw, 0, 0, 0x140, 0xF0);
 
-    D_800F4F28[0].disp.screen =
-    D_800F4F28[1].disp.screen = (RECT){
+    D_800F4F28[0].disp.screen = D_800F4F28[1].disp.screen = (RECT) {
         .x = 4,
         .y = 12,
         .w = 248,
@@ -1621,11 +1739,13 @@ int main()
         D_800F4F28[i].draw.g0 = 255;
         D_800F4F28[i].draw.b0 = 255;
 
+#ifdef VERSION_WORLD
         D_800F4F28[i].disp.pad0 = 0;
         if (jt.get_video_mode() == 1) {
             D_800F4F28[i].disp.screen.y += 24;
             D_800F4F28[i].disp.pad0 = 1;
         }
+#endif
     }
 
     u32 buttons;
@@ -1633,7 +1753,7 @@ int main()
     while (1) {
         // loop 10
         var_s1_2 = 0;
-        func_800E3EA4();    // setup_graph_env
+        func_800E3EA4(); // setup_graph_env
         jt.music_set_repeat(0);
         jt.music_play(1);
         D_800F4E50 = 0;
@@ -1642,10 +1762,10 @@ int main()
         D_800F4E28 = 0;
         while (1) {
             // loop 11
-            func_800E09EC();    // gbuffer_swap
+            func_800E09EC(); // gbuffer_swap
             text_clear();
-            func_800E0C74();    // tick
-            func_800E14CC();    // tick
+            func_800E0C74(); // tick
+            func_800E14CC(); // tick
             if ((D_800F4E50 == 0) && (D_800F4CEC == 0) && !(jt.snd_status() & 8)) {
                 jt.music_set_repeat(1);
                 jt.music_play(0xF3);
@@ -1658,7 +1778,7 @@ int main()
                 D_800F4E50 = 1;
                 D_800F4E40 = 1;
             }
-            buttons = func_800E74A8(0);    // read_input
+            buttons = func_800E74A8(0); // read_input
             if (buttons != 0) {
                 // reset timers
                 D_800F4E70 = 0;
@@ -1680,7 +1800,7 @@ int main()
                 jt.sound_fade_out(12, 0, 0);
                 glob->world = D_800EB97C[glob->unk518];
                 glob->stage = D_800EB98C[glob->unk518];
-                glob->unk518 = (glob->unk518 + 1) & 3;    /* bitfield? */
+                glob->unk518 = (glob->unk518 + 1) & 3; /* bitfield? */
                 var_s1_2 = 0;
                 glob->unk516 = 3U;
             }
@@ -1763,28 +1883,29 @@ int main()
         }
 
         // the right thing
-        jt.sound_fade_out(12, 0, 0);
+        jt.sound_fade_out(SOUND_FADE_TIME, 0, 0);
         int temp_v1 = D_800F4CF4;
         while (D_800F4CF4 >= 0) {
             D_800F4CF4 = temp_v1 - (D_800F4CC4 * 8);
             if (D_800F4E30 < 0x100) {
                 D_800F4E30 += D_800F4E18 * D_800F4CC4;
             }
-            func_800E4D40();    // _the_callback
+            func_800E4D40(); // _the_callback
         }
-        func_800E8640("MOVIE\\OPEN.STR", 485);
+
+        func_800E8640(INTRO_MOVIE_NAME, INTRO_MOVIE_LENGTH);
         D_800F4CF4 = 8;
-        glob->unk518 = (u8) (glob->unk518 + 1);
+        glob->unk518 = (u8)(glob->unk518 + 1);
     }
 }
 
 extern RECT D_800F4D90;
-u8 D_801A0FF0;   // brightness
+u8 D_801A0FF0; // brightness
 extern int D_800F4EE0;
 
 void _func_800E6B90(RECT *r, short x, short y)
 {
-    //D_801A0FF0
+    // D_801A0FF0
     SPRT *p = current_bgbuffer->next;
     func_800E58E4(2);
     setSprt(p);
@@ -1794,15 +1915,14 @@ void _func_800E6B90(RECT *r, short x, short y)
     setRGB0(p, D_801A0FF0, D_801A0FF0, D_801A0FF0);
     setXY0(p, x, y);
     // ????
-    //addPrim(current_bgbuffer->ot, p)
+    // addPrim(current_bgbuffer->ot, p)
     //
     //
     //
-
 }
 
 // draw_big_string_layer
-void _func_800E6D1C(char*, int, RECT*)
+void _func_800E6D1C(char *, int, RECT *)
 {
     //
     //
@@ -1812,8 +1932,8 @@ void _func_800E6D1C(char*, int, RECT*)
 // draw sky polygons
 void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
 {
-    u16 *depth = (u16 *) 0x1F800000;
-    u32 *verts = (u32 *) 0x1F800154;
+    u16 *depth = (u16 *)0x1F800000;
+    u32 *verts = (u32 *)0x1F800154;
     POLY_FT4 *p = current_bgbuffer->next;
     u16 tpage = getTPage(0, 0, 640, 256);
 
@@ -1827,11 +1947,11 @@ void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
         for (int i = 0; i < cols; i++) {
             setPolyFT4(p);
             setRGB0(p, D_801A0FF0, D_801A0FF0, D_801A0FF0);
-            *((u32*)&p->x0) = verts[0];
-            *((u32*)&p->x1) = verts[1];
-            *((u32*)&p->x2) = verts[cols + 1];
-            *((u32*)&p->x3) = verts[cols + 2];
-            u16 fog_level = (depth[0] + depth[1] + depth[cols + 1] + depth[cols + 2])/4;
+            *((u32 *)&p->x0) = verts[0];
+            *((u32 *)&p->x1) = verts[1];
+            *((u32 *)&p->x2) = verts[cols + 1];
+            *((u32 *)&p->x3) = verts[cols + 2];
+            u16 fog_level = (depth[0] + depth[1] + depth[cols + 1] + depth[cols + 2]) / 4;
             fog_level >>= 6;
             u %= 128;
             v %= 128;
@@ -1853,7 +1973,7 @@ void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
     current_bgbuffer->next = p;
 
     DR_MODE *q = current_bgbuffer->next;
-    jt.SetDrawMode(q, 0, 0, tpage, &(RECT){ 0, 0, 128, 128 });
+    jt.SetDrawMode(q, 0, 0, tpage, &(RECT) { 0, 0, 128, 128 });
     addPrim(current_bgbuffer->ot[2], q);
 
     current_bgbuffer->next = q + 1;
@@ -1861,13 +1981,22 @@ void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
 
 extern char *D_800F4F20;
 
+#ifdef VERSION_WORLD
+// update_mc_file_name
+// US: 800E76D4
 void func_800E76D4(void)
 {
     switch (jt.get_region()) {
     default:
-    case REGION_JAPAN:  D_800F4F20 = "BISCPS-10007EXACT02"; break;
-    case REGION_USA:    D_800F4F20 = "BASCUS-94103EXACT01"; break;
-    case REGION_EUROPE: D_800F4F20 = "BESCES-00003EXACT01"; break;
+    case REGION_JAPAN:
+        D_800F4F20 = "BISCPS-10007EXACT02";
+        break;
+    case REGION_USA:
+        D_800F4F20 = "BASCUS-94103EXACT01";
+        break;
+    case REGION_EUROPE:
+        D_800F4F20 = "BESCES-00003EXACT01";
+        break;
     case REGION_DEBUG:
         D_800F4F20 = "BISCPS-10007EXACT02";
         char *name = jt.get_mc_file_name();
@@ -1876,6 +2005,7 @@ void func_800E76D4(void)
         break;
     }
 }
+#endif
 
 extern void (*D_800F4DDC)(void);
 
@@ -1978,9 +2108,10 @@ int func_800E799C(int port, int slot, u8 *src, int len, char *suffix)
                 if (rc == -1)
                     return -1;
             }
-            if (rc > -1) break;
+            if (rc > -1)
+                break;
             // What the fuck is happening
-label0:
+        label0:
             rc = jt.mc_file_exists(port, filename);
             if (rc == -2)
                 return -2;
@@ -1988,7 +2119,8 @@ label0:
 
         // I'm too tired to even wanna make sense of this control flow.
         if (rc != 0) {
-            if (rc == 1) goto label1;
+            if (rc == 1)
+                goto label1;
             goto label0;
         }
         rc = jt.mc_file_exists(port, filename);
@@ -1996,7 +2128,7 @@ label0:
             rc = jt.mc_file_create(port, filename, 0x1e00, title);
             if (rc < 0)
                 return 0;
-label1:
+        label1:
             rc = jt.mc_file_write(port, filename, src, 0, len);
             return rc > 0;
         }
@@ -2053,7 +2185,7 @@ void text_set_pos(int x, int y)
 void text_clear(void)
 {
     u16 *p = D_800F7050;
-    for (int i = 0; i < 30*64; i++)
+    for (int i = 0; i < 30 * 64; i++)
         p[i] = 0;
     text_set_pos(0, 0);
 }
@@ -2061,8 +2193,10 @@ void text_clear(void)
 // 800E568C
 void text_put_char(u16 c)
 {
-    if (D_800F4EE8 >= 63) return;
-    if (D_800F4EF0 >= 29) return;
+    if (D_800F4EE8 >= 63)
+        return;
+    if (D_800F4EF0 >= 29)
+        return;
     D_800F7050[D_800F4EF0][D_800F4EE8++] = (c & 0xFF) | (D_800F4D8E << 8);
 }
 

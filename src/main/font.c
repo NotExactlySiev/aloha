@@ -1,27 +1,22 @@
-#include "common.h"
+#include "font.h"
 #include "jumptable.h"
 #include <libapi.h>
 
-u8 *func_8001E438(u32 sjis, int set);
-void *func_8001E5BC(void *ptr, int set);
+/* US:80047F5C JP:80044788 */ static u8 (*font_ptr8)[128][8];
+/* US:80047F64 JP:80044790 */ static u8 (*font_ptr16)[94][32]; // I think?
 
-/* US:80047F5C JP:80044788 */ u8 (*font_ptr8)[128][8];
-/* US:80047F64 JP:80044790 */ u8 (*font_ptr16)[94][32]; // I think?
-
-// default fonts
+// Embedded default fonts
 #ifdef VERSION_WORLD
 /* US:80031A14 */ extern u8 D_80031A14[94][15];
 #endif
 /* US:80032A4C JP:8002F164 */ extern u8 D_80032A4C[128][8];
 
-// 4 font and type functions
-// fnt_init
 // US: 8001E38C
 // JP: 8001D290
 void fnt_init(void)
 {
-    jt_set(func_8001E438, 0xD0);
-    jt_set(func_8001E5BC, 0xD1);
+    jt_set(fnt_get, 0xD0);
+    jt_set(fnt_set_tiles, 0xD1);
     font_ptr8 = 0;
     font_ptr16 = 0;
 }
@@ -46,10 +41,9 @@ static u16 func_8001E3D4(u16 sjis)
     return ((hi & 0xFF) << 8) | (lo & 0xFF);
 }
 
-// fnt_get
 // US: 8001E438
 // JP: 8001D33C
-u8 *func_8001E438(u32 c, int set)
+u8 *fnt_get(u32 c, int set)
 {
     switch (set) {
     case 4:
@@ -63,7 +57,8 @@ u8 *func_8001E438(u32 c, int set)
         if (font_ptr16) {
             if (c - 0x8141 < 0x37E) {
                 c = func_8001E3D4(c) - 0x2120;
-                return (*font_ptr16)[(c >> 8) - 1][(c & 0xFF) + 93]; // HUH??
+                // I have absolutely no idea what's going on here.
+                return (u8 *)(u32)(*font_ptr16)[(c >> 8) - 1][(c & 0xFF) + 93];
             }
         } else {
             if (c >> 8 == 0) {
@@ -91,10 +86,9 @@ u8 *func_8001E438(u32 c, int set)
     }
 }
 
-// fnt_set_tiles
 // US: 8001E5BC
 // JP: 8001D470
-void *func_8001E5BC(void *ptr, int set)
+void *fnt_set_tiles(void *ptr, int set)
 {
     void *ret = (void *)-1;
     if (set == 4) {

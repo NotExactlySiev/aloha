@@ -1,4 +1,6 @@
+#include "misc.h"
 #include "card.h"
+#include "common.h"
 #include "decode.h"
 #include "jumptable.h"
 #include "main.h"

@@ -1,6 +1,10 @@
-#include "cd.h"
 #include "common.h"
+#include "priv.h"
 #include <util.h>
+
+// root sector loc is cached here
+/* US:80047E84 JP:800446B0 */ CdlLOC rootloc;
+/* US:80047DAC JP:80044364 */ CdlLOC pvd_loc = { 0, 2, 22, 0 };
 
 // US: 8001D67C
 // JP: 8001C818
@@ -11,10 +15,6 @@ static int read_unaligned_int(u8 *p)
         ret |= p[i] << (i * 8);
     return ret;
 }
-
-// root sector loc is cached here
-/* US:80047E84 JP:800446B0 */ CdlLOC rootloc;
-/* US:80047EE4 JP:80044710 */ int pvd_is_cached;
 
 // US: 8001D6AC
 // JP: 8001C848
@@ -142,8 +142,6 @@ static u8 find_entry(char *filename, void *buf, u32 max, CdlFILE *file)
     return 0xFFU;
 }
 
-extern int D_800548EC;
-
 // US: 8001DA00
 // JP: 8001CB9C
 int iso_get_file(CdlFILE *file, char *filename)
@@ -169,8 +167,7 @@ int iso_get_file(CdlFILE *file, char *filename)
         dirloc = file->pos;
         if ((levels != 1) && ((flags & 2) == 0))
             return 0;
-        while (*p++)
-            ;
+        while (*p++);
         levels -= 1;
     }
 
@@ -179,5 +176,5 @@ int iso_get_file(CdlFILE *file, char *filename)
 
 #ifdef VERSION_WORLD
 // US: 8001DB04
-NOT_IMPL_FN(iso_never_called)
+NOT_IMPL_FN(iso_never_called, void *arg0, char *filename, int arg2)
 #endif

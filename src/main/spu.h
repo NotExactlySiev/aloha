@@ -1,9 +1,8 @@
 #include "common.h"
 #include <libspu.h>
 
-void func_8001DD7C(void);
-// snd_mute
-void func_8001DE98(void);
+void spu_init(void);
+void spu_deinit(void);
 void call_SpuSetCommonAttr(SpuCommonAttr *attr);
 void func_8001DF14(long mode, short depth);
 void spu_set_stereo(int val);

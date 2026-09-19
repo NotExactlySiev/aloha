@@ -1,5 +1,6 @@
 #include "gpu.h"
 #include "jumptable.h"
+#include "main.h"
 #include <libetc.h>
 #include <libgte.h>
 

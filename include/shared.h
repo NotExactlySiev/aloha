@@ -96,7 +96,7 @@ extern struct {
     /* 110 */ int         (*cd_read_full)();
     /* 111 */ int         (*iso_read)(const char* addr, void* buf, s32 mode);
     /* 112 */ int         (*iso_file_size)();
-    /* 113 */ int         (*iso_exec)();
+    /* 113 */ int         (*cd_fs_exec)();
     /* 114 */ int         (*cd_seek_safe)();
     /* 115 */ int         (*iso_read_fast)();
     /* 116 */ int         (*iso_seek)();
@@ -105,7 +105,7 @@ extern struct {
 #endif
     UNK(280, 287);
     /* 120 */ int         (*music_play_cdda)(int idx, int repeat);
-    /* 121 */ int         (*music_play_cdda_from_loc)();
+    /* 121 */ int         (*music_play_cdda_from_loc)(CdlLOC *loc);
     /* 122 */ void        (*cd_pause)(void);
     /* 123 */ int         (*cd_play)();
     /* 124 */ void        (*cd_mute)(void);

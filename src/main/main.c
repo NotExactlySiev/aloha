@@ -1,14 +1,19 @@
 #include "main.h"
 #include "asm.h"
+#include "boot.h"
 #include "card.h"
 #include "cd/cd.h"
 #include "common.h"
 #include "decode.h"
+#include "font.h"
 #include "gpu.h"
 #include "jumptable.h"
+#include "misc.h"
 #include "music.h"
 #include "pad.h"
 #include "sfx.h"
+#include "sound.h"
+#include "spu.h"
 #include "tasks.h"
 #include <kernel.h>
 #include <libapi.h>
@@ -19,105 +24,123 @@
 #include <stdio.h>
 #include <util.h>
 
-void fnt_init(void);
-void misc_init(void);
 void VSyncCallbacks(int, int);
 
+static u8 *const tmpfilebuf = (u8 *)0x80100000;
+
+#ifdef VERSION_WORLD
+/* US:80047D44 */ u32 tv_system = MODE_NTSC;
+/* US:80047D48 */ int D_80047D48 = -2;
+/* US:80047D4C */ int widescreen = 0;
+/* US:80047D50 */ int D_80047D50 = 0; // debug mode
+/* US:80047D54 */ int dev_mode = 0;
+/* US:80047D64 */ int D_80047D64 = 0; // vblank event paused
+/* US:80047D68 */ int game_region = 0;
+/* US:80048048 */ char mc_file_name[20];
+#endif
+
+/* US:80047D58 JP:80044320 */ int D_80047D58 = 0;
+/* US:80047D5C JP:80044324 */ int next_exec = 0;
+/* US:80047D60 JP:80044328 */ int g_CurrFile = 0;
+/* US:80047E6C JP:80044698 */ int D_80047E6C;
+/* US:80047E74 JP:800446A0 */ int vblank_event;
+/* US:80047E7C JP:800446A8 */ int syscall_event;
 /* US:80048044 JP:80044868 */ u32 saved_ra;
 
-// stuff from 1D530.data.s
-int D_80047D48 = -2;
 #ifdef VERSION_WORLD
-int widescreen = 0;
+    #define TRACK 0xC9
+#else
+    #define TRACK 0xCD
 #endif
-int D_80047D50 = 0;
-/* US:80047D58 JP:80044320 */ int D_80047D58 = 0;
-int D_80047D64 = 0;
-
-// over
 
 #define DMUSIC(n, i, c, ...) { .name = n, .type = 1, .id = i, .size = 0x24, .unk0 = 16, .unk1 = 0, .file = 1, .chan = c, .loc = __VA_ARGS__ }
 MusicList D_80034344 = {
-    .count = 66,
+    .count = 67,
     .tracks = {
-        DMUSIC("MUSICSYS.STR", 0x01, 0x00, { 0x02, 0x02, 0x95, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x02, 0x01, { 0x03, 0x02, 0x04, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x03, 0x07, { 0x02, 0x14, 0x91, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0xF0, 0x03, { 0x00, 0x03, 0x28, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0xF1, 0x04, { 0x00, 0x03, 0x65, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0xF2, 0x05, { 0x00, 0x09, 0x74, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0xF3, 0x06, { 0x02, 0x03, 0x80, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x20, 0x02, { 0x00, 0x13, 0x18, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x21, 0x02, { 0x00, 0x13, 0x18, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x22, 0x02, { 0x00, 0x13, 0x18, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x23, 0x02, { 0x00, 0x13, 0x18, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x24, 0x02, { 0x00, 0x13, 0x18, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x25, 0x02, { 0x00, 0x13, 0x18, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x30, 0x03, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x31, 0x03, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x32, 0x03, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x33, 0x03, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x34, 0x03, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSICSYS.STR", 0x35, 0x03, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x10, 0x03, { 0x00, 0x15, 0x41, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x11, 0x03, { 0x00, 0x15, 0x41, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x12, 0x03, { 0x00, 0x15, 0x41, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x13, 0x03, { 0x00, 0x15, 0x41, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x14, 0x03, { 0x00, 0x15, 0x41, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x15, 0x03, { 0x00, 0x15, 0x41, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x18, 0x04, { 0x00, 0x03, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x19, 0x04, { 0x00, 0x03, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x1A, 0x04, { 0x00, 0x03, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x1B, 0x04, { 0x00, 0x03, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x1C, 0x04, { 0x00, 0x03, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x1D, 0x04, { 0x00, 0x03, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x40, 0x05, { 0x00, 0x07, 0x94, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x41, 0x05, { 0x00, 0x07, 0x94, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x42, 0x05, { 0x00, 0x07, 0x94, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x43, 0x05, { 0x00, 0x07, 0x94, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x44, 0x05, { 0x00, 0x07, 0x94, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x45, 0x05, { 0x00, 0x07, 0x94, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x50, 0x06, { 0x02, 0x53, 0x93, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x51, 0x06, { 0x02, 0x53, 0x93, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x52, 0x06, { 0x02, 0x53, 0x93, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x53, 0x06, { 0x02, 0x53, 0x93, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x54, 0x06, { 0x02, 0x53, 0x93, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x55, 0x06, { 0x02, 0x53, 0x93, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x60, 0x07, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x61, 0x07, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x62, 0x07, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x63, 0x07, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x64, 0x07, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x65, 0x07, { 0x01, 0x00, 0x00, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x70, 0x00, { 0x03, 0x12, 0x24, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x71, 0x01, { 0x03, 0x11, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W1.STR", 0x72, 0x02, { 0x02, 0x58, 0x57, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x73, 0x00, { 0x02, 0x47, 0x69, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x74, 0x01, { 0x03, 0x23, 0x39, 0xC9 }),
-        DMUSIC("MUSIC_W2.STR", 0x75, 0x02, { 0x03, 0x04, 0x90, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x76, 0x00, { 0x03, 0x03, 0x63, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x77, 0x01, { 0x03, 0x30, 0x54, 0xC9 }),
-        DMUSIC("MUSIC_W3.STR", 0x78, 0x02, { 0x03, 0x03, 0x76, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x79, 0x00, { 0x02, 0x54, 0x55, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x7A, 0x01, { 0x03, 0x00, 0x18, 0xC9 }),
-        DMUSIC("MUSIC_W4.STR", 0x7B, 0x02, { 0x02, 0x56, 0x66, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x7C, 0x00, { 0x03, 0x22, 0x04, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x7D, 0x01, { 0x03, 0x22, 0x14, 0xC9 }),
-        DMUSIC("MUSIC_W5.STR", 0x7E, 0x02, { 0x02, 0x43, 0x26, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x7F, 0x00, { 0x03, 0x07, 0x83, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x80, 0x01, { 0x02, 0x54, 0x44, 0xC9 }),
-        DMUSIC("MUSIC_W6.STR", 0x81, 0x02, { 0x03, 0x04, 0x07, 0xC9 }),
+        DMUSIC("MUSICSYS.STR", 0x01, 0x00, { 0x02, 0x02, 0x95, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x02, 0x01, { 0x03, 0x02, 0x04, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x03, 0x07, { 0x02, 0x14, 0x91, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0xF0, 0x03, { 0x00, 0x03, 0x28, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0xF1, 0x04, { 0x00, 0x03, 0x65, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0xF2, 0x05, { 0x00, 0x09, 0x74, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0xF3, 0x06, { 0x02, 0x03, 0x80, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x20, 0x02, { 0x00, 0x13, 0x18, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x21, 0x02, { 0x00, 0x13, 0x18, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x22, 0x02, { 0x00, 0x13, 0x18, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x23, 0x02, { 0x00, 0x13, 0x18, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x24, 0x02, { 0x00, 0x13, 0x18, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x25, 0x02, { 0x00, 0x13, 0x18, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x30, 0x03, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x31, 0x03, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x32, 0x03, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x33, 0x03, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x34, 0x03, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSICSYS.STR", 0x35, 0x03, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x10, 0x03, { 0x00, 0x15, 0x41, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x11, 0x03, { 0x00, 0x15, 0x41, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x12, 0x03, { 0x00, 0x15, 0x41, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x13, 0x03, { 0x00, 0x15, 0x41, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x14, 0x03, { 0x00, 0x15, 0x41, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x15, 0x03, { 0x00, 0x15, 0x41, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x18, 0x04, { 0x00, 0x03, 0x39, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x19, 0x04, { 0x00, 0x03, 0x39, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x1A, 0x04, { 0x00, 0x03, 0x39, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x1B, 0x04, { 0x00, 0x03, 0x39, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x1C, 0x04, { 0x00, 0x03, 0x39, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x1D, 0x04, { 0x00, 0x03, 0x39, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x40, 0x05, { 0x00, 0x07, 0x94, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x41, 0x05, { 0x00, 0x07, 0x94, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x42, 0x05, { 0x00, 0x07, 0x94, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x43, 0x05, { 0x00, 0x07, 0x94, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x44, 0x05, { 0x00, 0x07, 0x94, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x45, 0x05, { 0x00, 0x07, 0x94, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x50, 0x06, { 0x02, 0x53, 0x93, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x51, 0x06, { 0x02, 0x53, 0x93, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x52, 0x06, { 0x02, 0x53, 0x93, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x53, 0x06, { 0x02, 0x53, 0x93, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x54, 0x06, { 0x02, 0x53, 0x93, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x55, 0x06, { 0x02, 0x53, 0x93, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x60, 0x07, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x61, 0x07, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x62, 0x07, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x63, 0x07, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x64, 0x07, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x65, 0x07, { 0x01, 0x00, 0x00, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x70, 0x00, { 0x03, 0x12, 0x24, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x71, 0x01, { 0x03, 0x11, 0x39, TRACK }),
+        DMUSIC("MUSIC_W1.STR", 0x72, 0x02, { 0x02, 0x58, 0x57, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x73, 0x00, { 0x02, 0x47, 0x69, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x74, 0x01, { 0x03, 0x23, 0x39, TRACK }),
+        DMUSIC("MUSIC_W2.STR", 0x75, 0x02, { 0x03, 0x04, 0x90, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x76, 0x00, { 0x03, 0x03, 0x63, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x77, 0x01, { 0x03, 0x30, 0x54, TRACK }),
+        DMUSIC("MUSIC_W3.STR", 0x78, 0x02, { 0x03, 0x03, 0x76, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x79, 0x00, { 0x02, 0x54, 0x55, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x7A, 0x01, { 0x03, 0x00, 0x18, TRACK }),
+        DMUSIC("MUSIC_W4.STR", 0x7B, 0x02, { 0x02, 0x56, 0x66, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x7C, 0x00, { 0x03, 0x22, 0x04, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x7D, 0x01, { 0x03, 0x22, 0x14, TRACK }),
+        DMUSIC("MUSIC_W5.STR", 0x7E, 0x02, { 0x02, 0x43, 0x26, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x7F, 0x00, { 0x03, 0x07, 0x83, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x80, 0x01, { 0x02, 0x54, 0x44, TRACK }),
+        DMUSIC("MUSIC_W6.STR", 0x81, 0x02, { 0x03, 0x04, 0x07, TRACK }),
     }
 };
 
+typedef struct {
+    void *header;
+    char *addr;
+} ExecutableDesc;
+
 #define DFILE(ptr, name) { (void *)(ptr | 1), name }
-file_t g_Files[] = {
+ExecutableDesc g_Files[] = {
     DFILE(0x80060000, "TITLE.PEX"),
 
 #ifdef VERSION_WORLD
     DFILE(0x80060000, "SELECT.PEX"),
 #else
-    { (void *)(0x00000000), "SELECT.PEX" },
+    // For some reason, this file isn't compressed in the Japanese version.
+    { (void *)(0x00000000), "SELECT.EXE" },
 #endif
 
     DFILE(0x80080000, "JM1\\MAIN.PEX"),
@@ -165,24 +188,8 @@ file_t g_Files[] = {
 #endif
 };
 
-s32 g_CurrFile = 0;
-s32 next_exec = 0;
-s32 game_region = 0;
-u32 tv_system = MODE_NTSC;
-s32 dev_mode = 0;
-
-/* US:80047E6C JP:80044698 */ int D_80047E6C;
-/* US:80047E74 JP:800446A0 */ int vblank_event;
-/* US:80047E7C JP:800446A8 */ int syscall_event;
-char mc_file_name[20];
-
-s32 iso_read(const char *addr, void *buf, s32 mode);
-void wait_frame(); // TODO: args?
-void execute_compressed(u32 *addr, u32 stack);
-s32 iso_exec(char *file, s32 param);
-
-// boot.h
-void reset(void);
+void disable_vblank_event(s32 event);
+GlobalData *globals(void);
 
 // US: 800188C8
 // JP: 80018724
@@ -198,19 +205,19 @@ void file_execute_loop(void)
             // if addr isn't NULL, it's compressed
             if ((u32)addr & 1) {
                 addr = (u32 *)((u32)addr & ~0xF);
-                while (iso_read(g_Files[g_CurrFile].addr, addr, 0) < 0) {
+                while (iso_read(g_Files[g_CurrFile].addr, (u8 *)addr, 0) < 0) {
                     printf("Exec File Read Error\n");
                 }
 
                 while (addr[0] != 0x582D5350 || addr[1] != 0x45584520) {
-                    iso_read(g_Files[g_CurrFile].addr, addr, 0);
+                    iso_read(g_Files[g_CurrFile].addr, (u8 *)addr, 0);
                     printf("Exec File Read Error\n");
                 }
             }
             execute_compressed(addr, 0);
         } else {
             // otherwise it's uncompressed and execute it normally
-            iso_exec(g_Files[g_CurrFile].addr, 0);
+            cd_fs_exec(g_Files[g_CurrFile].addr, 0);
         }
         g_CurrFile = get_next_exec();
     }
@@ -228,7 +235,7 @@ char *get_file_addr(s32 idx)
 
 #ifdef VERSION_WORLD
 // US: 80018A6C
-s32 func_80018A6C(void)
+int func_80018A6C(void)
 {
     return D_80047D50;
 }
@@ -310,12 +317,6 @@ static inline void LOAD_PRS(u8 *dst, short w, short h)
 // JP: 800188C8
 void show_logo(void)
 {
-    POLY_FT4 polys[5];
-    TILE tile;
-    s32 tmp;
-    s32 y;
-    u32 h;
-
 #ifndef VERSION_WORLD
     wait_frame();
     call_ResetGraph(0);
@@ -344,6 +345,12 @@ void show_logo(void)
     PutDispEnv(&dispenv);
 
 #ifdef VERSION_WORLD
+    POLY_FT4 polys[5];
+    TILE tile;
+    s32 tmp;
+    s32 y;
+    u32 h;
+
     DrawSync(0);
     // clear the screen with black
     // SetBlockFill(&tile);
@@ -363,14 +370,14 @@ void show_logo(void)
 
     // Show the warning file if it's there.
     do {
-        tmp = iso_read("WARNING.PRS", (u32 *)0x80100000, 0); // read file
+        tmp = iso_read("WARNING.PRS", tmpfilebuf, 0); // read file
     } while (tmp == -1);
 
     if (tmp >= 0) {
         // TODO: maybe a #define POLYCOUNT 4 so I don't have to
         // repeat 4? just put POLYCOUNT in the macros
         MAKE_QUADS(polys, 4, 64, 0, 128, 480, 0, 0, 128, 480, 64);
-        LOAD_PRS(&tmpfilebuf, 256, 240);
+        LOAD_PRS(tmpfilebuf, 256, 240);
         // SLEEP_FRAMES(10);
         sleep_frames(10);
 
@@ -392,10 +399,11 @@ void show_logo(void)
     SetDispMask(0);
 
     do {
-        D_80047D48 = iso_read("TITLE.PRS", (u32 *)0x80100000, 0); // read file
+        D_80047D48 = iso_read("TITLE.PRS", tmpfilebuf, 0); // read file
     } while (D_80047D48 == -1);
 
     if (D_80047D48 == -2) {
+        extern u8 D_80032FFC; // builtin intro prs image
         MAKE_QUADS(polys, 4, 64, 192, 128, 96, 0, 0, 128, 96, 64);
         LOAD_PRS(&D_80032FFC, 256, 96);
         sleep_frames(10);
@@ -413,7 +421,7 @@ void show_logo(void)
             h = 480;
         }
         MAKE_QUADS(polys, 5, 0, y, 128, h, 0, 0, 128, 240, 64);
-        LOAD_PRS(&tmpfilebuf, 320, 240);
+        LOAD_PRS(tmpfilebuf, 320, 240);
         sleep_frames(10);
 
         wait_frame();
@@ -436,7 +444,6 @@ void func_8001926C(void)
 {
     DRAWENV drawenv;
     DISPENV dispenv;
-    POLY_FT4 polys[5];
 
     call_SetDefDrawEnv(&drawenv, 0, 0, 0x280, 0x1E0);
     call_SetDefDispEnv(&dispenv, 0, 0, 0x280, 0x1E0);
@@ -456,6 +463,8 @@ void func_8001926C(void)
     call_PutDispEnv(&dispenv);
 
 #ifdef VERSION_WORLD
+    POLY_FT4 polys[5];
+
     if (D_80047D48 != -2) {
         int y, h;
         if (get_region() == 1) {
@@ -526,7 +535,7 @@ void init_everything(void)
 #endif
 
     // spu set defaults
-    func_8001DD7C(); // spu_init?
+    spu_init(); // spu_init?
     gpu_init();
     show_logo();
     pad_init();
@@ -542,9 +551,9 @@ void game_shutdown(void)
 {
     cd_stop();
     cd_flush();
-    func_8001A74C();
+    cd_deinit();
     mc_deinit();
-    func_8001DE98();
+    spu_deinit();
     StopCallback();
     PadStop();
     disable_vblank_event(vblank_event);
@@ -597,6 +606,8 @@ void flush_cache_safe(void)
 }
 #endif
 
+void *KSEG0(void *x) { return (void *)(((u32)x & 0x0FFFFFFF) | 0x80000000); }
+
 // US: 800198B4
 // JP: 80018FD4
 void jt_clear(void)
@@ -610,7 +621,7 @@ void jt_clear(void)
 
 // US: 80019908
 // JP: 80019028
-void jt_set(void *func, s32 idx)
+void jt_set(void *func, int idx)
 {
     void **jmptable = (void **)&jt;
     jmptable[idx] = KSEG0(func);
@@ -640,7 +651,7 @@ s32 vblank_enable(void)
 }
 
 // US: 800199D4
-s32 get_video_mode(void)
+int get_video_mode(void)
 {
     return tv_system;
 }
@@ -775,6 +786,13 @@ void *jt_reset(void)
 // Except, it turns out, that no such initializations were ever needed. The only
 // implementation of this syscall that's ever used does nothing but return NULL.
 
+typedef struct ExCB ExCB;
+typedef struct TCB TCB;
+
+typedef struct {
+    TCB *current_thread;
+} PCB;
+
 // The first few entries of the "Table of Tables", in a more useful form than
 // what PsyQ provides us.
 typedef struct {
@@ -791,7 +809,7 @@ typedef struct {
 // Set the v0 register in the caller's context.
 static void SYSCALL_RETURN(void *v)
 {
-    BIOS_TABLES.pcb->current_thread->reg[R_V0] = v;
+    BIOS_TABLES.pcb->current_thread->reg[R_V0] = (u32)v;
 }
 
 // Unused implementation. Checks if the engine needs to be reinitialized, and if
@@ -885,12 +903,12 @@ int main(int argc, char *argv[])
     syscall_event = enable_syscall(sys_nothing);
     music_set_list(&D_80034344);
     while (1) {
-        int rc = iso_read("SYS_SE.VAB", &tmpfilebuf, 0);
-        if (rc > 0 && tmpfilebuf == 0x56414270)
+        int rc = iso_read("SYS_SE.VAB", tmpfilebuf, 0);
+        if (rc > 0 && *(u32 *)tmpfilebuf == 0x56414270)
             break;
         printf("VAB file Reload\n");
     }
-    sfx_load_vab(0, &tmpfilebuf, 0);
+    sfx_load_vab(0, (VabRealHeader *)tmpfilebuf, 0);
 
     // fade logo?
     func_8001926C();
