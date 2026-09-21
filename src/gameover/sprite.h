@@ -20,12 +20,9 @@ typedef struct {
     SpriteThing sprts[];
 } Sprite;
 
-void sprite_init(void); // init sprite system
+void sprite_init(void);
 void sprite_load_tiles(u32 *raw, int x, int y);
 void sprite_load_data(u32 *data);
-void _sprite_render(SpriteSet *set, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx);
-// I think stuff above this are shared between files, and the other functions are file specific (not defined here)
-
 void sprite_render(s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx);
 
 #endif // _SPRITE_H

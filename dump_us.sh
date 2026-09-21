@@ -1,5 +1,12 @@
 dumpsxiso -x build/disc_us -s us.xml original/us.bin
 
+mkdir -p execs
+
+cp build/disc_us/SCUS_941.03 execs/us_main.exe
+cp build/disc_us/TITLE.PEX execs/us_title.pex
+cp build/disc_us/SELECT.PEX execs/us_select.pex
+cp build/disc_us/GAMEOVER.PEX execs/us_gameover.pex
+
 mkdir -p assets/main
 mkdir -p assets/gameover
 

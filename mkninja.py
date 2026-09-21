@@ -11,7 +11,7 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 # "us", "eu", or "jp"
-version = sys.argv[1]
+version: str = sys.argv[1]
 
 
 class SourceFile:
@@ -25,7 +25,15 @@ class SourceFile:
 
 
 class Executable:
-    def __init__(self, final_name, name, is_comped, libs=[], objs=[], assets=[]):
+    def __init__(
+        self,
+        final_name: str,
+        name: str,
+        is_comped: bool,
+        libs: list[str] = [],
+        objs: list[str] = [],
+        assets: list[Asset] = [],
+    ):
         self.name = name
         self.final_name = final_name
         self.is_comped = is_comped
@@ -34,7 +42,7 @@ class Executable:
         self.libs = libs
         self.data = []
         self.common_objects = objs + ["header.o"]
-        self.assets = assets
+        self.assets: list[Asset] = assets
 
         self.scan_dir(f"src/{self.name}")
         self.scan_dir(f"asm/{self.name}/data")
@@ -58,6 +66,14 @@ class Executable:
             else:
                 self.add_file(entry, full_path)
 
+    def generate_decompress(self):
+        Ninja.build(
+            "decomp",
+            f"execs/{version}_{self.name}.exe",
+            [f"execs/{version}_{self.name}.pex"],
+            ["$knife"],
+        )
+
     def generate(self):
         all_deps = ["build/" + cobj for cobj in self.common_objects]
         for f in self.source:
@@ -66,10 +82,17 @@ class Executable:
             all_deps.append(self.build_dir + f.obj_name)
         for lib in self.libs:
             all_deps.append(f"psyq/libs/{lib}.a")
+
+        # Assets
+
+        # If there are assets that need to be extracted, make sure this file
+        # gets decompressed if needed.
+        if len(self.assets) > 0 and self.is_comped:
+            self.generate_decompress()
+
         for asset in self.assets:
-            obj_path = self.build_dir + asset + ".elf"
-            Ninja.build("embed", obj_path, [asset], [])
-            all_deps.append(obj_path)
+            asset.generate()
+            all_deps.append(asset.final_path)
 
         elf_path = f"build/{self.name}.elf"
         symbols_file = f"linker/symbols.{self.name}.ld"
@@ -92,6 +115,50 @@ class Executable:
         return f"build/disc_{version}/{self.final_name}"
 
 
+# Location of a binary asset embedded inside an executable.
+class AssetLocation:
+    def __init__(self, offset: int, size: int):
+        self.offset: int = offset + 0x800
+        self.size: int = size
+
+
+class Asset:
+    def __init__(
+        self, name: str, exec: str, locJp: AssetLocation, locUs: AssetLocation
+    ):
+        self.name: str = name
+        self.exec: str = exec
+        # TODO: Other versions are not supported.
+        self.loc: AssetLocation = locJp if version == "jp" else locUs
+
+    @property
+    def bin_path(self) -> str:
+        return f"assets/{self.exec}/{self.name}.bin"
+
+    @property
+    def elf_path(self) -> str:
+        return f"build/{self.exec}/assets/{self.name}.elf"
+
+    def generate_extract(self):
+        Ninja.build("extract", self.bin_path, [f"execs/{version}_{self.exec}.exe"])
+        Ninja.param("offset", self.loc.offset)
+        Ninja.param("size", self.loc.size)
+
+    # Generate the build command to turn the extracted .bin file into a linkable
+    # .elf file.
+    def generate_embed(self):
+        Ninja.build("embed", self.elf_path, [self.bin_path])
+
+    # Generate all the required build commands for this asset.
+    def generate(self):
+        self.generate_extract()
+        self.generate_embed()
+
+    @property
+    def final_path(self) -> str:
+        return self.elf_path
+
+
 match version:
     case "us":
         versionFlag = " -DVERSION_WORLD"
@@ -110,6 +177,7 @@ match version:
 
     case _:
         print(f"Version {version} is unknown.")
+        sys.exit(1)
 
 selectExeName = "SELECT." + "PEX" if selectIsCompressed else "EXE"
 
@@ -131,6 +199,10 @@ executables = [
             "libapi",
         ],
         objs=["util.o"],
+        assets=[
+            # TODO: Use this list to bring in the assets for this file. They are
+            # currently hardcoded in the dump_us.sh script.
+        ],
     ),
     # Executable(
     #     "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
@@ -144,14 +216,66 @@ executables = [
         True,
         objs=["start.o"],
         assets=[
-            "assets/gameover/sprtdata.bin",
-            "assets/gameover/sprttiles.bin",
-            "assets/gameover/clut0.bin",
-            "assets/gameover/clut1.bin",
-            "assets/gameover/clut2.bin",
-            "assets/gameover/bunny.bin",
+            Asset(
+                "sprtdata",
+                "gameover",
+                AssetLocation(0x0, 0xAF4),
+                AssetLocation(0x0, 0xAEC),
+            ),
+            Asset(
+                "sprttiles",
+                "gameover",
+                AssetLocation(0xAF4, 40704),
+                AssetLocation(0xAEC, 40576),
+            ),
+            Asset(
+                "clut0",
+                "gameover",
+                AssetLocation(0xA9F4, 512),
+                AssetLocation(0xA96C, 512),
+            ),
+            Asset(
+                "clut1",
+                "gameover",
+                AssetLocation(0xABF4, 512),
+                AssetLocation(0xAB6C, 512),
+            ),
+            Asset(
+                "clut2",
+                "gameover",
+                AssetLocation(0xADF4, 512),
+                AssetLocation(0xAD6C, 512),
+            ),
+            Asset(
+                "bunny",
+                "gameover",
+                AssetLocation(0xAFF4, 2312),
+                AssetLocation(0xAF6C, 2312),
+            ),
         ],
     ),
+]
+
+compileFlags = [
+    "-Wall",
+    "-Iinclude",
+    "-Ipsyq/include",
+    "-Iassets",
+    "-O1",
+    "-G0",
+    "-DLANGUAGE_C",
+    "-fno-zero-initialized-in-bss",
+    "-msoft-float",
+    "-mips1",
+    "-march=mips1",
+    "-mabi=32",
+    "-EL",
+    "-mno-abicalls",
+    "-fno-stack-protector",
+    "-Wa,--no-pad-sections",
+    "-fno-builtin",
+    "-fno-pic",
+    "-DPSYQ47_FIXES",
 ]
 
 # Ninja setup
@@ -163,29 +287,7 @@ Ninja.set("makeiso", "mkpsxiso")
 Ninja.set("dumpiso", "dumpsxiso")
 Ninja.set(
     "cflags",
-    " ".join(
-        [
-            "-Wall",
-            "-Iinclude",
-            "-Ipsyq/include",
-            "-Iassets",
-            "-O1",
-            "-G0",
-            "-DLANGUAGE_C",
-            "-fno-zero-initialized-in-bss",
-            "-msoft-float",
-            "-mips1",
-            "-march=mips1",
-            "-mabi=32",
-            "-EL",
-            "-mno-abicalls",
-            "-fno-stack-protector",
-            "-Wa,--no-pad-sections",
-            "-fno-builtin",
-            "-fno-pic",
-            "-DPSYQ47_FIXES",
-        ]
-    ),
+    " ".join(compileFlags),
 )
 Ninja.set("ldflags", "--no-check-sections -nostdlib -s")
 Ninja.set("cflagsnat", "-O2")
@@ -200,17 +302,23 @@ Ninja.rule(
 )
 Ninja.rule("objcopy", "${cross}objcopy -O binary $in $out")
 Ninja.rule("copy", "cp $in $out")
-Ninja.rule("decomp", "$knife decomp $in $out")
+Ninja.rule("decomp", "$knife pex decompress $in $out")
 Ninja.rule("comp", "$knife pex compress $in $out")
 Ninja.param("description", "Compressing $out")
-Ninja.rule("embed", "${cross}objcopy -I binary -O elf32-littlemips $in $out")
-Ninja.param("description", "Turning binary file $in into embeddable elf")
+
 Ninja.rule("mkiso", "$makeiso -y $in -o $out")
 Ninja.param("description", "Generating Disc Image")
 Ninja.rule("REGENERATE", "python $in $version")
 Ninja.param("description", "Updating build.ninja")
 Ninja.param("generator", "1")
 
+# Asset extractions and embedding rules
+
+Ninja.rule("extract", "dd if=$in of=$out bs=1 skip=$offset count=$size")
+Ninja.param("description", "Extracting asset $out")
+
+Ninja.rule("embed", "${cross}objcopy -I binary -O elf32-littlemips $in $out")
+Ninja.param("description", "Turning binary file $in into embeddable elf")
 
 # Build tools
 Ninja.build("phony", "tools", ["$knife"])

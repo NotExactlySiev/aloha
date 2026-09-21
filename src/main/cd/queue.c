@@ -6,6 +6,11 @@
 #include <libcd.h>
 #include <libspu.h>
 
+// For MODE_NTSC and MODE_PAL.
+#ifdef VERSION_WORLD
+    #include <libetc.h>
+#endif
+
 typedef struct {
     u8 com;
     u32 arg0;

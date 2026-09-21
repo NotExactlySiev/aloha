@@ -28,32 +28,27 @@ s32 bounce_dy = 0x600; // dy
 s32 bounce_anim_counter = 60; // initial counter
 s32 bounce_anim_state = 0; // bounce animation state
 
-s32 D_800ED380 = 0; // the shut the fuck up counter
-
 // this might be a struct
-s32 D_800ED388 = 0;
-s32 D_800ED38C = 0;
-s32 D_800ED390 = 40;
+/* US:800ED340 JP: */ s32 D_800ED340[5] = { 40, 42, 41, 42, -1 };
+/* US:800ED388 JP: */ s32 D_800ED388 = 0;
+/* US:800ED38C JP: */ s32 D_800ED38C = 0;
+/* US:800ED390 JP: */ s32 D_800ED390 = 40;
+/* US:800ED394 JP: */ s32 D_800ED394 = 0;
+/* US:800ED398 JP: */ RECT D_800ED398 = { .w = 0xFF, .h = 0xFF };
+/* US:800ED3B4 JP: */ s32 D_800ED3B4 = 0;
+/* US:800ED3C4 JP: */ s32 D_800ED3C4 = 0;
+/* US: JP: */ s32 screen_brightness = 0; // color for something (screen fading?)
+/* US: JP: */ s32 stage = 0; // stage of the entire sequence of this file. from fadein to fadeout
+/* US: JP: */ s32 selected = 0; // selected
+/* US:800ED3E4 JP: */ s32 D_800ED3E4 = 0;
+/* US:800ED3EC JP: */ s32 D_800ED3EC = 0;
+/* US:800ED3F4 JP: */ s32 D_800ED3F4 = 0;
 
-s32 D_800ED394 = 0;
-s32 D_800ED3B4 = 0;
-s32 D_800ED3C4 = 0;
-s32 screen_brightness = 0; // color for something (screen fading?)
-s32 stage = 0; // stage of the entire sequence of this file. from fadein to fadeout
-s32 selected = 0; // selected
-s32 D_800ED3E4 = 0;
-s32 D_800ED3EC = 0;
-s32 D_800ED3F4 = 0;
-
-s32 D_800ED340[5] = { 40, 42, 41, 42, -1 };
-
-RECT D_800ED398 = { .w = 0xFF, .h = 0xFF };
-
-// these change with tv standard
-s32 D_800ED384 = 1200;
-s32 D_800ED424 = 0;
-
-// functions
+#ifdef VERSION_WORLD
+/* US:800ED380 */ int D_800ED380 = 0; // the shut the fuck up counter
+/* US:800ED384 */ int D_800ED384 = 1200; // these change with tv standard
+/* US:800ED424 */ int D_800ED424 = 0; // these change with tv standard
+#endif
 
 // screen init?
 void func_800EB894(void)
@@ -177,11 +172,13 @@ void bigtext_render(void)
     case 5: // start bunny animation
         // TODO: the animation plays wrong, stops on the wrong frame
         D_800ED3EC = 1;
+#ifdef VERSION_WORLD
         D_800ED380 += 1;
         if (D_800ED380 > D_800ED384) {
             play_effect(0x5300);
             D_800ED380 = 0;
         }
+#endif
         break;
     case 6: // selected YES
         bounce_y += -0x800;
@@ -217,8 +214,10 @@ void func_800EBF58(u32 buttons)
     if (buttons == 0 || stage != 1)
         return;
 
+#ifdef VERSION_WORLD
     if (buttons & (BUTTONS_ACCEPT | BUTTONS_NAVIGATE))
         D_800ED380 = 0;
+#endif
 
     if (buttons & BUTTONS_ACCEPT) {
         play_effect(0x2600);
@@ -276,10 +275,12 @@ void func_800EC128(void)
 // menu curosr thing render
 void menu_cursor_render(void)
 {
-    s32 tmp;
-
+    int period = 12;
+#ifdef VERSION_WORLD
+    period = D_800ED424;
+#endif
     D_800ED388 += 1;
-    if (D_800ED388 >= D_800ED424) {
+    if (D_800ED388 >= period) {
         D_800ED38C += 1;
         D_800ED388 = 0;
         if (D_800ED340[D_800ED38C] == -1) {
@@ -288,8 +289,8 @@ void menu_cursor_render(void)
         D_800ED390 = D_800ED340[D_800ED38C];
     }
 
-    tmp = selected == 1 ? 0xAB : 0x9B;
-    sprite_render(2, D_800ED390, 0x44, tmp, screen_brightness, 0);
+    int spriteId = selected == 1 ? 0xAB : 0x9B;
+    sprite_render(2, D_800ED390, 0x44, spriteId, screen_brightness, 0);
 }
 
 void update_routine(u32 arg)
@@ -337,10 +338,6 @@ void func_800EC358(void)
 // JP: 800EC390
 int main(void)
 {
-    u32 buttons;
-    int choice;
-
-    // TEST: let's disable all audio shit
     // __main();
     announce_entering_main();
     gbuffer_init();
@@ -372,16 +369,16 @@ int main(void)
 
     robbit_anim_play(1);
     do {
-        buttons = input_das_read(); // read input
-        gbuffer_swap(); // swap and clear
-        update_routine(buttons); // process input
-        render_routine(); // update graphics
-        gbuffer_draw(); // render graphics
+        u32 buttons = input_das_read();
+        gbuffer_swap();
+        update_routine(buttons);
+        render_routine();
+        gbuffer_draw();
     } while (stage != 4);
 
     jt.snd_reset();
 
-    choice = 0;
+    int choice = 0;
 
     if (selected == 0) {
         global->world = 0;

@@ -1,17 +1,21 @@
-_output = ""
+_output: str = ""
 
-def put(s):
-    #print(s, end="")
+
+def put(s: str):
+    # print(s, end="")
     global _output
     _output += s
+
 
 def nl():
     put("\n")
 
+
 def tab():
     put("    ")
 
-def build(rule, target, direct, indirect=None):
+
+def build(rule: str, target: str, direct: list[str], indirect: list[str] | None = None):
     if indirect is None:
         indirect = []
     line = f"build {target}: {rule}"
@@ -21,19 +25,23 @@ def build(rule, target, direct, indirect=None):
     put(line)
     nl()
 
-def set(var_name, val):
+
+def set(var_name: str, val: str | int):
     put(f"{var_name} = {val}")
     nl()
 
-def param(var_name, val):
+
+def param(var_name: str, val: str | int):
     tab()
     set(var_name, val)
 
-def rule(name, cmd):
+
+def rule(name: str, cmd: str):
     put(f"rule {name}")
     nl()
     param("command", cmd)
 
-def write_to_file(filename="build.ninja"):
+
+def write_to_file(filename: str = "build.ninja"):
     with open(filename, "w") as f:
-        f.write(_output)
+        _ = f.write(_output)

@@ -46,7 +46,7 @@ void gbuffer_init(void)
 #ifdef VERSION_WORLD
         if (jt.get_video_mode() == MODE_PAL) {
             disp->screen.y = 36;
-            disp->pad0 = tv_standard == MODE_PAL ? 1 : 0;
+            disp->pad0 = jt.get_video_mode() == MODE_PAL ? 1 : 0;
         }
 #endif
     }

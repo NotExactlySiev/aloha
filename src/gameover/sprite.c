@@ -17,15 +17,13 @@
 
 // TODO: Struct the bunny texture format.
 
-Sprite *sprt_data[64];
-s32 D_800ED42C = 0; // max sprite index (sprite count)
-
-SpriteSet D_8012DF64; // sprite cluts and tpage
+static Sprite *sprt_data[64];
+static int D_800ED42C = 0; // sprite count
+static SpriteSet D_8012DF64; // sprite cluts and tpage
 
 void sprite_init(void)
 {
     sprite_load_data(ASSET(sprtdata));
-    // TODO: this should be a struct. but why? context? palette?
     D_8012DF64.tpage = getTPage(1, 0, 256, 0);
     D_8012DF64.cluts[0] = getClut(0, 240);
     D_8012DF64.cluts[1] = getClut(0, 241);
@@ -46,7 +44,7 @@ void sprite_load_data(u32 *raw)
 
 // put loaded sprite data into ots
 // rather, put a specific metasprite into ots, using its metadata
-void _sprite_render(SpriteSet *set, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx)
+static void render(SpriteSet *set, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clutidx)
 {
     Sprite *group;
     SpriteThing *s;
@@ -80,7 +78,7 @@ void _sprite_render(SpriteSet *set, s32 z, s32 id, s32 x, s32 y, u8 col, s32 clu
 
 void sprite_render(s32 z, s32 idx, s32 offx, s32 offy, u8 col, s32 clutidx)
 {
-    _sprite_render(&D_8012DF64, z, idx, offx, offy, col, clutidx);
+    render(&D_8012DF64, z, idx, offx, offy, col, clutidx);
 }
 
 void sprite_load_tiles(u32 *raw, int x, int y)
