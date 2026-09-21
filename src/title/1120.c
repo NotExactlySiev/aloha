@@ -9,14 +9,6 @@
 
 GlobalData *glob;
 
-// cheat sequence. unlock all levels
-const u32 D_800EBA3C[] = {
-    Pad1Up, Pad1Up, Pad1Down, Pad1Down,
-    Pad1x, Pad1x, Pad1Left, Pad1Right,
-    Pad1Left, Pad1Right, Pad1x, Pad1tri,
-    Pad1x, Pad1tri, 0, 0x08200000 // What is this final number doing here?
-};
-
 // enable debug mode. cheat mode should be on.
 // enter while holding down R2
 const u32 D_800EB9D4[] = {
@@ -24,6 +16,21 @@ const u32 D_800EB9D4[] = {
     Pad1Left, Pad1Left, Pad1Right, Pad1Right,
     Pad1x, Pad1x, Pad1tri, Pad1tri,
     Pad1Select, 0
+};
+
+// unused cheat sequence
+const u32 D_800EBA0C[] = {
+    Pad1Down, Pad1Up, Pad1Down, Pad1Up,
+    Pad1x, Pad1Left, Pad1Right, Pad1tri,
+    Pad1x, Pad1Up, Pad1Down, 0
+};
+
+// cheat sequence. unlock all levels
+const u32 D_800EBA3C[] = {
+    Pad1Up, Pad1Up, Pad1Down, Pad1Down,
+    Pad1x, Pad1x, Pad1Left, Pad1Right,
+    Pad1Left, Pad1Right, Pad1x, Pad1tri,
+    Pad1x, Pad1tri, 0
 };
 
 const char *D_800EB8F0[6][3] = {
@@ -57,9 +64,11 @@ typedef struct {
 } FGBuffer;
 
 typedef struct {
-    char unk[12];
-    u16 arr[30][64];
-    char unk2[72960];
+    DR_MODE draw_mode;
+    // u16 arr[30][64];
+    // char unk2[72960];
+    SPRT arr0[30][64];
+    SPRT arr1[30][64];
     u_long prims[64 * 1024];
     u_long ot[5];
     void *next;
@@ -328,7 +337,7 @@ int D_800F4CF4 = 8;
 int D_800F4CF8 = 0;
 
 #ifdef VERSION_WORLD
-/* US:800F4E08 */ int demo_wait_time = 0;
+/* US:800F4E08 */ int idle_wait_time = 0;
 #endif
 
 int D_800F4E18 = 0;
@@ -1013,7 +1022,7 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 
     // full repeat of the one above
     case PAGE_SAVE:
-        func_800E1384();
+        // func_800E1384();
         text_set_pos(page->offset.x, page->offset.y - 1);
         text_set_attr(2);
         text_put_str("   NOW    ");
@@ -1597,18 +1606,19 @@ void func_800E3EA4(void)
         D_800F4D0C = 0x800 * 6 / 5; // 0x999
         D_800F4D10 = 0x4000 * 6 / 5; // 0x4ccc
 
-        // Demo wait time
-        demo_wait_time = 1200 * 6 / 5; // 1440
+        // This is a bug. It's an interval so should be 5/6. This means the game
+        // takes ~9 seconds longer to play a demo on the PAL version.
+        idle_wait_time = 1200 * 6 / 5; // 1440
 
         // Fade out to movie wait time
-        D_800F4E18 = 9;
+        D_800F4E18 = 8 * 6 / 5; // 9
 
         // Robbit animation
-        D_800F4EC8 = 8;
+        D_800F4EC8 = 10 * 5 / 6; // 8
     } else {
         D_800F4D0C = 0x800;
         D_800F4D10 = 0x4000;
-        demo_wait_time = 1200;
+        idle_wait_time = 1200;
         D_800F4E18 = 8;
         D_800F4EC8 = 10;
     }
@@ -1626,25 +1636,29 @@ void func_800E3EA4(void)
 // # main stuff
 // glabel func_800E4D40 _the_callback
 // glabel func_800E4EE8 load_textures
-// glabel func_800E561C
+// x glabel func_800E561C
 
 // # text stuff
 // x text_set_pos
 // x text_clear
 // x text_put_char
 // x text_put_str
-// glabel func_800E5748 text_put_u8
-// glabel func_800E5780 text_put_u16
-// glabel func_800E57B4 text_put_u32
-// text_put_u64
+// x text_put_u4
+// x text_put_u8
+// x text_put_u16
+// x text_put_u32
 
 // # graphic stuff
 // glabel func_800E5818 gbuffer_swap
+
+// # sprite stuff
 // glabel func_800E58D4
 // glabel func_800E58E4
 // glabel func_800E5904 _draw_sprite
 // glabel func_800E5BBC draw_sprite
-// glabel func_800E5C00
+
+// # menu graphics
+// glabel func_800E5C00 draw_copyright_text
 // glabel func_800E5F58
 // glabel func_800E6300
 // glabel func_800E6658 set_brightness
@@ -1653,10 +1667,12 @@ void func_800E3EA4(void)
 // glabel func_800E6940
 // glabel func_800E6B90
 // glabel func_800E6D1C
-// glabel __func_800E6E80
-// glabel func_800E70F4
-// glabel func_800E7174
-// glabel func_800E7328
+// glabel __func_800E6E80 render_grid
+
+// # input.c
+// glabel func_800E70F4 input_init
+// glabel func_800E7174 cheat_code_debug_features
+// glabel func_800E7328 cheat_code_unlock_levels
 // glabel func_800E73CC set cloud speed
 // glabel func_800E742C update cheat mode
 // glabel func_800E7478 input das nonsense
@@ -1696,8 +1712,7 @@ int D_800F4D74 = 0;
 // JP: 800E3B54
 int main(void)
 {
-    printf("hellos\n");
-    __main();
+    // __main();
     D_800F4E68 = 0;
     announce_entering_main();
     func_800E87DC();
@@ -1804,10 +1819,10 @@ int main(void)
             }
 
 #ifndef VERSION_WORLD
-            const int demo_wait_time = 20 * 60;
+            const int idle_wait_time = 20 * 60;
 #endif
 
-            if (demo_wait_time < demo_counter) {
+            if (idle_wait_time < demo_counter) {
                 // User has been idle for too long. Play a demo or the intro.
 
                 // We reached the final demo. Play the intro movie this time.
@@ -2029,7 +2044,7 @@ void func_800E76D4(void)
 }
 #endif
 
-extern void (*D_800F4DDC)(void);
+void (*D_800F4DDC)(void) = NULL;
 
 void func_800E77A8(void (*cb)(void))
 {
@@ -2186,7 +2201,11 @@ void func_800E7CD8(int port, int slot)
 extern u8 D_800F4D8E;
 extern int D_800F4EE8;
 extern int D_800F4EF0;
-u16 D_800F7050[30][64];
+
+/* US:800F7050 JP: */ u16 D_800F7050[30][64];
+/* US:800F7F50 JP: */ BGBuffer D_800F7F50[2];
+
+// _the_callback()
 
 // 800E4ED0
 u8 text_set_attr(u8 attr)
@@ -2194,6 +2213,210 @@ u8 text_set_attr(u8 attr)
     u8 old = D_800F4D8E;
     D_800F4D8E = attr;
     return old;
+}
+
+void *D_800F4D78 = (void *)0x80060000;
+u8 D_800F5050[8192];
+
+// compressed assets
+extern u8 D_800EC030[];
+
+extern u8 D_800EC82C[]; // logo and copyright text texture
+extern u8 D_800EE6D0[]; // logo and copyright text clut
+
+// tileset assets
+extern u8 D_800EBFE8[]; // compressed clut
+extern u8 D_800EC234[]; // compressed texture
+
+extern u8 D_800EE8D0[];
+extern u8 D_800F04EC[];
+
+extern u8 D_800EBA78[];
+
+RECT D_800F4F7C = {
+    .x = 0,
+    .y = 0,
+    .w = 255,
+    .h = 255,
+};
+
+// load_textures
+void func_800E4EE8(void)
+{
+    D_800F4EE0 = 0;
+    D_800F4EE0 = 0;
+
+    DISPENV disp;
+    jt.SetDefDispEnv(&disp, 0, 0, 320, 240);
+#ifdef VERSION_WORLD
+    disp.pad0 = 0;
+    if (jt.get_video_mode() == MODE_PAL) {
+        disp.pad0 = 1;
+        disp.screen.y += 24;
+    }
+#endif
+    jt.PutDispEnv(&disp);
+
+    // Clear everything.
+    RECT rect = {
+        .x = 0,
+        .y = 0,
+        .w = 1024,
+        .h = 512,
+    };
+    jt.ClearImage(&rect, 0, 0, 0);
+    jt.DrawSync(0);
+    jt.ClearImage(&rect, 0, 0, 0);
+    jt.DrawSync(0);
+    text_set_attr(0);
+
+    for (u16 *p = &D_800F7050[29][63]; p > &D_800F7050; p--) {
+        *p = 0;
+    }
+
+    jt.decompress_lz1(D_800EC030 + 4, D_800F5050);
+
+    // Load the texture and clut for the logo and the copyright text.
+    jt.decompress_lz1(D_800EC82C, D_800F4D78);
+
+    jt.LoadImage(
+        &(RECT) {
+            .x = 0,
+            .y = 241,
+            .w = 256,
+            .h = 1,
+        },
+        D_800EE6D0
+    );
+    jt.DrawSync(0);
+
+    jt.LoadImage(
+        &(RECT) {
+            .x = 320,
+            .y = 0,
+            .w = 160,
+            .h = 240,
+        },
+        D_800F4D78 + 8
+    );
+    jt.DrawSync(0);
+
+    // FIXME
+    for (int i = 0; i < 2; i++) {
+        BGBuffer *buffer = &D_800F7F50[i];
+        jt.SetDrawMode(&buffer->draw_mode, 0, 0, getTPage(1, 0, 640, 0), &D_800F4F7C);
+        SPRT *p = &buffer->arr0[0][0];
+        for (int j = 0; j < 30 * 64; j++) {
+            setSprt(&p[j]);
+            setRGB0(&p[j], 128, 128, 128);
+            setClut(&p[j], 0, 240);
+            setWH(&p[j], 8, 8);
+        }
+    }
+
+    // Tileset texture
+    jt.decompress_lz1(D_800EBFE8 + 4, D_800F4D78);
+    jt.LoadImage(
+        &(RECT) {
+            .x = 0,
+            .y = 240,
+            .w = 256,
+            .h = 1,
+        },
+        D_800F4D78
+    );
+    jt.DrawSync(0);
+
+    jt.decompress_lz1(D_800EC234 + 4, D_800F4D78);
+    for (int i = 0; i < 32 * 32; i++) {
+        jt.LoadImage(
+            &(RECT) {
+                .x = (i & 0x1F) * 4 + 0x300,
+                .y = (i & ~0x1F) >> 2,
+                .w = 4,
+                .h = 8,
+            },
+            D_800F4D78 + 0x40 * i
+        );
+        jt.DrawSync(0);
+    }
+
+    jt.decompress_lz1(D_800EBA78 + 4, D_800F4D78);
+    jt.LoadImage(
+        &(RECT) {
+            .x = 640,
+            .y = 0,
+            .w = 64,
+            .h = 64,
+        },
+        D_800F4D78 + 8
+    );
+    jt.DrawSync(0);
+
+    // Sky texture
+    jt.decompress_lz1(D_800EE8D0 + 4, D_800F4D78);
+    u8 *src = D_800F4D78 + 8;
+    u8 *dst = D_800F4D78 + 0x10000;
+    for (int i = 0; i < 128; i++) {
+        for (int j = 0; j < 64; j++) {
+            u8 lo = *src++;
+            u8 hi = *src++;
+            *dst++ = (hi << 4) | (lo & 0xf);
+        }
+    }
+
+    jt.LoadImage(
+        &(RECT) {
+            .x = 640,
+            .y = 256,
+            .w = 32,
+            .h = 128,
+        },
+        D_800F4D78 + 0x10000
+    );
+    jt.DrawSync(0);
+
+    jt.decompress_lz1(D_800F04EC + 4, D_800F4D78);
+    RECT r = {
+        .x = 320,
+        .y = 480,
+        .w = 256,
+        .h = 1,
+    };
+
+    u16 skyClut[256];
+    // 32 shades
+    for (int i = 0; i < 32; i++) {
+        u16 *base = D_800F4D78;
+        for (int j = 0; j < 256; j++) {
+            u16 color = base[j];
+            u32 r = (color >> 10) & 0x1f;
+            u32 g = (color >> 5) & 0x1f;
+            u32 b = (color >> 0) & 0x1f;
+
+            r = (r * (31 - i) + i * 31) / 31;
+            g = (g * (31 - i) + i * 31) / 31;
+            b = (b * (31 - i) + i * 31) / 31;
+
+            skyClut[j] = ((r & 0x1f) << 10)
+                | ((g & 0x1f) << 5)
+                | ((b & 0x1f) << 0);
+        }
+
+        jt.LoadImage(&r, skyClut);
+        jt.DrawSync(0);
+        r.y += 1;
+    }
+}
+
+extern int D_800F4D84;
+extern int D_800F4D88;
+
+// 800E561C
+void func_800E561C(int param_1, int param_2)
+{
+    D_800F4D84 = param_1;
+    D_800F4D88 = param_2;
 }
 
 // 800E5634
@@ -2229,6 +2452,39 @@ void text_put_str(const char *str)
     while ((c = *str++))
         text_put_char(c);
 }
+
+// 800E5748
+void text_put_u4(uint v)
+{
+    v = v & 0xf;
+    if (9 < v) {
+        v = v + 'A' - '9' - 1;
+    }
+    text_put_char(v + '0');
+}
+
+// 800E5780
+void text_put_u8(uint v)
+{
+    text_put_u4((v & 0xff) >> 4);
+    text_put_u4(v & 0xf);
+}
+
+// 800E57B4
+void text_put_u16(uint v)
+{
+    text_put_u8((v & 0xffff) >> 8);
+    text_put_u8(v & 0xff);
+}
+
+// 800e57E4
+void text_put_u32(uint v)
+{
+    text_put_u16(v >> 0x10);
+    text_put_u16(v & 0xffff);
+}
+
+// gpu.c
 
 // misc.c ?
 

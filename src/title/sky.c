@@ -63,9 +63,9 @@ void func_800E8084(void)
 #ifdef VERSION_WORLD
     func_800E7FEC(&D_800F4DF0, &D_800F05E0);
     if (jt.get_video_mode() == MODE_PAL) {
-        D_800F4DE4 = 0x1333;
-        D_800F4DE8 = 0x1333;
-        D_800F4DEC = 0x13330;
+        D_800F4DE4 = 0x1000 * 6 / 5;
+        D_800F4DE8 = 0x1000 * 6 / 5;
+        D_800F4DEC = (0x1000 * 6 / 5) * 16;
     }
 #else
     func_800E7FEC(&(SVECTOR) { 0 }, &(VECTOR) { 0 });

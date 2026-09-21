@@ -9,7 +9,7 @@ glabel func_800E83BC
          * [XXXXZZZZ] [WWWWLLLL] [----YYYY] [  Step  ]
          *  T0         T1         T2         T3         T4
          * [ssssXXXX] [ssssZZZZ] [ssssWWWW] [ssssLLLL] [YYYY----]
-         * 
+         *
          * T0|T4 and T1 then go to VXY0/VZ0
          *
          */
@@ -36,7 +36,7 @@ glabel func_800E83BC
         or      $t6, $t6, $t4
         mtc2    $t6, $0
         mtc2    $t1, $1
-        
+
         /* t5 and t8 are dst pointers */
         la      $t5, 0x1F800000
         la      $t8, 0x1F800154
