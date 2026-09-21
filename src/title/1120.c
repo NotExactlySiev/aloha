@@ -2373,16 +2373,25 @@ typedef struct {
 /* US:800F4D98 JP:800F64DC */ CheatState D_800F4D98 = { .next_button = D_800EB9D4 }; // dev_mode;
 /* US:800F4DA0 JP:800F64E4 */ CheatState D_800F4DA0 = { .next_button = D_800EBA0C }; // music_movie_test
 /* US:800F4DA8 JP:800F64EC */ CheatState D_800F4DA8 = { .next_button = D_800EBA3C }; // unlock_levels
-/* US:800F4DB0 JP: */ int D_800F4DB0 = 0; // face_timer
-/* US:800F4DB4 JP: */ int D_800F4DB4 = 0; // nav_timer
-/* US:800F4DB8 JP: */ int D_800F4DB8 = -1; // das_state
-/* US:800F4DBC JP: */ int D_800F4DBC = 0; // face_prev
-/* US:800F4DC0 JP: */ int D_800F4DC0 = 0; // das_prev
+#ifndef VERSION_WORLD
+/*             JP:800F64F4 */ int D_800F64F4 = 12; // face_wait_jp
+/*             JP:800F64F8 */ int D_800F64F8 = 12; // nav_wait_jp
+#endif
+/* US:800F4DB0 JP:800F64FC */ int D_800F4DB0 = 0; // face_timer
+/* US:800F4DB4 JP:800F6500 */ int D_800F4DB4 = 0; // nav_timer
+/* US:800F4DB8 JP:800F6504 */ int D_800F4DB8 = -1; // das_state
+/* US:800F4DBC JP:800F6508 */ int D_800F4DBC = 0; // face_prev
+/* US:800F4DC0 JP:800F650C */ int D_800F4DC0 = 0; // das_prev
 
-int D_800F4F00 = 0; // initial_delay
-int D_800F4F08 = 0; // repeat_delay
-int D_800F4F10 = 0; // face_wait
-int D_800F4F18 = 0; // nav_wait
+/* US:800F4EF8 JP:800F6608 */ int D_800F4EF8 = 0; // are we allowed to activate cheats? first check
+
+#ifdef VERSION_WORLD
+/* US:800F4F00 */ int D_800F4F00 = 0; // initial_delay
+/* US:800F4F08 */ int D_800F4F08 = 0; // repeat_delay
+/* US:800F4F10 */ int D_800F4F10 = 0; // face_wait
+/* US:800F4F18 */ int D_800F4F18 = 0; // nav_wait
+/* US:800F4F20 */ char *D_800F4F20 = NULL; // mc_file_name
+#endif
 
 #ifdef VERSION_WORLD
 // input_set_delay
@@ -2401,7 +2410,71 @@ void func_800E70F4(void)
 
 //
 
-//
+void func_800E7174(int id, u32 buttons)
+{
+    if (id != 0)
+        return;
+
+    buttons ^= Pad1R2;
+
+    if (buttons == 0) {
+        // Ready to read the next button.
+        D_800F4D98.is_pressed = 0;
+        return;
+    }
+
+    if (!D_800F4D98.is_pressed) {
+        if (*D_800F4D98.next_button++ != buttons) {
+            // Wrong button. Reset sequence.
+            D_800F4D98.next_button = D_800EB9D4;
+        }
+
+        if (*D_800F4D98.next_button != 0) {
+            D_800F4D98.is_pressed = 1;
+            return;
+        }
+
+        if (D_800F4EF8) {
+            // Done. Activate cheat.
+            glob->debug_features = (!glob->debug_features) << 0;
+        } else if (glob->debug_features == 1) {
+            // Deactivate all debug features.
+            glob->debug_features = 0;
+        }
+    }
+}
+
+void func_800E724C(int id, u32 buttons)
+{
+    if (id != 0)
+        return;
+
+    if (buttons == 0) {
+        // Ready to read the next button.
+        D_800F4DA0.is_pressed = 0;
+        return;
+    }
+
+    if (!D_800F4DA0.is_pressed) {
+        if (*D_800F4DA0.next_button++ != buttons) {
+            // Wrong button. Reset sequence.
+            D_800F4DA0.next_button = D_800EBA0C;
+        }
+
+        if (*D_800F4DA0.next_button != 0) {
+            D_800F4DA0.is_pressed = 1;
+            return;
+        }
+
+        if (D_800F4EF8) {
+            // Done. Activate cheat.
+            glob->debug_features = (!glob->debug_features) << 1;
+        } else if (glob->debug_features == 1) {
+            // Deactivate all debug features.
+            glob->debug_features = 0;
+        }
+    }
+}
 
 void func_800E7328(int id, u32 buttons)
 {
@@ -2459,8 +2532,6 @@ int func_800E73CC(int id, u32 buttons)
 //    it the whole time.
 //
 
-extern int D_800F4EF8; // are we allowed to activate cheats? first check
-
 // update_cheat_mode
 void func_800E742C(void)
 {
@@ -2470,8 +2541,8 @@ void func_800E742C(void)
 void func_800E7478(void)
 {
 #ifndef VERSION_WORLD
-    D_800F4F10 = 12;
-    D_800F4F18 = 12;
+    D_800F64F4 = 12;
+    D_800F64F8 = 12;
 #endif
 
     D_800F4DB0 = 0;
@@ -2530,8 +2601,6 @@ void func_800E87DC(void)
 
     jt.sfx_set_prog_attr(26 << 8, 0);
 }
-
-extern char *D_800F4F20;
 
 #ifdef VERSION_WORLD
 // update_mc_file_name

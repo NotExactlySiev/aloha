@@ -1,6 +1,4 @@
-
-#ifndef _ENTITY_H
-#define _ENTITY_H
+#pragma once
 
 #include <common.h>
 
@@ -112,6 +110,10 @@ struct Entity {
         } block;
 
         s16 unk[32];
+
+        struct {
+            s16 unk0;
+        } coin;
     } sub;
 };
 
@@ -122,4 +124,4 @@ typedef struct {
     int unk3;
 } MeshMetadata;
 
-#endif
+Entity *func_800DBBE4();

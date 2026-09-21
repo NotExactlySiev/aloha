@@ -1,23 +1,23 @@
 #include "common.h"
-#include <libgpu.h>
-#include <libetc.h>
-#include <stdlib.h>
-#include "gbuffer.h"
 #include "entity.h"
-#include "libgte.h"
+#include "gbuffer.h"
+#include "math.h"
 #include "mesh.h"
+#include <libetc.h>
+#include <libgpu.h>
+#include <stdlib.h>
 
 #include "shared.h"
 
-void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id);   // render model
+void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id); // render model
 
 // todo: the OT in this one is wrong. also it's just another gbuffer
 typedef struct {
-    s16         count;
-    u32         ot[2];
-    SPRT_8     *nextfree;
-    u32         prims[2048];
-    DR_MODE     draw_mode;
+    s16 count;
+    u32 ot[2];
+    SPRT_8 *nextfree;
+    u32 prims[2048];
+    DR_MODE draw_mode;
 } TextOT;
 
 typedef struct {
@@ -39,10 +39,6 @@ List entity_list_1 = {};
 List entity_list_2 = {};
 List entity_list_free = {};
 
-// fast sin and cos from our own LUT
-#define sinf(a)     (sin_lut[(a) & 0xFFF])
-#define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
-
 // GetGraphType, TODO: remove when no longer needed
 int func_800C6FB8()
 {
@@ -51,18 +47,18 @@ int func_800C6FB8()
 
 // custom math functions. math.c?
 
-extern s32 D_801028F4;  // rng
-extern s32 D_801028FC;  // prng
+extern s32 D_801028F4; // rng
+extern s32 D_801028FC; // prng
 
 // seed arrs
-extern s8 D_8010154C[64];   // seed
-extern s8 D_8010158C[16];   // buttons
+extern s8 D_8010154C[64]; // seed
+extern s8 D_8010158C[16]; // buttons
 
 // working arrs
 extern s8 D_80106D28[64];
 extern s8 D_80106D68[64];
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
 void func_800CD010(void)
 {
     D_801028F4 = 0;
@@ -73,6 +69,7 @@ void func_800CD010(void)
     }
 }
 
+#ifdef PSYQ47_FIXES
 // The new version of PsyQ has a broken rsin!!! It returns non-sense numbers
 // for a certain range of angles. What.
 // Here's the original one from the game decompiled.
@@ -101,6 +98,7 @@ int rsin(int angle)
         return sin_1(angle & 0xfff);
     }
 }
+#endif
 
 s16 sin_lut[4096];
 
@@ -110,7 +108,6 @@ void make_sin_lut(void)
         // For some reason rsin is giving incorrect results for a certain range.
         // Perhaps something is overwriting its LUT? So we're using csin for now
         // until I figure that out.
-        //sin_lut[i] = rsin(i);
         sin_lut[i] = rsin(i);
     }
 }
@@ -155,11 +152,11 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDBA4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDCD0);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDDD4);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDFC4);
 
@@ -270,18 +267,18 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0224);
 extern Entity D_80106EC8[6];
 extern int D_8010294C;
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0370);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0370);
 void func_800D0370(void)
 {
     for (int i = 0; i < 6; i++) {
         Entity *e = &D_80106EC8[i];
         func_800E5E60(
-            &(SVECTOR){
-                 e->pos_x >> 12,
-                 e->pos_y >> 12,
-                 e->pos_z >> 12,
+            &(SVECTOR) {
+                e->pos_x >> 12,
+                e->pos_y >> 12,
+                e->pos_z >> 12,
             },
-            &(SVECTOR){
+            &(SVECTOR) {
                 e->angle_y,
                 e->angle_x,
                 e->angle_z,
@@ -365,7 +362,8 @@ void entity_detach_from_list(LinkedList *node)
 // 800D04E8
 Entity *entity_create(void)
 {
-    if (entity_free_count == 0) return 0;
+    if (entity_free_count == 0)
+        return 0;
     entity_free_count -= 1;
 
     Entity *ret = entity_list_free.head.next;
@@ -407,49 +405,49 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D08E8);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D09EC);
 
 // level_entity_ctors
-extern void (*D_8011EE78[64])(Entity*, Spirit*);
+extern void (*D_8011EE78[64])(Entity *, Spirit *);
 
 // entity call constructor
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0AA4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0AA4);
 void func_800D0AA4(Entity *e, Spirit *spirit)
 {
     u32 type = spirit->type & 0x7F;
 
     if (type < 0x40) {
-        void (*ctor)(Entity*, Spirit*);
+        void (*ctor)(Entity *, Spirit *);
         ctor = D_8011EE78[type];
         if (ctor == 0)
             entity_destroy(e);
         else
             ctor(e, spirit);
     } else
-    // isn't level specific
-    switch (type) {
-    case 0x40:  // jetpod
-        func_800D2618(e, spirit);
-        break;
-    case 0x41:
-        func_800D2A8C(e, spirit);
-        break;
-    case 0x42:
-        func_800D3D28(e, spirit);
-        break;
-    case 0x43:
-        func_800D45C4(e, spirit);
-        break;
-    case 0x44:
-        func_800D2184(e, spirit);
-        break;
-    default:
-        entity_destroy(e);
-        break;
-    }
+        // isn't level specific
+        switch (type) {
+        case 0x40: // jetpod
+            func_800D2618(e, spirit);
+            break;
+        case 0x41:
+            func_800D2A8C(e, spirit);
+            break;
+        case 0x42:
+            func_800D3D28(e, spirit);
+            break;
+        case 0x43:
+            func_800D45C4(e, spirit);
+            break;
+        case 0x44:
+            func_800D2184(e, spirit);
+            break;
+        default:
+            entity_destroy(e);
+            break;
+        }
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0B98);
+
 void _func_800D0B98(void)
 {
-
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C08);
@@ -458,8 +456,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C48);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C5C);
-// entity lists init
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C5C);
+//  entity lists init
 void func_800D0C5C(void)
 {
     func_800D0C48(&entity_list_0.head, &entity_list_0.tail);
@@ -475,9 +473,9 @@ void func_800D0C5C(void)
     for (int i = 0; i < 128; i++) {
         Entity *e = &entity_array[i];
         entity_ptrs[i] = e;
-        e->unk0 = i;    // id
-        e->unk1 = 0;    // active
-        LinkedList *node = (LinkedList*) e;
+        e->unk0 = i; // id
+        e->unk1 = 0; // active
+        LinkedList *node = (LinkedList *)e;
         // connect to tail
         entity_list_free.tail.prev = node;
         // connect to last element
@@ -586,7 +584,19 @@ void func_800D1834(MeshMetadata *data)
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1868);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D19D0);
+// Check collision with the player.
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D19D0);
+// US: 800D19D0
+int func_800D19D0(Entity *e, int distance, int ymargin)
+{
+    Entity *player = func_800DBBE4();
+    int mag2 = func_800E8868(
+        (player->pos_x >> 12) - (e->pos_x >> 12),
+        (player->pos_y >> 12) - (e->range_y / 2) - (e->pos_y >> 12) + ymargin,
+        (player->pos_z >> 12) - (e->pos_z >> 12)
+    );
+    return mag2 < distance;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1A68);
 
@@ -652,6 +662,7 @@ extern MeshMetadata D_8011EFA8;
 // e_exit_render
 // I have absolutely no idea what causes this to break
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2824);
+
 void _func_800D2824(Entity *e)
 {
     SVECTOR pos;
@@ -675,57 +686,136 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D29C4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2A8C);
 
+int D_801029EC = 0; // total number of coins in level
+
+// e_coin_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2B74);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2F58);
-
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D30E4);
-// e_coin_render
-// TODO: this isn't complete
-void func_800D30E4(Entity *e)
+// e_coin_comp3
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2F58);
+void func_800D2F58(Entity *e, Component *c)
 {
-    SVECTOR *cam = SCRTCHPAD(0x3CA);
-    SVECTOR pos;
-    SVECTOR rot;
-    int meshid;
-    // TODO: make the coin type in union
-    if (e->sub.unk[0] < 0) return;  // lifetime?
+    u16 state = c->state;
+    while (1) {
+        switch (state) {
+        case 0:
+            // Destroy if this entity type isn't allowed.
+            if (func_800DBC24()) {
+                state = 2;
+                break;
+            }
 
-    // is visible? these are flags I think TODO
-    e->unk5 |= 0x8000;
-    if (e->unk5 & 1) return;
+            if (e->sub.coin.unk0 < 0)
+                return;
 
-    pos.vx = e->pos_x >> 12;
-    pos.vy = e->pos_y >> 12;
-    pos.vz = e->pos_z >> 12;
+            // Collect.
+            if (func_800D19D0(e, 0x6400, 0x30) != 0) {
+                state = 1;
+                break;
+            }
 
-    rot.vx = -e->angle_x;
-    rot.vy = e->angle_y;
-    rot.vz = e->angle_z;
+            // Destroy if expired.
+            if (e->sub.coin.unk0 >= 720) {
+                if (func_800E3B98() == 0)
+                    func_800DB8A4();
+                state = 2;
+                break;
+            }
 
-    meshid = e->model.frame_a + D_8011EFB8.unk0;
+            // Destroy if it's fallen out of the world.
+            if ((e->pos_y >> 12) > 0x40) {
+                state = 2;
+                break;
+            }
 
-    // bouncing animation and... something else?
-    pos.vy += (6 * sinf(e->angle_x) - (e->range_y / 2) * cosf(e->angle_x)) >> 12;
+            // Destroy if it's out of range.
+            if (func_800DAB0C(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12)) {
+                state = 2;
+                break;
+            }
 
-    func_800E5E60(&pos, &rot, meshid);
+            return;
 
-    pos.vy = e->max_y + 2;
-    if (cam->vy >= pos.vy || e->max_y > 0) return;
+        case 1:
+            if (func_800DBC44()) {
+                state = 2;
+                break;
+            }
 
-    // draw shadow
-    // TODO: make sin_lut lookup a macro?
-    s32 tmp = (e->range_y / 2) * sinf(e->angle_x);
-    tmp /= ONE;
+            // Player has collected the coin.
+            int points = e->model.frame_a == 2 ? 500 : 100;
+            func_800EB16C(points);
+            if (!func_800E3B98()) {
+                func_800DB8D8(points);
+            }
 
-    s32 offz = tmp * sin_lut[(e->angle_y + 0xC00) & 0xFFF];
-    s32 offx = tmp * sin_lut[(e->angle_y + 0x800) & 0xFFF];
+            func_800CE304(0x1f00, 110, 63);
+            func_800ED59C();
+            state = 2;
+            break;
 
-    pos.vx += offx / ONE;
-    pos.vz += offz / ONE;
+        case 2:
+            D_801029EC -= 1;
+            entity_destroy(e);
+            return;
 
-    func_800E5E60(&pos, &rot, meshid | 0x4000);
+        default:
+            return;
+        }
+    }
 }
+
+// e_coin_comp2
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D30E4);
+//  e_coin_render
+//  TODO: this isn't complete
+// void func_800D30E4(Entity *e)
+// {
+//     SVECTOR *cam = SCRTCHPAD(0x3CA);
+//     SVECTOR pos;
+//     SVECTOR rot;
+//     int meshid;
+//     // TODO: make the coin type in union
+//     if (e->sub.unk[0] < 0)
+//         return; // lifetime?
+
+//     // is visible? these are flags I think TODO
+//     e->unk5 |= 0x8000;
+//     if (e->unk5 & 1)
+//         return;
+
+//     pos.vx = e->pos_x >> 12;
+//     pos.vy = e->pos_y >> 12;
+//     pos.vz = e->pos_z >> 12;
+
+//     rot.vx = -e->angle_x;
+//     rot.vy = e->angle_y;
+//     rot.vz = e->angle_z;
+
+//     meshid = e->model.frame_a + D_8011EFB8.unk0;
+
+//     // bouncing animation and... something else?
+//     pos.vy += (6 * sinf(e->angle_x) - (e->range_y / 2) * cosf(e->angle_x)) >> 12;
+
+//     func_800E5E60(&pos, &rot, meshid);
+
+//     pos.vy = e->max_y + 2;
+//     if (cam->vy >= pos.vy || e->max_y > 0)
+//         return;
+
+//     // draw shadow
+//     // TODO: make sin_lut lookup a macro?
+//     s32 tmp = (e->range_y / 2) * sinf(e->angle_x);
+//     tmp /= ONE;
+
+//     s32 offz = tmp * sin_lut[(e->angle_y + 0xC00) & 0xFFF];
+//     s32 offx = tmp * sin_lut[(e->angle_y + 0x800) & 0xFFF];
+
+//     pos.vx += offx / ONE;
+//     pos.vz += offz / ONE;
+
+//     func_800E5E60(&pos, &rot, meshid | 0x4000);
+// }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D3378);
 
@@ -797,25 +887,27 @@ extern s16 menu_item_positions[3][4];
 extern u32 menu_selection;
 extern u32 menu_is_visible;
 extern u32 menu_animation_timer;
+
 // menu_render
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4CC8);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4CC8);
 void func_800D4CC8(void)
 {
-    s16* pos;
+    s16 *pos;
     s32 text_sprite;
     s32 icon_frame;
     if (menu_is_visible) {
         icon_frame = menu_animation_timer >> 3;
-        if (icon_frame == 3) icon_frame = 1;
+        if (icon_frame == 3)
+            icon_frame = 1;
         for (int i = 0; i < 3; i++) {
             pos = menu_item_positions[i];
-            text_sprite = 0x120+i*2;
+            text_sprite = 0x120 + i * 2;
             if (i == menu_selection) {
-                ui_draw_menu_sprite(pos[2]+124, pos[1]+116, icon_frame+0x119, 0x808080, 0);
+                ui_draw_menu_sprite(pos[2] + 124, pos[1] + 116, icon_frame + 0x119, 0x808080, 0);
                 text_sprite += 1;
             }
             // draw text
-            ui_draw_menu_sprite(pos[0]+124, pos[1]+116, text_sprite, 0x808080, 0);
+            ui_draw_menu_sprite(pos[0] + 124, pos[1] + 116, text_sprite, 0x808080, 0);
         }
         // draw box
         ui_draw_menu_sprite(124, 116, 0x118, 0x2808080, 0);
@@ -853,7 +945,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D60C8);
 
 // render robbit. is acting really weird so I'm gonna disable it for now
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
-//func_800D6190() {}
+// func_800D6190() {}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
 
@@ -907,8 +999,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6E74);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6EEC);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
-func_800D6F14() {}  // FIXME !!!
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
+func_800D6F14() { } // FIXME !!!
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D71A4);
 
@@ -994,35 +1086,37 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA134);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA144);
 
-u32 *D_80102ACC;    // section1 base
-s32  D_80102ADC;    // render_range_thing
-SVECTOR D_80122EE8[32][32];    // objs, or whatever it is. center of tiles?
-extern s32   D_80102AE4;    // area side len
-extern s32   D_80102AD4;    // object id offset
+u32 *D_80102ACC; // section1 base
+s32 D_80102ADC; // render_range_thing
+SVECTOR D_80122EE8[32][32]; // objs, or whatever it is. center of tiles?
+extern s32 D_80102AE4; // area side len
+extern s32 D_80102AD4; // object id offset
 
 extern s32 D_80142D48; // render distance vertical
 extern s32 D_80141460; // render distance horizontal
 
 extern u16 D_80121CE8[];
-extern SVECTOR D_80121EE8[];    // position offsets
-extern SVECTOR D_801226E8[];   // rotation vectors
+extern SVECTOR D_80121EE8[]; // position offsets
+extern SVECTOR D_801226E8[]; // rotation vectors
 
 // load level objects (section1)
 // this has to do with culling outside of camera objects
 // dunno how it works :/
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA154);
+
 void _func_800DA154(void *data)
 {
     SVECTOR *vecmin = SCRTCHPAD(0);
     SVECTOR *vecmax = SCRTCHPAD(8);
-    u32 (*offsets)[32][32] = data;
+    u32(*offsets)[32][32] = data;
 
     D_80102ACC = data;
 
     for (int i = 0; i < 32; i++)
         for (int j = 0; j < 32; j++) {
             u32 offset = (*offsets)[i][j];
-            if (offset == 0) continue;
+            if (offset == 0)
+                continue;
             u16 *entries = data + offset;
             u16 count = *entries;
             SVECTOR *objs = entries + 1;
@@ -1039,14 +1133,20 @@ void _func_800DA154(void *data)
                 u16 meshid = D_80102AD4 + obj->pad;
                 int range = func_800E62F0(meshid);
 
-                if (vecmin->vx > (obj->vx - range)) vecmin->vx = obj->vx - range;
-                if (vecmax->vx < (obj->vx + range)) vecmax->vx = obj->vx + range;
+                if (vecmin->vx > (obj->vx - range))
+                    vecmin->vx = obj->vx - range;
+                if (vecmax->vx < (obj->vx + range))
+                    vecmax->vx = obj->vx + range;
 
-                if (vecmin->vy > (obj->vy - range)) vecmin->vy = obj->vy - range;
-                if (vecmax->vy < (obj->vy + range)) vecmax->vy = obj->vy + range;
+                if (vecmin->vy > (obj->vy - range))
+                    vecmin->vy = obj->vy - range;
+                if (vecmax->vy < (obj->vy + range))
+                    vecmax->vy = obj->vy + range;
 
-                if (vecmin->vz > (obj->vz - range)) vecmin->vz = obj->vz - range;
-                if (vecmax->vz < (obj->vz + range)) vecmax->vz = obj->vz + range;
+                if (vecmin->vz > (obj->vz - range))
+                    vecmin->vz = obj->vz - range;
+                if (vecmax->vz < (obj->vz + range))
+                    vecmax->vz = obj->vz + range;
             }
 
             D_80122EE8[i][j].vx = (vecmin->vx + vecmax->vx) / 2;
@@ -1056,9 +1156,11 @@ void _func_800DA154(void *data)
             s32 len_y = (vecmax->vy - vecmin->vy) / 2;
             s32 len_z = (vecmax->vz - vecmin->vz) / 2;
             s32 maxlen = len_x;
-            if (len_y > maxlen) maxlen = len_y;
-            if (len_z > maxlen) maxlen = len_z;
-            D_80122EE8[i][j].pad = (5792*maxlen) >> 12;     // sqrt(2)
+            if (len_y > maxlen)
+                maxlen = len_y;
+            if (len_z > maxlen)
+                maxlen = len_z;
+            D_80122EE8[i][j].pad = (5792 * maxlen) >> 12; // sqrt(2)
         }
 }
 
@@ -1073,6 +1175,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4C8);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4D8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA4E8);
+
 // FOR NOW
 // render level objects
 void _func_800DA4E8(void)
@@ -1083,8 +1186,8 @@ void _func_800DA4E8(void)
     Mesh *mesh = 0x1F800010;
 
     // top left corner of the chunks we're gonna draw
-    s32 player_chunk_x = (2*cam->vx - D_80102ADC*ONE + 16*ONE) >> 12;
-    s32 player_chunk_z = (2*cam->vz - D_80102ADC*ONE + 16*ONE) >> 12;
+    s32 player_chunk_x = (2 * cam->vx - D_80102ADC * ONE + 16 * ONE) >> 12;
+    s32 player_chunk_z = (2 * cam->vz - D_80102ADC * ONE + 16 * ONE) >> 12;
 
     // TODO: when this is turned on the entities get weird. memory corruption?
     /*for (int i = 0; i < D_80102AE4; i++) {
@@ -1127,7 +1230,6 @@ void _func_800DA4E8(void)
             }
         }
     }*/
-
 
     /*for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
@@ -1253,6 +1355,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBD2C);
 
 // player_entity_init
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
+
 void _func_800DBDB0(void)
 {
     player_entity.unk0 = 0;
@@ -1312,24 +1415,24 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC00C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
 
-extern int D_80102BFC;  // peak height?
+extern int D_80102BFC; // peak height?
 
 extern int D_80102C34;
 
 extern int D_80102724; // auto lookdown dangle
 extern int D_80102738;
 
-extern int D_80102C0C;  // jumps count
-extern int D_80102C14;  // airjump window
-extern int D_80102C1C;  // strafing thingy
+extern int D_80102C0C; // jumps count
+extern int D_80102C14; // airjump window
+extern int D_80102C1C; // strafing thingy
 extern int D_80102C4C;
 extern int D_80102C5C;
 extern int D_80102C6C;
-extern int D_80102C8C;  // winning animation is playing
+extern int D_80102C8C; // winning animation is playing
 extern int D_80102C9C;
 
-extern int D_80102710;  // jump force
-extern int D_80102718;  // jump timer?
+extern int D_80102710; // jump force
+extern int D_80102718; // jump timer?
 
 void func_800E5458(s16, s16, s16);
 
@@ -1345,7 +1448,7 @@ void func_800DC4C4(void)
         D_80102C6C = 0;
         D_80102C4C = 0x800;
         player_entity.vel_y = 0;
-        func_800DC9EC(&player_entity);  // land
+        func_800DC9EC(&player_entity); // land
         D_80102BFC = player_entity.max_y;
         player_entity.comp1.state = 0;
     case 0: // grounded
@@ -1362,11 +1465,12 @@ void func_800DC4C4(void)
             D_80102724 = -16;
             D_80102C0C = 0;
             D_80102C14 = 0;
-            if (D_80102C9C > 0) {   // do we actually need this?
+            if (D_80102C9C > 0) { // do we actually need this?
                 D_80102C9C = 0;
             }
             player_entity.unk7 = D_80102718;
-            if (player_entity.vel_y >= 0) goto make_5;
+            if (player_entity.vel_y >= 0)
+                goto make_5;
 
             // bouncing (off an enemy, or maybe something else)
             D_80102C6C = 0x300;
@@ -1377,8 +1481,9 @@ void func_800DC4C4(void)
         } else {
             D_80102C5C = func_800D9E40(&player_entity);
             if (func_800D9F2C(&player_entity)
-             || func_800D9DD4(&player_entity)
-             || (D_80102C34 & D_80102738) == 0) break;
+                || func_800D9DD4(&player_entity)
+                || (D_80102C34 & D_80102738) == 0)
+                break;
 
             func_800CE304(0x300, 0x50, 0x3F);
             D_80102C9C = 0;
@@ -1389,7 +1494,7 @@ void func_800DC4C4(void)
             player_entity.comp1.unk0 = 24;
             player_entity.comp1.state = 1;
             player_entity.vel_y = -D_80102710;
-            player_entity.unk7 = D_80102718;  // gravity? ddy
+            player_entity.unk7 = D_80102718; // gravity? ddy
         }
 
     case 1: // jump (just)
@@ -1399,13 +1504,14 @@ void func_800DC4C4(void)
         }
     case 2: // jump
         player_entity.on_air = 0;
-        if (player_entity.vel_y > 0) goto make_5;   // going down
+        if (player_entity.vel_y > 0)
+            goto make_5; // going down
 
         D_80102C14 = 0;
-        if (func_800DCB50()) goto make_3;
+        if (func_800DCB50())
+            goto make_3;
 
         break;
-
 
     make_3:
         func_800CE304(0x400, 0x5A, 0x3F);
@@ -1425,49 +1531,51 @@ void func_800DC4C4(void)
         }
     case 4: // air jump
         player_entity.on_air = 0;
-        if (player_entity.comp1.unk0 == 0 && func_800DCB50()) goto make_3;
+        if (player_entity.comp1.unk0 == 0 && func_800DCB50())
+            goto make_3;
         if (player_entity.vel_y > 0) {
             D_80102724 = -32;
             goto make_5;
         }
         break;
 
-
     make_5:
         player_entity.comp1.state = 5;
     case 5: // falling
         D_80102C6C = 0;
-        //jt.printf("timer: %d\n", D_80102C14);
-        if (func_800DCB50()) goto make_3;
+        // jt.printf("timer: %d\n", D_80102C14);
+        if (func_800DCB50())
+            goto make_3;
 
         if (player_entity.vel_y <= 0)
             player_entity.unk7 = D_80102718;
-        if (player_entity.on_air != 0) goto make_0;
+        if (player_entity.on_air != 0)
+            goto make_0;
 
         break;
     }
 
     // state machine is determined. do the actual physics now
 
-    func_800DD968();                    // manual vertical look?
-    func_800DD994(&player_entity);      // strafe?
+    func_800DD968(); // manual vertical look?
+    func_800DD994(&player_entity); // strafe?
 
-    func_800DD158(&player_entity);      // 4 looking and rotation stuff
+    func_800DD158(&player_entity); // 4 looking and rotation stuff
     func_800DD794(&player_entity);
     func_800DD534(&player_entity);
     func_800DD750(&player_entity);
 
-    func_800DCEE0(&player_entity);      // forward (set actual vel vector)
-    func_800DCFD0(&player_entity);      // gravity (update dy)
-    func_800DCCB0(&player_entity);      // movement (update position)
+    func_800DCEE0(&player_entity); // forward (set actual vel vector)
+    func_800DCFD0(&player_entity); // gravity (update dy)
+    func_800DCCB0(&player_entity); // movement (update position)
 
     // and set the camera too
 
     // off from looking up and down
     int offy = sinf(player_entity.angle_x) >> 6;
-    if (offy > 0) offy = 0;
-    if (D_80102C8C == 0)
-    {
+    if (offy > 0)
+        offy = 0;
+    if (D_80102C8C == 0) {
         //
         offy -= func_800DDB58() + 0x90;
         func_800E543C(player_entity.pos_x >> 12, (player_entity.pos_y >> 12) + offy, player_entity.pos_z >> 12);
@@ -1526,10 +1634,11 @@ void debug_print_decimal(s32 num)
     debug_print_decimal_unsigned(num, 5);
 }
 
-
 u32 D_80102794 = 0;
+int D_80102798 = 1;
+int D_8010279C = 0;
 extern s32 D_80102BF4;
-SVECTOR D_80141448;  // camera rotation?
+SVECTOR D_80141448; // camera rotation?
 
 void func_800DDF04(void)
 {
@@ -1559,14 +1668,13 @@ void func_800DDF04(void)
         //
         debug_set_pos(10, 23);
         debug_print_str("ZX=");
-        debug_print_hex16(player_entity.angle_y);   // wait what
+        debug_print_hex16(player_entity.angle_y); // wait what
         debug_set_pos(10, 24);
         debug_print_str("AREA=");
         //
         debug_set_pos(10, 25);
         debug_print_str("LAND=");
         //
-
     }
     // THEN PLAYER ENTITY STUFF
     // TODO: draw feet too
@@ -1578,23 +1686,21 @@ void func_800DDF04(void)
             &(SVECTOR) {
                 player_entity.pos_x >> 12,
                 player_entity.max_y,
-                player_entity.pos_z >> 12
-            },
+                player_entity.pos_z >> 12 },
             &(SVECTOR) {
                 .vy = player_entity.angle_y + 0x800,
             },
             D_80102BF4 + 1
         );
     }
-
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE244);
 
 u16 debug_font_color[4] = { 1, 1, 0x7FFF, 0 };
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE384);
-//load debug font clut
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE384);
+// load debug font clut
 void func_800DE384(u16 x, u16 y)
 {
     RECT rect = {
@@ -1610,7 +1716,7 @@ void func_800DE384(u16 x, u16 y)
 s32 debug_char_x = 0;
 s32 debug_char_y = 0;
 
-u32 debug_text_transparent = 0;    // debug_font_trans
+u32 debug_text_transparent = 0; // debug_font_trans
 u32 debug_font_index = 0;
 RECT debug_text_texture = { 0, 0, 255, 255 };
 u32 debug_font_x = 960;
@@ -1623,8 +1729,8 @@ extern TextUV debug_char_uvs[128];
 
 void debug_print_char(char c)
 {
-    s32* last;
-    SPRT_8* p;
+    s32 *last;
+    SPRT_8 *p;
 
     if (debug_text_ot[debug_ot_index].count < 512) {
         debug_text_ot[debug_ot_index].count += 1;
@@ -1641,7 +1747,7 @@ void debug_print_char(char c)
     }
 }
 
-void debug_print_str(char* str)
+void debug_print_str(char *str)
 {
     while (*str) debug_print_char(*str++);
 }
@@ -1651,11 +1757,12 @@ void debug_print_decimal_unsigned(u32 num, u32 pad)
     u32 digit;
     u32 place = 1000000000;
     u32 skip = 10;
-    if (pad < 10) skip = 10 - pad;
+    if (pad < 10)
+        skip = 10 - pad;
 
     while (place) {
-        digit = num/place;
-        num -= digit*place;
+        digit = num / place;
+        num -= digit * place;
         // skip leading zeros
         if (!(skip > 0 && digit == 0 && place != 1))
             debug_print_char(digit + '0');
@@ -1669,11 +1776,13 @@ void debug_print_hex8(u8 byte)
     u8 nybble;
 
     nybble = byte >> 4;
-    if (nybble > 9) nybble += 7;
+    if (nybble > 9)
+        nybble += 7;
     debug_print_char('0' + nybble);
 
     nybble = byte & 0xF;
-    if (nybble > 9) nybble += 7;
+    if (nybble > 9)
+        nybble += 7;
     debug_print_char('0' + nybble);
 }
 
@@ -1700,18 +1809,19 @@ void debug_set_pos(u32 x, u32 y)
 // draw and swap
 void debug_text_draw(void)
 {
-    DR_MODE* p;
-    void* last;
+    DR_MODE *p;
+    void *last;
     u16 tpage;
 
     p = &debug_text_ot[debug_ot_index].draw_mode;
-    tpage = GetTPage(0,debug_font_index, debug_font_x, debug_font_y);
+    tpage = GetTPage(0, debug_font_index, debug_font_x, debug_font_y);
     SetDrawMode(p, 0, 0, tpage, &debug_text_texture);
     last = &debug_text_ot[debug_ot_index].ot[0];
     addPrim(last, p);
     func_800E9818(last);
     debug_ot_index += 1;
-    if (debug_ot_index > 2) debug_ot_index = 0;
+    if (debug_ot_index > 2)
+        debug_ot_index = 0;
     debug_text_ot[debug_ot_index].nextfree = &debug_text_ot[debug_ot_index].prims[0];
     debug_text_ot[debug_ot_index].count = 0;
     // re-initialize an empty one
@@ -1723,7 +1833,6 @@ void func_800DE8B0(u32 x, u32 y)
     debug_font_x = x & 0x3c0;
     debug_font_y = y & 0x100;
     D_80102788 = y & 0xff;
-
 }
 
 void func_800DE8DC(u16 r, u16 g, u16 b)
@@ -1734,10 +1843,9 @@ void func_800DE8DC(u16 r, u16 g, u16 b)
     debug_font_color[2] = b;
 }
 
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE920); // Set index
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE920);   // Set index
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE930);   // debug_text_init
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DE930); // debug_text_init
 
 // more real functions
 
@@ -1747,7 +1855,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1C4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1D4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1E4);   // level_setup
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1E4); // level_setup
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF454);
 
@@ -1755,15 +1863,114 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF474);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF690);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF6FC);   // debug stuff
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF6FC); // debug stuff
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF884);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78);   // logic_routine
+int D_80102BFC = 0;
+int D_80102C04 = 0;
+int D_80102C0C = 0;
+int D_80102C14 = 0;
+int D_80102C1C = 0;
+int D_80102C24 = 0;
+int D_80102C2C = 0;
+int D_80102C34 = 0;
+int D_80102C3C = 0;
+int D_80102C44 = 0;
+int D_80102C4C = 0;
+int D_80102C54 = 0;
+int D_80102C5C = 0;
+int D_80102C64 = 0;
+int D_80102C6C = 0;
+int D_80102C74 = 0;
+int D_80102C7C = 0;
+int D_80102C84 = 0;
+int D_80102C8C = 0;
+int D_80102C94 = 0;
+int D_80102C9C = 0;
+int D_80102CA4 = 0;
+int D_80102CAC = 0;
+int D_80102CB4 = 0;
+int D_80102CBC = 0;
+int D_80102CC4 = 0;
+int D_80102CCC = 0;
+int D_80102CD4 = 0;
+int D_80102CDC = 0;
+int D_80102CE4 = 0;
+int D_80102CEC = 0;
+int D_80102CF4 = 0;
+int D_80102CFC = 0;
+int D_80102D04 = 0;
+int D_80102D0C = 0;
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78); // logic_routine
+
+void func_800DFC78(void)
+{
+    func_800F3320();
+    func_800F3330();
+    func_800DAAFC(0);
+    func_800D861C();
+    func_800D14A4();
+    func_800D6944();
+
+    // Spawn entities.
+    D_80102CEC += 1;
+    if (func_800DBA18() != 0) {
+        D_80102CEC = 0;
+    }
+    if ((D_80102CEC & 3) == 0) {
+        func_800D13EC();
+    }
+
+    func_800D0EEC();
+    func_800D0EB4();
+    func_800D0F4C();
+
+    if (func_800D1494() == 0) {
+        func_800CE158(0);
+        func_800DAAFC(1);
+    }
+
+    if (func_800DBC24() == 0) {
+        func_800D0E24();
+        func_800D0DEC();
+    }
+
+    func_800D0E8C();
+    func_800CE158(1);
+    func_800DAAFC(0);
+
+    // List 1 entities. Pickup items. Coins, powerups.
+    func_800D0F9C(); // comp0
+    func_800D0F74(); // comp1 // animation and physics
+    func_800D0FEC(); // comp3 // lets me collect coins
+
+    // Read processed input. Player control
+    func_800DC00C();
+    func_800DC4C4();
+    func_800FD328();
+    func_800F8EC4();
+    func_800F8DD8();
+    func_800DC0CC();
+
+    //
+    func_800E1738();
+    func_800E18A4();
+    func_800EFDEC();
+    func_800DF454();
+    func_800EEF50();
+    func_800F3DC0();
+    func_800D0224();
+    func_800F1F8C();
+    func_800F26E4();
+    func_800F28FC();
+}
 
 // 0x400 to 0xC00 camera is glitched
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18);   // render_routine
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18); // render_routine
+
 void _func_800DFE18(void)
 {
     func_800E5CC0();
@@ -1778,28 +1985,28 @@ void _func_800DFE18(void)
     // func_800D4CC8(); // pause menu
     // func_800F421C(); //
     // func_800D46CC(); // demo overlay
-    func_800EF004();    // ui
+    func_800EF004(); // ui
 
     if (!func_800F3434()) {
-        //func_800F1A0C();
-        //func_800F87BC();
-        //func_800EFEC4();
-        //func_800E5D30();
-        //func_800D0F24();
+        // func_800F1A0C();
+        // func_800F87BC();
+        // func_800EFEC4();
+        // func_800E5D30();
+        // func_800D0F24();
     }
 
     if (!func_800DBC24() && !func_800F3434()) {
-        //func_800D0E5C();
+        // func_800D0E5C();
     }
 
     if (!func_800F3434()) {
-        //func_800D0FC4();
-        //func_800DDF04();
-        //func_800D0370();
-        //func_800DA998();
-        //func_800DA4E8();
-        //func_800F8EF4();
-        //func_800F8E10();
+        // func_800D0FC4();
+        // func_800DDF04();
+        // func_800D0370();
+        // func_800DA998();
+        // func_800DA4E8();
+        // func_800F8EF4();
+        // func_800F8E10();
     }
 
     DRAWENV drawenv;
@@ -1842,16 +2049,7 @@ void _func_800DFE18(void)
     addPrim(&gbuf->ot[563], penv);
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
-extern u32 D_80102794;
-extern int D_80102CA4;
-extern int D_80102CAC;
-extern int D_80102CB4;
-extern int D_80102CCC;
-extern int D_80102CD4;
-extern int D_80102CDC;
-extern int D_80102CE4;
-extern int D_80102D04;
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", .L800E0140);  // main
 
 void main(void)
 {
@@ -1895,7 +2093,7 @@ reload:
 
         // The real display loop
         while (1) {
-            //printf("loop\n");
+            // printf("loop\n");
             if (D_80102CA4) {
                 //
             }
@@ -1904,7 +2102,8 @@ reload:
                 //
             }
 
-            if (D_80102CDC == 1) break;
+            if (D_80102CDC == 1)
+                break;
             gbuffer_swap();
             func_800DA4C8();
             int r;
@@ -1912,12 +2111,14 @@ reload:
                 func_800F31C4();
             }
             for (; r > 0; r--) {
-                //printf("simulate\n");
+                // printf("simulate\n");
                 if (!func_800F3350()) {
                     if (D_80102CCC < ONE) {
                         int tmp = D_80102CCC + 128;
-                        if (tmp < 0) tmp = 0;
-                        else if (tmp > ONE) tmp = ONE;
+                        if (tmp < 0)
+                            tmp = 0;
+                        else if (tmp > ONE)
+                            tmp = ONE;
                         D_80102CCC = tmp;
                         func_800E1164(tmp);
                     }
@@ -1929,7 +2130,7 @@ reload:
                     ? func_800F32BC()
                     : (r++, D_80102D04 -= ONE, func_800F323C());
                 if (buttons < 0) {
-                    //if (buttons & Pad2Down)
+                    // if (buttons & Pad2Down)
                     //
                 }
                 if (!D_80102CAC) {
@@ -1975,7 +2176,7 @@ reload:
 
                 //
                 //
-                //func_800E1164
+                // func_800E1164
             }
             my_DrawSync(0);
             func_800F2C6C(1);
@@ -1995,20 +2196,19 @@ out:
     func_800E9994();
 }
 
-
 // 2 functions, for sale, never called
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0810);
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E08FC);   // LoadClut
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E08FC); // LoadClut
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDrawEnv);
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDispEnv);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDrawEnv);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", SetDefDispEnv);
 
-void* data_buffer_start = 0x80060000;
-extern void* data_buffer_ptr;
+void *data_buffer_start = 0x80060000;
+extern void *data_buffer_ptr;
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0A30);
 
-void* data_buffer_get_ptr(void)
+void *data_buffer_get_ptr(void)
 {
     return data_buffer_ptr;
 }
@@ -2028,7 +2228,7 @@ void data_buffer_reset(void)
     data_buffer_ptr = data_buffer_start;
 }
 
-void func_800E0ABC(DISPENV* disp)
+void func_800E0ABC(DISPENV *disp)
 {
     if (func_800E95A0() != MODE_NTSC) {
         disp->pad0 = 1;
@@ -2048,7 +2248,7 @@ const u16 gbuffer_disp_pos[3][2] = {
     { 256, 0 },
 };
 
-void gbuffer_reset(GBuffer* gbuf, int idx)
+void gbuffer_reset(GBuffer *gbuf, int idx)
 {
     gbuf = &gbuf[idx];
     SetDefDispEnv(&gbuf->disp, gbuffer_disp_pos[idx][0], gbuffer_disp_pos[idx][1], 256, 240);
@@ -2068,7 +2268,6 @@ void gbuffer_reset(GBuffer* gbuf, int idx)
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0BD8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0C14);
-
 
 // vram inspector and color stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0D44);
@@ -2093,14 +2292,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F84);
 
 // This is weird. The second primbuffer will run into the text section if full.
 PrimBuffer *gbuffer_prim_buffers = 0x80060000;
-s32 D_80102D3C = 0;  // primbuffer_index
+s32 D_80102D3C = 0; // primbuffer_index
 
 GBuffer gbuffers[3];
 s32 gbuffer_current_index;
 
 extern s32 D_80102DBC;
 
-GBuffer* gbuffer_get_current(void)
+GBuffer *gbuffer_get_current(void)
 {
     return &gbuffers[gbuffer_current_index];
 }
@@ -2147,12 +2346,12 @@ extern CVECTOR D_80142CE0;
 extern QueuedImage D_8012B980[16];
 
 // gbuffer_draw
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E11A0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E11A0);
 void func_800E11A0(void)
 {
     int index = gbuffer_current_index;
     GBuffer *gbuf = &gbuffers[index];
-    //printf("Drawing buffer %d\n", index);
+    // printf("Drawing buffer %d\n", index);
     if (D_80102D0C) {
         // VRAM Inspector
         //
@@ -2178,7 +2377,7 @@ void func_800E11A0(void)
     // ????
     RECT *rect = gbuf->nextfree;
     gbuf->nextfree = rect + 1;
-    *rect = (RECT){
+    *rect = (RECT) {
         .x = gbuf->draw.clip.x,
         .y = gbuf->draw.clip.y,
         .w = 4,
@@ -2205,12 +2404,12 @@ void func_800E11A0(void)
         if (ot->len) {
             printf("%03d: %08X [%d] C: 0x%02X\n", layer, ot->addr, ot->len, ot->code);
         }
-        ot = (((u32) &ot) & 0xFF000000) | (ot->addr);
+        ot = (((u32)&ot) & 0xFF000000) | (ot->addr);
         if (ot == &gbuf->ot[layer + 1]) {
             layer += 1;
         }
-        //printf("next is at %p\n", ot);
-        //break;
+        // printf("next is at %p\n", ot);
+        // break;
     }
 #endif
 
@@ -2221,7 +2420,7 @@ void func_800E11A0(void)
     gbuf->draw.b0 = D_80142CE0.b;
     jt.SetDrawEnv(p, &gbuf->draw);
     addPrim(&gbuf->ot[1], p);
-    //jt.DrawOTag(gbuf->ot);
+    // jt.DrawOTag(gbuf->ot);
     func_800E9818(gbuf->ot);
 }
 
@@ -2254,7 +2453,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1C34);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1D8C);
 
 // Animate "GRAB" image
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1E28);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1E28);
 void func_800E1E28(int rate, int frames)
 {
     printf("rate %d frame %d\n", rate, frames);
@@ -2309,17 +2508,21 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E20C4);
 u32 func_800E20E8(u32 *header, s32 section)
 {
     // should be converted from big endian
-    union { u8 b[4]; u32 i; } be;
+    union {
+        u8 b[4];
+        u32 i;
+    } be;
+
     be.i = header[section];
     u32 le = (be.b[0] << 24)
-           | (be.b[1] << 16)
-           | (be.b[2] << 8)
-           | (be.b[3] << 0);
+        | (be.b[1] << 16)
+        | (be.b[2] << 8)
+        | (be.b[3] << 0);
     return le;
 }
 
 // ear decompress section
-u32 func_800E2124(void *src, s32 section, s32 subsection, void* dst)
+u32 func_800E2124(void *src, s32 section, s32 subsection, void *dst)
 {
     // navigate to section
     u32 offset = func_800E20E8(src, section);
@@ -2332,7 +2535,7 @@ u32 func_800E2124(void *src, s32 section, s32 subsection, void* dst)
     }
 
     return decompress_lz1_c(src + 4, dst);
-    //return jt.decompress_lz1(src + 4, dst);
+    // return jt.decompress_lz1(src + 4, dst);
 }
 
 // decompress section to permanent buffer
@@ -2340,15 +2543,14 @@ void *func_800E2184(void *src, s32 section, s32 subsection)
 {
     void *buffer = func_800E3E64();
     u32 size = func_800E2124(src, section, subsection, buffer);
-    size = (size + 3) & ~3;     // align to 4
+    size = (size + 3) & ~3; // align to 4
     func_800E3E54(buffer + size);
-    jt.printf("%d %d\t[%d]\t-> %p\n", section, subsection, size, buffer);
+    printf("%d %d\t[%d]\t-> %p\n", section, subsection, size, buffer);
     return buffer;
 }
 
 // load entity
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E21F0);
-
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E271C);
 
@@ -2573,13 +2775,13 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E543C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5458);
 
-SVECTOR *D_801027F0 = SCRTCHPAD(0x3C8);    // camera pos
-MATRIX *D_801027F4 = SCRTCHPAD(0x3E4);    // rotation matrix
-MATRIX *D_801027F8 = SCRTCHPAD(0x3D0);    // light matrix
+SVECTOR *D_801027F0 = SCRTCHPAD(0x3C8); // camera pos
+MATRIX *D_801027F4 = SCRTCHPAD(0x3E4); // rotation matrix
+MATRIX *D_801027F8 = SCRTCHPAD(0x3D0); // light matrix
 extern void *D_80102814;
 extern MATRIX D_80137CD0;
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5478);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5478);
 void func_800E5478(void)
 {
     MATRIX tmp;
@@ -2587,24 +2789,42 @@ void func_800E5478(void)
     int s = sinf(D_80141448.vy);
 
     MATRIX *m = D_801027F4;
-    m->m[0][0] = c; m->m[0][1] = 0; m->m[0][2] = s;
-    m->m[1][0] = 0; m->m[1][1] = ONE; m->m[1][2] = 0;
-    m->m[2][0] = -s; m->m[2][1] = 0; m->m[2][2] = c;
+    m->m[0][0] = c;
+    m->m[0][1] = 0;
+    m->m[0][2] = s;
+    m->m[1][0] = 0;
+    m->m[1][1] = ONE;
+    m->m[1][2] = 0;
+    m->m[2][0] = -s;
+    m->m[2][1] = 0;
+    m->m[2][2] = c;
 
     c = cosf(D_80141448.vx);
     s = sinf(D_80141448.vx);
-    tmp.m[0][0] = ONE; tmp.m[0][1] = 0; tmp.m[0][2] = 0;
-    tmp.m[1][0] = 0; tmp.m[1][1] = c; tmp.m[1][2] = -s;
-    tmp.m[2][0] = 0; tmp.m[2][1] = s ; tmp.m[2][2] = c;
+    tmp.m[0][0] = ONE;
+    tmp.m[0][1] = 0;
+    tmp.m[0][2] = 0;
+    tmp.m[1][0] = 0;
+    tmp.m[1][1] = c;
+    tmp.m[1][2] = -s;
+    tmp.m[2][0] = 0;
+    tmp.m[2][1] = s;
+    tmp.m[2][2] = c;
 
     func_800E8838(m, &D_80137CD0);
     MulMatrix2(&tmp, m);
 
     c = cosf(D_80141448.vz);
     s = sinf(D_80141448.vz);
-    tmp.m[0][0] = c; tmp.m[0][1] = -s; tmp.m[0][2] = 0;
-    tmp.m[1][0] = s; tmp.m[1][1] = c; tmp.m[1][2] = 0;
-    tmp.m[2][0] = 0; tmp.m[2][1] = 0; tmp.m[2][2] = ONE;
+    tmp.m[0][0] = c;
+    tmp.m[0][1] = -s;
+    tmp.m[0][2] = 0;
+    tmp.m[1][0] = s;
+    tmp.m[1][1] = c;
+    tmp.m[1][2] = 0;
+    tmp.m[2][0] = 0;
+    tmp.m[2][1] = 0;
+    tmp.m[2][2] = ONE;
     MulMatrix2(&tmp, m);
     MulMatrix2(&tmp, &D_80137CD0);
     func_800E8738(m, D_80102814);
@@ -2651,13 +2871,13 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
     return func_800F4354(vec, SCRTCHPAD(0x8), &mesh_array[index & 0x3FF]);
 }*/
 
-int D_80138088;                 // number of meshes drawn
-extern s32 D_801380B0;          // lod_distance
-extern s16 D_8013E448[1024];    // lod mesh index offsets
-extern u16 D_8013EC48[1024];    // added flags and stuff
-extern s16 D_80141468[1024];    // z offsets
+int D_80138088; // number of meshes drawn
+extern s32 D_801380B0; // lod_distance
+extern s16 D_8013E448[1024]; // lod mesh index offsets
+extern u16 D_8013EC48[1024]; // added flags and stuff
+extern s16 D_80141468[1024]; // z offsets
 
-extern int (*D_80102E3C)(int, VECTOR*, u32); // depth adjuster
+extern int (*D_80102E3C)(int, VECTOR *, u32); // depth adjuster
 extern SVECTOR D_80102E44;
 extern SVECTOR D_801380A0;
 
@@ -2707,12 +2927,12 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     dir->vy = pos->vy - camera_pos->vy;
     dir->vz = pos->vz - camera_pos->vz;
     s32 mag2 = func_800F4354(dir, rotation->t, mesh);
-    u32 mesh_with_flags = (u32) mesh;
+    u32 mesh_with_flags = (u32)mesh;
 
     if (mag2 < 0)
         return;
 
-    if (mag2 >= D_801380B0/4) {
+    if (mag2 >= D_801380B0 / 4) {
         // Medium distance
         if (id & MODEL_BLACK_SHADOW) {
             return;
@@ -2731,7 +2951,7 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
         // Far distance
         // Switch to the LOD model and shade it flat.
         mesh = &mesh_array[mesh_index + D_8013E448[mesh_index]];
-        mesh_with_flags = (u32) mesh;
+        mesh_with_flags = (u32)mesh;
         mesh_with_flags |= MESH_FLAG_FLAT_SHADE;
     }
 
@@ -2748,7 +2968,7 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
 
         // Convert to OT layer
         layer = z >> 4;
-        CLAMP(layer, 1, 511);
+        CLAMP(1, 511, layer);
         layer = 558 - layer;
     }
 
@@ -2809,7 +3029,7 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     // Get the OT pointer and put the required flags in it.
     GBuffer *gbuf = gbuffer_get_current();
     u32 *ot = &gbuf->ot[layer];
-    u32 ot_with_flags = ((u32) ot) | ((id & 0xc000) >> 14);
+    u32 ot_with_flags = ((u32)ot) | ((id & 0xc000) >> 14);
 
     // Draw the mesh.
     gbuf->nextfree = draw_mesh(mesh_with_flags, gbuf->nextfree, ot_with_flags, third);
@@ -2937,9 +3157,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E749C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E75B0);
 
-
-
-
+#if PSYQ47_FIXES
 // TEMPORARY FIX FOR LIBGPU
 
 // These are libgpu functions that were called directly by this file, rather
@@ -3020,3 +3238,4 @@ u_short GetClut(int x, int y)
 }
 
 int (*GPU_printf)(char *fmt, ...) = printf;
+#endif

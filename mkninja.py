@@ -235,7 +235,17 @@ executables = [
         [PsyqLibrary("libgte"), PsyqLibrary("libc"), PsyqLibrary("libapi")],
         ["util.o", "start.o"],
     ),
-    # Executable("JM1/MAIN.PEX", "jm1", True, ["libgte", "libetc", "libc", "libapi"]),
+    Executable(
+        "JM1/MAIN.PEX",
+        "jm1",
+        True,
+        [
+            PsyqLibrary("libgte"),
+            PsyqLibrary("libetc"),
+            PsyqLibrary("libc"),
+            PsyqLibrary("libapi"),
+        ],
+    ),
     # TODO: Should be SELECT.EXE and not compressed for Japan.
     # Executable(selectExeName, "select", selectIsCompressed, ["libc"]),
     Executable(

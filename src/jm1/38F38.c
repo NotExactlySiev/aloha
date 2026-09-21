@@ -1,42 +1,23 @@
 #include "common.h"
-#include <libgpu.h>
-#include <libetc.h>
+#include "entity.h"
 #include "gbuffer.h"
 #include "libapi.h"
+#include "math.h"
 #include "mesh.h"
 #include "shared.h"
+#include <libetc.h>
+#include <libgpu.h>
 
-#include "entity.h"
-
-// TODO: this is repeated, put in header
-extern s16 sin_lut[4096];
-#define sinf(a)     (sin_lut[(a) & 0xFFF])
-#define cosf(a)     (sin_lut[((a)+0x400) & 0xFFF])
-
-POLY_FT4 *func_800E9FDC(u32 x, u32 y, u32 id, u32 color, u32 trans, POLY_F4* prims, u32 *ot);
+POLY_FT4 *func_800E9FDC(u32 x, u32 y, u32 id, u32 color, u32 trans, POLY_F4 *prims, u32 *ot);
 
 // The functions here look very similar to GTE functions. But as far as I can
 // tell they're not from libgte. I can't actually find them there.
 
+// Moving the GTE functions from here to gte.s
+
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8738);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E87B8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8810);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8824);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8838);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8868);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E88B0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E88C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E88D4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E88E4);
+// Moved to gte.s
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E88F4);
 
@@ -70,37 +51,37 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E91F4);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E929C);
 
 // polar to cart
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9324);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9324);
 
 // math thing
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E939C);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9540);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9540);
 int func_800E9540(void)
 {
     switch (jt.get_region()) {
-        case REGION_JAPAN:
-        case REGION_DEBUG:
-            return jt.get_widescreen();
+    case REGION_JAPAN:
+    case REGION_DEBUG:
+        return jt.get_widescreen();
 
-        default:
-            return 0;
+    default:
+        return 0;
     }
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95A0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95A0);
 int func_800E95A0(void)
 {
     return jt.get_video_mode();
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95D0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E95D0);
 DISPENV *func_800E95D0(DISPENV *env)
 {
     return jt.PutDispEnv(env);
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9600);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9600);
 u32 func_800E9600(int id)
 {
     return jt.PadRead(id);
@@ -111,26 +92,26 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9630);
 // read
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9670);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9728);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9728);
 void func_800E9728(void)
 {
     jt.wait_for_vsync();
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9758);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9758);
 void func_800E9758(int mask)
 {
     jt.SetDispMask(mask);
 }
 
 // WHYYYYYYY
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", my_DrawSync);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", my_DrawSync);
 int my_DrawSync(int mode)
 {
     return jt.DrawSync(mode);
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", my_LoadImage);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", my_LoadImage);
 int my_LoadImage(RECT *r, u_long *data)
 {
     return jt.LoadImage(r, data);
@@ -155,13 +136,23 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9994);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E99E8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9BB8);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9BB8);
+u8 func_800E9BB8(u8 *arr)
+{
+    for (int i = 1; i < 64; i++) {
+        if ((arr[i] & 0xf0) != (arr[0] & 0xf0)) {
+            return 0x80;
+        }
+    }
+    return arr[0] >> 4;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9BFC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9EF0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9FDC);
+
 /*POLY_FT4* func_800E9FDC(u32 x, u32 y, u32 id, u32 color, u32 trans, POLY_F4* prims, u32 arg)
 {
     // let's just send some random shit
@@ -182,31 +173,32 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9FDC);
     return p+1;
 }*/
 
-
 // draw ui sprites
 // this one draws behind the next one (so behind menu)
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_sprite);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_sprite);
 void ui_draw_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
 {
-    GBuffer* gbuf = gbuffer_get_current();
-    gbuf->nextfree =
-        func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 563);
+    GBuffer *gbuf = gbuffer_get_current();
+    gbuf->nextfree = func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 563);
 }
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_menu_sprite);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_menu_sprite);
 void ui_draw_menu_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
 {
-    GBuffer* gbuf = gbuffer_get_current();
-    gbuf->nextfree =
-        func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 564);
+    GBuffer *gbuf = gbuffer_get_current();
+    gbuf->nextfree = func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 564);
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA404);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA414);
 
+// end of sprite code
+
+// Unused?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA4E0);
 
+// Unused?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA59C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA5DC);
@@ -221,18 +213,55 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA7F8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA808);
 
-void func_800EA81C(void) {
+// Some sound effect functions
+void func_800EA81C(void)
+{
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA824);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA824);
+void func_800EA824(void)
+{
+    func_800EA81C();
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA844);
+int D_80102E84 = 0;
+int D_80102E8C = 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA854);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA844);
+void func_800EA844(void)
+{
+    D_80102E84 = 0;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA868);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA854);
+void func_800EA854(void)
+{
+    D_80102E84 = 1;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA8C4);
+// sfx_play_normal
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA868);
+void func_800EA868(u32 id)
+{
+    if (D_80102E84)
+        return;
+
+    int vol = 120;
+    if (id == 0x4c00) {
+        id = 0x4c00;
+        vol = 140;
+    }
+
+    func_800CE168(id, vol, 0x3f, 0, 0);
+    D_80102E8C = 40;
+}
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA8C4);
+void func_800EA8C4(void)
+{
+    D_80102E84 = 0;
+    func_800EA81C();
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA8EC);
 
@@ -313,22 +342,22 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4E4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 
-Entity *func_800DBBE4();
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
-void _func_800EC5C8() {
+
+void _func_800EC5C8()
+{
     MATRIX *m = SCRTCHPAD(0);
 
     Entity *player = func_800DBBE4();
     int angle = player->angle_y;
-    *m = (MATRIX){
+    *m = (MATRIX) {
         .m = {
             { cosf(angle), -sinf(angle), 0 },
-            { sinf(angle),  cosf(angle), 0 },
-            {           0,            0, 0 },
+            { sinf(angle), cosf(angle), 0 },
+            { 0, 0, 0 },
         },
     };
-    func_800E8738(m, &(SVECTOR){ 21, 24 });
+    func_800E8738(m, &(SVECTOR) { 21, 24 });
     func_800E8810();
     SetRotMatrix(m);
     GBuffer *gbuf = gbuffer_get_current();
@@ -336,7 +365,6 @@ void _func_800EC5C8() {
     //
     //
     // POLY_F4 *p = gbuf->nextfree;
-
 
     // SVECTOR *v0 = SCRTCHPAD(0);
     // VECTOR *v1 = SCRTCHPAD(8);
@@ -351,7 +379,7 @@ void _func_800EC5C8() {
     SVECTOR *v0 = SCRTCHPAD(0);
     SVECTOR *v1 = SCRTCHPAD(8);
 
-    *v0 = (SVECTOR){ 0, 0xf00, 0 };
+    *v0 = (SVECTOR) { 0, 0xf00, 0 };
     RotTrans(v0, v1, v0);
 
     LINE_F2 *p1 = gbuf->nextfree;
@@ -377,7 +405,7 @@ void _func_800EC5C8() {
 
 typedef struct {
     short x, y, z;
-    short id;   // Sprite to use
+    short id; // Sprite to use
 } Objective;
 
 Objective D_8012F568[8]; // bss
@@ -388,7 +416,7 @@ void objective_add(short x, short y, short z, short id)
 {
     if (D_80102EE4 >= 8)
         return;
-    D_8012F568[D_80102EE4++] = (Objective){ x, y, z, id };
+    D_8012F568[D_80102EE4++] = (Objective) { x, y, z, id };
 }
 
 // objective_clear
@@ -403,12 +431,12 @@ void func_800ECDE0(void)
     func_800ECDD0();
 }
 
-void func_800ECE00(void) {}
+void func_800ECE00(void) { }
 
 // render objective text (JETPOD() and EXIT())
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800ECE08);
 
-void func_800ED024(void) {}
+void func_800ED024(void) { }
 
 // end of objective.c
 
@@ -501,25 +529,25 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EEF50);
 
 // render hud
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF004);
+
 void _func_800EF004(void)
 {
-    //func_800EE06C();  // level start text
+    // func_800EE06C();  // level start text
     if (func_800DBC24())
         return;
-    //func_800D4928();    // boss fight
-    //func_800D4AC4();    // bonus mode counter
-    //func_800EADE0();
+    // func_800D4928();    // boss fight
+    // func_800D4AC4();    // bonus mode counter
+    // func_800EADE0();
     //
-    //func_800ED444();
-    //func_800ED02C();
-    //func_800EC2F4();
-    //func_800EBCB8();
+    // func_800ED444();
+    // func_800ED02C();
+    // func_800EC2F4();
+    // func_800EBCB8();
     func_800EC5C8();
     GBuffer *gbuf = gbuffer_get_current();
     //
     //
 }
-
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EF150);
 
@@ -571,7 +599,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EFEC4);
     return;
 }*/
 
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F0074);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F00D0);
@@ -580,7 +607,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F0134);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F020C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F021C);   // not disassembled, not used
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F021C); // not disassembled, not used
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F023C);
 
@@ -598,7 +625,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F10B8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F11E8);
 
-
 // ground rendering functions
 extern SVECTOR D_8010285C;
 extern int D_80102864;
@@ -610,12 +636,13 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F16B8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F1800);
 
-#define camera_pos ((SVECTOR*)SCRTCHPAD(0x3C8))
+#define camera_pos ((SVECTOR *)SCRTCHPAD(0x3C8))
 
 // copies the ground texture from the render area to screen
 void func_800F1A0C(void)
 {
-    if (D_80141448.vx <= -0x200) return;
+    if (D_80141448.vx <= -0x200)
+        return;
     GBuffer *g = gbuffer_get_current();
     // TODO: have camera pos defined somewhere else correctly
     g->nextfree = func_800F1800(&D_8010285C, D_80102864, g->nextfree, &g->ot[camera_pos->vy > 0 ? 558 : 43]);
@@ -772,15 +799,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42A4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42C8);
 
-
 // moving these three handwritten assembly functions to src
 
 // these could be assmebly too? this sets the pointer in ot (saved right below it)
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42E0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42E0);
 
 // thse set and get the fucky color value in the middle of code
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42F4);
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4338);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42F4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4338);
 
 #include <inline_n.h>
 
@@ -806,16 +832,17 @@ int func_800F4354(SVECTOR *in, VECTOR *out, Mesh *m)
 
 // process and sort sets
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
+
 // TODO: this breaks and I don't know why. maybe shouldn't be C at all?
 void _func_800F443C(MeshSets *sets_data)
 {
-    void *verts = *(void**) SCRTCHPAD(0x3A0);
+    void *verts = *(void **)SCRTCHPAD(0x3A0);
 
     // Z values for each set.
-    s32 *dst0 = (s32*) SCRTCHPAD(0x288);
+    s32 *dst0 = (s32 *)SCRTCHPAD(0x288);
 
     // Face index offsets for each set.
-    u16 *dst1 = (u16*) SCRTCHPAD(0x3A8);
+    u16 *dst1 = (u16 *)SCRTCHPAD(0x3A8);
 
     u32 sr;
     __asm__ volatile("mfc0 %0, $12\n nop\n" : "=r"(sr));
@@ -839,19 +866,19 @@ void _func_800F443C(MeshSets *sets_data)
 
         // Disable interrupts
         // EnterCriticalSection();
-        __asm__ volatile("mtc0 %0, $12\n" :: "r"(no_intr));
+        __asm__ volatile("mtc0 %0, $12\n" ::"r"(no_intr));
 
         __asm__ volatile("cfc2   $zero, $31;" : : : "memory");
         gte_sqr0_b();
 
         // Re-enable interrupts
         // ExitCriticalSection();
-        __asm__ volatile("mtc0 %0, $12\n" :: "r"(sr));
+        __asm__ volatile("mtc0 %0, $12\n" ::"r"(sr));
 
         // Projection of the center point, squared.
         __asm__ volatile("cfc2   $zero, $31;" : : : "memory");
 
-        //VECTOR projected;
+        // VECTOR projected;
         int x, y, z;
         __asm__ volatile(
             "mfc2   %0, $25;"
@@ -859,8 +886,8 @@ void _func_800F443C(MeshSets *sets_data)
             "mfc2   %2, $27;"
             : "=r"(x), "=r"(y), "=r"(z)
         );
-        //gte_stlvnl(&projected);
-        //gte_st
+        // gte_stlvnl(&projected);
+        // gte_st
 
         // Store the the biased Z value and the faces index offset.
         dst0[i] = ((x + y) >> 2) + z;
@@ -879,7 +906,8 @@ void _func_800F443C(MeshSets *sets_data)
         int j = sets_count - 1 - i;
         do {
             u16 off = *faceoffs_;
-            if (*mags_ <= mag) break;
+            if (*mags_ <= mag)
+                break;
             mags_[1] = *mags_;
             faceoffs_[1] = off;
             mags_ = mags_ - 1;
@@ -895,8 +923,6 @@ void _func_800F443C(MeshSets *sets_data)
         if (i < 1)
             return;
     } while (1);
-
-
 
     // for (int i = 1; i <= sets_count; i++) {
     //     s32 z = dst0[i];
@@ -920,7 +946,6 @@ void func_800F686C(void);
 void func_800F6878(void);
 void func_800F68A4(void);
 
-
 // draw_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
 void *func_800F4548(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3);
@@ -931,15 +956,15 @@ void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
     return func_800F4548(mesh_with_flags, prim, ot_with_flags, arg3);
 
     // printf("DRAWING %p at %p: %p\n", mesh_with_flags, ot_with_flags, arg3);
-    Mesh *mesh = (Mesh *) (mesh_with_flags & ~0x1);
-    if (mesh != (Mesh *) 0x80134fb0)
+    Mesh *mesh = (Mesh *)(mesh_with_flags & ~0x1);
+    if (mesh != (Mesh *)0x80134fb0)
         return prim;
 
     u32 ab = *(u32 *)(&mesh->a);
     if (ab == 0)
         return prim;
 
-    u32 *ot = (u32 *) (ot_with_flags & ~0x3);
+    u32 *ot = (u32 *)(ot_with_flags & ~0x3);
     void *t5_routine = func_800F686C;
     if (ot_with_flags & 3) {
         t5_routine = func_800F6878;
@@ -964,8 +989,7 @@ void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
 
     // Save it in VXY2 for now
     __asm__ volatile(
-        "mtc2   %0, $4;"
-        :: "r"(sets_data)
+        "mtc2   %0, $4;" ::"r"(sets_data)
     );
 
     // Process and sorts sets
@@ -999,8 +1023,8 @@ void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
 
     __asm__ volatile(
         "mtc2   %0, $2;"
-        "mtc2   %1, $3;"
-        :: "r"(xy), "r"(z)
+        "mtc2   %1, $3;" ::"r"(xy),
+        "r"(z)
     );
 
     //
@@ -1008,25 +1032,24 @@ void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
     //
 
     for (int i = 0; i < sets_count; i++) {
-        void *fs;   // Pointer to the faces section
+        void *fs; // Pointer to the faces section
         __asm__ volatile(
             "mfc2   %0, $4;"
             : "=r"(fs)
         );
 
         Face *faces = fs + faceoffs[i];
-        //FaceList *subset_faces = fs + offset;  // Skip past the size field and faces
-        //for (int j = 0; j < )
+        // FaceList *subset_faces = fs + offset;  // Skip past the size field and faces
+        // for (int j = 0; j < )
     }
 
     gte_ReadRotMatrix(save_rot);
-    //render_object()
+    // render_object()
     gte_SetRotMatrix(save_rot);
 
     // LOOPS
     //
     //
-
 
     // Restore foreground color
     __asm__ volatile(
@@ -1050,20 +1073,20 @@ void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
 // FUCK rendering code
 // INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F49A0);   // not disassembled, LOOOONG
 // smol function. assembly?
-//INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C14);   // disassembled
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C14);   // disassembled
 // weird function with two entry points
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C48);   // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C48); // disassembled
 // more stupid assembly shit using $t9
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6D78);   // disassembled
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E18);   // disassembled
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C);   // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6D78); // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E18); // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C); // disassembled
 
 // big function, probably C?
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6EE0);   // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6EE0); // disassembled
 
 // stupid shit using weird registers, but very small
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C);   // disassembled
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7130);   // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C); // disassembled
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7130); // disassembled
 
 // ## Insanity over
 
@@ -1073,7 +1096,12 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7154);
 // small trivial stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7194);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F71A4);
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F71B4);
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F71B4);
+int func_800F71B4(void)
+{
+    return 33;
+}
 
 // level loading function
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F71BC);
@@ -1104,8 +1132,10 @@ extern s32 D_80141458;
 int func_800F8228(int arg)
 {
     // this is weird... perhaps the formula should be rephrased
-    if (D_80141458 >= arg) return 0;
-    if (arg >= D_80138620) return 0x1000;
+    if (D_80141458 >= arg)
+        return 0;
+    if (arg >= D_80138620)
+        return 0x1000;
 
     int range = D_80141458 - D_80138620;
     int amt = ((D_80141458 - arg) << 0xC) / range;
@@ -1124,17 +1154,17 @@ void func_800F82E8(VECTOR *v, s32 angle)
     v->vy = func_800F8228(val_x);
 }
 
-
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F83E4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8694);
 
-extern int D_8010308C;  // ground exists
+extern int D_8010308C; // ground exists
 extern int D_8010309C;
-extern SVECTOR D_80141448;  // camera rotation
+extern SVECTOR D_80141448; // camera rotation
 
 // render_ground_texture
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F87BC);
+
 void _func_800F87BC(void)
 {
     DRAWENV drawenv;
@@ -1173,7 +1203,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8E10);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8E38);
 
-void func_800F8E70(void) {
+void func_800F8E70(void)
+{
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8E78);
