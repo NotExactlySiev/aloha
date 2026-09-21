@@ -52,7 +52,7 @@ typedef struct {
     u8  stage;  // next one to play
     s8  unk516;
     u8  debug_features;
-    u8  unk518;
+    u8  next_demo; // next_demo
     s8  unk519; // unlock all levels cheat
 } GlobalData;
 #undef UNK
