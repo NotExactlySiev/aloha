@@ -2205,7 +2205,41 @@ extern int D_800F4EF0;
 /* US:800F7050 JP: */ u16 D_800F7050[30][64];
 /* US:800F7F50 JP: */ BGBuffer D_800F7F50[2];
 
-// _the_callback()
+void func_800E4D40(void)
+{
+    func_800E6658(D_800F4CF4);
+    if (D_800F4E20 >= PAGE_CONFIRM_LOAD && D_800F4E20 <= PAGE_YES_NO) {
+        func_800E2438(D_800F4CBC, D_800F4CC0, 0);
+    }
+    func_800E2438(D_800F4E20, D_800F4E28, 0);
+    func_800E3168(D_800F4E20, D_800F4E28);
+
+    if (D_800F4E38 < 8) {
+        D_800F4E38 += 1;
+        func_800E7478();
+    }
+
+    if (D_800F4E20 >= PAGE_CONFIRM_LOAD && D_800F4E20 <= PAGE_YES_NO) {
+        func_800E22D8(D_800F4CBC);
+    }
+    func_800E22D8(D_800F4E20);
+
+    func_800E1FB8();
+    func_800E2234(D_800F4E20);
+    func_800E82A8();
+    func_800E681C();
+    jt.cd_run_block();
+    func_800E0A60();
+    func_800E09EC();
+    text_clear();
+    func_800E0C74();
+}
+
+// unused
+// func_800E4EA0()
+
+// unused
+// func_800E4EC0()
 
 // 800E4ED0
 u8 text_set_attr(u8 attr)
