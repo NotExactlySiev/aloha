@@ -161,9 +161,12 @@ ExecutableDesc g_Files[] = {
     DFILE(0x80080000, "JM6\\MAIN.PEX"),
     DFILE(0x80080000, "JM6\\MAIN.PEX"),
     DFILE(0x80080000, "JM6\\MAIN.PEX"),
-    DFILE(0x80080000, "JM1\\MAIN.PEX"),
-    DFILE(0x80080000, "JM2\\MAIN.PEX"),
-    DFILE(0x80080000, "JM3\\MAIN.PEX"),
+
+    // Executables used for playing the demo.
+    /* 20 */ DFILE(0x80080000, "JM1\\MAIN.PEX"),
+    /* 21 */ DFILE(0x80080000, "JM2\\MAIN.PEX"),
+    /* 22 */ DFILE(0x80080000, "JM3\\MAIN.PEX"),
+
     DFILE(0x80080000, "GAMEOVER.PEX"),
 
 #ifdef VERSION_WORLD

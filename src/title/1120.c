@@ -327,7 +327,10 @@ int D_800F4CF0 = 0;
 int D_800F4CF4 = 8;
 int D_800F4CF8 = 0;
 
-int D_800F4E08 = 0;
+#ifdef VERSION_WORLD
+/* US:800F4E08 */ int demo_wait_time = 0;
+#endif
+
 int D_800F4E18 = 0;
 int D_800F4E20 = 0;
 int D_800F4E28 = 0;
@@ -1202,8 +1205,8 @@ void func_800E2438(int page_id, uint selected, u8 attr)
 // robbit cursor anim
 INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E3168);
 
-extern u32 D_800EB97C[4];
-extern u32 D_800EB98C[4];
+/* US:800EB980 */ u32 demo_worlds[4] = { 0, 1, 2, 0 };
+/* US:800EB990 */ u32 demo_stages[4] = { 0, 1, 0, 0 };
 
 // menu logic
 // INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E32BC);
@@ -1594,13 +1597,18 @@ void func_800E3EA4(void)
         D_800F4D0C = 0x800 * 6 / 5; // 0x999
         D_800F4D10 = 0x4000 * 6 / 5; // 0x4ccc
 
-        D_800F4E08 = 1200 * 6 / 5; // 1440
+        // Demo wait time
+        demo_wait_time = 1200 * 6 / 5; // 1440
+
+        // Fade out to movie wait time
         D_800F4E18 = 9;
+
+        // Robbit animation
         D_800F4EC8 = 8;
     } else {
         D_800F4D0C = 0x800;
         D_800F4D10 = 0x4000;
-        D_800F4E08 = 1200;
+        demo_wait_time = 1200;
         D_800F4E18 = 8;
         D_800F4EC8 = 10;
     }
@@ -1753,10 +1761,9 @@ int main(void)
     }
 
     u32 buttons;
-    int var_s1_2;
     while (1) {
         // loop 10
-        var_s1_2 = 0;
+        int demo_counter = 0;
         func_800E3EA4(); // setup_graph_env
         jt.music_set_repeat(0);
         jt.music_play(1);
@@ -1787,7 +1794,7 @@ int main(void)
                 // reset timers
                 D_800F4E70 = 0;
                 D_800F4E38 = 8;
-                var_s1_2 = 0;
+                demo_counter = 0;
                 D_801A0FA8 = 0;
             }
             if (D_800F4E38 < 8) {
@@ -1796,18 +1803,27 @@ int main(void)
                 func_800E7478();
             }
 
-            // if (0) {
-            if (D_800F4E08 < var_s1_2) {
-                // Go to demo.
+#ifndef VERSION_WORLD
+            const int demo_wait_time = 20 * 60;
+#endif
+
+            if (demo_wait_time < demo_counter) {
+                // User has been idle for too long. Play a demo or the intro.
+
+                // We reached the final demo. Play the intro movie this time.
                 if (glob->next_demo == 0)
                     break;
 
+                // Play the next demo.
                 D_800F4CEC = glob->next_demo + 19;
                 jt.sound_fade_out(SOUND_FADE_TIME, 0, 0);
-                glob->world = D_800EB97C[glob->next_demo];
-                glob->stage = D_800EB98C[glob->next_demo];
-                glob->next_demo = (glob->next_demo + 1) & 3; /* bitfield? */
-                var_s1_2 = 0;
+                glob->world = demo_worlds[glob->next_demo - 1];
+                glob->stage = demo_stages[glob->next_demo - 1];
+                glob->next_demo = (glob->next_demo + 1) & 3;
+
+                // Make sure this won't trigger again while we transition.
+                demo_counter = 0;
+
                 glob->unk516 = 3U;
             }
             if ((D_800F4E30 > 0) && (D_800F4CEC == 0)) {
@@ -1884,7 +1900,7 @@ int main(void)
             func_800E0A60();
             jt.cd_run_block();
             if (D_800F4E20 == 0) {
-                var_s1_2 += 1;
+                demo_counter += 1;
             }
         }
 
