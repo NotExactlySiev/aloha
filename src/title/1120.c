@@ -874,20 +874,20 @@ const char *D_800EB430[] = {
 // if this is correct.
 // Shift-JIS, for use in the save file display text
 const char *D_800EB948[14] = {
-    "\x82\x6D\x82\x85\x82\x97\x81\x40\x82\x66\x82\x81\x82\x8d\x82\x85", // "üü®üüüü½—ãüü§üüüü½ï½",
-    "\x82\x76\x82\x8f\x82\x92\x82\x8c\x82\x84\x81\x40\x82\x50", // "üü·üüï½’ï½Œï½üüüü",
-    "üü·üüï½’ï½Œï½üüüü",
-    "üü·üüï½’ï½Œï½üüüü",
-    "üü·üüï½’ï½Œï½üüüü",
-    "üü·üüï½’ï½Œï½üüüü",
-    "üü·üüï½’ï½Œï½üüüü",
-    "üü¥üü˜ï½”ï½’ï½ãüü",
-    "üü¥üü˜ï½”ï½’ï½ãüü",
-    "üü¥üü˜ï½”ï½’ï½ãüü",
-    "üü¥üü˜ï½”ï½’ï½ãüü",
-    "üü¥üü˜ï½”ï½’ï½ãüü",
-    "üü¥üü˜ï½”ï½’ï½ãüü",
-    "üü£üüï½ï½ï½Œï½üü½”ï½",
+    "\x82\x6D\x82\x85\x82\x97\x81\x40\x82\x66\x82\x81\x82\x8d\x82\x85", // "ï¼®ï½…ï½—ã€€ï¼§ï½ï½ï½…",
+    "\x82\x76\x82\x8f\x82\x92\x82\x8c\x82\x84\x81\x40\x82\x50", // "ï¼·ï½ï½’ï½Œï½„ã€€ï¼‘",
+    "ï¼·ï½ï½’ï½Œï½„ã€€ï¼’",
+    "ï¼·ï½ï½’ï½Œï½„ã€€ï¼“",
+    "ï¼·ï½ï½’ï½Œï½„ã€€ï¼”",
+    "ï¼·ï½ï½’ï½Œï½„ã€€ï¼•",
+    "ï¼·ï½ï½’ï½Œï½„ã€€ï¼–",
+    "ï¼¥ï½˜ï½”ï½’ï½ã€€ï¼‘",
+    "ï¼¥ï½˜ï½”ï½’ï½ã€€ï¼’",
+    "ï¼¥ï½˜ï½”ï½’ï½ã€€ï¼“",
+    "ï¼¥ï½˜ï½”ï½’ï½ã€€ï¼”",
+    "ï¼¥ï½˜ï½”ï½’ï½ã€€ï¼•",
+    "ï¼¥ï½˜ï½”ï½’ï½ã€€ï¼–",
+    "ï¼£ï½ï½ï½ï½Œï½…ï½”ï½…",
 };
 
 extern int D_800F4E30;
@@ -1469,6 +1469,8 @@ void bzero(void *buf, int n)
 }
 
 // init game data
+// US: 800E3C68
+// JP: 800E3620
 void func_800E3C68(void)
 {
     bzero(&glob->curr, sizeof(SavedData));
@@ -1547,30 +1549,27 @@ void func_800E3EA4(void)
     func_800E3DF8("          Initialize ?       ", &rect);
     jt.DrawSync(0);
 #else
-    // TODO: These need to be shift-jis.
-    rect.y = 0x20;
-    // func_800E3DF8("\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xc9\x8b\xf3\x82\xab\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1", &rect);
-    func_800E3DF8("ƒƒ‚ƒŠ[ƒJ[ƒh‚É‹ó‚«‚ª‚ ‚è‚Ü‚¹‚ñ", &rect);
-
+    // "ãƒ¡ãƒ¢ãƒªãƒ¼ã‚«ãƒ¼ãƒ‰ã«ç©ºããŒã‚ã‚Šã¾ã›ã‚“"
+    func_800E3DF8("\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xc9\x8b\xf3\x82\xab\x82\xaa\x82\xa0\x82\xe8\x82\xdc\x82\xb9\x82\xf1", &rect);
     jt.DrawSync(0);
     rect.y = 0x30;
-    // "ã€ãƒ¡ãƒ¢ãƒªãƒ¼ã‚«ãƒ¼ãƒ‰ãŒæœªæ¥ç¶šã§ã"
+    // "ã€€ãƒ¡ãƒ¢ãƒªãƒ¼ã‚«ãƒ¼ãƒ‰ãŒæœªæ¥ç¶šã§ã™"
     func_800E3DF8("\x81\x40\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xaa\x96\xa2\x90\xda\x91\xb1\x82\xc5\x82\xb7", &rect);
     jt.DrawSync(0);
     rect.y = 0x40;
-    // "ã€ãƒ¡ãƒ¢ãƒªãƒ¼ã‚«ãƒ¼ãƒ‰ãŒå£Šã‚Œã¦ãüü¾ã"
+    // "ã€€ãƒ¡ãƒ¢ãƒªãƒ¼ã‚«ãƒ¼ãƒ‰ãŒå£Šã‚Œã¦ã„ã¾ã™"
     func_800E3DF8("\x81\x40\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xaa\x89\xf3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7", &rect);
     jt.DrawSync(0);
     rect.y = 0x50;
-    // "ã€ã€ã€ãƒüüüüã‚¿ãŒå­˜åœ¨ã—ã¾ã›ã‚“"
+    // "ã€€ã€€ã€€ãƒ‡ãƒ¼ã‚¿ãŒå­˜åœ¨ã—ã¾ã›ã‚“"
     func_800E3DF8("\x81\x40\x81\x40\x81\x40\x83\x66\x81\x5b\x83\x5e\x82\xaa\x91\xb6\x8d\xdd\x82\xb5\x82\xdc\x82\xb9\x82\xf1", &rect);
     jt.DrawSync(0);
     rect.y = 0x0;
-    // "ãƒ¡ãƒ¢ãƒªãƒ¼ã‚«ãƒ¼ãƒ‰ãŒå£Šã‚Œã¦ãüü¾ã"
+    // "ãƒ¡ãƒ¢ãƒªãƒ¼ã‚«ãƒ¼ãƒ‰ãŒå£Šã‚Œã¦ã„ã¾ã™"
     func_800E3DF8("\x83\x81\x83\x82\x83\x8a\x81\x5b\x83\x4a\x81\x5b\x83\x68\x82\xaa\x89\xf3\x82\xea\x82\xc4\x82\xa2\x82\xdc\x82\xb7", &rect);
     jt.DrawSync(0);
     rect.y = 0x10;
-    // "åˆæœŸåŒ–ã—ã¦ã‚ˆã‚ã—ã„ã§ã—ã‚‡ãüü‹üü"
+    // "åˆæœŸåŒ–ã—ã¦ã‚ˆã‚ã—ã„ã§ã—ã‚‡ã†ã‹ï¼Ÿ"
     func_800E3DF8("\x8f\x89\x8a\xfa\x89\xbb\x82\xb5\x82\xc4\x82\xe6\x82\xeb\x82\xb5\x82\xa2\x82\xc5\x82\xb5\x82\xe5\x82\xa4\x82\xa9\x81\x48", &rect);
     jt.DrawSync(0);
 
@@ -1591,8 +1590,10 @@ void func_800E3EA4(void)
 
 #ifdef VERSION_WORLD
     if (jt.get_video_mode == MODE_PAL) {
+        // Some animation thing acceleration vals
         D_800F4D0C = 0x800 * 6 / 5; // 0x999
         D_800F4D10 = 0x4000 * 6 / 5; // 0x4ccc
+
         D_800F4E08 = 1200 * 6 / 5; // 1440
         D_800F4E18 = 9;
         D_800F4EC8 = 8;
@@ -1705,8 +1706,10 @@ int main(void)
     func_800E742C();
     glob = jt.globals();
     if (glob->intro_played == 0) {
+        // First time entering the title menu. Play the intro movie and set up
+        // global variables.
         func_800E8640(INTRO_MOVIE_NAME, 485);
-        glob->unk518 = 1U;
+        glob->next_demo = 1;
         if (glob->intro_played == 0) {
             func_800E3C68();
             glob->intro_played = 1U;
@@ -1793,15 +1796,17 @@ int main(void)
                 func_800E7478();
             }
 
+            // if (0) {
             if (D_800F4E08 < var_s1_2) {
-                if (glob->unk518 == 0)
+                // Go to demo.
+                if (glob->next_demo == 0)
                     break;
 
-                D_800F4CEC = glob->unk518 + 19;
-                jt.sound_fade_out(12, 0, 0);
-                glob->world = D_800EB97C[glob->unk518];
-                glob->stage = D_800EB98C[glob->unk518];
-                glob->unk518 = (glob->unk518 + 1) & 3; /* bitfield? */
+                D_800F4CEC = glob->next_demo + 19;
+                jt.sound_fade_out(SOUND_FADE_TIME, 0, 0);
+                glob->world = D_800EB97C[glob->next_demo];
+                glob->stage = D_800EB98C[glob->next_demo];
+                glob->next_demo = (glob->next_demo + 1) & 3; /* bitfield? */
                 var_s1_2 = 0;
                 glob->unk516 = 3U;
             }
@@ -1896,7 +1901,7 @@ int main(void)
 
         func_800E8640(INTRO_MOVIE_NAME, INTRO_MOVIE_LENGTH);
         D_800F4CF4 = 8;
-        glob->unk518 = (u8)(glob->unk518 + 1);
+        glob->next_demo = (u8)(glob->next_demo + 1);
     }
 }
 
@@ -2075,9 +2080,9 @@ int func_800E77E4(int port, char *filename)
 }
 
 const char *D_800F05B4[3] = {
-    "\x82\x50\x81\x40", // "üü‘ã"
-    "\x82\x51\x81\x40", // "üü’ã"
-    "\x82\x52\x81\x40", // "üü“ã"
+    "\x82\x50\x81\x40", // "ï¼‘ã€€"
+    "\x82\x51\x81\x40", // "ï¼’ã€€"
+    "\x82\x52\x81\x40", // "ï¼“ã€€"
 };
 
 // TODO: The display name of the save block sometimes comes out mangled.
@@ -2092,7 +2097,7 @@ int func_800E799C(int port, int slot, u8 *src, int len, char *suffix)
 
     char buffer[128];
     char title[128];
-    // "üüªüü•ï½ï½ï½‰ï½ï½‡\x3000üü¦üüŒï½üü½“ï½ˆï¼\x3000üü¤üü¡üü´üü¡\x3000"
+    // "ï¼ªï½•ï½ï½ï½‰ï½ï½‡\x3000ï¼¦ï½Œï½ï½“ï½ˆï¼\x3000ï¼¤ï¼¡ï¼´ï¼¡\x3000"
     char *sjis_string = "\x82\x69\x82\x95\x82\x8d\x82\x90\x82\x89\x82\x8e\x82\x87\x81\x40\x82\x65\x82\x8c\x82\x81\x82\x93\x82\x88\x81\x49\x81\x40\x82\x63\x82\x60\x82\x73\x82\x60\x81\x40";
     ram_strcat(sjis_string, D_800F05B4[slot], buffer);
     if (suffix) {
