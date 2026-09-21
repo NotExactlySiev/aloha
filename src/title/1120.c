@@ -2023,7 +2023,7 @@ void func_800E77B8(void)
 
 static inline make_filename(char *buffer, int slot)
 {
-    CLAMP(slot, 0, 2);
+    CLAMP(0, 2, slot);
     ram_strcpy(D_800F4F20, buffer);
     int len = ram_strlen2(D_800F4F20);
     buffer[len] = '0' + slot;

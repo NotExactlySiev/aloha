@@ -228,9 +228,13 @@ executables = [
             # currently hardcoded in the dump_us.sh script.
         ],
     ),
-    # Executable(
-    #     "TITLE.PEX", "title", True, ["libgte", "libc", "libapi"], ["util.o", "start.o"]
-    # ),
+    Executable(
+        "TITLE.PEX",
+        "title",
+        True,
+        [PsyqLibrary("libgte"), PsyqLibrary("libc"), PsyqLibrary("libapi")],
+        ["util.o", "start.o"],
+    ),
     # Executable("JM1/MAIN.PEX", "jm1", True, ["libgte", "libetc", "libc", "libapi"]),
     # TODO: Should be SELECT.EXE and not compressed for Japan.
     # Executable(selectExeName, "select", selectIsCompressed, ["libc"]),
@@ -300,6 +304,7 @@ compileFlags = [
     "-fno-builtin",
     "-fno-pic",
     "-DPSYQ47_FIXES",
+    "-DEXTRA_DEBUG_LOGS",
 ]
 
 # Ninja setup

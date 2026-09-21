@@ -1,5 +1,5 @@
 #include "spu.h"
-#include <stdio.h>
+#include "common.h"
 
 #ifdef VERSION_WORLD
     #define SPU_MALLOC_NUM 16

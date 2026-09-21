@@ -1,4 +1,4 @@
-#include "common.h"
+#include <ints.h>
 #include <libspu.h>
 
 void spu_init(void);

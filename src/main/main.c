@@ -594,7 +594,12 @@ void disable_vblank_event(s32 event)
 
 // US: 8001987C
 // JP: 80018FCC
-void nop(void) { }
+void nop(void)
+{
+#ifdef EXTRA_DEBUG_LOGS
+    printf("Called non-existant jumptable function.\n");
+#endif
+}
 
 #ifdef VERSION_WORLD
 // US: 80019884
@@ -702,6 +707,12 @@ char *get_mc_file_name(void)
         return 0;
     return mc_file_name;
 }
+#elif defined(EXTRA_DEBUG_LOGS)
+int get_video_mode(void)
+{
+    printf("Called get_video_mode() on the Japanese build.\n");
+    return MODE_NTSC;
+}
 #endif
 
 // US: 80019B1C
@@ -740,6 +751,8 @@ void game_init(void)
     jt_set(get_widescreen, 9);
     jt_set(set_widescreen, 10);
     jt_set(get_mc_file_name, 11);
+#elif defined(EXTRA_DEBUG_LOGS)
+    jt_set(get_video_mode, 7);
 #endif
 
     // clear global space
