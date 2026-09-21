@@ -10,7 +10,7 @@
 GlobalData *glob;
 
 // enable debug mode. cheat mode should be on.
-// enter while holding down R2
+// enter while holding down R2.
 const u32 D_800EB9D4[] = {
     Pad1Up, Pad1tri, Pad1Up, Pad1x,
     Pad1Left, Pad1Left, Pad1Right, Pad1Right,
@@ -18,14 +18,14 @@ const u32 D_800EB9D4[] = {
     Pad1Select, 0
 };
 
-// unused cheat sequence
+// enable movie/music test mode. unused, doesn't work.
 const u32 D_800EBA0C[] = {
     Pad1Down, Pad1Up, Pad1Down, Pad1Up,
     Pad1x, Pad1Left, Pad1Right, Pad1tri,
     Pad1x, Pad1Up, Pad1Down, 0
 };
 
-// cheat sequence. unlock all levels
+// basic cheat sequence. unlock all levels.
 const u32 D_800EBA3C[] = {
     Pad1Up, Pad1Up, Pad1Down, Pad1Down,
     Pad1x, Pad1x, Pad1Left, Pad1Right,
@@ -356,7 +356,6 @@ int D_800F4E78 = 0;
 int D_800F4E80 = 0;
 
 //
-/* 800F4ED0 */ BGBuffer *current_bgbuffer = NULL;
 
 // extra mode prev/next
 void func_800E10B8(void)
@@ -908,7 +907,7 @@ extern int D_800F4E68;
 extern int D_800F4E38;
 
 // INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E22D8);
-//  draw menu box
+// draw menu box
 void func_800E22D8(int idx)
 {
     RECT *r = &D_800EB8CC[idx]->rect;
@@ -1633,20 +1632,6 @@ void func_800E3EA4(void)
 }
 
 // a ton of functions inside this one
-// # main stuff
-// glabel func_800E4D40 _the_callback
-// glabel func_800E4EE8 load_textures
-// x glabel func_800E561C
-
-// # text stuff
-// x text_set_pos
-// x text_clear
-// x text_put_char
-// x text_put_str
-// x text_put_u4
-// x text_put_u8
-// x text_put_u16
-// x text_put_u32
 
 // # graphic stuff
 // glabel func_800E5818 gbuffer_swap
@@ -1670,31 +1655,16 @@ void func_800E3EA4(void)
 // glabel __func_800E6E80 render_grid
 
 // # input.c
-// glabel func_800E70F4 input_init
-// glabel func_800E7174 cheat_code_debug_features
-// glabel func_800E7328 cheat_code_unlock_levels
-// glabel func_800E73CC set cloud speed
-// glabel func_800E742C update cheat mode
+// glabel func_800E70F4 x input_init
+// glabel func_800E7174   cheat_code_debug_features
+//                        cheat_code_music_movie_test
+// glabel func_800E7328 x cheat_code_unlock_levels
+// glabel func_800E73CC x set cloud speed
+// glabel func_800E742C x update cheat mode
 // glabel func_800E7478 input das nonsense
 // glabel func_800E74A8 input das nonsense
 
 INCLUDE_ASM("asm/title/nonmatchings/1120", bigone);
-
-int func_800E73CC(int arg, u32 buttons)
-{
-    if ((arg == 0) && (buttons & (Pad1L1 | Pad1L2 | Pad1R1 | Pad1R2))) {
-        if (buttons & Pad1Up) {
-            func_800E8238();
-
-            return 1;
-        }
-        if (buttons & Pad1Down) {
-            func_800E8278();
-            return 1;
-        }
-    }
-    return 0;
-}
 
 // part of a data structure
 extern int D_800F4CEC;
@@ -1707,6 +1677,9 @@ int D_800F4D74 = 0;
     #define INTRO_MOVIE_NAME "MOVIE\\01.STR"
     #define INTRO_MOVIE_LENGTH 482
 #endif
+
+// input.h
+u32 func_800E74A8(int id);
 
 // US: 800E4250
 // JP: 800E3B54
@@ -1938,7 +1911,10 @@ int main(void)
 
 extern RECT D_800F4D90;
 u8 D_801A0FF0; // brightness
-extern int D_800F4EE0;
+
+/* US:800F4ED0 */ BGBuffer *current_bgbuffer = NULL;
+/* US:800F4ED8 */ int current_bgbuffer_index = 0; // current_bgbuffer_index
+/* US:800F4EE0 */ int D_800F4EE0 = 0;
 
 void _func_800E6B90(RECT *r, short x, short y)
 {
@@ -2016,188 +1992,6 @@ void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
     current_bgbuffer->next = q + 1;
 }
 
-extern char *D_800F4F20;
-
-#ifdef VERSION_WORLD
-// update_mc_file_name
-// US: 800E76D4
-void func_800E76D4(void)
-{
-    switch (jt.get_region()) {
-    default:
-    case REGION_JAPAN:
-        D_800F4F20 = "BISCPS-10007EXACT02";
-        break;
-    case REGION_USA:
-        D_800F4F20 = "BASCUS-94103EXACT01";
-        break;
-    case REGION_EUROPE:
-        D_800F4F20 = "BESCES-00003EXACT01";
-        break;
-    case REGION_DEBUG:
-        D_800F4F20 = "BISCPS-10007EXACT02";
-        char *name = jt.get_mc_file_name();
-        if (name)
-            D_800F4F20 = name;
-        break;
-    }
-}
-#endif
-
-void (*D_800F4DDC)(void) = NULL;
-
-void func_800E77A8(void (*cb)(void))
-{
-    D_800F4DDC = cb;
-}
-
-void func_800E77B8(void)
-{
-    if (D_800F4DDC)
-        D_800F4DDC();
-}
-
-static inline make_filename(char *buffer, int slot)
-{
-    CLAMP(0, 2, slot);
-    ram_strcpy(D_800F4F20, buffer);
-    int len = ram_strlen2(D_800F4F20);
-    buffer[len] = '0' + slot;
-    buffer[len + 1] = 0;
-}
-
-// func_800E77E4
-int func_800E77E4(int port, char *filename)
-{
-    int x, y;
-    DIRENTRY dirent, *p, *q;
-
-    // Is this an unrolled loop or something? What on earth is going on
-    x = 0;
-    do {
-        func_800E77B8();
-        p = jt.mc_firstfile(port, "*", &dirent);
-        y = x;
-        if (p == &dirent) {
-            do {
-                x += dirent.size;
-                q = jt.mc_nextfile(p);
-            } while (p == q);
-            func_800E77B8();
-            q = jt.mc_firstfile(port, filename, p);
-            y = x;
-            while (p == q) {
-                y -= dirent.size;
-                p = jt.mc_nextfile(q);
-            }
-        }
-        x = 0;
-        func_800E77B8();
-        p = jt.mc_firstfile(port, "*", &dirent);
-        if (p == &dirent) {
-            do {
-                x += dirent.size;
-                q = jt.mc_nextfile(p);
-            } while (p == q);
-            func_800E77B8();
-            q = jt.mc_firstfile(port, filename, p);
-            while (p == q) {
-                x -= dirent.size;
-                p = jt.mc_nextfile(q);
-            }
-        }
-    } while (y != x);
-    return 120 * 1024 - x;
-}
-
-const char *D_800F05B4[3] = {
-    "\x82\x50\x81\x40", // "１　"
-    "\x82\x51\x81\x40", // "２　"
-    "\x82\x52\x81\x40", // "３　"
-};
-
-// TODO: The display name of the save block sometimes comes out mangled.
-int func_800E799C(int port, int slot, u8 *src, int len, char *suffix)
-{
-    char filename[128];
-    make_filename(filename, slot);
-    int space = func_800E77E4(port, filename);
-    if (space < 15 * 512) {
-        return 0;
-    }
-
-    char buffer[128];
-    char title[128];
-    // "Ｊｕｍｐｉｎｇ\x3000Ｆｌａｓｈ！\x3000ＤＡＴＡ\x3000"
-    char *sjis_string = "\x82\x69\x82\x95\x82\x8d\x82\x90\x82\x89\x82\x8e\x82\x87\x81\x40\x82\x65\x82\x8c\x82\x81\x82\x93\x82\x88\x81\x49\x81\x40\x82\x63\x82\x60\x82\x73\x82\x60\x81\x40";
-    ram_strcat(sjis_string, D_800F05B4[slot], buffer);
-    if (suffix) {
-        ram_strcat(buffer, suffix, title);
-    } else {
-        ram_strcpy(buffer, title);
-    }
-
-    while (1) {
-        int rc;
-        while (1) {
-            while ((rc = jt.mc_file_exists(port, filename)) == -1) {
-                rc = jt.mc_file_exists(port, filename);
-                if (rc == -1)
-                    return -1;
-            }
-            if (rc > -1)
-                break;
-            // What the fuck is happening
-        label0:
-            rc = jt.mc_file_exists(port, filename);
-            if (rc == -2)
-                return -2;
-        }
-
-        // I'm too tired to even wanna make sense of this control flow.
-        if (rc != 0) {
-            if (rc == 1)
-                goto label1;
-            goto label0;
-        }
-        rc = jt.mc_file_exists(port, filename);
-        if (rc == 0) {
-            rc = jt.mc_file_create(port, filename, 0x1e00, title);
-            if (rc < 0)
-                return 0;
-        label1:
-            rc = jt.mc_file_write(port, filename, src, 0, len);
-            return rc > 0;
-        }
-    }
-}
-
-// func_800E7BD8
-int func_800E7BD8(int port, int slot, u8 *dst, int len)
-{
-    char filename[128];
-    make_filename(filename, slot);
-    int rc, rc2;
-    // I have no idea what the hell is going on here.
-    do {
-        rc = jt.mc_file_read(port, filename, dst, 0, len);
-        if (rc > 0) {
-            return 1;
-        }
-        func_800E77B8();
-        rc2 = jt.mc_file_read(port, filename, dst, 0, len);
-    } while (rc2 > 0);
-    return rc;
-}
-
-// func_800E7CD8
-void func_800E7CD8(int port, int slot)
-{
-    char filename[128];
-    make_filename(filename, slot);
-    jt.mc_delete(port, filename);
-}
-
 extern u8 D_800F4D8E;
 extern int D_800F4EE8;
 extern int D_800F4EF0;
@@ -2219,10 +2013,11 @@ void func_800E4D40(void)
         func_800E7478();
     }
 
-    if (D_800F4E20 >= PAGE_CONFIRM_LOAD && D_800F4E20 <= PAGE_YES_NO) {
-        func_800E22D8(D_800F4CBC);
-    }
-    func_800E22D8(D_800F4E20);
+    // Draw black box
+    // if (D_800F4E20 >= PAGE_CONFIRM_LOAD && D_800F4E20 <= PAGE_YES_NO) {
+    //     func_800E22D8(D_800F4CBC);
+    // }
+    // func_800E22D8(D_800F4E20);
 
     func_800E1FB8();
     func_800E2234(D_800F4E20);
@@ -2235,11 +2030,9 @@ void func_800E4D40(void)
     func_800E0C74();
 }
 
-// unused
-// func_800E4EA0()
+NOT_IMPL_FN(func_800E4EA0)
 
-// unused
-// func_800E4EC0()
+NOT_IMPL_FN(func_800E4EC0)
 
 // 800E4ED0
 u8 text_set_attr(u8 attr)
@@ -2278,7 +2071,7 @@ RECT D_800F4F7C = {
 void func_800E4EE8(void)
 {
     D_800F4EE0 = 0;
-    D_800F4EE0 = 0;
+    current_bgbuffer_index = 0;
 
     DISPENV disp;
     jt.SetDefDispEnv(&disp, 0, 0, 320, 240);
@@ -2520,6 +2313,198 @@ void text_put_u32(uint v)
 
 // gpu.c
 
+void func_800E5818(void)
+{
+    if (current_bgbuffer_index < 1) {
+        current_bgbuffer_index += 1;
+    } else {
+        current_bgbuffer_index = 0;
+    }
+
+    current_bgbuffer = &D_800F7F50[current_bgbuffer_index];
+    jt.ClearOTag(D_800F7F50[current_bgbuffer_index].ot, 5);
+    current_bgbuffer->next = current_bgbuffer->prims;
+}
+
+void func_800E58D4(int arg)
+{
+    D_800F4EE0 = arg;
+}
+
+void func_800E58E4(int arg)
+{
+    func_800E58D4(arg & 0xff);
+}
+
+//
+
+typedef struct {
+    int a;
+    u16 b;
+    uint unk8;
+    int unkC;
+    void *data;
+} SpriteSet;
+
+SpriteSet D_800EB9A0 = {
+    .a = 0,
+    .b = 240,
+    .unk8 = 0x300,
+    .unkC = 0,
+    .data = D_800F5050,
+};
+
+func_800E5904(SpriteSet *set, u32 id, short x, short y, int clutidx);
+
+void func_800E5BBC(u32 id, short x, short y, int clutidx)
+{
+    func_800E5904(&D_800EB9A0, id, x, y, clutidx);
+}
+
+// func_800E5C00()
+
+// input.c
+
+typedef struct {
+    u32 *next_button;
+    int is_pressed;
+} CheatState;
+
+/* US:800F4D98 JP:800F64DC */ CheatState D_800F4D98 = { .next_button = D_800EB9D4 }; // dev_mode;
+/* US:800F4DA0 JP:800F64E4 */ CheatState D_800F4DA0 = { .next_button = D_800EBA0C }; // music_movie_test
+/* US:800F4DA8 JP:800F64EC */ CheatState D_800F4DA8 = { .next_button = D_800EBA3C }; // unlock_levels
+/* US:800F4DB0 JP: */ int D_800F4DB0 = 0; // face_timer
+/* US:800F4DB4 JP: */ int D_800F4DB4 = 0; // nav_timer
+/* US:800F4DB8 JP: */ int D_800F4DB8 = -1; // das_state
+/* US:800F4DBC JP: */ int D_800F4DBC = 0; // face_prev
+/* US:800F4DC0 JP: */ int D_800F4DC0 = 0; // das_prev
+
+int D_800F4F00 = 0; // initial_delay
+int D_800F4F08 = 0; // repeat_delay
+int D_800F4F10 = 0; // face_wait
+int D_800F4F18 = 0; // nav_wait
+
+#ifdef VERSION_WORLD
+// input_set_delay
+// US: 800E70F4
+void func_800E70F4(void)
+{
+    if (jt.get_video_mode() == MODE_PAL) {
+        D_800F4F00 = 12 * 2 / 3; // 8
+        D_800F4F08 = 5 * 2 / 3; // 3
+    } else {
+        D_800F4F00 = 12;
+        D_800F4F08 = 5;
+    }
+}
+#endif
+
+//
+
+//
+
+void func_800E7328(int id, u32 buttons)
+{
+    if (id != 0)
+        return;
+
+    if (buttons == 0) {
+        // Ready to read the next button.
+        D_800F4DA8.is_pressed = 0;
+        return;
+    }
+
+    if (!D_800F4DA8.is_pressed) {
+        if (*D_800F4DA8.next_button++ != buttons) {
+            // Wrong button. Reset sequence.
+            D_800F4DA8.next_button = D_800EBA3C;
+        }
+
+        D_800F4DA8.is_pressed = 1;
+        if (*D_800F4DA8.next_button == 0) {
+            // Done. Activate cheat.
+            glob->unk519 = !glob->unk519;
+        }
+    }
+}
+
+// set_cloud_speed
+int func_800E73CC(int id, u32 buttons)
+{
+    if (id != 0)
+        return 0;
+
+    const u32 hold_buttons = Pad1L1 | Pad1L2 | Pad1R1 | Pad1R2;
+
+    if ((buttons & hold_buttons) != hold_buttons)
+        return 0;
+
+    if (buttons & Pad1Up) {
+        func_800E8238();
+        return 1;
+    }
+
+    if (buttons & Pad1Down) {
+        func_800E8278();
+        return 1;
+    }
+
+    return 0;
+}
+
+// How do do cheats?
+// 1- Start holding L1+R1+R2 as soon as the console is turned on. Keep holding
+//    them until the Exact logo is shown on screen.
+// 2- On the main menu, hold R2. Enter the debug cheat sequence while holding
+//    it the whole time.
+//
+
+extern int D_800F4EF8; // are we allowed to activate cheats? first check
+
+// update_cheat_mode
+void func_800E742C(void)
+{
+    D_800F4EF8 = jt.PadRead(0) == (Pad1L1 | Pad1R1 | Pad1R2);
+}
+
+void func_800E7478(void)
+{
+#ifndef VERSION_WORLD
+    D_800F4F10 = 12;
+    D_800F4F18 = 12;
+#endif
+
+    D_800F4DB0 = 0;
+    D_800F4DB4 = 0;
+
+#ifdef VERSION_WORLD
+    D_800F4F10 = D_800F4F00;
+    D_800F4F18 = D_800F4F00;
+#endif
+}
+
+// input_read
+u32 _func_800E74A8(int id)
+{
+    u32 raw = jt.PadRead(id);
+    func_800E7328(id, raw);
+    //
+    int setting_clouds = func_800E73CC(id, raw);
+    u32 nav_raw = raw & BUTTONS_NAVIGATE;
+    if (setting_clouds == 1) {
+        raw = 0;
+        nav_raw = 0;
+    }
+
+    u32 face_raw = raw & (BUTTONS_ACCEPT | BUTTONS_CANCEL);
+    if (nav_raw == 0 && face_raw == 0) {
+        D_800F4DB8 = -1;
+    }
+    //
+    //
+    return 0;
+}
+
 // misc.c ?
 
 void func_800E8790(void)
@@ -2544,4 +2529,186 @@ void func_800E87DC(void)
     }
 
     jt.sfx_set_prog_attr(26 << 8, 0);
+}
+
+extern char *D_800F4F20;
+
+#ifdef VERSION_WORLD
+// update_mc_file_name
+// US: 800E76D4
+void func_800E76D4(void)
+{
+    switch (jt.get_region()) {
+    default:
+    case REGION_JAPAN:
+        D_800F4F20 = "BISCPS-10007EXACT02";
+        break;
+    case REGION_USA:
+        D_800F4F20 = "BASCUS-94103EXACT01";
+        break;
+    case REGION_EUROPE:
+        D_800F4F20 = "BESCES-00003EXACT01";
+        break;
+    case REGION_DEBUG:
+        D_800F4F20 = "BISCPS-10007EXACT02";
+        char *name = jt.get_mc_file_name();
+        if (name)
+            D_800F4F20 = name;
+        break;
+    }
+}
+#endif
+
+void (*D_800F4DDC)(void) = NULL;
+
+void func_800E77A8(void (*cb)(void))
+{
+    D_800F4DDC = cb;
+}
+
+void func_800E77B8(void)
+{
+    if (D_800F4DDC)
+        D_800F4DDC();
+}
+
+static inline make_filename(char *buffer, int slot)
+{
+    CLAMP(0, 2, slot);
+    ram_strcpy(D_800F4F20, buffer);
+    int len = ram_strlen2(D_800F4F20);
+    buffer[len] = '0' + slot;
+    buffer[len + 1] = 0;
+}
+
+// func_800E77E4
+int func_800E77E4(int port, char *filename)
+{
+    int x, y;
+    DIRENTRY dirent, *p, *q;
+
+    // Is this an unrolled loop or something? What on earth is going on
+    x = 0;
+    do {
+        func_800E77B8();
+        p = jt.mc_firstfile(port, "*", &dirent);
+        y = x;
+        if (p == &dirent) {
+            do {
+                x += dirent.size;
+                q = jt.mc_nextfile(p);
+            } while (p == q);
+            func_800E77B8();
+            q = jt.mc_firstfile(port, filename, p);
+            y = x;
+            while (p == q) {
+                y -= dirent.size;
+                p = jt.mc_nextfile(q);
+            }
+        }
+        x = 0;
+        func_800E77B8();
+        p = jt.mc_firstfile(port, "*", &dirent);
+        if (p == &dirent) {
+            do {
+                x += dirent.size;
+                q = jt.mc_nextfile(p);
+            } while (p == q);
+            func_800E77B8();
+            q = jt.mc_firstfile(port, filename, p);
+            while (p == q) {
+                x -= dirent.size;
+                p = jt.mc_nextfile(q);
+            }
+        }
+    } while (y != x);
+    return 120 * 1024 - x;
+}
+
+const char *D_800F05B4[3] = {
+    "\x82\x50\x81\x40", // "１　"
+    "\x82\x51\x81\x40", // "２　"
+    "\x82\x52\x81\x40", // "３　"
+};
+
+// TODO: The display name of the save block sometimes comes out mangled.
+int func_800E799C(int port, int slot, u8 *src, int len, char *suffix)
+{
+    char filename[128];
+    make_filename(filename, slot);
+    int space = func_800E77E4(port, filename);
+    if (space < 15 * 512) {
+        return 0;
+    }
+
+    char buffer[128];
+    char title[128];
+    // "Ｊｕｍｐｉｎｇ\x3000Ｆｌａｓｈ！\x3000ＤＡＴＡ\x3000"
+    char *sjis_string = "\x82\x69\x82\x95\x82\x8d\x82\x90\x82\x89\x82\x8e\x82\x87\x81\x40\x82\x65\x82\x8c\x82\x81\x82\x93\x82\x88\x81\x49\x81\x40\x82\x63\x82\x60\x82\x73\x82\x60\x81\x40";
+    ram_strcat(sjis_string, D_800F05B4[slot], buffer);
+    if (suffix) {
+        ram_strcat(buffer, suffix, title);
+    } else {
+        ram_strcpy(buffer, title);
+    }
+
+    while (1) {
+        int rc;
+        while (1) {
+            while ((rc = jt.mc_file_exists(port, filename)) == -1) {
+                rc = jt.mc_file_exists(port, filename);
+                if (rc == -1)
+                    return -1;
+            }
+            if (rc > -1)
+                break;
+            // What the fuck is happening
+        label0:
+            rc = jt.mc_file_exists(port, filename);
+            if (rc == -2)
+                return -2;
+        }
+
+        // I'm too tired to even wanna make sense of this control flow.
+        if (rc != 0) {
+            if (rc == 1)
+                goto label1;
+            goto label0;
+        }
+        rc = jt.mc_file_exists(port, filename);
+        if (rc == 0) {
+            rc = jt.mc_file_create(port, filename, 0x1e00, title);
+            if (rc < 0)
+                return 0;
+        label1:
+            rc = jt.mc_file_write(port, filename, src, 0, len);
+            return rc > 0;
+        }
+    }
+}
+
+// func_800E7BD8
+int func_800E7BD8(int port, int slot, u8 *dst, int len)
+{
+    char filename[128];
+    make_filename(filename, slot);
+    int rc, rc2;
+    // I have no idea what the hell is going on here.
+    do {
+        rc = jt.mc_file_read(port, filename, dst, 0, len);
+        if (rc > 0) {
+            return 1;
+        }
+        func_800E77B8();
+        rc2 = jt.mc_file_read(port, filename, dst, 0, len);
+    } while (rc2 > 0);
+    return rc;
+}
+
+// func_800E7CD8
+void func_800E7CD8(int port, int slot)
+{
+    char filename[128];
+    make_filename(filename, slot);
+    jt.mc_delete(port, filename);
 }
