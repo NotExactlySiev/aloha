@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import override
 
 import ninja as Ninja
 
@@ -16,47 +17,66 @@ version: str = sys.argv[1]
 
 class SourceFile:
     def __init__(self, name, path):
-        self.name = name
-        self.path = path
+        self.name: str = name
+        self.path: str = path
 
     @property
     def obj_name(self):
         return f"{self.path.removeprefix('src/')}.o"
 
 
-class Executable:
+class Artifact:
+    def generate(self): ...
+
+    @property
+    def final_path(self) -> str: ...
+
+
+class PsyqLibrary(Artifact):
+    def __init__(self, name: str):
+        self.name: str = name
+
+    @property
+    @override
+    def final_path(self) -> str:
+        return f"psyq/libs/{self.name}.a"
+
+
+class Executable(Artifact):
     def __init__(
         self,
         final_name: str,
         name: str,
         is_comped: bool,
-        libs: list[str] = [],
+        # libs: list[str] = [],
+        libs: list[Artifact] = [],
         objs: list[str] = [],
-        assets: list[Asset] = [],
+        assets: list[Artifact] = [],
     ):
-        self.name = name
-        self.final_name = final_name
-        self.is_comped = is_comped
-        self.source = []
-        self.header = []
-        self.libs = libs
-        self.data = []
-        self.common_objects = objs + ["header.o"]
-        self.assets: list[Asset] = assets
+        self.name: str = name
+        self.final_name: str = final_name
+        self.is_comped: bool = is_comped
 
+        # Explicit dependencies
+        self.common_objects: list[str] = objs + ["header.o"]
+        self.libs: list[Artifact] = libs
+        self.assets: list[Artifact] = assets
+
+        # Discovered dependencies
+        self.source: list[SourceFile] = []
+        self.header: list[str] = []
         self.scan_dir(f"src/{self.name}")
         self.scan_dir(f"asm/{self.name}/data")
-        # TODO: Automatically scan the asset dir too.
 
-    def add_file(self, name, path):
-        if path.endswith(".c") or path.endswith(".s"):
+    def add_file(self, name: str, path: str):
+        if path.endswith((".c", ".s")):
             self.source.append(SourceFile(name, path))
         elif path.endswith(".h"):
             self.header.append(path)
         else:
             print(f"# don't know: {path}")
 
-    def scan_dir(self, path):
+    def scan_dir(self, path: str):
         if not os.path.exists(path):
             return
         for entry in os.listdir(path):
@@ -66,6 +86,10 @@ class Executable:
             else:
                 self.add_file(entry, full_path)
 
+    @property
+    def build_dir(self):
+        return "build/"
+
     def generate_decompress(self):
         Ninja.build(
             "decomp",
@@ -74,6 +98,7 @@ class Executable:
             ["$knife"],
         )
 
+    @override
     def generate(self):
         all_deps = ["build/" + cobj for cobj in self.common_objects]
         for f in self.source:
@@ -81,7 +106,9 @@ class Executable:
             Ninja.param("modid", self.name)
             all_deps.append(self.build_dir + f.obj_name)
         for lib in self.libs:
-            all_deps.append(f"psyq/libs/{lib}.a")
+            lib.generate()
+            all_deps.append(lib.final_path)
+            # all_deps.append(f"psyq/libs/{lib}.a")
 
         # Assets
 
@@ -107,11 +134,8 @@ class Executable:
             Ninja.build("objcopy", self.final_path, [elf_path])
 
     @property
-    def build_dir(self):
-        return "build/"
-
-    @property
-    def final_path(self):
+    @override
+    def final_path(self) -> str:
         return f"build/disc_{version}/{self.final_name}"
 
 
@@ -122,7 +146,7 @@ class AssetLocation:
         self.size: int = size
 
 
-class Asset:
+class Asset(Artifact):
     def __init__(
         self, name: str, exec: str, locJp: AssetLocation, locUs: AssetLocation
     ):
@@ -188,15 +212,15 @@ executables = [
         "main",
         False,
         libs=[
-            "libpress",
-            "libcd",
-            "libds",
-            "libcard",
-            "libgpu",
-            "libspu",
-            "libetc",
-            "libc",
-            "libapi",
+            PsyqLibrary("libpress"),
+            PsyqLibrary("libcd"),
+            PsyqLibrary("libds"),
+            PsyqLibrary("libcard"),
+            PsyqLibrary("libgpu"),
+            PsyqLibrary("libspu"),
+            PsyqLibrary("libetc"),
+            PsyqLibrary("libc"),
+            PsyqLibrary("libapi"),
         ],
         objs=["util.o"],
         assets=[
@@ -339,8 +363,8 @@ Ninja.build("cc", "build/header.o", ["src/header.s"])
 Ninja.build("cc", "build/start.o", ["src/start.s"])
 Ninja.build("cc", "build/util.o", ["src/util.c"])
 
-extra_deps = []
-exe_paths = []
+extra_deps: list[str] = []
+exe_paths: list[str] = []
 for exe in executables:
     exe.generate()
     exe_paths.append(exe.final_path)
