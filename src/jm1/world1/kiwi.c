@@ -90,10 +90,38 @@ void func_800B2354(Entity *e)
 }
 
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B24B8);
+void func_800B24B8(Entity *e)
+{
+    e->carry_z = 0;
+    e->carry_y = 0;
+    e->carry_x = 0;
+    e->angle_x = 0;
+    if (e->sub.kiwi.unk5 > 0) {
+        int angle = e->sub.kiwi.unk6;
+        e->angle_x = -0xc0;
+        if (angle > -1) {
+            int dz, dx;
+            func_800E9324(angle, e->sub.kiwi.unk5 / 2, &dz, &dx);
+            e->vel_z += dz;
+            e->vel_x += dx;
+        }
+        e->sub.kiwi.unk5 /= 2;
+    }
+}
 
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B254C);
+void func_800B254C(Entity *e)
+{
+    func_800D95E8(e, &e->vel_z, &e->vel_x);
+    func_800D9A00(e, &e->vel_z, &e->vel_x, &e->vel_y);
+    func_800D96B0(e, e->vel_z, e->vel_x, e->vel_y);
+    func_800D973C(e);
+    func_800D7C70(e);
+    func_800D8514(e);
+    if (e->uh2) {
+        e->vel_y = 0;
+    }
+}
 
 // e_kiwi_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B25E4);

@@ -131,9 +131,9 @@ struct Entity {
             s16 unk3;
             s16 unk4; // angle to spawner
             s16 unk5;
-            s16 unk6;
+            s16 unk6; // some angle
             s16 unk7;
-            s16 unk8; // some angle
+            s16 unk8; // some other angle
             s16 unk9;
             s16 unk10;
             s16 unk11;
