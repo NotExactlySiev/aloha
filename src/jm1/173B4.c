@@ -1124,26 +1124,22 @@ int func_800D6B60(void *data)
     return ret;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C08);
 int func_800D6C08(void)
 {
     return D_80102A74;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C18);
 void func_800D6C18(int v)
 {
     D_80102A94 = v;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C28);
 void func_800D6C28(int v)
 {
     D_80102AA4 = v;
     D_80102AAC = NULL;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C40);
 void func_800D6C40(GroundRange *v)
 {
     D_80102AAC = v;
@@ -1160,19 +1156,16 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C50);
 //     D_80101A06 = v0;
 // }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C80);
 void func_800D6C80(int v)
 {
     D_80102ABC = v;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C90);
 void func_800D6C90(int v)
 {
     D_80102AB4 = v;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6CA0);
 void func_800D6CA0(int v)
 {
     D_80102AC4 = v;
@@ -1181,8 +1174,6 @@ void func_800D6CA0(int v)
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6CB0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6CDC);
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6D08);
 
 void func_800D6D08(int v)
 {
@@ -1559,6 +1550,10 @@ void _func_800DA4E8(void)
     }*/
 }
 
+short D_80102700 = 0;
+int D_80102704 = 0;
+int D_80102708 = 0x00034BBF;
+int D_8010270C = 0x00000012;
 int D_80102710 = 28 * 4096; // jump force
 int D_80102714 = 28 * 4096;
 int D_80102718 = 0x800; // jump timer?
@@ -1574,42 +1569,53 @@ int D_8010273C = 64;
 int D_80102740 = 0; // hyper mode
 int D_80102744 = 0;
 
-int D_80102BF4 = 0;
-int D_80102BFC = 0; // peak height?
-int D_80102C04 = 0;
-int D_80102C0C = 0; // jumps count
-int D_80102C14 = 0; // airjump window
-int D_80102C1C = 0; // strafing thingy
-int D_80102C24 = 0;
-int D_80102C2C = 0;
-int D_80102C34 = 0;
-int D_80102C3C = 0;
-int D_80102C44 = 0;
-int D_80102C4C = 0;
-int D_80102C54 = 0;
-int D_80102C5C = 0;
-int D_80102C64 = 0;
-int D_80102C6C = 0;
-int D_80102C74 = 0;
-int D_80102C7C = 0;
-int D_80102C84 = 0;
-int D_80102C8C = 0; // winning animation is playing
-int D_80102C94 = 0;
-int D_80102C9C = 0;
-int D_80102CA4 = 0;
-int D_80102CAC = 0;
-int D_80102CB4 = 0;
-int D_80102CBC = 0;
-int D_80102CC4 = 0;
-int D_80102CCC = 0;
-int D_80102CD4 = 0;
-int D_80102CDC = 0;
-int D_80102CE4 = 0;
-int D_80102CEC = 0;
-int D_80102CF4 = 0;
-int D_80102CFC = 0;
-int D_80102D04 = 0;
-int D_80102D0C = 0;
+/* US:80102BF4 JP: */ int D_80102BF4 = 0;
+/* US:80102BFC JP: */ int D_80102BFC = 0; // peak height?
+/* US:80102C04 JP: */ int D_80102C04 = 0;
+/* US:80102C0C JP: */ int D_80102C0C = 0; // jumps count
+/* US:80102C14 JP: */ int D_80102C14 = 0; // airjump window
+/* US:80102C1C JP: */ int D_80102C1C = 0; // strafing thingy
+/* US:80102C24 JP: */ int D_80102C24 = 0;
+/* US:80102C2C JP: */ int D_80102C2C = 0;
+/* US:80102C34 JP: */ int D_80102C34 = 0;
+/* US:80102C3C JP: */ int D_80102C3C = 0;
+/* US:80102C44 JP: */ int D_80102C44 = 0;
+/* US:80102C4C JP: */ int D_80102C4C = 0;
+/* US:80102C54 JP: */ int D_80102C54 = 0;
+/* US:80102C5C JP: */ int D_80102C5C = 0;
+/* US:80102C64 JP: */ int D_80102C64 = 0;
+/* US:80102C6C JP: */ int D_80102C6C = 0;
+/* US:80102C74 JP: */ int D_80102C74 = 0;
+/* US:80102C7C JP: */ int D_80102C7C = 0;
+/* US:80102C84 JP: */ int D_80102C84 = 0;
+/* US:80102C8C JP: */ int D_80102C8C = 0; // winning animation is playing
+/* US:80102C94 JP: */ int D_80102C94 = 0;
+/* US:80102C9C JP: */ int D_80102C9C = 0;
+/* US:80102CA4 JP: */ int D_80102CA4 = 0;
+/* US:80102CAC JP: */ int D_80102CAC = 0;
+/* US:80102CB4 JP: */ int D_80102CB4 = 0;
+/* US:80102CBC JP: */ int D_80102CBC = 0;
+/* US:80102CC4 JP: */ int D_80102CC4 = 0;
+/* US:80102CCC JP: */ int D_80102CCC = 0;
+/* US:80102CD4 JP: */ int D_80102CD4 = 0;
+/* US:80102CDC JP: */ int D_80102CDC = 0;
+/* US:80102CE4 JP: */ int D_80102CE4 = 0;
+/* US:80102CEC JP: */ int D_80102CEC = 0;
+/* US:80102CF4 JP: */ int D_80102CF4 = 0;
+/* US:80102CFC JP: */ int D_80102CFC = 0;
+/* US:80102D04 JP: */ int D_80102D04 = 0;
+/* US:80102D0C JP: */ int D_80102D0C = 0;
+/* US:80102D14 JP: */ int D_80102D14 = 0;
+/* US:80102D1C JP: */ int D_80102D1C = 0;
+/* US:80102D24 JP: */ int D_80102D24 = 0;
+/* US:80102D2C JP: */ int D_80102D2C = 0;
+/* US:80102D34 JP: */ int D_80102D34 = 0;
+/* US:80102D44 JP: */ int D_80102D44 = 0;
+/* US:80102D4C JP: */ int D_80102D4C = 0;
+/* US:80102D54 JP: */ int D_80102D54 = 0;
+/* US:80102D5C JP: */ int D_80102D5C = 0;
+/* US:80102D64 JP: */ int D_80102D64 = 0;
+/* US:80102D6C JP: */ int D_80102D6C = 0;
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA85C);
 
@@ -2711,7 +2717,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F4C);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E0F84);
 
 // This is weird. The second primbuffer will run into the text section if full.
-PrimBuffer *gbuffer_prim_buffers = 0x80060000;
+/* US:801027DC JP: */ PrimBuffer *gbuffer_prim_buffers = (PrimBuffer *)0x80060000;
 s32 D_80102D3C = 0; // primbuffer_index
 
 GBuffer gbuffers[3];
@@ -2750,11 +2756,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1144);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1164);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E1190);
-
-extern int D_80102D0C;
-extern int D_80102D44;
-extern int D_80102D4C;
-extern int D_80102D54;
 
 typedef struct {
     RECT *rect;

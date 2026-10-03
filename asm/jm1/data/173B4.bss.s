@@ -88,87 +88,7 @@ glabel D_801030C0
 glabel D_801030C4
 	.space 0x8
 
-glabel D_801030CC
-	.space 0x8
-
-glabel D_801030D4
-	.space 0x8
-
-glabel D_801030DC
-	.space 0x8
-
-glabel D_801030E4
-	.space 0x8
-
-glabel D_801030EC
-	.space 0x8
-
-glabel D_801030F4
-	.space 0x8
-
-glabel D_801030FC
-	.space 0x8
-
-glabel D_80103104
-	.space 0x8
-
-glabel D_8010310C
-	.space 0x8
-
-glabel D_80103114
-	.space 0x8
-
-glabel D_8010311C
-	.space 0x8
-
-glabel D_80103124
-	.space 0x8
-
-glabel D_8010312C
-	.space 0x8
-
-glabel D_80103134
-	.space 0x8
-
-glabel D_8010313C
-	.space 0x8
-
-glabel D_80103144
-	.space 0x8
-
-glabel D_8010314C
-	.space 0x8
-
-glabel D_80103154
-	.space 0x8
-
-glabel D_8010315C
-	.space 0x8
-/*
-glabel D_80103164
-	.space 0x10
-
-glabel D_80103174
-	.space 0x10
-
-glabel D_80103184
-	.space 0x10
-
-glabel D_80103194
-	.space 0x10
-
-glabel D_801031A4
-	.space 0x10
-
-glabel D_801031B4
-	.space 0x10
-
-glabel D_801031C4
-	.space 0x10
-
-glabel D_801031D4
-	.space 0x10
-*/
+/* Weapons */
 
 glabel D_801031E4
 	.space 0x4
@@ -947,6 +867,7 @@ glabel D_80130B80
 glabel D_80130D80
 	.space 0x908
 
+# These three too.
 glabel D_80131688
 	.space 0x58
 
@@ -956,14 +877,14 @@ glabel D_801316E0
 glabel D_801316E2
 	.space 0x3ae6
 
-glabel D_801351C8
-	.space 0x24
+# glabel D_801351C8
+# 	.space 0x24
 
-glabel D_801351EC
-	.space 0x10
+# glabel D_801351EC
+# 	.space 0x10
 
-glabel D_801351FC
-	.space 0x10c
+# glabel D_801351FC
+# 	.space 0x10c
 
 glabel D_80135308
 	.space 0x4

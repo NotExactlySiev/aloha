@@ -114,7 +114,12 @@ struct Entity {
         struct {
             s16 unk0;
         } coin;
-    } sub;
+
+        struct {
+            s16 unk0;
+            s16 unk1;
+        } twister;
+    } sub
 };
 
 typedef struct {
