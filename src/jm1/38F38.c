@@ -4,6 +4,7 @@
 #include "libapi.h"
 #include "math.h"
 #include "mesh.h"
+#include "pad.h"
 #include "shared.h"
 #include <libetc.h>
 #include <libgpu.h>
@@ -506,16 +507,19 @@ void func_800ED26C(SpecialWeapon id)
     func_800DB928(D_8012F5A8);
 }
 
+// inventory_set
 void func_800ED2DC(int index, SpecialWeapon weapon)
 {
     D_8012F5A8[index] = weapon;
 }
 
+// inventory_get
 SpecialWeapon func_800ED2F8(int index)
 {
     return D_8012F5A8[index];
 }
 
+// inventory_init
 void func_800ED314(void)
 {
     D_80102EEC = 0;
@@ -787,15 +791,62 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2C94);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2CAC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2CBC);
+// demo.c
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2CC4);
+int func_800B0A68(void);
+int func_800B0B74(int);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2CFC);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2CBC);
+int func_800F2CBC(int a, int *b, int c)
+{
+    (void)a;
+    (void)b;
+    return c;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2D0C);
+/* US:80102FEC JP: */ int D_80102FEC = 0; // demo_number
+/* US:80102FF4 JP: */ int D_80102FF4 = 0;
+/* US:80102FFC JP: */ int D_80102FFC = 0;
+/* US:80103000 JP: */ int D_80103000;
+/* US:80103004 JP: */ int D_80103004;
+/* US:8010300C JP: */ int *D_8010300C;
+/* US:80103014 JP: */ int D_80103014;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2D1C);
+void func_800F2CC4(int id)
+{
+    switch (id) {
+    case 1:
+        D_80102FEC = 1;
+        return;
+
+    case 2:
+        *D_8010300C = 0;
+        D_80102FEC = 2;
+        return;
+
+    default:
+        D_80102FEC = 0;
+        return;
+    }
+}
+
+int func_800F2CFC(void)
+{
+    return D_80102FEC;
+}
+
+int func_800F2D0C(void)
+{
+    return D_80102FF4;
+}
+
+void func_800F2D1C(void)
+{
+    if (*D_8010300C == 0)
+        return;
+
+    func_800F2CBC(func_800B0B74(func_800B0A68()), D_8010300C, 0x4004);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2D70);
 
@@ -804,6 +855,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2DEC);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F2E50);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F3044);
+
+// input.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F3104);
 
@@ -1257,4 +1310,20 @@ void _func_800F87BC(void)
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8C00);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8C20);
+u32 D_8010286C = Pad1sqr; // mapping_shoot
+u32 D_80102870 = Pad1crc; // mapping_special
+u32 D_80102874 = Pad1tri; // mapping_strafe
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8C20);
+void func_800F8C20(int shoot_square, int swap_special)
+{
+    // Use the default settings if we're about to play a demo.
+    if (func_800F2CFC() != 0) {
+        shoot_square = 0;
+        swap_special = 0;
+    }
+
+    D_8010286C = shoot_square ? Pad1x : Pad1sqr;
+    D_80102870 = swap_special ? Pad1tri : Pad1crc;
+    D_80102874 = swap_special ? Pad1crc : Pad1tri;
+}

@@ -54,7 +54,7 @@ struct Entity {
     /* 08 */ Component comp0; //
     /* 18 */ Component comp1; // physics
     /* 28 */ Component render_comp;
-    /* 38 */ Component comp3; // state machine. behavior and ai
+    /* 38 */ Component comp3; // state machine. behavior and ai. interaction
     /* 48 */ Model model; // model_t
     /* 58 */ u16 unk0; // id
     /* 5A */ u8 unk1;
