@@ -9,8 +9,6 @@ build.ninja
 *.xml
 *.cue
 original/*
-asm/**/nonmatchings
-!asm/main/nonmatchings
 execs/*
 assets/*
 build/
