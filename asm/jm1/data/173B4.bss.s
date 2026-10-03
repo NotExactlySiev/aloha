@@ -554,11 +554,11 @@ glabel D_801210B0
 glabel D_801210C0
 	.space 0x20
 
-glabel D_801210E0
-	.space 0x5fc
+# glabel D_801210E0
+# 	.space 0x5fc
 
-glabel D_801216DC
-	.space 0x4
+# glabel D_801216DC
+# 	.space 0x4
 
 glabel D_801216E0
 	.space 0x180

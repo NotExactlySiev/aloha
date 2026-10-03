@@ -1077,34 +1077,117 @@ typedef struct {
     s16 z0, z1;
 } GroundShape;
 
-int D_80102AA4 = 0;
-GroundRange *D_80102AAC = 0;
+/* US:80102A34 JP: */ int D_80102A34 = 0;
+/* US:80102A3C JP: */ int D_80102A3C = 0;
+/* US:80102A44 JP: */ int D_80102A44 = 0;
+/* US:80102A4C JP: */ int D_80102A4C = 0;
+/* US:80102A54 JP: */ int D_80102A54 = 0;
+/* US:80102A5C JP: */ int D_80102A5C = 0;
+/* US:80102A64 JP: */ int D_80102A64 = 0;
+/* US:80102A6C JP: */ int D_80102A6C = 0;
+/* US:80102A74 JP: */ int D_80102A74 = 0; // Section 3 entries count
+/* US:80102A7C JP: */ int D_80102A7C = 0;
+/* US:80102A84 JP: */ short D_80102A84 = 0;
+/* US:80102A8C JP: */ short D_80102A8C = 0;
+/* US:80102A94 JP: */ int D_80102A94 = 0;
+/* US:80102A9C JP: */ int D_80102A9C = 0;
+/* US:80102AA4 JP: */ int D_80102AA4 = 0;
+/* US:80102AAC JP: */ GroundRange *D_80102AAC = 0;
+/* US:80102AB4 JP: */ int D_80102AB4 = 0;
+/* US:80102ABC JP: */ int D_80102ABC = 0;
+/* US:80102AC4 JP: */ int D_80102AC4 = 0;
+/* US:80102B04 JP: */ int D_80102B04 = 0;
+/* US:80102B0C JP: */ int D_80102B0C = 0;
+/* US:80102B14 JP: */ int D_80102B14 = 0;
+/* US:80102B1C JP: */ int D_80102B1C = 0;
+/* US:80102B24 JP: */ int D_80102B24 = 0;
 
-extern GroundShape *D_801210E0[];
+GroundShape *D_801210E0[0x180]; // Section 3 entries
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6B60);
+int func_800D6B60(void *data)
+{
+    u8 *p = data;
+    int ret = D_80102A74;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C08);
+    int count = *(s32 *)p;
+    p += 4;
+    for (; D_80102A74 < D_80102A74 + count && D_80102A74 <= 0x180; D_80102A74++) {
+        u32 size = *(u32 *)p;
+        if (size == 0) {
+            D_801210E0[D_80102A74] = NULL;
+            p += 4;
+        } else {
+            D_801210E0[D_80102A74] = (GroundShape *)(p + 4);
+            p += size;
+        }
+    }
+    return ret;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C18);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C08);
+int func_800D6C08(void)
+{
+    return D_80102A74;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C28);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C18);
+void func_800D6C18(int v)
+{
+    D_80102A94 = v;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C40);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C28);
+void func_800D6C28(int v)
+{
+    D_80102AA4 = v;
+    D_80102AAC = NULL;
+}
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C40);
+void func_800D6C40(GroundRange *v)
+{
+    D_80102AAC = v;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C50);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C80);
+// void func_800D6C50(short v0, short v1)
+// {
+//     D_80102A84 = v0;
+//     D_80102A8C = v1;
+//     D_801019F0 = v1;
+//     D_801019F2 = v0;
+//     D_80101A06 = v0;
+// }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C90);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C80);
+void func_800D6C80(int v)
+{
+    D_80102ABC = v;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6CA0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6C90);
+void func_800D6C90(int v)
+{
+    D_80102AB4 = v;
+}
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6CA0);
+void func_800D6CA0(int v)
+{
+    D_80102AC4 = v;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6CB0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6CDC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6D08);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6D08);
+
+void func_800D6D08(int v)
+{
+    D_80102A9C = v;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6D18);
 
@@ -1199,7 +1282,19 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D73A4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D79C4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7A64);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7A64);
+// collision_init?
+void func_800D7A64(void)
+{
+    D_80102A54 = 0;
+    D_80102A5C = 0;
+    D_80102A7C = 0;
+    D_80102A74 = 0;
+    for (GroundShape **p = &D_801210E0[0x180 - 1]; p >= &D_801210E0[0]; p--) {
+        *p = NULL;
+    }
+    func_800D79C4();
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7AC0);
 
