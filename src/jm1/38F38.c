@@ -271,14 +271,30 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EADE0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB038);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB124);
+int D_80102E9C = 0; // score
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB134);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB124);
+// get_score
+int func_800EB124(void)
+{
+    return D_80102E9C;
+}
 
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB134);
+// set_score
+void func_800EB134(int v)
+{
+    CLAMP(0, 9999999, v);
+    D_80102E9C = v;
+}
+
+// give_points
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB16C);
 
+// draw score?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB23C);
 
+// level timer functions
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB354);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB390);

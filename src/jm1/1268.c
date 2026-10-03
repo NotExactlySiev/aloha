@@ -6,20 +6,20 @@
 // other units that contain general code shared between all worlds.
 
 // from other modules
-void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id);   // render model
-void func_800E5B88(s16, s16, s16);  // does this do anything?
+void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id); // render model
+void func_800E5B88(s16, s16, s16); // does this do anything?
 
 // this module
-s32 func_800E5DD8(SVECTOR *v, u32 meshid);                  // camera transform
+s32 func_800E5DD8(SVECTOR *v, u32 meshid); // camera transform
 
 // map stuff
 extern int D_801026B8;
 extern int D_801026BC;
 
 typedef struct {
-    char *unk0;     // mesh clut name
-    char *unk1;     // texture clut name
-    char *unk2;     // vo2 name
+    char *unk0; // mesh clut name
+    char *unk1; // texture clut name
+    char *unk2; // vo2 name
     void *unk3;
     void *unk4;
     void *unk5;
@@ -27,7 +27,7 @@ typedef struct {
     void *unk7;
     void *unk8;
     void *unk9;
-    char *unk10;    // xs3 name
+    char *unk10; // xs3 name
     void *unk11;
     void *unk12;
     void *unk13;
@@ -50,7 +50,7 @@ typedef struct {
     MeshMetadata *unk0;
     EntityResources *unk1;
     void (*class_ctor)(void); // class constructor (called once when level is loaded)
-    void (*ctor)(Entity*, Spirit*); // object constructor (called when this entity is instantiated)
+    void (*ctor)(Entity *, Spirit *); // object constructor (called when this entity is instantiated)
 } EntityTemplate;
 
 // Mesh metadata for the level specific entities
@@ -84,13 +84,11 @@ void func_800C602C(Entity *this, Spirit *params);
 void func_800C6538(void);
 void func_800C643C(Entity *this, Spirit *params);
 
-
 void func_800B9280(void);
 void func_800B9068(Entity *this, Spirit *params);
 
 void func_800BBFD8(void);
 void func_800BBD9C(Entity *this, Spirit *params);
-
 
 void func_800C5044(void);
 void func_800C4DE8(Entity *this, Spirit *params);
@@ -171,9 +169,9 @@ extern EntityTemplate D_800FFD3C;
 extern EntityTemplate D_8010048C;
 
 EntityTemplate *(*D_800FD454[3])[] = {
-    &(EntityTemplate*[]){
+    &(EntityTemplate *[]) {
         //&D_800FE818,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_80103164[0],
             &D_800FE7AC,
             func_800B1F8C,
@@ -181,7 +179,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FEB54,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_80103164[1],
             &D_800FEAE8,
             func_800B31E8,
@@ -189,7 +187,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FED64,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_80103164[2],
             &D_800FECF8,
             func_800B4D20,
@@ -197,7 +195,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FEFE4,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_80103164[3],
             &D_800FEF78,
             func_800B6614,
@@ -205,53 +203,52 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FF0A0,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_80103164[4],
             &D_800FF034,
             func_800B6C40,
             func_800B6820,
         },
 
-        &D_800FF2F8,    // shared
+        &D_800FF2F8, // shared
 
         // the pattern doesn't continue after this
         &D_800FFCEC,
         &D_80100544,
 
         //&D_80100554,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             .class_ctor = func_800C5DD8,
             .ctor = func_800C5CD0,
         },
 
         //&D_80100564,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             .class_ctor = func_800C6124,
             .ctor = func_800C602C,
         },
 
         //&D_80100574,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             .class_ctor = func_800C6538,
             .ctor = func_800C643C,
         },
 
-        (void *) -1
-    },
+        (void *)-1 },
 
-    &(EntityTemplate*[]){
+    &(EntityTemplate *[]) {
         //&D_800FF4E0,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_80103164[6],
             &D_800FF474,
             func_800B9280,
             func_800B9068,
         },
 
-        &D_800FF2F8,    // shared
+        &D_800FF2F8, // shared
 
         //&D_800FFA78,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_80103164[7],
             &D_800FFA0C,
             func_800BBFD8,
@@ -261,21 +258,18 @@ EntityTemplate *(*D_800FD454[3])[] = {
         &D_800FFC50,
         &D_800FFD3C,
         &D_8010048C,
-        (void *) -1
-    },
+        (void *)-1 },
 
-    &(EntityTemplate*[]){
+    &(EntityTemplate *[]) {
         //&D_80100334,
-        &(EntityTemplate){
+        &(EntityTemplate) {
             &D_8010353C,
             &D_801002C8,
             func_800C5044,
             func_800C4DE8,
         },
-        (void *) -1
-    },
+        (void *)-1 },
 };
-
 
 int func_800B0A68(void)
 {
@@ -293,16 +287,16 @@ void func_800B0A88(int val)
     D_801026BC = val / 18;
 }
 
-EntityTemplate *(*func_800B0AD4(int index))[]
-{
+EntityTemplate *(*func_800B0AD4(int index)) [] {
     return D_800FD454[index % 3];
 }
 
-const char *D_800FD48C[3] = {
-    "sou_ene.ear",
-    "kaz_ene.ear",
-    "bos1_ene.ear",
-};
+const char *D_800FD48C[3]
+    = {
+          "sou_ene.ear",
+          "kaz_ene.ear",
+          "bos1_ene.ear",
+      };
 
 const char *func_800B0B24(int index)
 {
@@ -348,10 +342,10 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1788);
 u32 func_800B1B28(Entity *e, s32 val);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
 
-//extern s32 D_80103164;
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
-// e_frog_render (TODO: shadow)
-void func_800B1BF4(Entity* this)
+// extern s32 D_80103164;
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
+//  e_frog_render (TODO: shadow)
+void func_800B1BF4(Entity *this)
 {
     SVECTOR *cam = SCRTCHPAD(0x3CA);
     SVECTOR pos;
@@ -359,42 +353,43 @@ void func_800B1BF4(Entity* this)
     pos.vx = this->pos_x >> 12;
     pos.vy = this->pos_y >> 12;
     pos.vz = this->pos_z >> 12;
-    rot.vy =  this->angle_y;
+    rot.vy = this->angle_y;
     rot.vx = -this->angle_x;
-    rot.vz =  this->angle_z;
+    rot.vz = this->angle_z;
     if (func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         if (this->unk5 != 0) {
-            meshid |= 0x8000;   // damage blinkW
+            meshid |= 0x8000; // damage blinkW
         }
         func_800E5E60(&pos, &rot, meshid);
     }
     // and the shadow
     pos.vy = this->max_y + 2;
-    if (cam->vy < pos.vy &&
-        func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].unk0) > -1) {
+    if (cam->vy < pos.vy && func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].unk0) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         func_800E5B88(0, 0, 0);
         func_800E5E60(&pos, &rot, meshid | 0x4000);
         func_800E5B88(0, 0, 0);
-
     }
 
-    if (this->unk5 != 0) this->unk5 = -1;
+    if (this->unk5 != 0)
+        this->unk5 = -1;
 }
 
 // e_frog_ctor
 void _func_800B1D78(Entity *this, Spirit *params);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", _func_800B1D78);
+
 void func_800B1D78(Entity *this, Spirit *params)
 {
-    //LinkedList *list = get_list0_head();
+    // LinkedList *list = get_list0_head();
 
     _func_800B1D78(this, params);
 }
 
 // e_frog_class_ctor
-void func_800B1F8C(void) {
+void func_800B1F8C(void)
+{
 }
 
 // kiwi.c
@@ -417,7 +412,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2E6C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2FF0);
 
-void func_800B31E8(void) {
+void func_800B31E8(void)
+{
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B31F0);
@@ -452,7 +448,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B498C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B4B14);
 
-void func_800B4D20(void) {
+void func_800B4D20(void)
+{
 }
 
 // hippo.c
@@ -496,7 +493,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B62AC);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6430);
 
 // e_hippo_class_ctor
-void func_800B6614(void) {
+void func_800B6614(void)
+{
 }
 
 // block.c
@@ -506,7 +504,7 @@ void func_800B661C(Entity *this)
 {
     s32 old_y = this->pos_y;
     s32 new_y = old_y + this->vel_y;
-    this->angle_y += 64;    // rotation of the blades
+    this->angle_y += 64; // rotation of the blades
 
     if ((this->sub.block.max_y << 12) < new_y) {
         new_y = this->sub.block.max_y << 12;
@@ -526,8 +524,9 @@ void func_800B661C(Entity *this)
 void func_800B66A0(Entity *this, Component *comp)
 {
     if (comp->state == 0) {
-        int rc = func_800DAB0C(this->pos_x >> 12, this->pos_y >> 12, this->pos_z >> 12);
-        if (rc == 0) return;    // in range. keep vibin
+        int rc = is_outside_simulation_range(this->pos_x >> 12, this->pos_y >> 12, this->pos_z >> 12);
+        if (rc == 0)
+            return; // in range. keep vibin
         comp->state = 1;
     }
     // oh no, out of range
@@ -542,7 +541,7 @@ void func_800B66A0(Entity *this, Component *comp)
 extern s32 D_801031A4;
 
 // block render
-void func_800B6744(Entity* this)
+void func_800B6744(Entity *this)
 {
     SVECTOR pos = {
         this->pos_x >> 12,
@@ -570,12 +569,12 @@ void func_800B6820(Entity *e, Spirit *spirit)
     e->unk2 = 0;
     e->unk5 = 0;
     e->spirit = spirit;
-    e->sub.block.max_y = spirit->unk4;  // spirit also has custom fields
+    e->sub.block.max_y = spirit->unk4; // spirit also has custom fields
     e->sub.block.min_y = spirit->unk0;
-    e->vel_x = e->vel_y = -ONE*spirit->unk1;
-    e->pos_x = ONE*spirit->x;
-    e->pos_z = ONE*spirit->z;
-    e->pos_y = ONE*spirit->unk4;    // starting height
+    e->vel_x = e->vel_y = -ONE * spirit->unk1;
+    e->pos_x = ONE * spirit->x;
+    e->pos_z = ONE * spirit->z;
+    e->pos_y = ONE * spirit->unk4; // starting height
 
     e->comp0.disabled = 1;
 
@@ -612,8 +611,8 @@ int D_801028A4 = 0;
 
 // Sound maker entity functions
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
-void func_800B6948(Entity* e, Component* comp)
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
+void func_800B6948(Entity *e, Component *comp)
 {
     D_8010288C += 4;
     D_80102894 += 3;
@@ -623,7 +622,7 @@ void func_800B6948(Entity* e, Component* comp)
 
 // Adjust the volume of the wind sound based on the time variables and player y.
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B69A0);
-void func_800B69A0(Entity* e, Component* comp);
+void func_800B69A0(Entity *e, Component *comp);
 
 // e_block_class_ctor
 void func_800B6C40(void)
@@ -681,7 +680,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B79D4);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B7B58);
 
 // e_beetle_class_ctor
-void func_800B7D54(void) {
+void func_800B7D54(void)
+{
 }
 
 // hari.c
@@ -706,14 +706,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B8EE4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B9068);
 
-void func_800B9280(void) {
+void func_800B9280(void)
+{
 }
 
 // kumo.c
 
 // static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B9288);
-
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B92B4);
 
@@ -781,7 +781,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBD9C);
 // e_kumo_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BBFD8);
 
-
 // mosu.c
 
 // static
@@ -830,7 +829,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD588);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BD710);
 
 // e_mosu_class_ctor
-void func_800BD924(void) {
+void func_800BD924(void)
+{
 }
 
 // zeplin.c
@@ -881,7 +881,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BE48C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BE7AC);
 
-void func_800BE8F8(void) {
+void func_800BE8F8(void)
+{
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BE900);
@@ -1024,7 +1025,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C557C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C55B8);
 
-
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C55D8);
 
 // e_yuge_class_ctor
@@ -1094,16 +1094,16 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C643C);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6538);
 
 // unused:
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6558);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6558);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C664C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C664C);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C67F4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C67F4);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6834);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6834);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A68);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A68);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A7C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6A7C);
 
-//INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6B0C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C6B0C);

@@ -59,16 +59,16 @@ struct Entity {
     /* 5C */ u16 health;
     /* 5E */ u16 unk3;
     /* 60 */ u32 unk4;
-    /* 64 */ u32 unk5;
+    /* 64 */ u32 unk5; // flags. 0x8000 is BLINK. 0x0001 is VISIBLE
     /* 68 */ int pos_x;
     /* 6C */ int pos_y;
     /* 70 */ int pos_z;
     /* 74 */ int vel_x;
     /* 78 */ int vel_y;
     /* 7C */ int vel_z;
-    /* 80 */ int unk6; // acc_x (ddx)
-    /* 84 */ int unk7; // acc_y
-    /* 88 */ int unk8; // acc_z
+    /* 80 */ int acc_x;
+    /* 84 */ int acc_y;
+    /* 88 */ int acc_z;
     /* 8C */ int angle_y;
     /* 90 */ int angle_x;
     /* 94 */ int angle_z;

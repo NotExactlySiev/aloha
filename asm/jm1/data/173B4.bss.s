@@ -1100,9 +1100,6 @@ glabel D_8013860B
 glabel D_80138610
 	.space 0x8
 
-glabel D_80138618
-	.space 0x8
-
 glabel D_80138620
 	.space 0x8
 
@@ -1133,11 +1130,6 @@ glabel D_8013C828
 glabel D_8013CC28
 	.space 0x8
 
-glabel D_8013CC30
-	.space 0x8
-
-glabel D_8013CC38
-	.space 0x8
 
 glabel D_8013CC40
 	.space 0x200
@@ -1186,8 +1178,6 @@ glabel D_80141453
 glabel D_80141458
 	.space 0x8
 
-glabel D_80141460
-	.space 0x8
 
 glabel D_80141468
 	.space 0x800
@@ -1287,6 +1277,3 @@ glabel D_80142D38
 
 glabel D_80142D40
 	.space 0x8
-
-glabel D_80142D48
-    .space 0x4
