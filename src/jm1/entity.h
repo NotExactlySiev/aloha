@@ -2,6 +2,9 @@
 
 #include <common.h>
 
+// This one shouldn't be here.
+typedef struct Laser Laser;
+
 typedef struct LinkedList LinkedList;
 typedef struct Entity Entity;
 typedef struct Component Component;
@@ -119,6 +122,11 @@ struct Entity {
             s16 unk0;
             s16 unk1;
         } twister;
+
+        struct {
+            u8 unk0[16];
+            Laser *laser;
+        } roman_laser;
     } sub
 };
 

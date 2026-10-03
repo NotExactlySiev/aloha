@@ -1707,7 +1707,24 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB338);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB348);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB394);
+int D_80102B54 = 0;
+int D_80102B5C = 0;
+
+int func_800E3CD8(void);
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB394);
+void func_800DB394(void)
+{
+    func_800EC0A0();
+    func_800EA808(0);
+    func_800ED314();
+    func_800ED26C(0);
+    func_800EB354(0);
+    func_800EB3A0(func_800E3CD8());
+    D_80102B54 = 1;
+    D_80102B5C = 0;
+    func_800DB66C();
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB400);
 

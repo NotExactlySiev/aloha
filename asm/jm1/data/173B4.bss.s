@@ -85,10 +85,7 @@ glabel D_801030BC
 glabel D_801030C0
 	.space 0x4
 
-glabel D_801030C4
-	.space 0x8
-
-/* Weapons */
+/* */
 
 glabel D_801031E4
 	.space 0x4
@@ -868,14 +865,14 @@ glabel D_80130D80
 	.space 0x908
 
 # These three too.
-glabel D_80131688
-	.space 0x58
+# glabel D_80131688
+# 	.space 0x58
 
-glabel D_801316E0
-	.space 0x2
+# glabel D_801316E0
+# 	.space 0x2
 
-glabel D_801316E2
-	.space 0x3ae6
+# glabel D_801316E2
+# 	.space 0x3ae6
 
 # glabel D_801351C8
 # 	.space 0x24
