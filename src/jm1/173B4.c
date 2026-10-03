@@ -701,9 +701,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2A8C);
 int D_801029EC = 0; // total number of coins in level
 
 // e_coin_comp1
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D2B74);
-
-void _func_800D2B74(Entity *e, Component *c)
+void func_800D2B74(Entity *e, Component *c)
 {
     e->sub.coin.unk0 += 1;
     if (e->sub.coin.unk0 < 0)
@@ -711,13 +709,16 @@ void _func_800D2B74(Entity *e, Component *c)
 
     if (e->sub.coin.unk0 == 0) {
         // Initial sound effect when spawned in.
-        //
+        func_800CE304(
+            0x2000,
+            func_800CEC30(110, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+            func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+        );
     }
 
-    //
+    int tmp = func_800D9CF8(e);
     e->acc_y = 0x1400;
-    //
-    //
+    e->angle_y += tmp;
     e->angle_y += e->dangle_y;
 
     e->vel_y += e->acc_y;
@@ -728,10 +729,8 @@ void _func_800D2B74(Entity *e, Component *c)
     e->vel_x = (e->vel_x * 4048) / 4096;
     e->vel_z = (e->vel_z * 4048) / 4096;
 
-    printf("%p: vel_x is %d\n", e, e->vel_x);
-
-    e->sub.coin.unk0 += 1;
-    if (e->sub.coin.unk0 & 1) {
+    e->sub.coin.unk1 += 1;
+    if (e->sub.coin.unk1 & 1) {
         int vel_x = e->vel_x;
         int vel_z = e->vel_z;
         func_800D95E8(e, &vel_x, &vel_z);
@@ -745,7 +744,39 @@ void _func_800D2B74(Entity *e, Component *c)
             e->on_air = 0;
         }
     } else {
-        //
+        e->pos_x += -0x1000 * e->carry_x;
+        e->pos_y += -0x1000 * e->carry_y;
+        e->pos_z += -0x1000 * e->carry_z;
+        int vel_x = e->vel_x;
+        int vel_z = e->vel_z;
+        func_800D95E8(e, &vel_x, &vel_z);
+        func_800D9A00(e, &vel_x, &vel_z, &e->vel_y);
+        func_800D96B0(e, vel_x, vel_z, e->vel_y);
+        func_800D973C(e);
+        func_800D7C70(e);
+        func_800D8514(e);
+
+        // Handle collisions with walls.
+        if (e->on_air) {
+            // Bounce
+            e->vel_y = -(e->vel_y * 5 / 6);
+        } else {
+            if (e->uh2) {
+                e->vel_y = 0;
+            }
+        }
+
+        if (e->uh0) {
+            e->vel_z = -e->vel_z;
+        }
+
+        if (e->uh1) {
+            e->vel_x = -e->vel_z;
+        }
+
+        e->carry_z = 0;
+        e->carry_y = 0;
+        e->carry_x = 0;
     }
 
     if (e->sub.coin.unk0 > 480) {
@@ -760,11 +791,6 @@ void _func_800D2B74(Entity *e, Component *c)
             e->unk5 = (e->unk5 & ~0x8000) ^ 1;
         }
     }
-
-    // slopes and stuff
-    //
-    //
-    //
 }
 
 // e_coin_comp3

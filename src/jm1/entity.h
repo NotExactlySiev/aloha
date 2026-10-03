@@ -94,10 +94,10 @@ struct Entity {
     /* D8 */ u32 unk21;
     /* DC */ s32 max_y; // ground_y
     /* E0 */ s32 unk22; // ceiling_y
-    /* E4 */ s8 uh0;
-    /* E5 */ s8 uh1;
-    /* E6 */ s8 uh2;
-    /* E7 */ s8 on_air;
+    /* E4 */ s8 uh0; // Collision on XY plane
+    /* E5 */ s8 uh1; // Collision on YZ plane
+    /* E6 */ s8 uh2; // Collision on ZX plane
+    /* E7 */ s8 on_air; // RENAME: on_ground
     /* E8 */ s8 unk25;
     /* E9 */ s8 unk26;
     /* EA */ s16 unk27; // id of the entity we will land on. LAND in debug info
@@ -116,6 +116,7 @@ struct Entity {
 
         struct {
             s16 unk0;
+            s16 unk1;
         } coin;
 
         struct {
