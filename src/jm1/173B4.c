@@ -120,8 +120,9 @@ int rsin(int angle)
 }
 #endif
 
-s16 sin_lut[4096];
+/* US:8013F448 JP: */ s16 sin_lut[4096];
 
+// US: 800CD070
 void make_sin_lut(void)
 {
     for (int i = 0; i < 4096; i++) {

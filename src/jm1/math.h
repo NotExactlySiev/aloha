@@ -3,6 +3,11 @@
 #include <ints.h>
 #include <libgte.h>
 
+void make_sin_lut(void);
+u8 func_800CD0BC(void); // rand_rng
+u8 func_800CD158(void); // rand_prng (deterministic)
+int func_800CD1C4(int y, int x); // atan2
+
 // GTE Functions
 void func_800E87B8(MATRIX *m); // double_matrix
 void func_800E8810(void); // clear_translation_vector
@@ -21,4 +26,4 @@ static inline s16 sinf(int a) { return sin_lut[(a) & 0xFFF]; }
 
 static inline s16 cosf(int a) { return sin_lut[((a) + 0x400) & 0xFFF]; }
 
-static inline fixed_mul(int a, int b) { return (a * b) / ONE; }
+static inline int fixed_mul(int a, int b) { return (a * b) / ONE; }

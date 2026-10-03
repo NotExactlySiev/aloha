@@ -96,7 +96,7 @@ struct Entity {
     /* CC */ u32 carry_x;
     /* D0 */ u32 carry_y;
     /* D4 */ u32 carry_z;
-    /* D8 */ u32 unk21;
+    /* D8 */ u32 unk21; // carry_angle_y?
     /* DC */ s32 max_y; // ground_y
     /* E0 */ s32 unk22; // ceiling_y
     /* E4 */ s8 uh0; // Collision on XY plane
@@ -116,6 +116,27 @@ struct Entity {
             s16 max_y;
             s16 min_y;
         } block;
+
+        struct {
+            s32 unk0;
+            s16 unk1;
+            s16 unk2;
+            s16 unk3;
+            s16 unk4; // angle to spawner
+            s16 unk5;
+            s16 unk6;
+            s16 unk7;
+            s16 unk8; // some angle
+            s16 unk9;
+            s16 unk10;
+            s16 unk11;
+            s16 unk12;
+            u8 unk13[20];
+            s16 unk14;
+            // Padding
+            s16 *unk15;
+            s16 **unk16;
+        } kiwi;
 
         s16 unk[32];
 

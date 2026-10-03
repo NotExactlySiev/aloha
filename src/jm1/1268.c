@@ -1,7 +1,8 @@
 #include "common.h"
 #include "entity.h"
+#include "math.h"
 #include <libgpu.h>
-
+#include <libgte.h>
 // this file contains mostly world specific code, which are linked with the
 // other units that contain general code shared between all worlds.
 
@@ -392,62 +393,59 @@ void func_800B1F8C(void)
 {
 }
 
-// kiwi.c
+// kiwi.c (moved)
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1F94);
+// dragonfly.c
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2354);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B24B8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B254C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B25E4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2A0C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2DA0);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2E6C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2FF0);
-
-void func_800B31E8(void)
-{
-}
-
+// e_dragonfly_sth_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B31F0);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B3294);
 
+// e_dragonfly_sth_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B3344);
 
+// e_dragonfly_sth_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B341C);
 
+// e_dragonfly_sth_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B34D4);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B3640);
 
+// e_dragonfly_comp0
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B390C);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B3CB0);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B3DD0);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B3F2C);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B4088);
 
+// e_dragonfly_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B4114);
 
+// e_dragonfly_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B42D4);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B4638);
 
+// e_dragonfly_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B498C);
 
+// e_dragonfly_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B4B14);
 
+// e_dragonfly_class_ctor
 void func_800B4D20(void)
 {
 }
