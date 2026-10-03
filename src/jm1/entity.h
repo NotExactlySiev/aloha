@@ -48,6 +48,11 @@ struct Model { // Should be called Anim instead?
     short length;
 };
 
+enum {
+    DISPLAY_VISIBLE = 0x0001,
+    DISPLAY_BLINK = 0x8000,
+};
+
 struct Entity {
     /* 00 */ Entity *next;
     /* 04 */ Entity *prev;

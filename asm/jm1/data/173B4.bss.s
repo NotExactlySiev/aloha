@@ -197,11 +197,6 @@ glabel D_80105D24
 glabel D_80106CD8
 	.space 0x50
 
-glabel D_80106D28
-	.space 0x40
-
-glabel D_80106D68
-	.space 0x40
 
 glabel D_80106DA8
 	.space 0x2

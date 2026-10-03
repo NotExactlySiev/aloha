@@ -20,3 +20,5 @@ extern s16 sin_lut[4096];
 static inline s16 sinf(int a) { return sin_lut[(a) & 0xFFF]; }
 
 static inline s16 cosf(int a) { return sin_lut[((a) + 0x400) & 0xFFF]; }
+
+static inline fixed_mul(int a, int b) { return (a * b) / ONE; }

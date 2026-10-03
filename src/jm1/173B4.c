@@ -51,16 +51,32 @@ int func_800C6FB8()
 
 // custom math functions. math.c?
 
-extern s32 D_801028F4; // rng
-extern s32 D_801028FC; // prng
+s32 D_801028F4 = 0; // rng
+s32 D_801028FC = 0; // prng
 
 // seed arrs
-extern s8 D_8010154C[64]; // seed
-extern s8 D_8010158C[16]; // buttons
+
+// seed
+u8 D_8010154C[64] = {
+    0x9a, 0xf9, 0x93, 0xdd, 0xf8, 0xfe, 0x85, 0x4b,
+    0xe2, 0xa5, 0x92, 0xc9, 0x4c, 0x22, 0x51, 0x61,
+    0xfa, 0x4e, 0x37, 0x23, 0x91, 0x7c, 0x0e, 0x57,
+    0xa8, 0x2b, 0x2a, 0x98, 0x49, 0x60, 0x7d, 0x3f,
+    0xb7, 0xbc, 0x0b, 0x63, 0xd0, 0xaf, 0xad, 0x9d,
+    0x53, 0x0a, 0x4a, 0x4f, 0x05, 0x6d, 0x0f, 0x09,
+    0x70, 0xc8, 0x52, 0x5a, 0x74, 0xa2, 0x6e, 0xff,
+    0x08, 0xe5, 0xc3, 0x75, 0xcd, 0xbb, 0xb0, 0xf4
+};
+
+// buttons
+u8 D_8010158C[16] = {
+    0x00, 0x08, 0x02, 0x00, 0x04, 0x07, 0x01, 0x04,
+    0x06, 0x09, 0x03, 0x06, 0x00, 0x08, 0x02, 0x00
+};
 
 // working arrs
-extern s8 D_80106D28[64];
-extern s8 D_80106D68[64];
+u8 D_80106D28[64];
+u8 D_80106D68[64];
 
 // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
 void func_800CD010(void)
@@ -121,6 +137,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD0BC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD158);
 
+// atan2
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD1C4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD2C4);
@@ -162,15 +179,42 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDDD4);
 
 // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28);
 
+// catan
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDFC4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE098);
+/* US:80102904 JP: */ short D_80102904;
+/* US:8010290C JP: */ int D_8010290C; // sfx_queue_count
+/* US:80102914 JP: */ int D_80102914 = 0;
+/* US:8010291C JP: */ int D_8010291C = 0;
+/* US:80102924 JP: */ int D_80102924 = 0;
+/* US:8010292C JP: */ SpuVolume D_8010292C = { 0 };
+/* US:80102934 JP: */ int D_80102934 = 0;
+/* US:8010293C JP: */ int D_8010293C = 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE0E4);
+void func_800CE098(int a, int b)
+{
+    u32 part = (D_80102904 + ((a & 0xf0) >> 4));
+    jt.sfx_set_prog_attr((part << 24) | (a & 0xff0f), b);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE0F8);
+void func_800CE0E4(int v)
+{
+    D_8010291C = v & 1;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE108);
+int func_800CE0F8(void)
+{
+    return D_8010291C;
+}
+
+void func_800CE108(void)
+{
+    D_8010290C = 0;
+    func_800CE098(0x1700, 2);
+    func_800CE098(0x900, 2);
+    func_800CE098(0x1500, 2);
+    func_800CE098(0x4d11, 2);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE158);
 
@@ -190,9 +234,48 @@ void func_800CE304(short a, int vol, short pan)
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE324);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE3A8);
+// sfx_is_valid
+int func_800CE3A8(int handle)
+{
+    if (handle < 0)
+        return -1;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE3F4);
+    if (!(handle & 0x8000))
+        return jt.sfx_is_valid(handle);
+
+    return handle;
+}
+
+#define NCHANNELS 24
+
+typedef struct {
+    s16 id;
+    u16 vol;
+    u16 pan;
+    u16 prio;
+    int *unk;
+} Channel;
+
+extern Channel D_80106DA8[NCHANNELS];
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE3F4);
+void func_800CE3F4(int handle)
+{
+    if (handle < 0)
+        return;
+
+    // This sound effect is managed by the main executable.
+    if (!(handle & 0x8000)) {
+        jt.sfx_kill(handle);
+        return;
+    }
+
+    // It's managed by us.
+    handle &= 0x7fff;
+    D_80106DA8[handle].unk = NULL;
+    D_80106DA8[handle].id = -0x8000;
+    D_80106DA8[handle].prio = 2;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE484);
 
@@ -204,35 +287,99 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE69C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE6AC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE6FC);
+void func_800CE6FC(int v)
+{
+    jt.snd_set_reverb(5, v);
+    jt.sfx_set_reverb(!!v);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE77C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE77C);
+void func_800CE77C(void)
+{
+    D_80102934 = 0x1000;
+    D_8010293C = 0;
+    D_80102914 = 1;
+    D_8010291C = 1;
+    D_80102924 = 0;
+    func_800CE108();
+    jt.sfx_kill_all();
+    jt.snd_reset();
+    jt.snd_set_vol_to_max();
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE820);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE8A8);
+void func_800CE8A8(void)
+{
+    jt.cd_pause();
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE8D8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE9A8);
+int func_800CE9A8(void)
+{
+    return D_80102924;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE9B8);
+u32 func_800CE9B8(void)
+{
+    if (func_800CE9A8() != 0)
+        return 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEA14);
+    u32 status = jt.snd_status();
+    if (!(status & 8))
+        return 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEA48);
+    return status & 1;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEA7C);
+int func_800CEA14(void)
+{
+    return jt.snd_fade_out(0x30, 0, 0);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEAAC);
+int func_800CEA48(void)
+{
+    return jt.snd_fade_in(0x30, 0x400, 0);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEADC);
+int func_800CEA7C(int v)
+{
+    return jt.snd_set_stereo(v);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEB2C);
+int func_800CEAAC(void)
+{
+    return jt.snd_get_stereo();
+}
 
+void func_800CEADC(int id, int repeat)
+{
+    jt.music_set_repeat(repeat);
+    jt.music_play(id);
+}
+
+int func_800CEB2C(void)
+{
+    return (jt.snd_status() & 8) != 0;
+}
+
+// calculate_sound_pan
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEB6C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEC30);
+// calculate_sound_volume
+int func_800CEC30(int val, int x, int y, int z)
+{
+    SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
+    int distance = SquareRoot0(func_800E8868(
+        x - camera_pos->vx,
+        y - camera_pos->vy,
+        z - camera_pos->vz
+    ));
+    distance -= 0x300;
+    CLAMP(0, 4096, distance);
+    return (val * (0x1000 - distance)) >> 12;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CECB8);
 
@@ -867,61 +1014,142 @@ void func_800D2F58(Entity *e, Component *c)
     }
 }
 
-// e_coin_comp2
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D30E4);
-//  e_coin_render
-//  TODO: this isn't complete
-// void func_800D30E4(Entity *e)
-// {
-//     SVECTOR *cam = SCRTCHPAD(0x3CA);
-//     SVECTOR pos;
-//     SVECTOR rot;
-//     int meshid;
-//     // TODO: make the coin type in union
-//     if (e->sub.unk[0] < 0)
-//         return; // lifetime?
+// e_coin_render
+void func_800D30E4(Entity *e)
+{
+    SVECTOR *cam = SCRTCHPAD(0x3CA);
+    SVECTOR pos;
+    SVECTOR rot;
+    int meshid;
 
-//     // is visible? these are flags I think TODO
-//     e->unk5 |= 0x8000;
-//     if (e->unk5 & 1)
-//         return;
+    if (e->sub.coin.unk0 < 0)
+        return; // lifetime?
 
-//     pos.vx = e->pos_x >> 12;
-//     pos.vy = e->pos_y >> 12;
-//     pos.vz = e->pos_z >> 12;
+    e->unk5 |= DISPLAY_BLINK;
+    if (e->unk5 & DISPLAY_VISIBLE)
+        return;
 
-//     rot.vx = -e->angle_x;
-//     rot.vy = e->angle_y;
-//     rot.vz = e->angle_z;
+    pos.vx = e->pos_x >> 12;
+    pos.vy = e->pos_y >> 12;
+    pos.vz = e->pos_z >> 12;
 
-//     meshid = e->model.frame_a + D_8011EFB8.unk0;
+    rot.vy = e->angle_y;
+    rot.vx = -e->angle_x;
+    rot.vz = e->angle_z;
 
-//     // bouncing animation and... something else?
-//     pos.vy += (6 * sinf(e->angle_x) - (e->range_y / 2) * cosf(e->angle_x)) >> 12;
+    meshid = e->model.frame_a + D_8011EFB8.unk0;
 
-//     func_800E5E60(&pos, &rot, meshid);
+    // bouncing animation and... something else?
+    pos.vy -= (6 * sinf(e->angle_x) + (e->range_y / 2) * cosf(e->angle_x)) >> 12;
 
-//     pos.vy = e->max_y + 2;
-//     if (cam->vy >= pos.vy || e->max_y > 0)
-//         return;
+    func_800E5E60(&pos, &rot, meshid);
 
-//     // draw shadow
-//     // TODO: make sin_lut lookup a macro?
-//     s32 tmp = (e->range_y / 2) * sinf(e->angle_x);
-//     tmp /= ONE;
+    pos.vy = e->max_y + 2;
+    if (cam->vy >= pos.vy || e->max_y > 0)
+        return;
 
-//     s32 offz = tmp * sin_lut[(e->angle_y + 0xC00) & 0xFFF];
-//     s32 offx = tmp * sin_lut[(e->angle_y + 0x800) & 0xFFF];
+    // draw shadow
+    int tmp = fixed_mul(e->range_y / 2, sinf(e->angle_x));
+    pos.vx += fixed_mul(tmp, cosf(e->angle_y + 0x800));
+    pos.vz += fixed_mul(tmp, sinf(e->angle_y + 0x800));
 
-//     pos.vx += offx / ONE;
-//     pos.vz += offz / ONE;
+    func_800E5B88(0, -(e->range_y / 2), 0);
+    func_800E5E60(&pos, &rot, meshid | 0x4000);
+    func_800E5B88(0, 0, 0);
+}
 
-//     func_800E5E60(&pos, &rot, meshid | 0x4000);
-// }
+#define COIN_SHOOT_UP_FORCE (20 * ONE)
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D3378);
+// spawn_coin
+void func_800D3378(int x, int y, int z, int ay, int ax, int speed, int gold)
+{
+    if (D_801029EC >= 0x1f)
+        return;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D35A8);
+    Entity *e = entity_create();
+    if (e == NULL)
+        return;
+
+    entity_insert_after(get_list1_head(), (LinkedList *)e);
+    e->unk2 = 0;
+    e->unk5 = 0;
+    e->pos_x = x << 12;
+    e->pos_y = y << 12;
+    e->pos_z = z << 12;
+
+    VECTOR dir;
+    func_800CD4D4(ay, ax, 0x50, &dir.vx, &dir.vy, &dir.vz);
+    e->carry_x = dir.vx >> 12;
+    e->carry_y = (dir.vy >> 12) - 0x50;
+    e->carry_z = dir.vz >> 12;
+
+    func_800CD4D4(ay, ax, speed, &dir.vx, &dir.vy, &dir.vz);
+    e->vel_x = dir.vx;
+    e->vel_y = dir.vy - COIN_SHOOT_UP_FORCE;
+    e->vel_z = dir.vz;
+
+    e->angle_y = func_800CD0BC() << 4;
+    e->angle_x = 0;
+    e->angle_z = 0;
+    e->dangle_y = 0x80;
+
+    e->comp0.disabled = 1;
+    e->comp1.func = func_800D2B74;
+    e->comp1.disabled = 0;
+    e->comp1.state = 0;
+    e->comp3.func = func_800D2F58;
+    e->comp3.disabled = 0;
+    e->comp3.state = 0;
+    e->render_comp.func = func_800D30E4;
+    e->render_comp.disabled = 0;
+    e->render_comp.state = 0;
+
+    if (gold) {
+        e->range_z = 0x30;
+        e->range_x = 0x30;
+        e->range_y = 0x60;
+        e->model.frame_a = 2;
+    } else {
+        e->range_z = 0x20;
+        e->range_x = 0x20;
+        e->range_y = 0x48;
+        e->model.frame_a = 1;
+    }
+
+    e->on_air = 0;
+    e->uh2 = 0;
+    e->uh1 = 0;
+    e->uh0 = 0;
+    func_800D7AC0(e);
+    e->unk26 = 1;
+
+    e->sub.coin.unk0 = -(func_800CD0BC() >> 5);
+    e->sub.coin.unk1 = 0;
+    D_801029EC += 1;
+}
+
+void func_800D35A8(int x, int y, int z, int nsilver, int ngold)
+{
+    for (int i = 0; i < ngold; i++) {
+        func_800D3378(
+            x, y, z,
+            func_800CD0BC() << 4,
+            func_800CD0BC() * 5 / 2 + 0x100,
+            (func_800CD0BC() * 12) / 256 + 10,
+            1
+        );
+    }
+
+    for (int i = 0; i < nsilver; i++) {
+        func_800D3378(
+            x, y, z,
+            func_800CD0BC() << 4,
+            func_800CD0BC() * 5 / 2 + 0x100,
+            (func_800CD0BC() * 12) / 256 + 10,
+            0
+        );
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D3700);
 
