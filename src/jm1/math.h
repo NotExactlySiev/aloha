@@ -27,3 +27,5 @@ static inline s16 sinf(int a) { return sin_lut[(a) & 0xFFF]; }
 static inline s16 cosf(int a) { return sin_lut[((a) + 0x400) & 0xFFF]; }
 
 static inline int fixed_mul(int a, int b) { return (a * b) / ONE; }
+
+static inline int fixed_div(int a, int b) { return (a * ONE) / b; }

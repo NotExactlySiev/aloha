@@ -158,10 +158,10 @@ struct Entity {
 };
 
 typedef struct {
-    int unk0;
-    int unk1;
-    int unk2;
-    int unk3;
+    int mesh_id; // mesh_id
+    int unk1; // mesh_palette
+    int unk2; // texture_palette
+    int unk3; // texture_id
 } MeshMetadata;
 
 Entity *func_800DBBE4();

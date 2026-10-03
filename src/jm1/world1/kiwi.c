@@ -38,6 +38,9 @@
 #include "common.h"
 #include <libgte.h>
 
+extern MeshMetadata D_80103164[8];
+int func_800E6684(int *frames, int *factors, int n);
+
 // e_kiwi_comp0
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1F94);
 
@@ -98,11 +101,72 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B25E4);
 // e_kiwi_comp3
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2A0C);
 
-// static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2DA0);
+static int func_800B2DA0(Entity *e, int arg)
+{
+    int frame_b = e->model.frame_b;
+    if (frame_b == e->model.frame_a) {
+        return frame_b + D_80103164[1].mesh_id + arg;
+    }
+
+    int frames[2] = {
+        e->model.frame_b + D_80103164[1].mesh_id + arg,
+        e->model.frame_a + D_80103164[1].mesh_id + arg,
+    };
+
+    int fac = fixed_div(e->model.current_time + 1, e->model.length);
+    int factors[2] = {
+        fac,
+        ONE - fac,
+    };
+
+    return func_800E6684(frames, factors, 2);
+}
 
 // e_kiwi_render
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2E6C);
+void func_800B2E6C(Entity *e, Component *c)
+{
+    func_800EC408(e->pos_z >> 12, e->pos_x >> 12, 0);
+
+    SVECTOR pos_int = {
+        .vx = e->pos_x >> 12,
+        .vy = e->pos_y >> 12,
+        .vz = e->pos_z >> 12,
+    };
+
+    SVECTOR angle = {
+        .vx = -e->angle_x,
+        .vy = e->angle_y,
+        .vz = e->angle_z,
+    };
+
+    int id = -1;
+    if (func_800E5DD8(&pos_int, e->model.frame_a + D_80103164[1].mesh_id) > -1) {
+        id = func_800B2DA0(e, 0);
+        if (e->unk5) {
+            id |= 0x8000;
+        }
+        func_800E5E60(&pos_int, &angle, id);
+    }
+
+    // Shadow
+    pos_int.vy = e->max_y + 2;
+
+    SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
+    if (camera_pos->vy < pos_int.vy) {
+        if (func_800E5DD8(&pos_int, e->model.frame_a + D_80103164[1].mesh_id) > -1) {
+            if (id < 0) {
+                id = func_800B2DA0(e, 0);
+            }
+            func_800E5B88(0, 0, 0);
+            func_800E5E60(&pos_int, &angle, id | 0x4000);
+            func_800E5B88(0, 0, 0);
+        }
+    }
+
+    if (e->unk5) {
+        e->unk5 = -1;
+    }
+}
 
 // e_kiwi_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2FF0);
