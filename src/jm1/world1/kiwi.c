@@ -122,8 +122,8 @@ static int func_800B2DA0(Entity *e, int arg)
     return func_800E6684(frames, factors, 2);
 }
 
-// e_kiwi_render
-void func_800B2E6C(Entity *e, Component *c)
+// US: 800B2E6C
+void e_kiwi_render(Entity *e, Component *c)
 {
     func_800EC408(e->pos_z >> 12, e->pos_x >> 12, 0);
 
@@ -168,10 +168,110 @@ void func_800B2E6C(Entity *e, Component *c)
     }
 }
 
-// e_kiwi_ctor
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2FF0);
+void func_800B1F94(Entity *e, Component *c);
+void func_800B25E4(Entity *e, Component *c);
+void func_800B2A0C(Entity *e, Component *c);
 
-// e_kiwi_class_ctor
-void func_800B31E8(void)
+void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims);
+
+extern ModelKeyframe D_800FE828[2];
+extern ModelKeyframe D_800FE830[5];
+extern ModelKeyframe D_800FE844[2];
+extern ModelKeyframe D_800FE84C[2];
+extern ModelKeyframe D_800FE854[1];
+extern ModelKeyframe D_800FE858[2];
+extern ModelKeyframe D_800FE860[2];
+extern ModelKeyframe D_800FE868[4];
+
+// kiwi_anims
+ModelKeyframe *D_800FE878[] = {
+    D_800FE828,
+    D_800FE830,
+    D_800FE844,
+    D_800FE84C,
+    D_800FE854,
+    D_800FE858,
+    D_800FE860,
+    D_800FE868,
+};
+
+extern short D_800FE898[];
+extern short *D_800FEA50[28];
+extern short *D_800FEAC0[2];
+
+// US: 800B2FF0
+void e_kiwi_ctor(Entity *e, Spirit *spirit)
+{
+    entity_insert_after(get_list0_head(), e);
+    e->unk2 = 1;
+    e->unk5 = 0;
+    func_800D07C4(e->unk0);
+    func_800D0808(e->unk0, 0);
+    e->spirit = spirit;
+    e->health = spirit->unk4;
+    e->unk4 = spirit->unk0;
+    e->pos_x = ONE * spirit->x;
+    e->pos_y = ONE * spirit->y;
+    e->pos_z = ONE * spirit->z;
+
+    e->comp0.func = func_800B1F94;
+    e->comp0.disabled = 0;
+    e->comp0.state = 0;
+
+    e->comp1.func = func_800B25E4;
+    e->comp1.disabled = 0;
+    e->comp1.state = 0;
+
+    e->comp3.func = func_800B2A0C;
+    e->comp3.disabled = 0;
+    e->comp3.state = 0;
+
+    e->render_comp.func = e_kiwi_render;
+    e->render_comp.disabled = 0;
+    e->render_comp.state = 0;
+
+    Entity *player = func_800DBBE4();
+    (void)player;
+
+    e->angle_y = 0;
+    e->angle_z = 0;
+    e->angle_x = 0;
+    e->vel_z = 0;
+    e->vel_y = 0;
+    e->vel_x = 0;
+    e->acc_z = 0;
+    e->acc_x = 0;
+    e->acc_y = 0x800;
+    e->speed = 0;
+    e->ddangle_z = 0;
+    e->unk21 = 0;
+    e->range_z = 0x84;
+    e->range_x = 0x84;
+    e->range_y = 0xc0;
+    e->on_air = 0;
+    e->uh2 = 0;
+    e->uh1 = 0;
+    e->uh0 = 0;
+    e->sub.kiwi.a = 0;
+    e->sub.kiwi.b = spirit->unk1;
+    e->sub.kiwi.unk1 = spirit->unk2;
+    func_800D7AC0(e);
+    e->unk26 = 1;
+    func_800CD684(&e->model, D_800FE828, D_800FE878);
+    e->sub.kiwi.unk2 = 0;
+    e->sub.kiwi.unk3 = 0;
+    e->sub.kiwi.unk4 = 0;
+    e->sub.kiwi.unk5 = 0;
+    e->sub.kiwi.unk6 = -1;
+    e->sub.kiwi.unk7 = 0;
+    e->sub.kiwi.unk8 = 0;
+    e->sub.kiwi.unk9 = 0;
+    e->sub.kiwi.unk10 = 0;
+    e->sub.kiwi.unk14 = 0;
+    e->sub.kiwi.unk16 = D_800FEA50;
+    e->sub.kiwi.unk15 = D_800FEAC0[spirit->unk3];
+}
+
+void e_kiwi_class_ctor(void)
 {
 }

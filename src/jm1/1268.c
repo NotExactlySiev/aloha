@@ -61,8 +61,8 @@ extern MeshMetadata D_8010353C;
 void func_800B1F8C(void);
 void func_800B1D78(Entity *this, Spirit *params);
 
-void func_800B31E8(void);
-void func_800B2FF0(Entity *this, Spirit *params);
+void e_kiwi_class_ctor(void);
+void e_kiwi_ctor(Entity *this, Spirit *params);
 
 void func_800B4D20(void);
 void func_800B4B14(Entity *this, Spirit *params);
@@ -183,8 +183,8 @@ EntityTemplate *(*D_800FD454[3])[] = {
         &(EntityTemplate) {
             &D_80103164[1],
             &D_800FEAE8,
-            func_800B31E8,
-            func_800B2FF0,
+            e_kiwi_class_ctor,
+            e_kiwi_ctor,
         },
 
         //&D_800FED64,
@@ -357,7 +357,7 @@ void func_800B1BF4(Entity *this)
     rot.vy = this->angle_y;
     rot.vx = -this->angle_x;
     rot.vz = this->angle_z;
-    if (func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].unk0) > -1) {
+    if (func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].mesh_id) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         if (this->unk5 != 0) {
             meshid |= 0x8000; // damage blinkW
@@ -366,7 +366,7 @@ void func_800B1BF4(Entity *this)
     }
     // and the shadow
     pos.vy = this->max_y + 2;
-    if (cam->vy < pos.vy && func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].unk0) > -1) {
+    if (cam->vy < pos.vy && func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].mesh_id) > -1) {
         u32 meshid = func_800B1B28(this, 0);
         func_800E5B88(0, 0, 0);
         func_800E5E60(&pos, &rot, meshid | 0x4000);

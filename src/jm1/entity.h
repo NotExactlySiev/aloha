@@ -9,6 +9,7 @@ typedef struct LinkedList LinkedList;
 typedef struct Entity Entity;
 typedef struct Component Component;
 typedef struct Spirit Spirit;
+typedef struct ModelKeyframe ModelKeyframe;
 typedef struct Model Model;
 
 // spirits are what come into existence in the form
@@ -37,6 +38,11 @@ struct Component {
 struct LinkedList {
     LinkedList *next;
     LinkedList *prev;
+};
+
+struct ModelKeyframe {
+    short length;
+    short frame;
 };
 
 struct Model { // Should be called Anim instead?
@@ -118,7 +124,8 @@ struct Entity {
         } block;
 
         struct {
-            s32 unk0;
+            s16 a;
+            s16 b;
             s16 unk1;
             s16 unk2;
             s16 unk3;
