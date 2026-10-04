@@ -154,34 +154,53 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD550);
 // end of math.c
 
 // model anim stuff
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD684);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD684);
+void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims)
+{
+    model->current_time = initial->length;
+    model->length = initial->length;
+    model->next = initial + 1;
+    model->anims = anims;
+    model->frame_a = initial->frame;
+    model->frame_b = initial->frame;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6B0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6B0);
+void func_800CD6B0(Model *model, ModelKeyframe *next, ModelKeyframe **anims)
+{
+    model->next = next;
+    model->anims = anims;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6BC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD780);
+// math_init?
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD780);
+void func_800CD780(void)
+{
+    func_800CD010();
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD7A0);
+// libgte functions
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD7A0); // RotMatrixC
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD920);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD920); // csincos
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDA40);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDA40); // csin_1
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDAE0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDAE0); // ccos
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDBA4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDBA4); // csin
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDCD0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDCD0); // cln_1
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68);
+// // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68); // cln
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDDD4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDDD4); // csqrt_1
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28);
+// // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28); // csqrt
 
-// catan
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDFC4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDFC4); // catan
 
 /* US:80102904 JP: */ short D_80102904;
 /* US:8010290C JP: */ int D_8010290C; // sfx_queue_count
@@ -800,12 +819,12 @@ void func_800D239C(Entity *e)
     func_800EC408(pos.vz, pos.vx, 2);
 
     // Jetpod model
-    func_800E5E60(&pos, &rot, D_8011EFA8.unk0 + e->model.frame_a + 1);
+    func_800E5E60(&pos, &rot, D_8011EFA8.mesh_id + e->model.frame_a + 1);
 
     // Shadow
     pos.vy = e->max_y + 2;
     if (camera_pos->vy < pos.vy)
-        func_800E5E60(&pos, &rot, D_8011EFA8.unk0 + 6);
+        func_800E5E60(&pos, &rot, D_8011EFA8.mesh_id + 6);
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D24C0);
@@ -839,7 +858,7 @@ void _func_800D2824(Entity *e)
 
     objective_add(pos.vx, pos.vy, pos.vz, 1);
     func_800EC408(pos.vz, pos.vx, 2);
-    func_800E5E60(&pos, &rot, D_8011EFA8.unk0 + 5);
+    func_800E5E60(&pos, &rot, D_8011EFA8.mesh_id + 5);
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D29C4);
@@ -1038,7 +1057,7 @@ void func_800D30E4(Entity *e)
     rot.vx = -e->angle_x;
     rot.vz = e->angle_z;
 
-    meshid = e->model.frame_a + D_8011EFB8.unk0;
+    meshid = e->model.frame_a + D_8011EFB8.mesh_id;
 
     // bouncing animation and... something else?
     pos.vy -= (6 * sinf(e->angle_x) + (e->range_y / 2) * cosf(e->angle_x)) >> 12;

@@ -29,7 +29,7 @@ struct Spirit {
 struct Component {
     u16 state;
     u16 disabled;
-    u16 unk0;
+    u16 unk0; // wait counter in the vm
     u16 unk1;
     void *unk2;
     void (*func)(Entity *, Component *); // this probably has a specific type
@@ -49,7 +49,7 @@ struct Model { // Should be called Anim instead?
     short current_time;
     short frame_a;
     void *next;
-    int *keyframes;
+    ModelKeyframe **anims;
     short frame_b;
     short length;
 };
@@ -62,11 +62,11 @@ enum {
 struct Entity {
     /* 00 */ Entity *next;
     /* 04 */ Entity *prev;
-    /* 08 */ Component comp0; //
+    /* 08 */ Component comp0; // bytecode vm. behavior and ai
     /* 18 */ Component comp1; // physics
     /* 28 */ Component render_comp;
-    /* 38 */ Component comp3; // state machine. behavior and ai. interaction
-    /* 48 */ Model model; // model_t
+    /* 38 */ Component comp3; // interaction
+    /* 48 */ Model model;
     /* 58 */ u16 unk0; // id
     /* 5A */ u8 unk1;
     /* 5B */ u8 unk2;
@@ -124,28 +124,25 @@ struct Entity {
         } block;
 
         struct {
-            s16 a;
-            s16 b;
-            s16 unk1;
-            s16 unk2;
-            s16 unk3;
-            s16 unk4; // angle to spawner
-            s16 unk5;
-            s16 unk6; // some angle
-            s16 unk7;
-            s16 unk8; // some other angle
-            s16 unk9;
-            s16 unk10;
-            s16 unk11;
-            s16 unk12;
-            u8 unk13[20];
-            s16 unk14;
-            // Padding
-            s16 *unk15;
-            s16 **unk16;
+            /* 00 */ s16 a;
+            /* 01 */ s16 b;
+            /* 02 */ s16 unk1;
+            /* 03 */ s16 action; // current action
+            /* 04 */ s16 unk3;
+            /* 05 */ s16 unk4; // angle to spawner
+            /* 06 */ s16 unk5;
+            /* 07 */ s16 unk6; // some angle
+            /* 08 */ s16 unk7;
+            /* 09 */ s16 unk8; // some other angle
+            /* 0A */ s16 unk9;
+            /* 0B */ s16 unk10;
+            // /* 0C */ s16 unk11;
+            // /* 0D */ s16 unk12;
+            // /* 0E */ u16 unk13[10];
         } kiwi;
 
-        s16 unk[32];
+        // s16 unk[32];
+        u8 unk[48];
 
         struct {
             s16 unk0;
@@ -161,7 +158,15 @@ struct Entity {
             u8 unk0[16];
             Laser *laser;
         } roman_laser;
-    } sub
+    } sub;
+
+    struct {
+        s16 loop;
+        u16 *pc;
+        u16 **labels;
+    } vm;
+
+    u8 unused[8];
 };
 
 typedef struct {

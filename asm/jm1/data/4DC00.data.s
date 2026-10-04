@@ -1650,6 +1650,25 @@ glabel D_800FE968
 /* 4F170 800FE970 */ .word 0x00000005
 
 glabel D_800FE974
+#     .short 0x000a
+#     .short 0x0005
+# glabel D_800FE984
+#     .short 0x000B, 0
+#     .short 0x0002, 0x003C
+#     .short 0x000B, 3
+#     .short 0x0002, 0x003C
+#     .short 0x000B, 0
+#     .short 0x0002, 0x003C
+#     .short 0x000B, 3
+#     .short 0x0002, 0x003C
+#     .short 0x000B, 0
+#     .short 0x0002, 0x003C
+#     .short 0x000B, 3
+#     .short 0x0002, 0x003C
+#     .short 0x0005
+#     .short 0x000f
+
+
 /* 4F174 800FE974 */ .word 0x00800006
 /* 4F178 800FE978 */ .word 0x000A0014
 /* 4F17C 800FE97C */ .word 0x00090005
