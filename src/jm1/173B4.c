@@ -781,6 +781,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1A68);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1B78);
 
+// drop item from enemy kill
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1CBC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1F90);
@@ -1481,6 +1482,7 @@ static inline int do_nclip(u32 p0, u32 p1, u32 p2)
     return ret;
 }
 
+// is_on_air
 int func_800D6F14(int z, int x)
 {
     if (D_80102AA4 < 0)
@@ -2184,7 +2186,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC00C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
 
-void func_800E5458(s16, s16, s16);
+void func_800E543C(s16 x, s16 y, s16 z);
+void func_800E5458(s16 x, s16 y, s16 z);
 
 // handle player movement
 // main player movement state machine. has 4 main states:
@@ -3975,5 +3978,5 @@ u_short GetClut(int x, int y)
     return getClut(x, y);
 }
 
-int (*GPU_printf)(char *fmt, ...) = printf;
+int (*GPU_printf)(char *fmt, ...) = (int (*)(char *fmt, ...))printf;
 #endif

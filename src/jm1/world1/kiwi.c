@@ -34,12 +34,25 @@
 
 #include "../entity.h"
 #include "../math.h"
+#include "../physics.h"
 #include "common.h"
 #include <libgte.h>
 
 extern MeshMetadata D_80103164[8];
+
 void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims);
+void func_800CE304(short a, int vol, short pan);
+int func_800CEB6C(int z, int x);
+int func_800CEC30(int val, int x, int y, int z);
+void func_800CFFB0(SVECTOR *pos, SVECTOR *rot, int id);
+int func_800D0764(int id);
+int func_800D07A4(int id);
+void func_800D07C4(int id);
+void func_800D1CBC(int x, int y, int z, int ground_y, int type);
+void func_800D8788(uint id, short v);
+int is_outside_simulation_range(int x, int y, int z); // 800DAB0C
 int func_800E6684(int *frames, int *factors, int n);
+void func_800EB16C(int points);
 
 // Bytecode
 extern u16 D_800FE898[];
@@ -411,7 +424,128 @@ out:
 }
 
 // e_kiwi_comp3
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B2A0C);
+void func_800B2A0C(Entity *e, Component *c)
+{
+    int state = c->state;
+    while (1) {
+        switch (state) {
+        case 0:
+            if (--e->sub.kiwi.unk10 < 0) {
+                e->sub.kiwi.unk10 = 0;
+            }
+
+            if (e->unk5 < 0) {
+                e->unk5 = 0;
+            }
+
+            if (is_outside_simulation_range(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12)) {
+                state = 3; // can
+                break;
+            }
+
+            int damage = func_800D0764(e->unk0);
+            if (damage > 0) {
+                e->health -= damage;
+                if (e->unk5 == 0) {
+                    e->unk5 = 1; // Blink?
+                }
+
+                e->sub.kiwi.unk6 = func_800D07A4(e->unk0);
+                if (e->sub.kiwi.unk5 == 0) {
+                    e->sub.kiwi.unk5 = 0x30;
+                    if (e->on_air) {
+                        e->vel_y = -8 * ONE;
+                    }
+                }
+
+                if (e->sub.kiwi.unk10 == 0) {
+                    e->sub.kiwi.unk10 = 0x30;
+                    func_800CE304(
+                        0x0410,
+                        func_800CEC30(100, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+                        func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+                    );
+                }
+            }
+            func_800D07C4(e->unk0);
+            if (e->health > 0) {
+                func_800D8788(e->unk0 | 0x100, 0);
+                return;
+            }
+            state = 1; // can
+            break;
+
+        case 1:
+            func_800EB16C(e->unk4);
+            e->spirit->type &= 0x7f;
+            func_800CFFB0(
+                &(SVECTOR) {
+                    .vx = e->pos_x >> 12,
+                    .vy = e->pos_y >> 12,
+                    .vz = e->pos_z >> 12,
+                },
+                &(SVECTOR) {
+                    .vx = -e->angle_x,
+                    .vy = e->angle_y,
+                    .vz = 0,
+                },
+                e->model.frame_a + D_80103164[1].mesh_id
+            );
+            func_800CE304(
+                0x2400,
+                func_800CEC30(100, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+                func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+            );
+            e->unk2 = 0;
+            e->comp0.disabled = 1;
+            e->comp1.disabled = 1;
+            e->render_comp.disabled = 1;
+            c->unk0 = 8;
+            state = 2;
+            c->state = state;
+            break;
+
+        case 2:
+            if (c->unk0-- > 0) {
+                return;
+            }
+            func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->max_y, e->sub.kiwi.unk1);
+            state = 3;
+            break;
+
+        case 3:
+            e->unk2 = 0;
+            e->comp0.disabled = 1;
+            e->comp1.disabled = 1;
+            e->render_comp.disabled = 1;
+            e->pos_x = e->spirit->x << 12;
+            e->pos_y = e->spirit->y << 12;
+            e->pos_z = e->spirit->z << 12;
+            c->unk0 = e->sub.kiwi.a;
+            state = 4;
+            c->state = state;
+            break;
+
+            // Dead. Stay around as a zombie to prevent respawning, until the
+            // player has left the area.
+        case 4:
+            if (!is_outside_simulation_range(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12)) {
+                return;
+            }
+            state = 6;
+            break;
+
+        case 6:
+            e->spirit->alive = -1;
+            entity_destroy(e);
+            return;
+
+        default:
+            return;
+        }
+    }
+    return;
+}
 
 static int func_800B2DA0(Entity *e, int arg)
 {
@@ -479,8 +613,6 @@ void e_kiwi_render(Entity *e, Component *c)
         e->unk5 = -1;
     }
 }
-
-void func_800B2A0C(Entity *e, Component *c);
 
 // US: 800B2FF0
 void e_kiwi_ctor(Entity *e, Spirit *spirit)

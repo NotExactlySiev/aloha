@@ -70,10 +70,10 @@ struct Entity {
     /* 58 */ u16 unk0; // id
     /* 5A */ u8 unk1;
     /* 5B */ u8 unk2;
-    /* 5C */ u16 health;
+    /* 5C */ s16 health; // should be signed
     /* 5E */ u16 unk3;
-    /* 60 */ u32 unk4;
-    /* 64 */ u32 unk5; // flags. 0x8000 is BLINK. 0x0001 is VISIBLE
+    /* 60 */ u32 unk4; // score value
+    /* 64 */ s32 unk5; // flags. 0x8000 is BLINK. 0x0001 is VISIBLE. has to be signed for the kiwi entity. and the other ones?
     /* 68 */ int pos_x;
     /* 6C */ int pos_y;
     /* 70 */ int pos_z;
@@ -126,7 +126,7 @@ struct Entity {
         struct {
             /* 00 */ s16 a;
             /* 01 */ s16 b;
-            /* 02 */ s16 unk1;
+            /* 02 */ s16 unk1; // what to drop on death
             /* 03 */ s16 action; // current action
             /* 04 */ s16 unk3;
             /* 05 */ s16 unk4; // angle to spawner
@@ -136,9 +136,6 @@ struct Entity {
             /* 09 */ s16 unk8; // some other angle
             /* 0A */ s16 unk9;
             /* 0B */ s16 unk10;
-            // /* 0C */ s16 unk11;
-            // /* 0D */ s16 unk12;
-            // /* 0E */ u16 unk13[10];
         } kiwi;
 
         // s16 unk[32];
@@ -166,8 +163,10 @@ struct Entity {
         u16 **labels;
     } vm;
 
-    u8 unused[8];
+    u8 unused[4];
 };
+
+_Static_assert(sizeof(Entity) == 0x13C);
 
 typedef struct {
     int mesh_id; // mesh_id
@@ -177,3 +176,6 @@ typedef struct {
 } MeshMetadata;
 
 Entity *func_800DBBE4();
+
+Entity *entity_create(void);
+void entity_destroy(Entity *e);

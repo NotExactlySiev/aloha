@@ -290,7 +290,7 @@ void func_800EB134(int v)
 }
 
 // give_points
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB16C);
+INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB16C); // DO NEXT
 
 // draw score?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB23C);
