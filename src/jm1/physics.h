@@ -15,7 +15,11 @@ void func_800D8514(Entity *e);
 // func_800D86E4
 void func_800D8720(s16 val);
 // func_800D8730
-void func_800D8788(uint id, short v);
+
+// 0x100    bounce
+// 0x200    solid
+void func_800D8788(uint id, short v); // set collision?
+
 // func_800D88B4
 // func_800D8CEC
 // func_800D8F40

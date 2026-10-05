@@ -71,8 +71,8 @@ struct Entity {
     /* A0 */ int dangle_z;
     /* A4 */ int ddangle_y;
     /* A8 */ int ddangle_x;
-    /* AC */ int ddangle_z;
-    /* B0 */ int speed; // forward speed
+    /* AC */ int forward_speed;
+    /* B0 */ int forward_acceleration;
     /* B4 */ void *colptr; // col thingy ptr
     /* B8 */ u32 unk13; // \ col thingy
     /* BC */ u32 unk14; // |

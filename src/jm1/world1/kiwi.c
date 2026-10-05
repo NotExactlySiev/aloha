@@ -46,8 +46,6 @@ typedef struct {
     u8 personality;
 } KiwiSpirit;
 
-#define E_KIWI 1
-
 #define SFX_STEP_INTERVAL 12
 #define SFX_STEP_VOLUME 50
 #define SFX_DAMAGE_INTERVAL 48
@@ -165,8 +163,8 @@ void e_kiwi_behavior(Entity *e, Component *c)
             state = 1;
         } break;
 
-        case 10: // Kiwi: Set Rotation
-            e->ddangle_z = *e->vm.pc++;
+        case 10: // Kiwi: Set Speed
+            e->forward_speed = *e->vm.pc++;
             state = 1;
             break;
 
@@ -298,7 +296,6 @@ static void apply_movement(Entity *e)
     }
 }
 
-// e_kiwi_comp1
 void e_kiwi_physics(Entity *e, Component *c)
 {
     e->vel_x = 0;
@@ -352,7 +349,7 @@ void e_kiwi_physics(Entity *e, Component *c)
             }
 
             do_turning(e);
-            polar_to_cart(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
+            polar_to_cart(e->angle_y, e->forward_speed, &e->vel_z, &e->vel_x);
             if (e->sub.kiwi.step_sfx_counter++ % SFX_STEP_INTERVAL == 0) {
                 sfx_play(
                     SFX_KIWI_STEP,
@@ -370,7 +367,7 @@ void e_kiwi_physics(Entity *e, Component *c)
             [[fallthrough]];
         case 5:
             do_turning(e);
-            polar_to_cart(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
+            polar_to_cart(e->angle_y, e->forward_speed, &e->vel_z, &e->vel_x);
             if (!e->on_air) {
                 goto out;
             }
@@ -423,7 +420,7 @@ void e_kiwi_physics(Entity *e, Component *c)
             [[fallthrough]];
         case 12:
             do_turning(e);
-            polar_to_cart(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
+            polar_to_cart(e->angle_y, e->forward_speed, &e->vel_z, &e->vel_x);
             e->on_air = 0;
             if (e->vel_y > 0) {
                 state = 4;
@@ -681,8 +678,8 @@ void e_kiwi_ctor(Entity *e, Spirit *spirit)
     e->acc_z = 0;
     e->acc_x = 0;
     e->acc_y = KIWI_GRAVITY;
-    e->speed = 0;
-    e->ddangle_z = 0;
+    e->forward_acceleration = 0;
+    e->forward_speed = 0;
     e->unk21 = 0;
     e->range_z = 0x84;
     e->range_x = 0x84;

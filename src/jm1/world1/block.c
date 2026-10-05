@@ -5,8 +5,6 @@ typedef struct {
     s16 max_y;
     u16 min_y;
     s16 speed;
-    s8 unk2;
-    s8 unk3;
 } BlockSpirit;
 
 // block update
@@ -34,18 +32,27 @@ void func_800B661C(Entity *e, Component *c)
 // block custom
 void func_800B66A0(Entity *e, Component *c)
 {
-    if (c->state == 0) {
-        int rc = is_outside_simulation_range(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12);
-        if (rc == 0)
-            return; // in range. keep vibin
-        c->state = 1;
-    }
-    // oh no, out of range
+    func_800D8788(e->id | 0x200, 0);
+    int state = c->state;
+    while (1) {
+        switch (state) {
+        case 0:
+            c->state = 0;
+            if (is_outside_simulation_range(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12)) {
+                state = 1;
+                break;
+            }
+            // in range. keep vibin
+            return;
 
-    if (c->state == 1) {
-        e->spirit->alive = -1;
-        entity_destroy(e);
-        return;
+        case 1:
+            e->spirit->alive = -1;
+            entity_destroy(e);
+            return;
+
+        default:
+            return;
+        }
     }
 }
 
@@ -122,7 +129,7 @@ int D_801028A4 = 0;
 
 // Sound maker entity functions
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
+// e_wind_noise_physics
 void func_800B6948(Entity *e, Component *comp)
 {
     D_8010288C += 4;
@@ -133,6 +140,8 @@ void func_800B6948(Entity *e, Component *comp)
 
 // Adjust the volume of the wind sound based on the time variables and player y.
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B69A0);
+
+// e_wind_noise_interaction
 void func_800B69A0(Entity *e, Component *comp);
 
 // e_block_class_ctor
@@ -144,7 +153,7 @@ void func_800B6C40(void)
     // Create an invisible entity that makes a wind sound when you're up in the
     // air.
     Entity *e = entity_create();
-    entity_insert_after(get_list2_head(), e);
+    entity_insert_after(get_list2_head(), &e->link);
     e->behavior.disabled = 1;
     e->phyisics.func = func_800B6948;
     e->phyisics.disabled = 0;

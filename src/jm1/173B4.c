@@ -1872,8 +1872,8 @@ void _func_800DBDB0(void)
     player_entity.dangle_z = 0;
     player_entity.dangle_y = 0;
     player_entity.dangle_x = 0;
-    player_entity.speed = 0;
-    player_entity.ddangle_z = 0;
+    player_entity.forward_acceleration = 0;
+    player_entity.forward_speed = 0;
     player_entity.phyisics.state = 0;
     player_entity.interaction.state = 0;
     player_entity.acc_z = 0;
