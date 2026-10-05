@@ -1,5 +1,6 @@
 #pragma once
 
+#include "math.h"
 #include <common.h>
 
 // This one shouldn't be here.
@@ -9,8 +10,6 @@ typedef struct LinkedList LinkedList;
 typedef struct Entity Entity;
 typedef struct Component Component;
 typedef struct Spirit Spirit;
-typedef struct ModelKeyframe ModelKeyframe;
-typedef struct Model Model;
 
 // spirits are what come into existence in the form
 // of entities. when an entity is destroyed and later respawned,
@@ -40,28 +39,13 @@ struct LinkedList {
     LinkedList *prev;
 };
 
-struct ModelKeyframe {
-    short length;
-    short frame;
-};
-
-struct Model { // Should be called Anim instead?
-    short current_time;
-    short frame_a;
-    void *next;
-    ModelKeyframe **anims;
-    short frame_b;
-    short length;
-};
-
 enum {
     DISPLAY_VISIBLE = 0x0001,
     DISPLAY_BLINK = 0x8000,
 };
 
 struct Entity {
-    /* 00 */ Entity *next;
-    /* 04 */ Entity *prev;
+    /* 00 */ LinkedList link;
     /* 08 */ Component comp0; // bytecode vm. behavior and ai
     /* 18 */ Component comp1; // physics
     /* 28 */ Component render_comp;
@@ -175,7 +159,80 @@ typedef struct {
     int unk3; // texture_id
 } MeshMetadata;
 
-Entity *func_800DBBE4();
+typedef struct {
+    char *unk0; // mesh clut name
+    char *unk1; // texture clut name
+    char *unk2; // vo2 name
+    void *unk3;
+    void *unk4;
+    void *unk5;
+    void *unk6;
+    void *unk7;
+    void *unk8;
+    void *unk9;
+    char *unk10; // xs3 name
+    void *unk11;
+    void *unk12;
+    void *unk13;
+    void *unk14;
+    void *unk15;
+    void *unk16;
+    void *unk17;
+    void *unk18;
+    void *unk19;
+    void *unk20;
+    void *unk21;
+    void *unk22;
+    void *unk23;
+    void *unk24;
+    void *unk25;
+    void *unk26;
+} EntityResources;
 
-Entity *entity_create(void);
+typedef struct {
+    MeshMetadata *unk0;
+    EntityResources *unk1;
+    void (*class_ctor)(void); // class constructor (called once when level is loaded)
+    void (*ctor)(Entity *, Spirit *); // object constructor (called when this entity is instantiated)
+} EntityClass;
+
+LinkedList *get_list1_head(void);
+LinkedList *get_list1_tail(void);
+LinkedList *get_list2_head(void);
+LinkedList *get_list2_tail(void);
+LinkedList *get_list0_head(void); // 800D0478
+LinkedList *get_list0_tail(void);
+void entity_insert_before(LinkedList *list, LinkedList *node);
+void entity_insert_after(LinkedList *list, LinkedList *node); // 800D04B0
+void entity_detach_from_list(LinkedList *node);
+Entity *entity_create(void); // 800D04E8
 void entity_destroy(Entity *e);
+void func_800D058C(void);
+// func_800D05F0
+int func_800D0764(int id);
+// func_800D0784
+int func_800D07A4(int id);
+void func_800D07C4(int id);
+void func_800D0808(int id, u8 val);
+// func_800D0824
+void func_800D0840(EntityClass **classes);
+// ? func_800D08E8
+// func_800D09EC
+void func_800D0AA4(Entity *e, Spirit *spirit);
+// func_800D0B98
+// func_800D0C08
+// func_800D0C28
+void func_800D0C5C(void);
+//
+//
+// func_800D11E4
+// func_800D13EC
+//
+//
+void func_800D1484(int v);
+int func_800D1494(void);
+//
+//
+
+// Probably don't belong here:
+Entity *func_800DBBE4();

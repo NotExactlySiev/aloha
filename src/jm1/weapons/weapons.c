@@ -1,7 +1,6 @@
 #include "../entity.h"
+#include "../physics.h"
 #include "common.h"
-
-// Weapons
 
 /* US:801030C4 JP: */ int D_801030C4;
 /* US:801030CC JP: */ int D_801030CC; // normal_remaining_shot

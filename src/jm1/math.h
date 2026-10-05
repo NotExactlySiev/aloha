@@ -7,6 +7,34 @@ void make_sin_lut(void);
 u8 func_800CD0BC(void); // rand_rng
 u8 func_800CD158(void); // rand_prng (deterministic)
 int func_800CD1C4(int y, int x); // atan2
+// func_800CD2C4
+void func_800CD3BC(int x, int y, int z, int *ay, int *ax); // cart_to_sperical
+int func_800CD444(int angle0, int angle1, int num);
+void func_800CD4D4(int ay, int ax, int r, int *x, int *y, int *z); // spherical_to_cart
+
+// func_800CD550 // rotate_vector
+
+// For some reason, the animation functions are defined in this module. Maybe
+// because they have to do interpolation which is a math function?
+
+typedef struct {
+    short length;
+    short frame;
+} ModelKeyframe;
+
+typedef struct { // Should be called Anim instead?
+    short current_time;
+    short frame_a;
+    void *next;
+    ModelKeyframe **anims;
+    short frame_b;
+    short length;
+} Model;
+
+void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims);
+void func_800CD6B0(Model *model, ModelKeyframe *next, ModelKeyframe **anims);
+int func_800CD6BC(Model *model);
+void func_800CD780(void); // math_init
 
 // GTE Functions
 void func_800E87B8(MATRIX *m); // double_matrix
@@ -18,6 +46,8 @@ void func_800E88B0(int r, int g, int b); // set_background_color
 void func_800E88C4(int a, int b); // set_depth_cue
 int func_800E88D4(void); // get_depth_cue_a
 int func_800E88E4(void); // get_depth_cue_b
+//
+void func_800E9324(int angle, int r, int *x, int *y); // polar_to_cart
 
 // Fast sin and cos from our own LUT
 extern s16 sin_lut[4096];

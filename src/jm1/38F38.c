@@ -51,11 +51,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E91F4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E929C);
 
-// polar to cart
 // INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9324);
 
 // math thing
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E939C);
+
+// end of GTE assembly functions
+
+// General imported engine functions:
 
 // INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9540);
 int func_800E9540(void)
@@ -133,6 +136,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9878);
 // reset_and_clear_gpu
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E98A8);
 
+// kill graphics
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9994);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E99E8);
@@ -318,14 +322,13 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBCA8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBCB8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBD58);
+// Unused things
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBD58);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBD8C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBDD4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBE50);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBD8C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBDD4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBE50);
-
+// Health functions
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBE5C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EBE74);
@@ -346,11 +349,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC2F4);
 
 // radar.c
 
-// radar_add
+// radar_add_dot
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC408);
 
+// These ones start blinking when you're running out of time.
+// radar_add_objective
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC450);
 
+// radar_clear
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC490);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4A8);
@@ -361,7 +367,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC4F4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EC5C8);
 
-void _func_800EC5C8()
+void _func_800EC5C8(void)
 {
     MATRIX *m = SCRTCHPAD(0);
 
@@ -419,6 +425,10 @@ void _func_800EC5C8()
 // end of radar.c
 
 // objective.c
+// This module renders the text that appears on the screen to show you the
+// direction of each objective. Probably shouldn't be called objective.c as we
+// already have another array that stores level objectives and managed them. It
+// is located at 801029D4.
 
 typedef struct {
     short x, y, z;

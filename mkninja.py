@@ -296,6 +296,7 @@ executables = [
 
 compileFlags = [
     "-Wall",
+    "-Wno-comment",
     "-Iinclude",
     "-Ipsyq/include",
     "-Iassets",

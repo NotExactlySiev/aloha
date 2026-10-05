@@ -32,27 +32,17 @@
 //
 //      [The PlayStation can produce mind-boggling effects.]
 
+#include "../all.h"
 #include "../entity.h"
+#include "../level.h"
 #include "../math.h"
 #include "../physics.h"
+#include "../renderer.h"
+#include "../sound.h"
 #include "common.h"
 #include <libgte.h>
 
 extern MeshMetadata D_80103164[8];
-
-void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims);
-void func_800CE304(short a, int vol, short pan);
-int func_800CEB6C(int z, int x);
-int func_800CEC30(int val, int x, int y, int z);
-void func_800CFFB0(SVECTOR *pos, SVECTOR *rot, int id);
-int func_800D0764(int id);
-int func_800D07A4(int id);
-void func_800D07C4(int id);
-void func_800D1CBC(int x, int y, int z, int ground_y, int type);
-void func_800D8788(uint id, short v);
-int is_outside_simulation_range(int x, int y, int z); // 800DAB0C
-int func_800E6684(int *frames, int *factors, int n);
-void func_800EB16C(int points);
 
 // Bytecode
 extern u16 D_800FE898[];
@@ -617,7 +607,7 @@ void e_kiwi_render(Entity *e, Component *c)
 // US: 800B2FF0
 void e_kiwi_ctor(Entity *e, Spirit *spirit)
 {
-    entity_insert_after(get_list0_head(), e);
+    entity_insert_after(get_list0_head(), &e->link);
     e->unk2 = 1;
     e->unk5 = 0;
     func_800D07C4(e->unk0);

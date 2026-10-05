@@ -249,26 +249,8 @@ glabel D_80107678
 glabel D_80108F78
 	.space 0xbb80
 
-glabel entity_array
-	.space 0x9e00
 
-glabel D_8011E8F8
-	.space 0x80
-
-glabel D_8011E978
-	.space 0x2
-
-glabel D_8011E97A
-	.space 0x2
-
-glabel D_8011E97C
-	.space 0x3fc
-
-glabel D_8011ED78
-	.space 0x100
-
-glabel D_8011EE78
-	.space 0x100
+/* */
 
 glabel D_8011EF78
 	.space 0x20

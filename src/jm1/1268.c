@@ -1,14 +1,11 @@
 #include "common.h"
 #include "entity.h"
 #include "math.h"
+#include "renderer.h"
 #include <libgpu.h>
 #include <libgte.h>
 // this file contains mostly world specific code, which are linked with the
 // other units that contain general code shared between all worlds.
-
-// from other modules
-void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id); // render model
-void func_800E5B88(s16, s16, s16); // does this do anything?
 
 // this module
 s32 func_800E5DD8(SVECTOR *v, u32 meshid); // camera transform
@@ -16,43 +13,6 @@ s32 func_800E5DD8(SVECTOR *v, u32 meshid); // camera transform
 // map stuff
 extern int D_801026B8;
 extern int D_801026BC;
-
-typedef struct {
-    char *unk0; // mesh clut name
-    char *unk1; // texture clut name
-    char *unk2; // vo2 name
-    void *unk3;
-    void *unk4;
-    void *unk5;
-    void *unk6;
-    void *unk7;
-    void *unk8;
-    void *unk9;
-    char *unk10; // xs3 name
-    void *unk11;
-    void *unk12;
-    void *unk13;
-    void *unk14;
-    void *unk15;
-    void *unk16;
-    void *unk17;
-    void *unk18;
-    void *unk19;
-    void *unk20;
-    void *unk21;
-    void *unk22;
-    void *unk23;
-    void *unk24;
-    void *unk25;
-    void *unk26;
-} EntityResources;
-
-typedef struct {
-    MeshMetadata *unk0;
-    EntityResources *unk1;
-    void (*class_ctor)(void); // class constructor (called once when level is loaded)
-    void (*ctor)(Entity *, Spirit *); // object constructor (called when this entity is instantiated)
-} EntityTemplate;
 
 // Mesh metadata for the level specific entities
 MeshMetadata D_80103164[8];
@@ -156,23 +116,23 @@ EntityResources D_801002C8 = {
     .unk10 = "drgn_tp0.xs3",
 };
 
-EntityTemplate D_800FF2F8 = {
+EntityClass D_800FF2F8 = {
     &D_80103164[5],
     &D_800FF28C,
     func_800B7D54,
     func_800B7B58,
 };
 
-extern EntityTemplate D_800FFCEC;
-extern EntityTemplate D_80100544;
-extern EntityTemplate D_800FFC50;
-extern EntityTemplate D_800FFD3C;
-extern EntityTemplate D_8010048C;
+extern EntityClass D_800FFCEC;
+extern EntityClass D_80100544;
+extern EntityClass D_800FFC50;
+extern EntityClass D_800FFD3C;
+extern EntityClass D_8010048C;
 
-EntityTemplate *(*D_800FD454[3])[] = {
-    &(EntityTemplate *[]) {
+EntityClass *(*D_800FD454[3])[] = {
+    &(EntityClass *[]) {
         //&D_800FE818,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_80103164[0],
             &D_800FE7AC,
             func_800B1F8C,
@@ -180,7 +140,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FEB54,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_80103164[1],
             &D_800FEAE8,
             e_kiwi_class_ctor,
@@ -188,7 +148,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FED64,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_80103164[2],
             &D_800FECF8,
             func_800B4D20,
@@ -196,7 +156,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FEFE4,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_80103164[3],
             &D_800FEF78,
             func_800B6614,
@@ -204,7 +164,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         },
 
         //&D_800FF0A0,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_80103164[4],
             &D_800FF034,
             func_800B6C40,
@@ -218,28 +178,28 @@ EntityTemplate *(*D_800FD454[3])[] = {
         &D_80100544,
 
         //&D_80100554,
-        &(EntityTemplate) {
+        &(EntityClass) {
             .class_ctor = func_800C5DD8,
             .ctor = func_800C5CD0,
         },
 
         //&D_80100564,
-        &(EntityTemplate) {
+        &(EntityClass) {
             .class_ctor = func_800C6124,
             .ctor = func_800C602C,
         },
 
         //&D_80100574,
-        &(EntityTemplate) {
+        &(EntityClass) {
             .class_ctor = func_800C6538,
             .ctor = func_800C643C,
         },
 
         (void *)-1 },
 
-    &(EntityTemplate *[]) {
+    &(EntityClass *[]) {
         //&D_800FF4E0,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_80103164[6],
             &D_800FF474,
             func_800B9280,
@@ -249,7 +209,7 @@ EntityTemplate *(*D_800FD454[3])[] = {
         &D_800FF2F8, // shared
 
         //&D_800FFA78,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_80103164[7],
             &D_800FFA0C,
             func_800BBFD8,
@@ -261,9 +221,9 @@ EntityTemplate *(*D_800FD454[3])[] = {
         &D_8010048C,
         (void *)-1 },
 
-    &(EntityTemplate *[]) {
+    &(EntityClass *[]) {
         //&D_80100334,
-        &(EntityTemplate) {
+        &(EntityClass) {
             &D_8010353C,
             &D_801002C8,
             func_800C5044,
@@ -288,7 +248,7 @@ void func_800B0A88(int val)
     D_801026BC = val / 18;
 }
 
-EntityTemplate *(*func_800B0AD4(int index)) [] {
+EntityClass *(*func_800B0AD4(int index)) [] {
     return D_800FD454[index % 3];
 }
 

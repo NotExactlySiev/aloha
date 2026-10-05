@@ -1,16 +1,17 @@
+#include "all.h"
 #include "common.h"
 #include "entity.h"
 #include "gbuffer.h"
 #include "math.h"
 #include "mesh.h"
+#include "physics.h"
 #include <common.h>
 #include <libetc.h>
 #include <libgpu.h>
 #include <stdlib.h>
 
+#include "renderer.h"
 #include "shared.h"
-
-void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id); // render model
 
 int func_800DBC24(void);
 int is_outside_simulation_range(int x, int y, int z);
@@ -31,381 +32,21 @@ typedef struct {
 
 /* US:801380B8 JP: */ Entity player_entity;
 
-// entity lists
-
-typedef struct {
-    LinkedList head;
-    LinkedList tail;
-} List;
-
-List entity_list_0 = {};
-List entity_list_1 = {};
-List entity_list_2 = {};
-List entity_list_free = {};
-
 // GetGraphType, TODO: remove when no longer needed
 int func_800C6FB8()
 {
     return 0;
 }
 
-// custom math functions. math.c?
-
-s32 D_801028F4 = 0; // rng
-s32 D_801028FC = 0; // prng
-
-// seed arrs
-
-// seed
-u8 D_8010154C[64] = {
-    0x9a, 0xf9, 0x93, 0xdd, 0xf8, 0xfe, 0x85, 0x4b,
-    0xe2, 0xa5, 0x92, 0xc9, 0x4c, 0x22, 0x51, 0x61,
-    0xfa, 0x4e, 0x37, 0x23, 0x91, 0x7c, 0x0e, 0x57,
-    0xa8, 0x2b, 0x2a, 0x98, 0x49, 0x60, 0x7d, 0x3f,
-    0xb7, 0xbc, 0x0b, 0x63, 0xd0, 0xaf, 0xad, 0x9d,
-    0x53, 0x0a, 0x4a, 0x4f, 0x05, 0x6d, 0x0f, 0x09,
-    0x70, 0xc8, 0x52, 0x5a, 0x74, 0xa2, 0x6e, 0xff,
-    0x08, 0xe5, 0xc3, 0x75, 0xcd, 0xbb, 0xb0, 0xf4
-};
-
-// buttons
-u8 D_8010158C[16] = {
-    0x00, 0x08, 0x02, 0x00, 0x04, 0x07, 0x01, 0x04,
-    0x06, 0x09, 0x03, 0x06, 0x00, 0x08, 0x02, 0x00
-};
-
-// working arrs
-u8 D_80106D28[64];
-u8 D_80106D68[64];
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
-void func_800CD010(void)
-{
-    D_801028F4 = 0;
-    D_801028FC = 0;
-    for (int i = 0; i < 64; i++) {
-        D_80106D28[i] = D_8010154C[i];
-        D_80106D68[i] = D_8010154C[i];
-    }
-}
-
-#ifdef PSYQ47_FIXES
-// The new version of PsyQ has a broken rsin!!! It returns non-sense numbers
-// for a certain range of angles. What.
-// Here's the original one from the game decompiled.
-extern short rsin_tbl[1024];
-
-static int sin_1(uint angle)
-{
-    if (angle < 0x400)
-        return rsin_tbl[angle];
-    else if (angle >= 0x400 && angle < 0x800)
-        return rsin_tbl[0x7ff - angle];
-    else if (angle >= 0x800 && angle < 0xc00)
-        return -rsin_tbl[angle - 0x800];
-    else if (angle >= 0xc00 && angle < 0x1000)
-        return -rsin_tbl[0xfff - angle];
-    else
-        return 0;
-}
-
-int rsin(int angle)
-{
-    if (angle < 0) {
-        return -sin_1(-angle & 0xfff); // Probably incorrect
-
-    } else {
-        return sin_1(angle & 0xfff);
-    }
-}
-#endif
-
-/* US:8013F448 JP: */ s16 sin_lut[4096];
-
-// US: 800CD070
-void make_sin_lut(void)
-{
-    for (int i = 0; i < 4096; i++) {
-        // For some reason rsin is giving incorrect results for a certain range.
-        // Perhaps something is overwriting its LUT? So we're using csin for now
-        // until I figure that out.
-        sin_lut[i] = rsin(i);
-    }
-}
-
-// more rand stuff
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD0BC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD158);
-
-// atan2
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD1C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD2C4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD3BC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD444);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD4D4);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD550);
-
-// end of math.c
-
-// model anim stuff
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD684);
-void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims)
-{
-    model->current_time = initial->length;
-    model->length = initial->length;
-    model->next = initial + 1;
-    model->anims = anims;
-    model->frame_a = initial->frame;
-    model->frame_b = initial->frame;
-}
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6B0);
-void func_800CD6B0(Model *model, ModelKeyframe *next, ModelKeyframe **anims)
-{
-    model->next = next;
-    model->anims = anims;
-}
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6BC);
-
-// math_init?
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD780);
-void func_800CD780(void)
-{
-    func_800CD010();
-}
-
-// libgte functions
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD7A0); // RotMatrixC
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD920); // csincos
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDA40); // csin_1
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDAE0); // ccos
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDBA4); // csin
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDCD0); // cln_1
-
-// // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68); // cln
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDDD4); // csqrt_1
-
-// // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28); // csqrt
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDFC4); // catan
-
-/* US:80102904 JP: */ short D_80102904;
-/* US:8010290C JP: */ int D_8010290C; // sfx_queue_count
-/* US:80102914 JP: */ int D_80102914 = 0;
-/* US:8010291C JP: */ int D_8010291C = 0;
-/* US:80102924 JP: */ int D_80102924 = 0;
-/* US:8010292C JP: */ SpuVolume D_8010292C = { 0 };
-/* US:80102934 JP: */ int D_80102934 = 0;
-/* US:8010293C JP: */ int D_8010293C = 0;
-
-void func_800CE098(int a, int b)
-{
-    u32 part = (D_80102904 + ((a & 0xf0) >> 4));
-    jt.sfx_set_prog_attr((part << 24) | (a & 0xff0f), b);
-}
-
-void func_800CE0E4(int v)
-{
-    D_8010291C = v & 1;
-}
-
-int func_800CE0F8(void)
-{
-    return D_8010291C;
-}
-
-void func_800CE108(void)
-{
-    D_8010290C = 0;
-    func_800CE098(0x1700, 2);
-    func_800CE098(0x900, 2);
-    func_800CE098(0x1500, 2);
-    func_800CE098(0x4d11, 2);
-}
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE158);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE168);
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE2E0);
-void func_800CE2E0(short a, int vol, short pan, int *p)
-{
-    func_800CE168(a, vol, pan, p, -1);
-}
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE304);
-void func_800CE304(short a, int vol, short pan)
-{
-    func_800CE2E0(a, vol, pan, NULL);
-}
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE324);
-
-// sfx_is_valid
-int func_800CE3A8(int handle)
-{
-    if (handle < 0)
-        return -1;
-
-    if (!(handle & 0x8000))
-        return jt.sfx_is_valid(handle);
-
-    return handle;
-}
-
-#define NCHANNELS 24
-
-typedef struct {
-    s16 id;
-    u16 vol;
-    u16 pan;
-    u16 prio;
-    int *unk;
-} Channel;
-
-extern Channel D_80106DA8[NCHANNELS];
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE3F4);
-void func_800CE3F4(int handle)
-{
-    if (handle < 0)
-        return;
-
-    // This sound effect is managed by the main executable.
-    if (!(handle & 0x8000)) {
-        jt.sfx_kill(handle);
-        return;
-    }
-
-    // It's managed by us.
-    handle &= 0x7fff;
-    D_80106DA8[handle].unk = NULL;
-    D_80106DA8[handle].id = -0x8000;
-    D_80106DA8[handle].prio = 2;
-}
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE484);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE658);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE668);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE69C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE6AC);
-
-void func_800CE6FC(int v)
-{
-    jt.snd_set_reverb(5, v);
-    jt.sfx_set_reverb(!!v);
-}
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE77C);
-void func_800CE77C(void)
-{
-    D_80102934 = 0x1000;
-    D_8010293C = 0;
-    D_80102914 = 1;
-    D_8010291C = 1;
-    D_80102924 = 0;
-    func_800CE108();
-    jt.sfx_kill_all();
-    jt.snd_reset();
-    jt.snd_set_vol_to_max();
-}
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE820);
-
-void func_800CE8A8(void)
-{
-    jt.cd_pause();
-}
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE8D8);
-
-int func_800CE9A8(void)
-{
-    return D_80102924;
-}
-
-u32 func_800CE9B8(void)
-{
-    if (func_800CE9A8() != 0)
-        return 0;
-
-    u32 status = jt.snd_status();
-    if (!(status & 8))
-        return 0;
-
-    return status & 1;
-}
-
-int func_800CEA14(void)
-{
-    return jt.snd_fade_out(0x30, 0, 0);
-}
-
-int func_800CEA48(void)
-{
-    return jt.snd_fade_in(0x30, 0x400, 0);
-}
-
-int func_800CEA7C(int v)
-{
-    return jt.snd_set_stereo(v);
-}
-
-int func_800CEAAC(void)
-{
-    return jt.snd_get_stereo();
-}
-
-void func_800CEADC(int id, int repeat)
-{
-    jt.music_set_repeat(repeat);
-    jt.music_play(id);
-}
-
-int func_800CEB2C(void)
-{
-    return (jt.snd_status() & 8) != 0;
-}
-
-// calculate_sound_pan
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEB6C);
-
-// calculate_sound_volume
-int func_800CEC30(int val, int x, int y, int z)
-{
-    SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
-    int distance = SquareRoot0(func_800E8868(
-        x - camera_pos->vx,
-        y - camera_pos->vy,
-        z - camera_pos->vz
-    ));
-    distance -= 0x300;
-    CLAMP(0, 4096, distance);
-    return (val * (0x1000 - distance)) >> 12;
-}
+// level progressions functions
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CECB8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CED54);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEDBC);
+
+// smoke.c
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEE24);
 
@@ -419,6 +60,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEF24);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CF010);
 
+//
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CF064);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CF08C);
@@ -446,7 +88,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0224);
 extern Entity D_80106EC8[6];
 extern int D_8010294C;
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0370);
+// US: 800D0370
 void func_800D0370(void)
 {
     for (int i = 0; i < 6; i++) {
@@ -469,10 +111,34 @@ void func_800D0370(void)
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0428);
 
-extern s32 entity_free_count;
-extern Entity entity_array[128]; // entity array
-extern Entity *entity_ptrs[128]; // entity pointers
-extern s32 D_801029A4;
+#define MAX_ENTITIES 128
+#define MAX_CLASSES 64
+
+typedef struct {
+    s16 unk0;
+    s16 unk1;
+    s16 unk2;
+    s16 unk3;
+} LandingAttributes;
+
+typedef struct {
+    LinkedList head;
+    LinkedList tail;
+} List;
+
+/* US:8010295C JP: */ List entity_list_0 = {};
+/* US:8010296C JP: */ List entity_list_1 = {};
+/* US:8010297C JP: */ List entity_list_2 = {};
+/* US:8010298C JP: */ List entity_list_free = {};
+/* US:8010299C JP: */ int entity_free_count = 0;
+/* US:801029A4 JP: */ s32 D_801029A4 = 0;
+
+/* US:80114AF8 JP: */ Entity entity_array[MAX_ENTITIES];
+/* US:8011E8F8 JP: */ u8 D_8011E8F8[MAX_ENTITIES]; // land_events related
+/* US:8011E978 JP: */ LandingAttributes D_8011E978[MAX_ENTITIES]; // land_events related
+/* US:8011ED78 JP: */ void (*D_8011ED78[MAX_CLASSES])(void); // level_entity_class_ctors
+/* US:8011EE78 JP: */ void (*D_8011EE78[MAX_CLASSES])(Entity *, Spirit *); // level_entity_ctors
+/* US:801383F8 JP: */ extern Entity *entity_ptrs[MAX_ENTITIES];
 
 // 800D0438
 LinkedList *get_list1_head(void)
@@ -510,7 +176,6 @@ LinkedList *get_list0_tail(void)
     return &entity_list_0.tail;
 }
 
-// shouldn't it be list_insert_before?
 // 800D0498
 void entity_insert_before(LinkedList *list, LinkedList *node)
 {
@@ -545,10 +210,11 @@ Entity *entity_create(void)
         return 0;
     entity_free_count -= 1;
 
-    Entity *ret = entity_list_free.head.next;
-    entity_detach_from_list(ret);
-    ret->unk1 = 0;
+    LinkedList *link = entity_list_free.head.next;
+    entity_detach_from_list(link);
 
+    Entity *ret = (Entity *)link;
+    ret->unk1 = 0;
     return ret;
 }
 
@@ -556,12 +222,21 @@ Entity *entity_create(void)
 void entity_destroy(Entity *e)
 {
     e->unk2 = 0;
-    entity_detach_from_list(e);
-    entity_insert_after(&entity_list_free.head, e);
+    entity_detach_from_list(&e->link);
+    entity_insert_after(&entity_list_free.head, &e->link);
     entity_free_count += 1;
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D058C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D058C);
+void func_800D058C(void)
+{
+    for (int i = 0; i < MAX_ENTITIES; i++) {
+        D_8011E8F8[i] = 0;
+        D_8011E978[i].unk0 = -1;
+        D_8011E978[i].unk1 = 0;
+        D_8011E978[i].unk2 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D05F0);
 
@@ -577,79 +252,106 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0808);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0824);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0840);
+// entity_load_classes (ctors)
+void func_800D0840(EntityClass **classes)
+{
+    for (int i = 0; i < MAX_CLASSES; i++) {
+        D_8011ED78[i] = NULL;
+        D_8011EE78[i] = NULL;
+    }
 
+    if (classes == NULL)
+        return;
+
+    for (int i = 0; classes[i] != (EntityClass *)-1; i++) {
+        D_8011ED78[i] = classes[i]->class_ctor;
+        D_8011EE78[i] = classes[i]->ctor;
+    }
+}
+
+// Similar to the one above. Unused.
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D08E8);
 
+// Add level objectives to the radar.
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D09EC);
 
-// level_entity_ctors
-extern void (*D_8011EE78[64])(Entity *, Spirit *);
-
 // entity call constructor
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0AA4);
+// US: 800D0AA4
 void func_800D0AA4(Entity *e, Spirit *spirit)
 {
     u32 type = spirit->type & 0x7F;
-
     if (type < 0x40) {
         void (*ctor)(Entity *, Spirit *);
         ctor = D_8011EE78[type];
-        if (ctor == 0)
-            entity_destroy(e);
-        else
+        if (ctor) {
             ctor(e, spirit);
-    } else
+            return;
+        }
+    } else {
         // isn't level specific
         switch (type) {
         case 0x40: // jetpod
             func_800D2618(e, spirit);
-            break;
-        case 0x41:
+            return;
+        case 0x41: // exit
             func_800D2A8C(e, spirit);
-            break;
+            return;
         case 0x42:
             func_800D3D28(e, spirit);
-            break;
+            return;
         case 0x43:
             func_800D45C4(e, spirit);
-            break;
-        case 0x44:
+            return;
+        case 0x44: // pickup
             func_800D2184(e, spirit);
-            break;
-        default:
-            entity_destroy(e);
-            break;
+            return;
         }
+    }
+
+    // Constructor wasn't found.
+    entity_destroy(e);
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0B98);
-
-void _func_800D0B98(void)
+// entity_init_all_classes
+void func_800D0B98(void)
 {
+    for (int i = 0; i < MAX_CLASSES; i++) {
+        if (D_8011ED78[i]) {
+            D_8011ED78[i]();
+        }
+    }
+    func_800D154C();
+    func_800D3818();
+    func_800D3F64();
 }
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C08);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C28);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C48);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C48);
+// entity_clear_list
+// US: 800D0C48
+void func_800D0C48(LinkedList *head, LinkedList *tail)
+{
+    *head = (LinkedList) { .next = tail };
+    *tail = (LinkedList) { .prev = head };
+}
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0C5C);
-//  entity lists init
+// entity lists init
 void func_800D0C5C(void)
 {
     func_800D0C48(&entity_list_0.head, &entity_list_0.tail);
     func_800D0C48(&entity_list_2.head, &entity_list_2.tail);
     func_800D0C48(&entity_list_1.head, &entity_list_1.tail);
-    entity_free_count = 128;
+    entity_free_count = MAX_ENTITIES;
 
     // TODO: entity size should be correct
     // initialize all entities as free
 
     entity_list_free.head.prev = 0;
     LinkedList *last = &entity_list_free.head;
-    for (int i = 0; i < 128; i++) {
+    for (int i = 0; i < MAX_ENTITIES; i++) {
         Entity *e = &entity_array[i];
         entity_ptrs[i] = e;
         e->unk0 = i; // id
@@ -722,18 +424,32 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D11A0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D11C0);
 
+// spawn_entity
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D11E4);
 
+// spawn_entities
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D13EC);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1484);
+void func_800D1484(int v)
+{
+    D_801029A4 = v;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D1494);
+int func_800D1494(void)
+{
+    return D_801029A4;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D14A4);
 
+//
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D154C);
 
+// end of entity.c for sure
+
+// pickup.c?
+
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D156C);
 
 extern MeshMetadata D_8011EF98;
@@ -1320,7 +1036,11 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6AA0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6AB8);
 
-// Ground collision stuff (and collision code in general?)
+// physics.c
+
+// Collision
+
+// Ground collision stuff
 
 typedef struct {
     s16 z;
@@ -1455,13 +1175,14 @@ void func_800D6D08(int v)
     D_80102A9C = v;
 }
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6D18);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6E74);
 
+// load collision data
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6EEC);
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6F14);
 
 static inline int do_nclip(u32 p0, u32 p1, u32 p2)
 {
@@ -1482,7 +1203,7 @@ static inline int do_nclip(u32 p0, u32 p1, u32 p2)
     return ret;
 }
 
-// is_on_air
+// static is_on_air
 int func_800D6F14(int z, int x)
 {
     if (D_80102AA4 < 0)
@@ -1541,15 +1262,16 @@ int func_800D6F14(int z, int x)
     return 1;
 }
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D71A4);
 
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7310);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D73A4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D79C4);
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7A64);
 // collision_init?
 void func_800D7A64(void)
 {
@@ -1572,6 +1294,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7BDC);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7C70);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D7FD4);
+
+// physics and movement
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D81D4);
 
@@ -1607,10 +1331,14 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D973C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D99C8);
 
+// set_force_and_rotation_field_callbacks
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D99E8);
 
+// handle_force_fields
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D9A00);
 
+// Like forcefields, but they turn you around
+// handle_rotation_fields
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D9CF8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D9DD4);
@@ -1620,6 +1348,10 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D9E40);
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D9EAC);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D9F2C);
+
+// end of physics.c
+
+// level.c?
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D9F98);
 
@@ -1901,7 +1633,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA998);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DAA60);
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DAAA4);
+// static
 void func_800DAAA4(void)
 {
     D_80102AF4 = 0;
@@ -3781,10 +3513,6 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     // Done. Number of meshes drawn.
     D_80138088 += 1;
 }
-
-// ground collision is also lost and you just fall.
-// but the ground texture bug is gone too. so that one's also
-// somewhere in that mess.
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E62F0);
 
