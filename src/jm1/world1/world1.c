@@ -1,22 +1,18 @@
-#include "common.h"
-#include "entity.h"
-#include "math.h"
-#include "renderer.h"
+#include "world1.h"
+#include <common.h>
 #include <libgpu.h>
 #include <libgte.h>
 // this file contains mostly world specific code, which are linked with the
 // other units that contain general code shared between all worlds.
 
-// this module
-s32 func_800E5DD8(SVECTOR *v, u32 meshid); // camera transform
-
 // map stuff
 extern int D_801026B8;
 extern int D_801026BC;
 
-// Mesh metadata for the level specific entities
-MeshMetadata D_80103164[8];
-extern MeshMetadata D_8010353C;
+MeshMetadata D_80103164[8]; // level 1 mesh metadata
+// some array here
+MeshMetadata D_8010350C[3]; // level 2 mesh metadata
+MeshMetadata D_8010353C[1]; // level 3 mesh metadata
 
 void func_800B1F8C(void);
 void func_800B1D78(Entity *this, Spirit *params);
@@ -224,7 +220,7 @@ EntityClass *(*D_800FD454[3])[] = {
     &(EntityClass *[]) {
         //&D_80100334,
         &(EntityClass) {
-            &D_8010353C,
+            &D_8010353C[0],
             &D_801002C8,
             func_800C5044,
             func_800C4DE8,
@@ -280,78 +276,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0CBC);
 
 // entity functions
 
-// frog.c
-
-// frog basic
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B0CCC);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1054);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B11B8);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B124C);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B12E4);
-
-// frog process
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B13BC);
-
-// frog custom
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1788);
-
-// get frame
-u32 func_800B1B28(Entity *e, s32 val);
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1B28);
-
-// extern s32 D_80103164;
-// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
-//  e_frog_render (TODO: shadow)
-void func_800B1BF4(Entity *this)
-{
-    SVECTOR *cam = SCRTCHPAD(0x3CA);
-    SVECTOR pos;
-    SVECTOR rot;
-    pos.vx = this->pos_x >> 12;
-    pos.vy = this->pos_y >> 12;
-    pos.vz = this->pos_z >> 12;
-    rot.vy = this->angle_y;
-    rot.vx = -this->angle_x;
-    rot.vz = this->angle_z;
-    if (func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].mesh_id) > -1) {
-        u32 meshid = func_800B1B28(this, 0);
-        if (this->unk5 != 0) {
-            meshid |= 0x8000; // damage blinkW
-        }
-        func_800E5E60(&pos, &rot, meshid);
-    }
-    // and the shadow
-    pos.vy = this->max_y + 2;
-    if (cam->vy < pos.vy && func_800E5DD8(&pos, this->model.frame_a + D_80103164[0].mesh_id) > -1) {
-        u32 meshid = func_800B1B28(this, 0);
-        func_800E5B88(0, 0, 0);
-        func_800E5E60(&pos, &rot, meshid | 0x4000);
-        func_800E5B88(0, 0, 0);
-    }
-
-    if (this->unk5 != 0)
-        this->unk5 = -1;
-}
-
-// e_frog_ctor
-void _func_800B1D78(Entity *this, Spirit *params);
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", _func_800B1D78);
-
-void func_800B1D78(Entity *this, Spirit *params)
-{
-    // LinkedList *list = get_list0_head();
-
-    _func_800B1D78(this, params);
-}
-
-// e_frog_class_ctor
-void func_800B1F8C(void)
-{
-}
+// frog.c (moved)
 
 // kiwi.c (moved)
 
@@ -455,160 +380,7 @@ void func_800B6614(void)
 {
 }
 
-// block.c
-
-// block update
-void func_800B661C(Entity *this)
-{
-    s32 old_y = this->pos_y;
-    s32 new_y = old_y + this->vel_y;
-    this->angle_y += 64; // rotation of the blades
-
-    if ((this->sub.block.max_y << 12) < new_y) {
-        new_y = this->sub.block.max_y << 12;
-        this->vel_y *= -1;
-    }
-
-    if ((this->sub.block.min_y << 12) > new_y) {
-        new_y = this->sub.block.min_y << 12;
-        this->vel_y *= -1;
-    }
-
-    this->pos_y = new_y;
-    this->carry_y = (this->pos_y >> 12) - (old_y >> 12);
-}
-
-// block custom
-void func_800B66A0(Entity *this, Component *comp)
-{
-    if (comp->state == 0) {
-        int rc = is_outside_simulation_range(this->pos_x >> 12, this->pos_y >> 12, this->pos_z >> 12);
-        if (rc == 0)
-            return; // in range. keep vibin
-        comp->state = 1;
-    }
-    // oh no, out of range
-
-    if (comp->state == 1) {
-        this->spirit->alive = -1;
-        entity_destroy(this);
-        return;
-    }
-}
-
-extern s32 D_801031A4;
-
-// block render
-void func_800B6744(Entity *this)
-{
-    SVECTOR pos = {
-        this->pos_x >> 12,
-        (this->pos_y >> 12) - 0xC0,
-        this->pos_z >> 12,
-    };
-
-    SVECTOR rot = {
-        0, 0, 0
-    };
-
-    func_800E5E60(&pos, &rot, D_801031A4 + 2);
-
-    pos.vy = this->pos_y >> 12;
-    rot.vy = this->angle_y;
-
-    func_800E5E60(&pos, &rot, D_801031A4 + 1);
-}
-
-// e_block_ctor
-void func_800B6820(Entity *e, Spirit *spirit)
-{
-    LinkedList *list = get_list2_head();
-    entity_insert_after(list, e);
-    e->unk2 = 0;
-    e->unk5 = 0;
-    e->spirit = spirit;
-    e->sub.block.max_y = spirit->unk4; // spirit also has custom fields
-    e->sub.block.min_y = spirit->unk0;
-    e->vel_x = e->vel_y = -ONE * spirit->unk1;
-    e->pos_x = ONE * spirit->x;
-    e->pos_z = ONE * spirit->z;
-    e->pos_y = ONE * spirit->unk4; // starting height
-
-    e->comp0.disabled = 1;
-
-    e->comp1.disabled = 0;
-    e->comp1.func = func_800B661C;
-    e->comp1.state = 0;
-
-    e->comp3.disabled = 0;
-    e->comp3.func = func_800B66A0;
-    e->comp3.state = 0;
-
-    e->render_comp.disabled = 0;
-    e->render_comp.func = func_800B6744;
-    e->render_comp.state = 0;
-
-    e->angle_x = e->angle_y = e->angle_z = 0;
-    e->angle_x = 0x90;
-    e->carry_x = e->carry_y = e->carry_z = 0;
-
-    e->range_z = 0x100;
-    e->range_x = 0x100;
-    e->range_y = 0x180;
-
-    e->on_air = 0;
-    e->uh0 = e->uh1 = e->uh2 = 0;
-}
-
-int D_8010287C = 0; // handle
-int D_80102884 = 0; // handle
-int D_8010288C = 0;
-int D_80102894 = 0;
-int D_8010289C = 0;
-int D_801028A4 = 0;
-
-// Sound maker entity functions
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B6948);
-void func_800B6948(Entity *e, Component *comp)
-{
-    D_8010288C += 4;
-    D_80102894 += 3;
-    D_8010289C += 7;
-    D_801028A4 += 5;
-}
-
-// Adjust the volume of the wind sound based on the time variables and player y.
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B69A0);
-void func_800B69A0(Entity *e, Component *comp);
-
-// e_block_class_ctor
-void func_800B6C40(void)
-{
-    if (func_800E3B98())
-        return;
-
-    // Create an invisible entity that makes a wind sound when you're up in the
-    // air.
-    Entity *e = entity_create();
-    entity_insert_after(get_list2_head(), e);
-    e->comp0.disabled = 1;
-    e->comp1.func = func_800B6948;
-    e->comp1.disabled = 0;
-    e->comp1.state = 0;
-    e->comp3.func = func_800B69A0;
-    e->comp3.disabled = 0;
-    e->comp3.state = 0;
-    e->render_comp.disabled = 1;
-    D_8010287C = -1;
-    D_80102884 = -1;
-    D_8010288C = 0;
-    D_80102894 = 0;
-    D_8010289C = 0;
-    D_801028A4 = 0;
-    func_800CE168(0xb10, 100, 63, &D_8010287C, 1);
-    func_800CE168(0xb11, 100, 63, &D_80102884, 1);
-}
+// block.c (moved)
 
 // beetle.c
 

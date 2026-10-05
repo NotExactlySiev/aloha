@@ -3334,15 +3334,18 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5D90);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DA0);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DD8);
-/*u32 func_800E5DD8(SVECTOR *v, u32 index)
+int func_800E5DD8(SVECTOR *v, u32 meshid)
 {
-    SVECTOR *vec = SCRTCHPAD(0x0);
-    vec->vx = v->vx - camera_pos->vx;
-    vec->vy = v->vy - camera_pos->vy;
-    vec->vz = v->vz - camera_pos->vz;
-    return func_800F4354(vec, SCRTCHPAD(0x8), &mesh_array[index & 0x3FF]);
-}*/
+    struct [[gnu::packed]] {
+        SVECTOR in;
+        VECTOR out;
+    } *s = SCRTCHPAD(0);
+
+    s->in.vx = v->vx - camera_pos->vx;
+    s->in.vy = v->vy - camera_pos->vy;
+    s->in.vz = v->vz - camera_pos->vz;
+    return func_800F4354(&s->in, &s->out, &mesh_array[meshid & 0x3FF]);
+}
 
 int D_80138088; // number of meshes drawn
 extern s32 D_801380B0; // lod_distance

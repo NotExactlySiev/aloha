@@ -92,14 +92,7 @@ glabel D_801031F0
 glabel D_801031F2
 	.space 0x31a
 
-glabel D_8010350C
-	.space 0x10
-
-glabel D_8010351C
-	.space 0x20
-
-glabel D_8010353C
-	.space 0x10
+/* */
 
 glabel D_8010354C
 	.space 0x4

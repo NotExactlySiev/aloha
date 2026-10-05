@@ -32,17 +32,8 @@
 //
 //      [The PlayStation can produce mind-boggling effects.]
 
-#include "../all.h"
-#include "../entity.h"
-#include "../level.h"
-#include "../math.h"
-#include "../physics.h"
-#include "../renderer.h"
-#include "../sound.h"
-#include "common.h"
+#include "world1.h"
 #include <libgte.h>
-
-extern MeshMetadata D_80103164[8];
 
 // Bytecode
 extern u16 D_800FE898[];
