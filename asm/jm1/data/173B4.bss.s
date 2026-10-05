@@ -109,11 +109,7 @@ glabel D_801046CC
 glabel D_801047CC
 	.space 0x100
 
-glabel D_801048CC
-	.space 0x10
-
-glabel D_801048DC
-	.space 0x10
+/* */
 
 glabel D_801048EC
 	.space 0x4

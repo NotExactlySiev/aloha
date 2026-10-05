@@ -25,16 +25,20 @@ typedef struct {
 typedef struct { // Should be called Anim instead?
     short current_time;
     short frame_a;
-    void *next;
-    ModelKeyframe **anims;
+    const ModelKeyframe *next;
+    const ModelKeyframe *const *anims;
     short frame_b;
     short length;
 } Model;
 
-void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims);
-void func_800CD6B0(Model *model, ModelKeyframe *next, ModelKeyframe **anims);
+void func_800CD684(Model *model, const ModelKeyframe *initial, const ModelKeyframe *const *anims);
+void func_800CD6B0(Model *model, const ModelKeyframe *next, const ModelKeyframe *const *anims);
 int func_800CD6BC(Model *model);
 void func_800CD780(void); // math_init
+
+#define model_set_anim func_800CD684
+#define model_set_next_anim func_800CD6B0
+#define model_step_anim func_800CD6BC
 
 // GTE Functions
 void func_800E87B8(MATRIX *m); // double_matrix
@@ -59,3 +63,7 @@ static inline s16 cosf(int a) { return sin_lut[((a) + 0x400) & 0xFFF]; }
 static inline int fixed_mul(int a, int b) { return (a * b) / ONE; }
 
 static inline int fixed_div(int a, int b) { return (a * ONE) / b; }
+
+#define random_number func_800CD0BC
+#define vector_mag2 func_800E8868
+#define polar_to_cart func_800E9324

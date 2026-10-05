@@ -35,37 +35,80 @@
 #include "world1.h"
 #include <libgte.h>
 
-// Bytecode
-extern u16 D_800FE898[];
-extern u16 *D_800FEA50[28];
+typedef struct {
+    s16 health;
+    u16 points;
+    s16 unk;
+    s8 drop_kind;
+    u8 personality;
+} KiwiSpirit;
 
-// Two different kiwi types: 0 = Runner, 1 = Walker
-extern u16 *D_800FEAC0[2];
+#define E_KIWI 1
 
-// Animations
-extern ModelKeyframe D_800FE828[2];
-extern ModelKeyframe D_800FE830[5];
-extern ModelKeyframe D_800FE844[2];
-extern ModelKeyframe D_800FE84C[2];
-extern ModelKeyframe D_800FE854[1];
-extern ModelKeyframe D_800FE858[2];
-extern ModelKeyframe D_800FE860[2];
-extern ModelKeyframe D_800FE868[4];
+#define SFX_STEP_INTERVAL 12
+#define SFX_STEP_VOLUME 50
+#define SFX_DAMAGE_INTERVAL 48
+#define SFX_DAMAGE_VOLUME 100
+#define SFX_DEATH_VOLUME 100
 
-// kiwi_anims
-ModelKeyframe *D_800FE878[] = {
-    D_800FE828,
-    D_800FE830,
-    D_800FE844,
-    D_800FE84C,
-    D_800FE854,
-    D_800FE858,
-    D_800FE860,
-    D_800FE868,
+#define KIWI_GRAVITY (ONE / 2)
+#define KIWI_SHADOW_OFFSET 2
+#define KIWI_MAX_FALL_SPEED (20 * ONE)
+
+enum {
+    SFX_KIWI_STEP = 0x0310,
+    SFX_KIWI_DAMAGE = 0x0410,
+    SFX_ENEMY_DEATH = 0x2400,
 };
 
-// e_kiwi_comp0
-void func_800B1F94(Entity *e, Component *c)
+enum {
+    KIWI_ACTION_RUN = 1,
+    KIWI_ACTION_HOP = 3,
+    KIWI_ACTION_STEP = 4,
+};
+
+// AI Bytecode
+
+extern s16 kiwi_bytecode[];
+extern s16 *kiwi_bytecode_labels[28];
+
+enum {
+    KIWI_PERSONALITY_RUNNER,
+    KIWI_PERSONALITY_WALKER,
+};
+
+s16 *kiwi_personalities[2] = {
+    [KIWI_PERSONALITY_RUNNER] = &kiwi_bytecode[0],
+    [KIWI_PERSONALITY_WALKER] = &kiwi_bytecode[110],
+};
+
+// Animations
+
+const ModelKeyframe keyframes[20] = {
+    // clang-format off
+    { 6, 0 }, { -1, 0 },
+    { 6, 1 }, { 6, 0 }, { 6, 2 }, { 6, 0 }, { -1, 1 },
+    { 4, 0 }, { 4, 3 },
+    { 4, 3 }, { -1, 3 },
+    { 7, 3 },
+    { 7, 3 }, { -1, 5 },
+    { 6, 0 }, { -1, 0 },
+    { 7, 0 }, { 7, 3 }, { 7, 0 }, { -1, 0 },
+    // clang-format on
+};
+
+static const ModelKeyframe *const animations[] = {
+    &keyframes[0],
+    &keyframes[2],
+    &keyframes[7],
+    &keyframes[9],
+    &keyframes[11],
+    &keyframes[12],
+    &keyframes[14],
+    &keyframes[16],
+};
+
+void e_kiwi_behavior(Entity *e, Component *c)
 {
     int state = c->state;
     while (1) {
@@ -75,7 +118,7 @@ void func_800B1F94(Entity *e, Component *c)
             [[fallthrough]];
         case 1: // Read Operand
             state = *e->vm.pc++;
-            // printf("%03d: OP %02x [%d]\n", e->vm.pc - D_800FE898, state, e->vm.loop);
+            // printf("%03d: OP %02x [%d]\n", e->vm.pc - kiwi_bytecode, state, e->vm.loop);
             break;
 
         case 2: // Wait
@@ -90,7 +133,6 @@ void func_800B1F94(Entity *e, Component *c)
             break;
 
         case 4: // Loop
-            // printf("LOOP: %d\n", e->vm.loop);
             state = (e->vm.loop-- > 0) ? 5 : 7;
             break;
 
@@ -100,7 +142,7 @@ void func_800B1F94(Entity *e, Component *c)
             break;
 
         case 6: // Pick Random Branch
-            state = *e->vm.pc++ > func_800CD0BC() ? 5 : 7;
+            state = *e->vm.pc++ > random_number() ? 5 : 7;
             break;
 
         case 7: // Skip Branch
@@ -114,7 +156,7 @@ void func_800B1F94(Entity *e, Component *c)
             break;
 
         case 9: { // Set Loop Counter Randomly
-            int val = func_800CD0BC();
+            int val = random_number();
             int window = *e->vm.pc++;
             int start = *e->vm.pc++;
             e->vm.loop = (val % window) + start;
@@ -136,14 +178,16 @@ void func_800B1F94(Entity *e, Component *c)
             state = 1;
             break;
 
-        case 12: // Kiwi: Unknown
-            e->sub.kiwi.unk3 = *e->vm.pc++;
-            if (e->sub.kiwi.unk3) {
-                e->sub.kiwi.unk3 = (func_800CD0BC() >> 2) + 0x20;
-                e->sub.kiwi.unk4 = func_800CD0BC() << 4;
+        case 12: { // Kiwi: Unknown
+            s16 arg = *e->vm.pc++;
+            if (arg) {
+                e->sub.kiwi.destination_counter = (random_number() >> 2) + 0x20;
+                e->sub.kiwi.destination_force = random_number() << 4;
+            } else {
+                e->sub.kiwi.destination_counter = 0;
             }
             state = 1;
-            break;
+        } break;
 
         case 13: { // Kiwi: Compare Action
             s16 word = *e->vm.pc++;
@@ -155,8 +199,8 @@ void func_800B1F94(Entity *e, Component *c)
         } break;
 
         case 14: { // Kiwi: Distance Less Than Or Equal
-            Entity *player = func_800DBBE4();
-            int distance = SquareRoot0(func_800E8868(
+            Entity *player = get_player();
+            int distance = SquareRoot0(vector_mag2(
                 (player->pos_x - e->pos_x) >> 12,
                 (player->range_y - e->range_y) / 2 - ((player->pos_y - e->pos_y) >> 12),
                 (player->pos_z - e->pos_z) >> 12
@@ -165,8 +209,8 @@ void func_800B1F94(Entity *e, Component *c)
         } break;
 
         case 15: { // Distance Greater Than
-            Entity *player = func_800DBBE4();
-            int distance = SquareRoot0(func_800E8868(
+            Entity *player = get_player();
+            int distance = SquareRoot0(vector_mag2(
                 (player->pos_x - e->pos_x) >> 12,
                 (player->range_y - e->range_y) / 2 - ((player->pos_y - e->pos_y) >> 12),
                 (player->pos_z - e->pos_z) >> 12
@@ -180,25 +224,26 @@ void func_800B1F94(Entity *e, Component *c)
     }
 }
 
-static void func_800B2354(Entity *e)
+static void do_turning(Entity *e)
 {
-    Entity *player = func_800DBBE4();
+    Entity *player = get_player();
 
     int val;
-    if (e->sub.kiwi.unk3) {
-        int spawner_distance = SquareRoot0(func_800E8868(
+    // Go towards your home while it's counting down. Once hit zero, go towards
+    // the player.
+    if (e->sub.kiwi.destination_counter-- > 0) {
+        int spawner_distance = SquareRoot0(vector_mag2(
             e->spirit->x - (e->pos_x >> 12),
             0,
             e->spirit->z - (e->pos_z >> 12)
         ));
         if (spawner_distance > 0x600) {
-            e->sub.kiwi.unk4 = func_800CD1C4(
+            e->sub.kiwi.destination_force = func_800CD1C4(
                 e->spirit->z - (e->pos_z >> 12),
                 e->spirit->x - (e->pos_x >> 12)
             );
         }
-        val = e->sub.kiwi.unk4;
-        e->sub.kiwi.unk3 -= 1;
+        val = e->sub.kiwi.destination_force;
     } else {
         val = func_800CD1C4(
             (player->pos_z - e->pos_z) >> 12,
@@ -206,17 +251,17 @@ static void func_800B2354(Entity *e)
         );
     }
 
-    if (!e->sub.kiwi.unk7) {
-        // If you hit a wall, turn to a random direction?
+    if (e->sub.kiwi.turning_counter == 0) {
+        // If you hit a wall, turn by a random amount.
         if (e->uh0 != 0 || e->uh1 != 0) {
-            e->sub.kiwi.unk7 = 0x40;
-            e->sub.kiwi.unk8 = func_800CD0BC() * 8 - 0x400;
+            e->sub.kiwi.turning_counter = 0x40;
+            e->sub.kiwi.turning_amount = random_number() * 8 - 0x400;
         }
     }
 
-    if (e->sub.kiwi.unk7) {
-        val += e->sub.kiwi.unk8;
-        e->sub.kiwi.unk7 -= 1;
+    if (e->sub.kiwi.turning_counter > 0) {
+        val += e->sub.kiwi.turning_amount;
+        e->sub.kiwi.turning_counter -= 1;
     }
 
     int angle0 = e->angle_y;
@@ -224,26 +269,26 @@ static void func_800B2354(Entity *e)
     e->unk21 = e->angle_y - angle0;
 }
 
-static void func_800B24B8(Entity *e)
+static void apply_rotation(Entity *e)
 {
     e->carry_z = 0;
     e->carry_y = 0;
     e->carry_x = 0;
     e->angle_x = 0;
-    if (e->sub.kiwi.unk5 > 0) {
-        int angle = e->sub.kiwi.unk6;
+    if (e->sub.kiwi.damage_pushback > 0) {
+        int angle = e->sub.kiwi.damage_direction;
         e->angle_x = -0xc0;
         if (angle > -1) {
             int dz, dx;
-            func_800E9324(angle, e->sub.kiwi.unk5 / 2, &dz, &dx);
+            polar_to_cart(angle, e->sub.kiwi.damage_pushback / 2, &dz, &dx);
             e->vel_z += dz;
             e->vel_x += dx;
         }
-        e->sub.kiwi.unk5 /= 2;
+        e->sub.kiwi.damage_pushback /= 2;
     }
 }
 
-static void func_800B254C(Entity *e)
+static void apply_movement(Entity *e)
 {
     func_800D95E8(e, &e->vel_z, &e->vel_x);
     func_800D9A00(e, &e->vel_z, &e->vel_x, &e->vel_y);
@@ -257,7 +302,7 @@ static void func_800B254C(Entity *e)
 }
 
 // e_kiwi_comp1
-void func_800B25E4(Entity *e, Component *c)
+void e_kiwi_physics(Entity *e, Component *c)
 {
     e->vel_x = 0;
     e->vel_z = 0;
@@ -265,7 +310,7 @@ void func_800B25E4(Entity *e, Component *c)
     while (1) {
         switch (state) {
         case 0:
-            func_800CD684(&e->model, D_800FE828, D_800FE878);
+            model_set_anim(&e->model, animations[0], animations);
             // Clearing this field signals to the bytecode that the action is
             // done.
             e->sub.kiwi.action = 0;
@@ -273,13 +318,13 @@ void func_800B25E4(Entity *e, Component *c)
             [[fallthrough]];
         case 1:
             switch (e->sub.kiwi.action) {
-            case 1:
+            case KIWI_ACTION_RUN:
                 state = 2;
                 break;
-            case 3:
+            case KIWI_ACTION_HOP:
                 state = 8;
                 break;
-            case 4:
+            case KIWI_ACTION_STEP:
                 state = 10;
                 break;
             default:
@@ -296,38 +341,39 @@ void func_800B25E4(Entity *e, Component *c)
             }
             break;
 
-        case 2:
-            func_800CD684(&e->model, D_800FE830, D_800FE878);
+        case 2: // Running
+            model_set_anim(&e->model, animations[1], animations);
             e->sub.kiwi.action = 1;
-            e->sub.kiwi.unk9 = 0;
-            c->unk0 = (func_800CD0BC() >> 4) + 32; // [32, 47]
+            e->sub.kiwi.step_sfx_counter = 0;
+            c->unk0 = (random_number() >> 4) + 32; // [32, 47]
             c->state = 3;
             [[fallthrough]];
         case 3:
-            if ((c->unk0-- << 16) <= 0) {
+            if (c->unk0-- <= 0) {
                 state = 0;
                 break;
             }
 
-            func_800B2354(e);
-            func_800E9324(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
-            if (e->sub.kiwi.unk9++ % 12 == 0) {
-                func_800CE304(
-                    0x0310,
-                    func_800CEC30(50, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
-                    func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+            do_turning(e);
+            polar_to_cart(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
+            if (e->sub.kiwi.step_sfx_counter++ % SFX_STEP_INTERVAL == 0) {
+                sfx_play(
+                    SFX_KIWI_STEP,
+                    sound_calculate_volume(SFX_STEP_VOLUME, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+                    sound_calculate_pan(e->pos_z >> 12, e->pos_x >> 12)
                 );
             }
             goto check_and_goto4;
 
+        // Landing sequence
         case 4:
-            func_800CD684(&e->model, D_800FE854, D_800FE878);
+            model_set_anim(&e->model, animations[4], animations);
             e->sub.kiwi.action = 2;
             c->state = 5;
             [[fallthrough]];
         case 5:
-            func_800B2354(e);
-            func_800E9324(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
+            do_turning(e);
+            polar_to_cart(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
             if (!e->on_air) {
                 goto out;
             }
@@ -335,13 +381,13 @@ void func_800B25E4(Entity *e, Component *c)
             break;
 
         case 6:
-            func_800CD684(&e->model, D_800FE860, D_800FE878);
-            func_800CE304(
-                0x0310,
-                func_800CEC30(50, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
-                func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+            model_set_anim(&e->model, animations[6], animations);
+            sfx_play(
+                SFX_KIWI_STEP,
+                sound_calculate_volume(SFX_STEP_VOLUME, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+                sound_calculate_pan(e->pos_z >> 12, e->pos_x >> 12)
             );
-            c->unk0 = (func_800CD0BC() >> 6) + 4; // [4, 7]
+            c->unk0 = (random_number() >> 6) + 4; // [4, 7]
             c->state = 7;
             [[fallthrough]];
         case 7:
@@ -352,21 +398,21 @@ void func_800B25E4(Entity *e, Component *c)
             goto check_and_goto4;
 
         case 8:
-            func_800CD684(&e->model, D_800FE868, D_800FE878);
+            model_set_anim(&e->model, animations[7], animations);
             e->sub.kiwi.action = 3;
             c->unk0 = 21;
             c->state = 9;
             [[fallthrough]];
         case 9:
-            if ((c->unk0-- << 16) <= 0) {
+            if (c->unk0-- <= 0) {
                 state = 0;
                 break;
             }
-            func_800B2354(e);
+            do_turning(e);
             goto check_and_goto4;
 
         case 10:
-            func_800CD684(&e->model, D_800FE844, D_800FE878);
+            model_set_anim(&e->model, animations[2], animations);
             e->sub.kiwi.action = 4;
             c->unk0 = 4;
             c->state = 11;
@@ -375,12 +421,12 @@ void func_800B25E4(Entity *e, Component *c)
             if (c->unk0-- > 0) {
                 goto out;
             }
-            e->vel_y = -ONE * ((func_800CD0BC() >> 6) + 4);
+            e->vel_y = -ONE * ((random_number() >> 6) + 4);
             c->state = 12;
             [[fallthrough]];
         case 12:
-            func_800B2354(e);
-            func_800E9324(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
+            do_turning(e);
+            polar_to_cart(e->angle_y, e->ddangle_z, &e->vel_z, &e->vel_x);
             e->on_air = 0;
             if (e->vel_y > 0) {
                 state = 4;
@@ -393,26 +439,25 @@ void func_800B25E4(Entity *e, Component *c)
     }
 
 out:
-    func_800CD6BC(&e->model);
+    model_step_anim(&e->model);
     e->vel_y += e->acc_y;
     e->vel_y += e->acc_y;
-    if (e->vel_y > 20 * ONE) {
-        e->vel_y = 20 * ONE;
+    if (e->vel_y > KIWI_MAX_FALL_SPEED) {
+        e->vel_y = KIWI_MAX_FALL_SPEED;
     }
-    func_800B24B8(e);
-    func_800B254C(e);
+    apply_rotation(e);
+    apply_movement(e);
     return;
 }
 
-// e_kiwi_comp3
-void func_800B2A0C(Entity *e, Component *c)
+void e_kiwi_interaction(Entity *e, Component *c)
 {
     int state = c->state;
     while (1) {
         switch (state) {
         case 0:
-            if (--e->sub.kiwi.unk10 < 0) {
-                e->sub.kiwi.unk10 = 0;
+            if (--e->sub.kiwi.damage_sfx_counter < 0) {
+                e->sub.kiwi.damage_sfx_counter = 0;
             }
 
             if (e->unk5 < 0) {
@@ -424,40 +469,40 @@ void func_800B2A0C(Entity *e, Component *c)
                 break;
             }
 
-            int damage = func_800D0764(e->unk0);
+            int damage = entity_get_damage(e->id);
             if (damage > 0) {
                 e->health -= damage;
                 if (e->unk5 == 0) {
                     e->unk5 = 1; // Blink?
                 }
 
-                e->sub.kiwi.unk6 = func_800D07A4(e->unk0);
-                if (e->sub.kiwi.unk5 == 0) {
-                    e->sub.kiwi.unk5 = 0x30;
+                e->sub.kiwi.damage_direction = entity_get_damage_direction(e->id);
+                if (e->sub.kiwi.damage_pushback == 0) {
+                    e->sub.kiwi.damage_pushback = 0x30;
                     if (e->on_air) {
                         e->vel_y = -8 * ONE;
                     }
                 }
 
-                if (e->sub.kiwi.unk10 == 0) {
-                    e->sub.kiwi.unk10 = 0x30;
-                    func_800CE304(
-                        0x0410,
-                        func_800CEC30(100, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
-                        func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+                if (e->sub.kiwi.damage_sfx_counter == 0) {
+                    e->sub.kiwi.damage_sfx_counter = SFX_DAMAGE_INTERVAL;
+                    sfx_play(
+                        SFX_KIWI_DAMAGE,
+                        sound_calculate_volume(SFX_DAMAGE_VOLUME, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+                        sound_calculate_pan(e->pos_z >> 12, e->pos_x >> 12)
                     );
                 }
             }
-            func_800D07C4(e->unk0);
+            entity_clear_damage(e->id);
             if (e->health > 0) {
-                func_800D8788(e->unk0 | 0x100, 0);
+                func_800D8788(e->id | 0x100, 0);
                 return;
             }
-            state = 1; // can
+            state = 1;
             break;
 
         case 1:
-            func_800EB16C(e->unk4);
+            give_points(e->points);
             e->spirit->type &= 0x7f;
             func_800CFFB0(
                 &(SVECTOR) {
@@ -470,17 +515,17 @@ void func_800B2A0C(Entity *e, Component *c)
                     .vy = e->angle_y,
                     .vz = 0,
                 },
-                e->model.frame_a + D_80103164[1].mesh_id
+                e->model.frame_a + D_80103164[E_KIWI].mesh_id
             );
-            func_800CE304(
-                0x2400,
-                func_800CEC30(100, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
-                func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+            sfx_play(
+                SFX_ENEMY_DEATH,
+                sound_calculate_volume(SFX_DEATH_VOLUME, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+                sound_calculate_pan(e->pos_z >> 12, e->pos_x >> 12)
             );
-            e->unk2 = 0;
-            e->comp0.disabled = 1;
-            e->comp1.disabled = 1;
-            e->render_comp.disabled = 1;
+            e->active = 0;
+            e->behavior.disabled = 1;
+            e->phyisics.disabled = 1;
+            e->render.disabled = 1;
             c->unk0 = 8;
             state = 2;
             c->state = state;
@@ -490,15 +535,15 @@ void func_800B2A0C(Entity *e, Component *c)
             if (c->unk0-- > 0) {
                 return;
             }
-            func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->max_y, e->sub.kiwi.unk1);
+            func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->max_y, e->sub.kiwi.drop_kind);
             state = 3;
             break;
 
         case 3:
-            e->unk2 = 0;
-            e->comp0.disabled = 1;
-            e->comp1.disabled = 1;
-            e->render_comp.disabled = 1;
+            e->active = 0;
+            e->behavior.disabled = 1;
+            e->phyisics.disabled = 1;
+            e->render.disabled = 1;
             e->pos_x = e->spirit->x << 12;
             e->pos_y = e->spirit->y << 12;
             e->pos_z = e->spirit->z << 12;
@@ -528,16 +573,16 @@ void func_800B2A0C(Entity *e, Component *c)
     return;
 }
 
-static int func_800B2DA0(Entity *e, int arg)
+static int calculate_frame_mesh(Entity *e, int arg)
 {
     int frame_b = e->model.frame_b;
     if (frame_b == e->model.frame_a) {
-        return frame_b + D_80103164[1].mesh_id + arg;
+        return frame_b + D_80103164[E_KIWI].mesh_id + arg;
     }
 
     int frames[2] = {
-        e->model.frame_b + D_80103164[1].mesh_id + arg,
-        e->model.frame_a + D_80103164[1].mesh_id + arg,
+        e->model.frame_b + D_80103164[E_KIWI].mesh_id + arg,
+        e->model.frame_a + D_80103164[E_KIWI].mesh_id + arg,
     };
 
     int fac = fixed_div(e->model.current_time + 1, e->model.length);
@@ -552,7 +597,7 @@ static int func_800B2DA0(Entity *e, int arg)
 // US: 800B2E6C
 void e_kiwi_render(Entity *e, Component *c)
 {
-    func_800EC408(e->pos_z >> 12, e->pos_x >> 12, 0);
+    radar_add_dot(e->pos_z >> 12, e->pos_x >> 12, 0);
 
     SVECTOR pos_int = {
         .vx = e->pos_x >> 12,
@@ -567,25 +612,25 @@ void e_kiwi_render(Entity *e, Component *c)
     };
 
     int id = -1;
-    if (func_800E5DD8(&pos_int, e->model.frame_a + D_80103164[1].mesh_id) > -1) {
-        id = func_800B2DA0(e, 0);
+    if (camera_frustum_cull(&pos_int, e->model.frame_a + D_80103164[E_KIWI].mesh_id) > -1) {
+        id = calculate_frame_mesh(e, 0);
         if (e->unk5) {
             id |= 0x8000;
         }
-        func_800E5E60(&pos_int, &angle, id);
+        draw_model(&pos_int, &angle, id);
     }
 
     // Shadow
-    pos_int.vy = e->max_y + 2;
+    pos_int.vy = e->max_y + KIWI_SHADOW_OFFSET;
 
     SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
     if (camera_pos->vy < pos_int.vy) {
-        if (func_800E5DD8(&pos_int, e->model.frame_a + D_80103164[1].mesh_id) > -1) {
+        if (camera_frustum_cull(&pos_int, e->model.frame_a + D_80103164[E_KIWI].mesh_id) > -1) {
             if (id < 0) {
-                id = func_800B2DA0(e, 0);
+                id = calculate_frame_mesh(e, 0);
             }
             func_800E5B88(0, 0, 0);
-            func_800E5E60(&pos_int, &angle, id | 0x4000);
+            draw_model(&pos_int, &angle, id | 0x4000);
             func_800E5B88(0, 0, 0);
         }
     }
@@ -598,35 +643,36 @@ void e_kiwi_render(Entity *e, Component *c)
 // US: 800B2FF0
 void e_kiwi_ctor(Entity *e, Spirit *spirit)
 {
+    KiwiSpirit *kiwi_spirit = (KiwiSpirit *)spirit->data;
     entity_insert_after(get_list0_head(), &e->link);
-    e->unk2 = 1;
+    e->active = 1;
     e->unk5 = 0;
-    func_800D07C4(e->unk0);
-    func_800D0808(e->unk0, 0);
+    entity_clear_damage(e->id);
+    entity_set_damage_mask(e->id, 0);
     e->spirit = spirit;
-    e->health = spirit->unk4;
-    e->unk4 = spirit->unk0;
+    e->health = kiwi_spirit->health;
+    e->points = kiwi_spirit->points;
     e->pos_x = ONE * spirit->x;
     e->pos_y = ONE * spirit->y;
     e->pos_z = ONE * spirit->z;
 
-    e->comp0.func = func_800B1F94;
-    e->comp0.disabled = 0;
-    e->comp0.state = 0;
+    e->behavior.func = e_kiwi_behavior;
+    e->behavior.disabled = 0;
+    e->behavior.state = 0;
 
-    e->comp1.func = func_800B25E4;
-    e->comp1.disabled = 0;
-    e->comp1.state = 0;
+    e->phyisics.func = e_kiwi_physics;
+    e->phyisics.disabled = 0;
+    e->phyisics.state = 0;
 
-    e->comp3.func = func_800B2A0C;
-    e->comp3.disabled = 0;
-    e->comp3.state = 0;
+    e->interaction.func = e_kiwi_interaction;
+    e->interaction.disabled = 0;
+    e->interaction.state = 0;
 
-    e->render_comp.func = e_kiwi_render;
-    e->render_comp.disabled = 0;
-    e->render_comp.state = 0;
+    e->render.func = e_kiwi_render;
+    e->render.disabled = 0;
+    e->render.state = 0;
 
-    Entity *player = func_800DBBE4();
+    Entity *player = get_player();
     (void)player;
 
     e->angle_y = 0;
@@ -637,7 +683,7 @@ void e_kiwi_ctor(Entity *e, Spirit *spirit)
     e->vel_x = 0;
     e->acc_z = 0;
     e->acc_x = 0;
-    e->acc_y = 0x800;
+    e->acc_y = KIWI_GRAVITY;
     e->speed = 0;
     e->ddangle_z = 0;
     e->unk21 = 0;
@@ -649,23 +695,23 @@ void e_kiwi_ctor(Entity *e, Spirit *spirit)
     e->uh1 = 0;
     e->uh0 = 0;
     e->sub.kiwi.a = 0;
-    e->sub.kiwi.b = spirit->unk1;
-    e->sub.kiwi.unk1 = spirit->unk2;
-    func_800D7AC0(e);
+    e->sub.kiwi.b = kiwi_spirit->unk;
+    e->sub.kiwi.drop_kind = kiwi_spirit->drop_kind;
+    prepare_entity_collision(e);
     e->unk26 = 1;
-    func_800CD684(&e->model, D_800FE828, D_800FE878);
+    model_set_anim(&e->model, animations[0], animations);
     e->sub.kiwi.action = 0;
-    e->sub.kiwi.unk3 = 0;
-    e->sub.kiwi.unk4 = 0;
-    e->sub.kiwi.unk5 = 0;
-    e->sub.kiwi.unk6 = -1;
-    e->sub.kiwi.unk7 = 0;
-    e->sub.kiwi.unk8 = 0;
-    e->sub.kiwi.unk9 = 0;
-    e->sub.kiwi.unk10 = 0;
+    e->sub.kiwi.destination_counter = 0;
+    e->sub.kiwi.destination_force = 0;
+    e->sub.kiwi.damage_pushback = 0;
+    e->sub.kiwi.damage_direction = -1;
+    e->sub.kiwi.turning_counter = 0;
+    e->sub.kiwi.turning_amount = 0;
+    e->sub.kiwi.step_sfx_counter = 0;
+    e->sub.kiwi.damage_sfx_counter = 0;
     e->vm.loop = 0;
-    e->vm.labels = D_800FEA50;
-    e->vm.pc = D_800FEAC0[spirit->unk3];
+    e->vm.labels = kiwi_bytecode_labels;
+    e->vm.pc = kiwi_personalities[kiwi_spirit->personality];
 }
 
 void e_kiwi_class_ctor(void)

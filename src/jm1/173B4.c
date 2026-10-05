@@ -104,7 +104,7 @@ void func_800D0370(void)
                 e->angle_x,
                 e->angle_z,
             },
-            e->unk0 + D_8010294C
+            e->id + D_8010294C
         );
     }
 }
@@ -221,13 +221,13 @@ Entity *entity_create(void)
 // 800D053C
 void entity_destroy(Entity *e)
 {
-    e->unk2 = 0;
+    e->active = 0;
     entity_detach_from_list(&e->link);
     entity_insert_after(&entity_list_free.head, &e->link);
     entity_free_count += 1;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D058C);
+// static
 void func_800D058C(void)
 {
     for (int i = 0; i < MAX_ENTITIES; i++) {
@@ -354,7 +354,7 @@ void func_800D0C5C(void)
     for (int i = 0; i < MAX_ENTITIES; i++) {
         Entity *e = &entity_array[i];
         entity_ptrs[i] = e;
-        e->unk0 = i; // id
+        e->id = i; // id
         e->unk1 = 0; // active
         LinkedList *node = (LinkedList *)e;
         // connect to tail
@@ -808,7 +808,7 @@ void func_800D3378(int x, int y, int z, int ay, int ax, int speed, int gold)
         return;
 
     entity_insert_after(get_list1_head(), (LinkedList *)e);
-    e->unk2 = 0;
+    e->active = 0;
     e->unk5 = 0;
     e->pos_x = x << 12;
     e->pos_y = y << 12;
@@ -830,16 +830,16 @@ void func_800D3378(int x, int y, int z, int ay, int ax, int speed, int gold)
     e->angle_z = 0;
     e->dangle_y = 0x80;
 
-    e->comp0.disabled = 1;
-    e->comp1.func = func_800D2B74;
-    e->comp1.disabled = 0;
-    e->comp1.state = 0;
-    e->comp3.func = func_800D2F58;
-    e->comp3.disabled = 0;
-    e->comp3.state = 0;
-    e->render_comp.func = func_800D30E4;
-    e->render_comp.disabled = 0;
-    e->render_comp.state = 0;
+    e->behavior.disabled = 1;
+    e->phyisics.func = func_800D2B74;
+    e->phyisics.disabled = 0;
+    e->phyisics.state = 0;
+    e->interaction.func = func_800D2F58;
+    e->interaction.disabled = 0;
+    e->interaction.state = 0;
+    e->render.func = func_800D30E4;
+    e->render.disabled = 0;
+    e->render.state = 0;
 
     if (gold) {
         e->range_z = 0x30;
@@ -1776,25 +1776,21 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBA08);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBA18);
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBBE4);
 Entity *func_800DBBE4(void)
 {
     return &player_entity;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBBF4);
 void func_800DBBF4(int v)
 {
     D_80102744 = v;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC04);
 int func_800DBC04(void)
 {
     return D_80102744;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC14);
 void func_800DBC14(int v)
 {
     D_80102BF4 = v;
@@ -1861,7 +1857,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
 
 void _func_800DBDB0(void)
 {
-    player_entity.unk0 = 0;
+    player_entity.id = 0;
     //
     //
     //
@@ -1878,8 +1874,8 @@ void _func_800DBDB0(void)
     player_entity.dangle_x = 0;
     player_entity.speed = 0;
     player_entity.ddangle_z = 0;
-    player_entity.comp1.state = 0;
-    player_entity.comp3.state = 0;
+    player_entity.phyisics.state = 0;
+    player_entity.interaction.state = 0;
     player_entity.acc_z = 0;
     player_entity.acc_y = 0;
     player_entity.acc_x = 0;
@@ -1928,14 +1924,14 @@ void func_800E5458(s16 x, s16 y, s16 z);
 // the control flow is fucked
 void func_800DC4C4(void)
 {
-    switch (player_entity.comp1.state) {
+    switch (player_entity.phyisics.state) {
     make_0: // landing
         D_80102C6C = 0;
         D_80102C4C = 0x800;
         player_entity.vel_y = 0;
         func_800DC9EC(&player_entity); // land
         D_80102BFC = player_entity.max_y;
-        player_entity.comp1.state = 0;
+        player_entity.phyisics.state = 0;
     case 0: // grounded
         if (D_80102C9C > 0) {
             D_80102C9C = 0;
@@ -1960,8 +1956,8 @@ void func_800DC4C4(void)
             // bouncing (off an enemy, or maybe something else)
             D_80102C6C = 0x300;
             D_80102724 = -32;
-            player_entity.comp1.unk0 = 1;
-            player_entity.comp1.state = 1;
+            player_entity.phyisics.unk0 = 1;
+            player_entity.phyisics.state = 1;
             func_800CE304(0x500, 0x50, 0x3F);
         } else {
             D_80102C5C = func_800D9E40(&player_entity);
@@ -1976,16 +1972,16 @@ void func_800DC4C4(void)
             D_80102724 = 0; // don't think we need this here?
             D_80102C0C = 0;
             D_80102C14 = 0;
-            player_entity.comp1.unk0 = 24;
-            player_entity.comp1.state = 1;
+            player_entity.phyisics.unk0 = 24;
+            player_entity.phyisics.state = 1;
             player_entity.vel_y = -D_80102710;
             player_entity.acc_y = D_80102718; // gravity? ddy
         }
 
     case 1: // jump (just)
-        if (D_80102C34 & D_80102738 == 0 || --player_entity.comp1.unk0 == 0) {
-            player_entity.comp1.state = 2;
-            player_entity.acc_y = (player_entity.comp1.unk0 + 2) * 0x300 + D_80102718;
+        if (D_80102C34 & D_80102738 == 0 || --player_entity.phyisics.unk0 == 0) {
+            player_entity.phyisics.state = 2;
+            player_entity.acc_y = (player_entity.phyisics.unk0 + 2) * 0x300 + D_80102718;
         }
     case 2: // jump
         player_entity.on_air = 0;
@@ -2004,19 +2000,19 @@ void func_800DC4C4(void)
         D_80102C1C = 0;
         D_80102724 = -16;
         D_80102C9C = 0;
-        player_entity.comp1.unk0 = 24;
-        player_entity.comp1.state = 3;
+        player_entity.phyisics.unk0 = 24;
+        player_entity.phyisics.state = 3;
         player_entity.vel_y = -D_80102710;
         player_entity.acc_y = D_80102718;
     case 3: // air jump (just)
-        if (D_80102C34 & D_80102738 == 0 || --player_entity.comp1.unk0 == 0) {
-            player_entity.acc_y = player_entity.comp1.unk0 * 0x300 + D_80102718;
-            player_entity.comp1.state = 4;
-            player_entity.comp1.unk0 = 0;
+        if (D_80102C34 & D_80102738 == 0 || --player_entity.phyisics.unk0 == 0) {
+            player_entity.acc_y = player_entity.phyisics.unk0 * 0x300 + D_80102718;
+            player_entity.phyisics.state = 4;
+            player_entity.phyisics.unk0 = 0;
         }
     case 4: // air jump
         player_entity.on_air = 0;
-        if (player_entity.comp1.unk0 == 0 && func_800DCB50())
+        if (player_entity.phyisics.unk0 == 0 && func_800DCB50())
             goto make_3;
         if (player_entity.vel_y > 0) {
             D_80102724 = -32;
@@ -2025,7 +2021,7 @@ void func_800DC4C4(void)
         break;
 
     make_5:
-        player_entity.comp1.state = 5;
+        player_entity.phyisics.state = 5;
     case 5: // falling
         D_80102C6C = 0;
         // jt.printf("timer: %d\n", D_80102C14);

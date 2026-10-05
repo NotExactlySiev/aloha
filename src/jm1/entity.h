@@ -18,11 +18,7 @@ struct Spirit {
     s8 alive; // is spawned and inhabitting an entity
     u8 type; // what kind of entity is it? TODO: enum for this
     s16 x, y, z; // initial spawn location
-    s16 unk4; // frame
-    u16 unk0;
-    s16 unk1;
-    s8 unk2;
-    s8 unk3;
+    u8 data[8]; // entity specific data
 }; // TODO: high bit of type is a flag. should it be a bitfield?
 
 struct Component {
@@ -46,17 +42,17 @@ enum {
 
 struct Entity {
     /* 00 */ LinkedList link;
-    /* 08 */ Component comp0; // bytecode vm. behavior and ai
-    /* 18 */ Component comp1; // physics
-    /* 28 */ Component render_comp;
-    /* 38 */ Component comp3; // interaction
+    /* 08 */ Component behavior;
+    /* 18 */ Component phyisics;
+    /* 28 */ Component render;
+    /* 38 */ Component interaction;
     /* 48 */ Model model;
-    /* 58 */ u16 unk0; // id
+    /* 58 */ u16 id; // id
     /* 5A */ u8 unk1;
-    /* 5B */ u8 unk2;
+    /* 5B */ u8 active;
     /* 5C */ s16 health; // should be signed
     /* 5E */ u16 unk3;
-    /* 60 */ u32 unk4; // score value
+    /* 60 */ u32 points; // score value
     /* 64 */ s32 unk5; // flags. 0x8000 is BLINK. 0x0001 is VISIBLE. has to be signed for the kiwi entity. and the other ones?
     /* 68 */ int pos_x;
     /* 6C */ int pos_y;
@@ -110,16 +106,16 @@ struct Entity {
         struct {
             /* 00 */ s16 a;
             /* 01 */ s16 b;
-            /* 02 */ s16 unk1; // what to drop on death
-            /* 03 */ s16 action; // current action
-            /* 04 */ s16 unk3;
-            /* 05 */ s16 unk4; // angle to spawner
-            /* 06 */ s16 unk5;
-            /* 07 */ s16 unk6; // some angle
-            /* 08 */ s16 unk7;
-            /* 09 */ s16 unk8; // some other angle
-            /* 0A */ s16 unk9;
-            /* 0B */ s16 unk10;
+            /* 02 */ s16 drop_kind;
+            /* 03 */ s16 action;
+            /* 04 */ u16 destination_counter;
+            /* 05 */ s16 destination_force;
+            /* 06 */ s16 damage_pushback;
+            /* 07 */ s16 damage_direction;
+            /* 08 */ u16 turning_counter;
+            /* 09 */ s16 turning_amount;
+            /* 0A */ s16 step_sfx_counter;
+            /* 0B */ s16 damage_sfx_counter;
         } kiwi;
 
         // s16 unk[32];
@@ -143,8 +139,8 @@ struct Entity {
 
     struct {
         s16 loop;
-        u16 *pc;
-        u16 **labels;
+        s16 *pc;
+        s16 **labels;
     } vm;
 
     u8 unused[4];
@@ -207,7 +203,6 @@ void entity_insert_after(LinkedList *list, LinkedList *node); // 800D04B0
 void entity_detach_from_list(LinkedList *node);
 Entity *entity_create(void); // 800D04E8
 void entity_destroy(Entity *e);
-void func_800D058C(void);
 // func_800D05F0
 int func_800D0764(int id);
 // func_800D0784
@@ -234,5 +229,16 @@ int func_800D1494(void);
 //
 //
 
+#define entity_deal_damage func_800D05F0
+#define entity_deal_damage func_800D05F0
+#define entity_get_damage func_800D0764
+#define entity_get_damage_flags func_800D0784
+#define entity_get_damage_direction func_800D07A4
+#define entity_clear_damage func_800D07C4
+#define entity_set_damage_mask func_800D0808
+#define entity_get_damage_mask func_800D0824
+
 // Probably don't belong here:
 Entity *func_800DBBE4();
+
+#define get_player func_800DBBE4

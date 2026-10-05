@@ -31,7 +31,7 @@ void func_800F8CA4(void)
 {
     for (int i = 0; i < 48; i++) {
         D_80131688[i].unk1 = 0;
-        D_80131688[i].unk0 = 0;
+        D_80131688[i].id = 0;
     }
     D_801030CC = 48;
 }
@@ -64,7 +64,7 @@ void func_800F8D58(Entity *arr, Component *comp);
 void func_800F8DD8(void)
 {
     func_800D8720(0x80);
-    func_800F8D58(D_80131688, &D_80131688[0].comp1);
+    func_800F8D58(D_80131688, &D_80131688[0].phyisics);
     func_800D8720(0);
 }
 
@@ -73,7 +73,7 @@ void func_800F8DD8(void)
 void func_800F8E10(void)
 {
     func_800D8720(0x80);
-    func_800F8D58(D_80131688, &D_80131688[0].render_comp);
+    func_800F8D58(D_80131688, &D_80131688[0].render);
     func_800D8720(0);
 }
 
@@ -82,7 +82,7 @@ void func_800F8E10(void)
 void func_800F8E38(void)
 {
     func_800D8720(0x80);
-    func_800F8D58(D_80131688, &D_80131688[0].comp3);
+    func_800F8D58(D_80131688, &D_80131688[0].interaction);
     func_800D8720(0);
 }
 
@@ -100,20 +100,20 @@ void func_800F8E78(void)
     D_801030DC = 0;
     D_801030F4 = -1;
     D_801030EC = -1;
-    D_801351C8.comp1.func = func_800F8E70;
-    D_801351C8.render_comp.func = func_800F8E70;
+    D_801351C8.phyisics.func = func_800F8E70;
+    D_801351C8.render.func = func_800F8E70;
 }
 
 // INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8EC4);
 void func_800F8EC4(void)
 {
-    D_801351C8.comp1.func(&D_801351C8, &D_801351C8.comp1);
+    D_801351C8.phyisics.func(&D_801351C8, &D_801351C8.phyisics);
 }
 
 // INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F8EF4);
 void func_800F8EF4(void)
 {
-    D_801351C8.render_comp.func(&D_801351C8, &D_801351C8.render_comp);
+    D_801351C8.render.func(&D_801351C8, &D_801351C8.render);
 }
 
 // Three utility functinos used by multiple weapons.
@@ -293,12 +293,12 @@ void func_800FCF30(Entity *, Component *);
 void func_800FD064(Entity *e)
 {
     D_801030D4 = -1;
-    e->comp1.func = func_800FCF30;
-    e->comp1.disabled = 0;
-    e->comp1.state = 0;
-    e->render_comp.func = func_800F8E70;
-    e->render_comp.disabled = 0;
-    e->render_comp.state = 0;
+    e->phyisics.func = func_800FCF30;
+    e->phyisics.disabled = 0;
+    e->phyisics.state = 0;
+    e->render.func = func_800F8E70;
+    e->render.disabled = 0;
+    e->render.state = 0;
     e->sub.twister.unk0 = 0;
     e->sub.twister.unk1 = 0;
 }

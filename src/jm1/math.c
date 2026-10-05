@@ -117,8 +117,9 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD550);
 // end of math.c
 
 // model anim stuff
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD684);
-void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims)
+
+// model_set_anim
+void func_800CD684(Model *model, const ModelKeyframe *initial, const ModelKeyframe *const *anims)
 {
     model->current_time = initial->length;
     model->length = initial->length;
@@ -128,13 +129,14 @@ void func_800CD684(Model *model, ModelKeyframe *initial, ModelKeyframe **anims)
     model->frame_b = initial->frame;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6B0);
-void func_800CD6B0(Model *model, ModelKeyframe *next, ModelKeyframe **anims)
+// model_set_next_anim
+void func_800CD6B0(Model *model, const ModelKeyframe *next, const ModelKeyframe *const *anims)
 {
     model->next = next;
     model->anims = anims;
 }
 
+// model_step_anim
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6BC);
 
 // math_init?

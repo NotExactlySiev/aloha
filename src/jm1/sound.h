@@ -33,3 +33,7 @@ void func_800CEADC(int id, int repeat);
 int func_800CEB2C(void);
 int func_800CEB6C(int z, int x);
 int func_800CEC30(int val, int x, int y, int z);
+
+#define sfx_play func_800CE304
+#define sound_calculate_pan func_800CEB6C
+#define sound_calculate_volume func_800CEC30

@@ -10,45 +10,59 @@ extern int D_801026B8;
 extern int D_801026BC;
 
 MeshMetadata D_80103164[8]; // level 1 mesh metadata
-// some array here
 MeshMetadata D_8010350C[3]; // level 2 mesh metadata
 MeshMetadata D_8010353C[1]; // level 3 mesh metadata
+MeshMetadata D_801048CC[2];
 
-void func_800B1F8C(void);
 void func_800B1D78(Entity *this, Spirit *params);
+void func_800B1F8C(void);
 
-void e_kiwi_class_ctor(void);
 void e_kiwi_ctor(Entity *this, Spirit *params);
+void e_kiwi_class_ctor(void);
 
-void func_800B4D20(void);
 void func_800B4B14(Entity *this, Spirit *params);
+void func_800B4D20(void);
 
-void func_800B6614(void);
 void func_800B6430(Entity *this, Spirit *params);
+void func_800B6614(void);
 
-void func_800B6C40(void);
 void func_800B6820(Entity *this, Spirit *params);
+void func_800B6C40(void);
 
-void func_800B7D54(void);
 void func_800B7B58(Entity *this, Spirit *params);
+void func_800B7D54(void);
 
-void func_800C5DD8(void);
-void func_800C5CD0(Entity *this, Spirit *params);
-
-void func_800C6124(void);
-void func_800C602C(Entity *this, Spirit *params);
-
-void func_800C6538(void);
-void func_800C643C(Entity *this, Spirit *params);
-
-void func_800B9280(void);
 void func_800B9068(Entity *this, Spirit *params);
+void func_800B9280(void);
 
-void func_800BBFD8(void);
 void func_800BBD9C(Entity *this, Spirit *params);
+void func_800BBFD8(void);
 
-void func_800C5044(void);
+void func_800BD710(Entity *this, Spirit *params);
+void func_800BD924(void);
+
+void func_800BDD44(void);
+
+void func_800BE7AC(Entity *this, Spirit *params);
+void func_800BE8F8(void);
+
 void func_800C4DE8(Entity *this, Spirit *params);
+void func_800C5044(void);
+
+void func_800C5368(Entity *this, Spirit *params);
+void func_800C55F8(void);
+
+void func_800C58D4(Entity *this, Spirit *params);
+void func_800C5B14(void);
+
+void func_800C5CD0(Entity *this, Spirit *params);
+void func_800C5DD8(void);
+
+void func_800C602C(Entity *this, Spirit *params);
+void func_800C6124(void);
+
+void func_800C643C(Entity *this, Spirit *params);
+void func_800C6538(void);
 
 EntityResources D_800FE7AC = {
     .unk0 = "frog_obj.clt",
@@ -119,11 +133,41 @@ EntityClass D_800FF2F8 = {
     func_800B7B58,
 };
 
-extern EntityClass D_800FFCEC;
-extern EntityClass D_80100544;
-extern EntityClass D_800FFC50;
-extern EntityClass D_800FFD3C;
-extern EntityClass D_8010048C;
+EntityClass D_800FFC50 = (EntityClass) {
+    .unk0 = &D_8010350C[0],
+
+    // 800FFBE4
+    .unk1 = &(EntityResources) {
+        .unk0 = "mosu_obj.clt",
+        .unk1 = "mosu_tp0.clt",
+        .unk2 = "mosu_obj.vo2",
+        .unk10 = "mosu_tp0.xs3",
+    },
+    .class_ctor = func_800BD924,
+    .ctor = func_800BD710,
+};
+
+EntityClass D_800FFCEC = {
+    .unk0 = &D_8010350C[1],
+
+    // 800FFC80
+    .unk1 = &(EntityResources) {
+        .unk0 = "baln_obj.clt",
+        .unk2 = "baln_obj.vo2",
+    },
+    .class_ctor = func_800BDD44,
+};
+
+// e_jyou
+EntityClass D_80100544 = {
+    .unk0 = &D_801048CC[1],
+    .unk1 = &(EntityResources) {
+        .unk0 = "jyou_obj.clt",
+        .unk2 = "jyou_obj.vo2",
+    },
+    .class_ctor = func_800C5B14,
+    .ctor = func_800C58D4,
+};
 
 EntityClass *(*D_800FD454[3])[] = {
     &(EntityClass *[]) {
@@ -213,19 +257,34 @@ EntityClass *(*D_800FD454[3])[] = {
         },
 
         &D_800FFC50,
-        &D_800FFD3C,
-        &D_8010048C,
+
+        // 800FFD3C
+        &(EntityClass) {
+            .class_ctor = func_800BE8F8,
+            .ctor = func_800BE7AC,
+        },
+
+        // 8010048C
+        &(EntityClass) {
+            .unk0 = &D_801048CC[0],
+            .unk1 = &(EntityResources) {
+                .unk0 = "yuge_obj.clt",
+                .unk2 = "yuge_obj.vo2",
+            },
+            .class_ctor = func_800C55F8,
+            .ctor = func_800C5368,
+        },
+
         (void *)-1 },
 
-    &(EntityClass *[]) {
-        //&D_80100334,
-        &(EntityClass) {
-            &D_8010353C[0],
-            &D_801002C8,
-            func_800C5044,
-            func_800C4DE8,
-        },
-        (void *)-1 },
+    &(EntityClass *[]) { //&D_80100334,
+                         &(EntityClass) {
+                             &D_8010353C[0],
+                             &D_801002C8,
+                             func_800C5044,
+                             func_800C4DE8,
+                         },
+                         (void *)-1 },
 };
 
 int func_800B0A68(void)
@@ -759,6 +818,8 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C55D8);
 
 // e_yuge_class_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C55F8);
+
+// jyou.c
 
 // e_jyou_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5628);

@@ -32,3 +32,5 @@ int func_800D9DD4(Entity *e);
 int func_800D9E40(Entity *e);
 // func_800D9EAC
 int func_800D9F2C(Entity *e);
+
+#define prepare_entity_collision func_800D7AC0

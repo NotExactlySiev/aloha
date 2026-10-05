@@ -1,52 +1,62 @@
 #include "../renderer.h"
 #include "world1.h"
 
+typedef struct {
+    s16 max_y;
+    u16 min_y;
+    s16 speed;
+    s8 unk2;
+    s8 unk3;
+} BlockSpirit;
+
 // block update
-void func_800B661C(Entity *this)
+void func_800B661C(Entity *e, Component *c)
 {
-    s32 old_y = this->pos_y;
-    s32 new_y = old_y + this->vel_y;
-    this->angle_y += 64; // rotation of the blades
+    (void)c;
+    s32 old_y = e->pos_y;
+    s32 new_y = old_y + e->vel_y;
+    e->angle_y += 64; // rotation of the blades
 
-    if ((this->sub.block.max_y << 12) < new_y) {
-        new_y = this->sub.block.max_y << 12;
-        this->vel_y *= -1;
+    if ((e->sub.block.max_y << 12) < new_y) {
+        new_y = e->sub.block.max_y << 12;
+        e->vel_y *= -1;
     }
 
-    if ((this->sub.block.min_y << 12) > new_y) {
-        new_y = this->sub.block.min_y << 12;
-        this->vel_y *= -1;
+    if ((e->sub.block.min_y << 12) > new_y) {
+        new_y = e->sub.block.min_y << 12;
+        e->vel_y *= -1;
     }
 
-    this->pos_y = new_y;
-    this->carry_y = (this->pos_y >> 12) - (old_y >> 12);
+    e->pos_y = new_y;
+    e->carry_y = (e->pos_y >> 12) - (old_y >> 12);
 }
 
 // block custom
-void func_800B66A0(Entity *this, Component *comp)
+void func_800B66A0(Entity *e, Component *c)
 {
-    if (comp->state == 0) {
-        int rc = is_outside_simulation_range(this->pos_x >> 12, this->pos_y >> 12, this->pos_z >> 12);
+    if (c->state == 0) {
+        int rc = is_outside_simulation_range(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12);
         if (rc == 0)
             return; // in range. keep vibin
-        comp->state = 1;
+        c->state = 1;
     }
     // oh no, out of range
 
-    if (comp->state == 1) {
-        this->spirit->alive = -1;
-        entity_destroy(this);
+    if (c->state == 1) {
+        e->spirit->alive = -1;
+        entity_destroy(e);
         return;
     }
 }
 
 // block render
-void func_800B6744(Entity *this)
+void func_800B6744(Entity *e, Component *c)
 {
+    (void)c;
     SVECTOR pos = {
-        this->pos_x >> 12,
-        (this->pos_y >> 12) - 0xC0,
-        this->pos_z >> 12,
+        e->pos_x >> 12,
+        (e->pos_y >> 12) - 0xC0,
+        e->pos_z >> 12,
     };
 
     SVECTOR rot = {
@@ -55,8 +65,8 @@ void func_800B6744(Entity *this)
 
     func_800E5E60(&pos, &rot, D_80103164[4].mesh_id + 2);
 
-    pos.vy = this->pos_y >> 12;
-    rot.vy = this->angle_y;
+    pos.vy = e->pos_y >> 12;
+    rot.vy = e->angle_y;
 
     func_800E5E60(&pos, &rot, D_80103164[4].mesh_id + 1);
 }
@@ -64,31 +74,32 @@ void func_800B6744(Entity *this)
 // e_block_ctor
 void func_800B6820(Entity *e, Spirit *spirit)
 {
+    BlockSpirit *s = (BlockSpirit *)spirit->data;
     LinkedList *list = get_list2_head();
     entity_insert_after(list, &e->link);
-    e->unk2 = 0;
+    e->active = 0;
     e->unk5 = 0;
     e->spirit = spirit;
-    e->sub.block.max_y = spirit->unk4; // spirit also has custom fields
-    e->sub.block.min_y = spirit->unk0;
-    e->vel_x = e->vel_y = -ONE * spirit->unk1;
+    e->sub.block.max_y = s->max_y; // spirit also has custom fields
+    e->sub.block.min_y = s->min_y;
+    e->vel_x = e->vel_y = -ONE * s->speed;
     e->pos_x = ONE * spirit->x;
     e->pos_z = ONE * spirit->z;
-    e->pos_y = ONE * spirit->unk4; // starting height
+    e->pos_y = ONE * s->max_y; // starting height
 
-    e->comp0.disabled = 1;
+    e->behavior.disabled = 1;
 
-    e->comp1.disabled = 0;
-    e->comp1.func = func_800B661C;
-    e->comp1.state = 0;
+    e->phyisics.disabled = 0;
+    e->phyisics.func = func_800B661C;
+    e->phyisics.state = 0;
 
-    e->comp3.disabled = 0;
-    e->comp3.func = func_800B66A0;
-    e->comp3.state = 0;
+    e->interaction.disabled = 0;
+    e->interaction.func = func_800B66A0;
+    e->interaction.state = 0;
 
-    e->render_comp.disabled = 0;
-    e->render_comp.func = func_800B6744;
-    e->render_comp.state = 0;
+    e->render.disabled = 0;
+    e->render.func = func_800B6744;
+    e->render.state = 0;
 
     e->angle_x = e->angle_y = e->angle_z = 0;
     e->angle_x = 0x90;
@@ -134,14 +145,14 @@ void func_800B6C40(void)
     // air.
     Entity *e = entity_create();
     entity_insert_after(get_list2_head(), e);
-    e->comp0.disabled = 1;
-    e->comp1.func = func_800B6948;
-    e->comp1.disabled = 0;
-    e->comp1.state = 0;
-    e->comp3.func = func_800B69A0;
-    e->comp3.disabled = 0;
-    e->comp3.state = 0;
-    e->render_comp.disabled = 1;
+    e->behavior.disabled = 1;
+    e->phyisics.func = func_800B6948;
+    e->phyisics.disabled = 0;
+    e->phyisics.state = 0;
+    e->interaction.func = func_800B69A0;
+    e->interaction.disabled = 0;
+    e->interaction.state = 0;
+    e->render.disabled = 1;
     D_8010287C = -1;
     D_80102884 = -1;
     D_8010288C = 0;

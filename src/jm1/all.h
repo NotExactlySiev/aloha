@@ -25,6 +25,8 @@ void func_800EB134(int v);
 void func_800EB16C(int points); // give_points
 // func_800EB23C
 
+#define give_points func_800EB16C
+
 // timer stuff
 
 // func_800EB354
@@ -45,3 +47,5 @@ void func_800EC408(s16 z, s16 x, u16 color); // radar_add
 // func_800EC4E4
 // func_800EC4F4
 void func_800EC5C8(void);
+
+#define radar_add_dot func_800EC408
