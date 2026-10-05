@@ -121,7 +121,6 @@ void e_kiwi_behavior(Entity *e, Component *c)
             [[fallthrough]];
         case 1: // Read Operand
             state = *e->vm.pc++;
-            // printf("%03d: OP %02x [%d]\n", e->vm.pc - kiwi_bytecode, state, e->vm.loop);
             break;
 
         case 2: // Wait
@@ -172,16 +171,11 @@ void e_kiwi_behavior(Entity *e, Component *c)
             break;
 
         case 11: // Kiwi: Set Action
-            // 0: stand
-            // 1: chase player
-            // 3: hop
-            // 4: take one step
             e->sub.kiwi.action = *e->vm.pc++;
-            // printf("Setting to %d\n", e->sub.kiwi.action);
             state = 1;
             break;
 
-        case 12: { // Kiwi: Unknown
+        case 12: { // Kiwi: Set Destination
             s16 arg = *e->vm.pc++;
             if (arg) {
                 e->sub.kiwi.destination_counter = (random_number() >> 2) + 0x20;
@@ -468,7 +462,7 @@ void e_kiwi_interaction(Entity *e, Component *c)
             }
 
             if (is_outside_simulation_range(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12)) {
-                state = 3; // can
+                state = 3;
                 break;
             }
 
