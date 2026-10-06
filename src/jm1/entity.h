@@ -24,7 +24,7 @@ struct Spirit {
 struct Component {
     u16 state;
     u16 disabled;
-    u16 unk0; // wait counter in the vm
+    u16 counter; // wait counter in the vm
     u16 unk1;
     void *unk2;
     void (*func)(Entity *, Component *); // this probably has a specific type
@@ -98,6 +98,8 @@ struct Entity {
     /* F8 */ Spirit *spirit;
 
     union {
+        u8 unk[48];
+
         struct {
             s16 max_y;
             s16 min_y;
@@ -119,23 +121,19 @@ struct Entity {
         } kiwi;
 
         struct {
-            /* 00 */ s8 unk0;
-            /* 01 */ s8 unk1;
+            /* 00 */ s16 unk0;
             /* 02 */ s16 unk2;
             /* 04 */ s16 unk4;
-            /* 06 */ u16 unk6;
+            /* 06 */ s16 drop_kind;
             /* 08 */ s16 action;
             /* 0A */ s16 destination_counter;
             /* 0C */ s16 destination_force;
-            /* 0E */ s16 unkE;
-            /* 10 */ s16 unk10;
+            /* 0E */ s16 damage_pushback;
+            /* 10 */ s16 damage_direction;
             /* 12 */ s16 unk12;
             /* 14 */ s16 unk14;
-            /* 16 */ s16 unk16;
+            /* 16 */ s16 damage_sfx_counter;
         } frog;
-
-        // s16 unk[32];
-        u8 unk[48];
 
         struct {
             s16 unk0;

@@ -13,6 +13,12 @@ enum {
     E_KIWI = 1,
 };
 
+#define SFX_DEATH_VOLUME 100
+
+enum {
+    SFX_ENEMY_DEATH = 0x2400,
+};
+
 extern MeshMetadata D_80103164[8];
 extern MeshMetadata D_8010350C[3];
 extern MeshMetadata D_8010353C[1];

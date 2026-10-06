@@ -1956,7 +1956,7 @@ void func_800DC4C4(void)
             // bouncing (off an enemy, or maybe something else)
             D_80102C6C = 0x300;
             D_80102724 = -32;
-            player_entity.phyisics.unk0 = 1;
+            player_entity.phyisics.counter = 1;
             player_entity.phyisics.state = 1;
             func_800CE304(0x500, 0x50, 0x3F);
         } else {
@@ -1972,16 +1972,16 @@ void func_800DC4C4(void)
             D_80102724 = 0; // don't think we need this here?
             D_80102C0C = 0;
             D_80102C14 = 0;
-            player_entity.phyisics.unk0 = 24;
+            player_entity.phyisics.counter = 24;
             player_entity.phyisics.state = 1;
             player_entity.vel_y = -D_80102710;
             player_entity.acc_y = D_80102718; // gravity? ddy
         }
 
     case 1: // jump (just)
-        if (D_80102C34 & D_80102738 == 0 || --player_entity.phyisics.unk0 == 0) {
+        if (D_80102C34 & D_80102738 == 0 || --player_entity.phyisics.counter == 0) {
             player_entity.phyisics.state = 2;
-            player_entity.acc_y = (player_entity.phyisics.unk0 + 2) * 0x300 + D_80102718;
+            player_entity.acc_y = (player_entity.phyisics.counter + 2) * 0x300 + D_80102718;
         }
     case 2: // jump
         player_entity.on_air = 0;
@@ -2000,19 +2000,19 @@ void func_800DC4C4(void)
         D_80102C1C = 0;
         D_80102724 = -16;
         D_80102C9C = 0;
-        player_entity.phyisics.unk0 = 24;
+        player_entity.phyisics.counter = 24;
         player_entity.phyisics.state = 3;
         player_entity.vel_y = -D_80102710;
         player_entity.acc_y = D_80102718;
     case 3: // air jump (just)
-        if (D_80102C34 & D_80102738 == 0 || --player_entity.phyisics.unk0 == 0) {
-            player_entity.acc_y = player_entity.phyisics.unk0 * 0x300 + D_80102718;
+        if (D_80102C34 & D_80102738 == 0 || --player_entity.phyisics.counter == 0) {
+            player_entity.acc_y = player_entity.phyisics.counter * 0x300 + D_80102718;
             player_entity.phyisics.state = 4;
-            player_entity.phyisics.unk0 = 0;
+            player_entity.phyisics.counter = 0;
         }
     case 4: // air jump
         player_entity.on_air = 0;
-        if (player_entity.phyisics.unk0 == 0 && func_800DCB50())
+        if (player_entity.phyisics.counter == 0 && func_800DCB50())
             goto make_3;
         if (player_entity.vel_y > 0) {
             D_80102724 = -32;

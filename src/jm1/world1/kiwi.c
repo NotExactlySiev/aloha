@@ -50,7 +50,6 @@ typedef struct {
 #define SFX_STEP_VOLUME 50
 #define SFX_DAMAGE_INTERVAL 48
 #define SFX_DAMAGE_VOLUME 100
-#define SFX_DEATH_VOLUME 100
 
 #define KIWI_SHADOW_OFFSET 2
 #define KIWI_MAX_FALL_SPEED (20 * ONE)
@@ -58,7 +57,6 @@ typedef struct {
 enum {
     SFX_KIWI_STEP = 0x0310,
     SFX_KIWI_DAMAGE = 0x0410,
-    SFX_ENEMY_DEATH = 0x2400,
 };
 
 enum {
@@ -122,10 +120,10 @@ void e_kiwi_behavior(Entity *e, Component *c)
 
         case 2: // Wait
             c->state = 3;
-            c->unk0 = *e->vm.pc++;
+            c->counter = *e->vm.pc++;
             [[fallthrough]];
         case 3:
-            if (c->unk0-- > 0) {
+            if (c->counter-- > 0) {
                 return;
             }
             state = 0;
@@ -338,11 +336,11 @@ void e_kiwi_physics(Entity *e, Component *c)
             model_set_anim(&e->model, animations[1], animations);
             e->sub.kiwi.action = 1;
             e->sub.kiwi.step_sfx_counter = 0;
-            c->unk0 = (random_number() >> 4) + 32; // [32, 47]
+            c->counter = (random_number() >> 4) + 32; // [32, 47]
             c->state = 3;
             [[fallthrough]];
         case 3:
-            if (c->unk0-- <= 0) {
+            if (c->counter-- <= 0) {
                 state = 0;
                 break;
             }
@@ -380,11 +378,11 @@ void e_kiwi_physics(Entity *e, Component *c)
                 sound_calculate_volume(SFX_STEP_VOLUME, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
                 sound_calculate_pan(e->pos_z >> 12, e->pos_x >> 12)
             );
-            c->unk0 = (random_number() >> 6) + 4; // [4, 7]
+            c->counter = (random_number() >> 6) + 4; // [4, 7]
             c->state = 7;
             [[fallthrough]];
         case 7:
-            if ((c->unk0-- << 16) <= 0) {
+            if ((c->counter-- << 16) <= 0) {
                 state = 0;
                 break;
             }
@@ -393,11 +391,11 @@ void e_kiwi_physics(Entity *e, Component *c)
         case 8:
             model_set_anim(&e->model, animations[7], animations);
             e->sub.kiwi.action = 3;
-            c->unk0 = 21;
+            c->counter = 21;
             c->state = 9;
             [[fallthrough]];
         case 9:
-            if (c->unk0-- <= 0) {
+            if (c->counter-- <= 0) {
                 state = 0;
                 break;
             }
@@ -407,11 +405,11 @@ void e_kiwi_physics(Entity *e, Component *c)
         case 10:
             model_set_anim(&e->model, animations[2], animations);
             e->sub.kiwi.action = 4;
-            c->unk0 = 4;
+            c->counter = 4;
             c->state = 11;
             [[fallthrough]];
         case 11:
-            if (c->unk0-- > 0) {
+            if (c->counter-- > 0) {
                 goto out;
             }
             e->vel_y = -ONE * ((random_number() >> 6) + 4);
@@ -519,13 +517,13 @@ void e_kiwi_interaction(Entity *e, Component *c)
             e->behavior.disabled = 1;
             e->phyisics.disabled = 1;
             e->render.disabled = 1;
-            c->unk0 = 8;
+            c->counter = 8;
             state = 2;
             c->state = state;
             break;
 
         case 2:
-            if (c->unk0-- > 0) {
+            if (c->counter-- > 0) {
                 return;
             }
             func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->max_y, e->sub.kiwi.drop_kind);
@@ -540,7 +538,7 @@ void e_kiwi_interaction(Entity *e, Component *c)
             e->pos_x = e->spirit->x << 12;
             e->pos_y = e->spirit->y << 12;
             e->pos_z = e->spirit->z << 12;
-            c->unk0 = e->sub.kiwi.a;
+            c->counter = e->sub.kiwi.a;
             state = 4;
             c->state = state;
             break;
@@ -563,7 +561,6 @@ void e_kiwi_interaction(Entity *e, Component *c)
             return;
         }
     }
-    return;
 }
 
 static int calculate_frame_mesh(Entity *e, int arg)
