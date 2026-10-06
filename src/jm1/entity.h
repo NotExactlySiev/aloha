@@ -123,7 +123,7 @@ struct Entity {
         struct {
             /* 00 */ s16 unk0;
             /* 02 */ s16 unk2;
-            /* 04 */ s16 unk4;
+            /* 04 */ s16 damage;
             /* 06 */ s16 drop_kind;
             /* 08 */ s16 action;
             /* 0A */ s16 destination_counter;
@@ -217,13 +217,13 @@ void entity_insert_after(LinkedList *list, LinkedList *node); // 800D04B0
 void entity_detach_from_list(LinkedList *node);
 Entity *entity_create(void); // 800D04E8
 void entity_destroy(Entity *e);
-// func_800D05F0
+void func_800D05F0(int id, u32 flags, short direction, int amount);
 int func_800D0764(int id);
-// func_800D0784
+u32 func_800D0784(int id);
 int func_800D07A4(int id);
 void func_800D07C4(int id);
 void func_800D0808(int id, u8 val);
-// func_800D0824
+u8 func_800D0824(int id);
 void func_800D0840(EntityClass **classes);
 // ? func_800D08E8
 // func_800D09EC
@@ -243,7 +243,6 @@ int func_800D1494(void);
 //
 //
 
-#define entity_deal_damage func_800D05F0
 #define entity_deal_damage func_800D05F0
 #define entity_get_damage func_800D0764
 #define entity_get_damage_flags func_800D0784

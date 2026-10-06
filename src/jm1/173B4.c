@@ -12,6 +12,7 @@
 
 #include "renderer.h"
 #include "shared.h"
+#include "sound.h"
 
 int func_800DBC24(void);
 int is_outside_simulation_range(int x, int y, int z);
@@ -1096,6 +1097,31 @@ typedef struct {
 /* US:80102B14 JP: */ int D_80102B14 = 0;
 /* US:80102B1C JP: */ int D_80102B1C = 0;
 /* US:80102B24 JP: */ int D_80102B24 = 0;
+/* US:80102B2C JP: */ int D_80102B2C = 0;
+/* US:80102B34 JP: */ int D_80102B34 = 0;
+/* US:80102B3C JP: */ int D_80102B3C = 0;
+/* US:80102B44 JP: */ int D_80102B44 = 0;
+/* US:80102B4C JP: */ int D_80102B4C = 0;
+/* US:80102B54 JP: */ int D_80102B54 = 0;
+/* US:80102B5C JP: */ int D_80102B5C = 0;
+/* US:80102B64 JP: */ int D_80102B64 = 0;
+/* US:80102B6C JP: */ int D_80102B6C = 0;
+/* US:80102B74 JP: */ int D_80102B74 = 0;
+/* US:80102B7C JP: */ int D_80102B7C = 0;
+/* US:80102B84 JP: */ int D_80102B84 = 0;
+/* US:80102B8C JP: */ int D_80102B8C = 0;
+/* US:80102B94 JP: */ int D_80102B94 = 0;
+/* US:80102B9C JP: */ int D_80102B9C = 0;
+/* US:80102BA4 JP: */ int D_80102BA4 = 0;
+/* US:80102BAC JP: */ int D_80102BAC = 0;
+/* US:80102BB4 JP: */ int D_80102BB4 = 0;
+/* US:80102BBC JP: */ int D_80102BBC = 0;
+/* US:80102BC4 JP: */ int D_80102BC4 = 0;
+/* US:80102BCC JP: */ int D_80102BCC = 0;
+/* US:80102BD4 JP: */ int D_80102BD4 = 0;
+/* US:80102BDC JP: */ int D_80102BDC = 0;
+/* US:80102BE4 JP: */ int D_80102BE4 = 0;
+/* US:80102BEC JP: */ int D_80102BEC = 0;
 
 GroundShape *D_801210E0[0x180]; // Section 3 entries
 
@@ -1452,10 +1478,9 @@ int D_8013CC30; // simulation_distance_down
 int D_8013CC38; // simulation_distance_horizontal
 
 int D_80141460; // render_distance_horizontal
+int D_80142D40;
 int D_80142D48; // render_distance_vertical
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA46C);
-// set_render_distance_horizontal
 // US: 800DA46C
 void set_render_distance_horizontal(uint v)
 {
@@ -1464,8 +1489,7 @@ void set_render_distance_horizontal(uint v)
     D_80102AE4 = D_80102ADC * 2 + 1; // side length in blocks
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DA498);
-// set_render_distance_vertical
+// US: 800DA498
 void set_render_distance_vertical(uint v)
 {
     D_80142D48 = v;
@@ -1558,14 +1582,14 @@ void _func_800DA4E8(void)
     }*/
 }
 
-short D_80102700 = 0;
+short D_80102700 = 0; // global_collision_mask
 int D_80102704 = 0;
-int D_80102708 = 0x00034BBF;
+int D_80102708 = 216000 - 1;
 int D_8010270C = 0x00000012;
 int D_80102710 = 28 * 4096; // jump force
 int D_80102714 = 28 * 4096;
 int D_80102718 = 0x800; // jump timer?
-int D_8010271C = 0x800;
+int D_8010271C = 0x800; // player_gravity
 int D_80102720 = 0x20000;
 int D_80102724 = -32; // auto lookdown dangle
 int D_80102728 = 16;
@@ -1715,9 +1739,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB338);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB348);
 
-int D_80102B54 = 0;
-int D_80102B5C = 0;
-
 int func_800E3CD8(void);
 
 // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB394);
@@ -1796,39 +1817,33 @@ void func_800DBC14(int v)
     D_80102BF4 = v;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC24);
 // get_winning_animation_is_playing
 int func_800DBC24(void)
 {
     return D_80102C8C;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC34);
 // set_winning_animation_is_playing
 void func_800DBC34(int v)
 {
     D_80102C8C = v;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC44);
 int func_800DBC44(void)
 {
     return D_80102C7C;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC54);
 void func_800DBC54(void)
-{
-    D_80102C94 = 0;
-}
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC68);
-void func_800DBC68(void)
 {
     D_80102C94 = 1;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBC78);
+void func_800DBC68(void)
+{
+    D_80102C94 = 0;
+}
+
 int func_800DBC78(void)
 {
     return D_80102C94;
@@ -1852,15 +1867,14 @@ int func_800DBD1C(void)
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBD2C);
 
-// player_entity_init
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
-
-void _func_800DBDB0(void)
+// e_player_ctor
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
+void func_800DBDB0(void)
 {
     player_entity.id = 0;
-    //
-    //
-    //
+    D_80102C1C = 0;
+    D_80102C24 = 0;
+    D_80102C04 = 0;
     player_entity.range_y = 0xD0;
     player_entity.range_z = 0x40;
     player_entity.range_x = 0x40;
@@ -1877,51 +1891,201 @@ void _func_800DBDB0(void)
     player_entity.phyisics.state = 0;
     player_entity.interaction.state = 0;
     player_entity.acc_z = 0;
-    player_entity.acc_y = 0;
     player_entity.acc_x = 0;
-    //
-    player_entity.unk26 = 0;
+    player_entity.acc_y = D_8010271C;
+    prepare_entity_collision(&player_entity);
+    player_entity.unk26 = 3;
     player_entity.uh2 = 0;
     player_entity.uh1 = 0;
     player_entity.uh0 = 0;
-    //
-    //
-    //
-    //
-    //
+    D_80102724 = -32;
+    D_80102C3C = 0;
+    D_80102C4C = 0;
+    D_80142D40 = 0;
+    D_80102C5C = 0;
     player_entity.on_air = ((player_entity.pos_y >> 12) < player_entity.max_y) - 1;
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
+    entity_clear_damage(player_entity.id);
+    D_80102C64 = 0;
+    D_80102C6C = 0;
+    D_80102C74 = 0;
+    D_80102C7C = 0;
+    D_80102BFC = player_entity.max_y;
+    func_800E543C(player_entity.pos_x >> 12, player_entity.pos_y >> 12, player_entity.pos_z >> 12);
+    func_800E5458(-player_entity.angle_y, -player_entity.angle_x, 0);
+    func_800D0C08(player_entity.pos_x, player_entity.pos_y, player_entity.pos_z);
+    func_800DBC88(0);
+    func_800DBC34(0);
+    func_800DBC68();
+    D_80102BD4 = -1;
+    D_80102BDC = 0;
+    D_80102BE4 = 0;
+    D_80102BEC = 0;
+    D_80102C9C = 0;
+    D_80102744 = 0;
 }
 
 // read raw input and process it
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC00C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
+extern short D_80101B04[];
 
-void func_800E543C(s16 x, s16 y, s16 z);
-void func_800E5458(s16 x, s16 y, s16 z);
+// extern short D_80101B14[][3];
+
+// e_player_interaction
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
+void func_800DC0CC(void)
+{
+    Entity *e = &player_entity;
+    Component *c = &e->interaction;
+
+    int damage;
+    int state = c->state;
+    while (1) {
+        switch (state) {
+        case 0:
+            c->state = 0;
+            if (e->health <= 0) {
+                state = 3;
+                if (D_80102C84) {
+                    break;
+                }
+            }
+
+            if (e->pos_y >> 12 > 0x400 && D_80102C84) {
+                // Fall out of the world.
+                func_800CE304(0x0C00, 100, 0x3f); // AAAAAHH
+                func_800EA854();
+                D_80102C7C = -1;
+                func_800D6804(); // Third person robbit entity
+                state = 4;
+                break;
+            }
+
+            if (func_800EDDAC()) {
+                goto out;
+            }
+
+            if (!func_800DBC98()) {
+                goto out;
+            }
+
+            if (func_800D9F2C(e)) {
+                goto out;
+            }
+
+            if (D_80102C94) {
+                goto out;
+            }
+
+            // Are we being damaged by another entity?
+            damage = entity_get_damage(e->id);
+            if (damage > 0) {
+                state = 1;
+                break;
+            }
+
+            // Are we being damaged by the level geometry?
+            damage = func_800D9EAC(e);
+            if (damage > 0) {
+                state = 1;
+                break;
+            }
+            goto out;
+
+        case 1: // Deal damage
+            if (D_80102C9C) {
+                damage *= 2;
+            }
+
+#ifdef EXTRA_DEBUG_LOGS
+            printf("Player received %d damage\n", damage);
+#endif
+
+            func_800DB87C();
+            func_800CE304(0x0D00, 0x78, 0x3f);
+            if (!func_800DF1D4()) {
+                e->health -= damage;
+            }
+
+            if (e->health < 0) {
+                e->health = 0;
+            } else if (e->health > func_800EBE5C()) {
+                e->health = func_800EBE5C();
+            }
+
+            if (e->health < 1) {
+                state = 3;
+                break;
+            }
+
+            if (e->health <= 0x41 && (e->health + damage) > 0x41) {
+                func_800EA868(0x4200);
+            } else if (entity_get_damage_flags(e->id) & 0x10) {
+                func_800EA868(0x5600);
+            } else if (damage > 20) {
+                func_800EA868(0x4600);
+            }
+
+            func_800E1710();
+            func_800E16DC(&D_80101B04[0]);
+            func_800E1894();
+            func_800E1838(&D_80101B04[8]);
+            func_800CE304(0x3000, 0x50, 0x3f);
+            func_800F3D94(12);
+            func_800ED5D4();
+            c->counter = 32;
+            c->state = state = 2;
+            break;
+
+        case 2:
+            if (c->counter-- > 0) {
+                goto out;
+            }
+            state = 0;
+            break;
+
+        case 3:
+            func_800EA868(0x4800);
+            func_800EA854();
+            func_800E1710();
+            func_800E16DC(&D_80101B04[0]);
+            func_800E1894();
+            func_800E1838(&D_80101B04[16]);
+            func_800F3488();
+            func_800F3D94(-1);
+            D_80102C7C = 1;
+            state = 4;
+            break;
+
+        case 4:
+            c->state = 4;
+            goto out2;
+
+        default:
+            goto out2;
+        }
+    }
+
+out:
+    entity_clear_damage(e->id);
+out2:
+    if (e->health > 0 && e->health <= 65 && !func_800F8F24()) {
+        D_80102BD4 = func_800CE3A8(D_80102BD4);
+        if (D_80102BD4 < 0) {
+            func_800CE168(0x1000, 30, 0x3f, &D_80102BD4, 0);
+        }
+    } else {
+        func_800CE3F4(D_80102BD4);
+        D_80102BD4 = -1;
+    }
+}
 
 // handle player movement
 // main player movement state machine. has 4 main states:
 // grounded, jump, air jump, falling. but also code for transitioning into each
 // state and states that run briefly before the actual state
 // the control flow is fucked
+// e_player_physics
 void func_800DC4C4(void)
 {
     switch (player_entity.phyisics.state) {
@@ -2333,7 +2497,12 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1B4);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1C4);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1D4);
+// player_is_invincible
+// US: 800DF1D4
+int func_800DF1D4(void)
+{
+    return D_8010279C;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF1E4); // level_setup
 

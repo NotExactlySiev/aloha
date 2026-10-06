@@ -1148,6 +1148,3 @@ glabel D_80142D30
 
 glabel D_80142D38
 	.space 0x8
-
-glabel D_80142D40
-	.space 0x8

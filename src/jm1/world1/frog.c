@@ -151,7 +151,38 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B11B8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B124C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B12E4);
+// check_collision_with_player
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B12E4);
+int func_800B12E4(Entity *e)
+{
+    // Only if we're falling down.
+    if (e->vel_y <= 0) {
+        return 0;
+    }
+
+    Entity *player = get_player();
+    int dist_x = player->pos_x - e->pos_x;
+    if (dist_x < 0)
+        dist_x = -dist_x;
+
+    int dist_z = player->pos_z - e->pos_z;
+    if (dist_z < 0)
+        dist_z = -dist_z;
+
+    if ((dist_x >> 12) >= e->range_x)
+        return 0;
+
+    if ((dist_z >> 12) >= e->range_z)
+        return 0;
+
+    int dy = (player->pos_y - e->pos_y) >> 12;
+    if (dy <= player->range_y && dy > 0) {
+        func_800D05F0(0, 16, -1, e->sub.frog.damage);
+        return -1;
+    }
+
+    return 0;
+}
 
 // e_frog_physics
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B13BC);
@@ -301,9 +332,7 @@ static int func_800B1B28(Entity *e, int arg)
     return func_800E6684(frames, factors, 2);
 }
 
-// extern s32 D_80103164;
-// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800B1BF4);
-//  e_frog_render (TODO: shadow)
+// e_frog_render
 void func_800B1BF4(Entity *e, Component *c)
 {
     (void)c;
@@ -316,7 +345,7 @@ void func_800B1BF4(Entity *e, Component *c)
     rot.vy = e->angle_y;
     rot.vx = -e->angle_x;
     rot.vz = e->angle_z;
-    if (func_800E5DD8(&pos, e->model.frame_a + D_80103164[0].mesh_id) > -1) {
+    if (func_800E5DD8(&pos, e->model.frame_a + D_80103164[E_FROG].mesh_id) > -1) {
         u32 meshid = func_800B1B28(e, 0);
         if (e->unk5 != 0) {
             meshid |= 0x8000; // damage blinkW
@@ -325,7 +354,7 @@ void func_800B1BF4(Entity *e, Component *c)
     }
     // and the shadow
     pos.vy = e->max_y + 2;
-    if (cam->vy < pos.vy && func_800E5DD8(&pos, e->model.frame_a + D_80103164[0].mesh_id) > -1) {
+    if (cam->vy < pos.vy && func_800E5DD8(&pos, e->model.frame_a + D_80103164[E_FROG].mesh_id) > -1) {
         u32 meshid = func_800B1B28(e, 0);
         func_800E5B88(0, 0, 0);
         func_800E5E60(&pos, &rot, meshid | 0x4000);
@@ -339,7 +368,7 @@ void func_800B1BF4(Entity *e, Component *c)
 typedef struct {
     s16 health;
     u16 points;
-    s16 unk4;
+    s16 damage;
     s8 drop_kind;
     u8 personality;
 } FrogSpirit;
@@ -409,7 +438,7 @@ void func_800B1D78(Entity *e, Spirit *spirit)
 
     e->sub.frog.unk0 = 0;
     e->sub.frog.unk2 = e->health;
-    e->sub.frog.unk4 = s->unk4;
+    e->sub.frog.damage = s->damage;
     e->sub.frog.drop_kind = s->drop_kind;
     prepare_entity_collision(e);
     e->unk26 = 1;

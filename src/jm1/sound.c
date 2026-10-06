@@ -68,6 +68,7 @@ void func_800CE304(short a, int vol, short pan)
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CE324);
 
 // sfx_is_valid
+// Or perhaps sfx_validate_handle is a better name
 int func_800CE3A8(int handle)
 {
     if (handle < 0)
