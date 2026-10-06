@@ -2,6 +2,8 @@
 
 #include "entity.h"
 
+#define ENEMY_GRAVITY (ONE / 2)
+
 void func_800D7A64(void); // collision_init?
 void func_800D7AC0(Entity *e); // collision
 // func_800D7B3C

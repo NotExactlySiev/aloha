@@ -52,7 +52,6 @@ typedef struct {
 #define SFX_DAMAGE_VOLUME 100
 #define SFX_DEATH_VOLUME 100
 
-#define KIWI_GRAVITY (ONE / 2)
 #define KIWI_SHADOW_OFFSET 2
 #define KIWI_MAX_FALL_SPEED (20 * ONE)
 
@@ -669,7 +668,7 @@ void e_kiwi_ctor(Entity *e, Spirit *spirit)
     Entity *player = get_player();
     (void)player;
 
-    e->angle_y = 0;
+    e->angle_y = random_number();
     e->angle_z = 0;
     e->angle_x = 0;
     e->vel_z = 0;
@@ -677,7 +676,7 @@ void e_kiwi_ctor(Entity *e, Spirit *spirit)
     e->vel_x = 0;
     e->acc_z = 0;
     e->acc_x = 0;
-    e->acc_y = KIWI_GRAVITY;
+    e->acc_y = ENEMY_GRAVITY;
     e->forward_acceleration = 0;
     e->forward_speed = 0;
     e->unk21 = 0;

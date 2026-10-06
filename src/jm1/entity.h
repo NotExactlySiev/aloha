@@ -48,7 +48,7 @@ struct Entity {
     /* 38 */ Component interaction;
     /* 48 */ Model model;
     /* 58 */ u16 id; // id
-    /* 5A */ u8 unk1;
+    /* 5A */ u8 unk1; // exists?
     /* 5B */ u8 active;
     /* 5C */ s16 health; // should be signed
     /* 5E */ u16 unk3;
@@ -104,19 +104,35 @@ struct Entity {
         } block;
 
         struct {
-            /* 00 */ s16 a;
-            /* 01 */ s16 b;
-            /* 02 */ s16 drop_kind;
-            /* 03 */ s16 action;
-            /* 04 */ u16 destination_counter;
-            /* 05 */ s16 destination_force;
-            /* 06 */ s16 damage_pushback;
-            /* 07 */ s16 damage_direction;
-            /* 08 */ u16 turning_counter;
-            /* 09 */ s16 turning_amount;
-            /* 0A */ s16 step_sfx_counter;
-            /* 0B */ s16 damage_sfx_counter;
+            s16 a;
+            s16 b;
+            s16 drop_kind;
+            s16 action;
+            u16 destination_counter;
+            s16 destination_force;
+            s16 damage_pushback;
+            s16 damage_direction;
+            u16 turning_counter;
+            s16 turning_amount;
+            s16 step_sfx_counter;
+            s16 damage_sfx_counter;
         } kiwi;
+
+        struct {
+            /* 00 */ s8 unk0;
+            /* 01 */ s8 unk1;
+            /* 02 */ s16 unk2;
+            /* 04 */ s16 unk4;
+            /* 06 */ u16 unk6;
+            /* 08 */ s16 action;
+            /* 0A */ s16 destination_counter;
+            /* 0C */ s16 destination_force;
+            /* 0E */ s16 unkE;
+            /* 10 */ s16 unk10;
+            /* 12 */ s16 unk12;
+            /* 14 */ s16 unk14;
+            /* 16 */ s16 unk16;
+        } frog;
 
         // s16 unk[32];
         u8 unk[48];
