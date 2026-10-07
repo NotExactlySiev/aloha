@@ -217,7 +217,7 @@ void func_800B1788(Entity *e, Component *c)
                 e->sub.frog.damage_direction = entity_get_damage_direction(e->id);
                 if (e->sub.frog.damage_pushback == 0) {
                     e->sub.frog.damage_pushback = 0x30;
-                    if (e->on_air) {
+                    if (e->on_ground) {
                         e->vel_y = -8 * ONE;
                     }
                 }
@@ -273,7 +273,7 @@ void func_800B1788(Entity *e, Component *c)
             if (c->counter-- > 0) {
                 return;
             }
-            func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->max_y, e->sub.frog.drop_kind);
+            func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->ground_y, e->sub.frog.drop_kind);
             state = 3;
             break;
 
@@ -353,7 +353,7 @@ void func_800B1BF4(Entity *e, Component *c)
         func_800E5E60(&pos, &rot, meshid);
     }
     // and the shadow
-    pos.vy = e->max_y + 2;
+    pos.vy = e->ground_y + 2;
     if (cam->vy < pos.vy && func_800E5DD8(&pos, e->model.frame_a + D_80103164[E_FROG].mesh_id) > -1) {
         u32 meshid = func_800B1B28(e, 0);
         func_800E5B88(0, 0, 0);
@@ -431,10 +431,10 @@ void func_800B1D78(Entity *e, Spirit *spirit)
     e->range_z = 0xcc;
     e->range_x = 0xcc;
     e->range_y = 0x90;
-    e->on_air = 0;
-    e->uh2 = 0;
-    e->uh1 = 0;
-    e->uh0 = 0;
+    e->on_ground = 0;
+    e->xz_col = 0;
+    e->yz_col = 0;
+    e->xy_col = 0;
 
     e->sub.frog.unk0 = 0;
     e->sub.frog.unk2 = e->health;

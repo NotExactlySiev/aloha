@@ -276,6 +276,16 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D08E8);
 // Add level objectives to the radar.
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D09EC);
 
+void func_800D2618(Entity *e, Spirit *spirit);
+void func_800D2A8C(Entity *e, Spirit *spirit);
+void func_800D3D28(Entity *e, Spirit *spirit);
+void func_800D45C4(Entity *e, Spirit *spirit);
+void func_800D2184(Entity *e, Spirit *spirit);
+
+void func_800D154C(void);
+void func_800D3818(void);
+void func_800D3F64(void);
+
 // entity call constructor
 // US: 800D0AA4
 void func_800D0AA4(Entity *e, Spirit *spirit)
@@ -370,6 +380,8 @@ void func_800D0C5C(void)
     entity_list_free.tail.next = 0;
 
     Entity *e = entity_create();
+    (void)e;
+
     func_800D0C08(0, 0, 0);
     func_800D0C28(0, 0, 0);
     func_800D058C();
@@ -540,7 +552,7 @@ void func_800D239C(Entity *e)
     func_800E5E60(&pos, &rot, D_8011EFA8.mesh_id + e->model.frame_a + 1);
 
     // Shadow
-    pos.vy = e->max_y + 2;
+    pos.vy = e->ground_y + 2;
     if (camera_pos->vy < pos.vy)
         func_800E5E60(&pos, &rot, D_8011EFA8.mesh_id + 6);
 }
@@ -625,8 +637,8 @@ void func_800D2B74(Entity *e, Component *c)
         e->pos_x = e->carry_x * 4096 + e->pos_x;
         e->pos_y = e->carry_y * 4096 + e->pos_y;
         e->pos_z = e->carry_z * 4096 + e->pos_z;
-        if ((e->pos_y >> 12) < e->max_y) {
-            e->on_air = 0;
+        if ((e->pos_y >> 12) < e->ground_y) {
+            e->on_ground = 0;
         }
     } else {
         e->pos_x += -0x1000 * e->carry_x;
@@ -642,20 +654,20 @@ void func_800D2B74(Entity *e, Component *c)
         func_800D8514(e);
 
         // Handle collisions with walls.
-        if (e->on_air) {
+        if (e->on_ground) {
             // Bounce
             e->vel_y = -(e->vel_y * 5 / 6);
         } else {
-            if (e->uh2) {
+            if (e->xz_col) {
                 e->vel_y = 0;
             }
         }
 
-        if (e->uh0) {
+        if (e->xy_col) {
             e->vel_z = -e->vel_z;
         }
 
-        if (e->uh1) {
+        if (e->yz_col) {
             e->vel_x = -e->vel_z;
         }
 
@@ -782,8 +794,8 @@ void func_800D30E4(Entity *e)
 
     func_800E5E60(&pos, &rot, meshid);
 
-    pos.vy = e->max_y + 2;
-    if (cam->vy >= pos.vy || e->max_y > 0)
+    pos.vy = e->ground_y + 2;
+    if (cam->vy >= pos.vy || e->ground_y > 0)
         return;
 
     // draw shadow
@@ -854,10 +866,10 @@ void func_800D3378(int x, int y, int z, int ay, int ax, int speed, int gold)
         e->model.frame_a = 1;
     }
 
-    e->on_air = 0;
-    e->uh2 = 0;
-    e->uh1 = 0;
-    e->uh0 = 0;
+    e->on_ground = 0;
+    e->xz_col = 0;
+    e->yz_col = 0;
+    e->xy_col = 0;
     func_800D7AC0(e);
     e->unk26 = 1;
 
@@ -992,7 +1004,7 @@ void func_800D4CC8(void)
 /* US:80102A1C JP: */ int D_80102A1C = 0;
 /* US:80102A24 JP: */ int D_80102A24 = 0;
 /* US:80102A2C JP: */ int D_80102A2C = 0;
-/* US:80102A34 JP: */ int D_80102A34 = 0;
+/* US:80102A34 JP: */ int D_80102A34 = 0; // third person camera pull back
 /* US:80102A3C JP: */ int D_80102A3C = 0;
 /* US:80102A44 JP: */ int D_80102A44 = 0;
 /* US:80102A4C JP: */ int D_80102A4C = 0;
@@ -1003,6 +1015,7 @@ void func_800D4CC8(void)
 
 // set robbit mesh metadata
 // robbit_set_mesh_metadata
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4E30);
 void func_800D4E30(MeshMetadata *data)
 {
     D_8011F8A0 = *data;
@@ -1020,7 +1033,6 @@ void func_800D4E64(void)
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4E9C);
 
 // Two functions that control the winning sequence score counting.
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D500C);
 void func_800D500C(void)
 {
     D_80102A1C = 0;
@@ -1037,16 +1049,17 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5190);
 // e_winner_robbit_physics_timeattack
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D54B8);
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D56BC);
 void func_800D56BC(void)
 {
+    int ay = D_8011F890.vy;
+    int ax = D_8011F890.vx;
     int y, z, x;
     polar_to_cart(D_8011F890.vy + 0x800, D_80102A34, &z, &x);
     x += D_8011F880.vx;
     z += D_8011F880.vz;
     y = D_8011F880.vy - 144 * ONE;
     func_800E543C(x >> 12, y >> 12, z >> 12);
-    func_800E5458(-D_8011F890.vy, -D_8011F890.vx, 0);
+    func_800E5458(-ay, -ax, 0);
     func_800D0C08(x, y, z);
 }
 
@@ -1064,9 +1077,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5CC8);
 // winning animation score counter
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5D68);
 
-// This is just like the one from kiwi and frog.
 // static calculate_frame_mesh()
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D60C8);
 int func_800D60C8(Entity *e, int arg)
 {
     int frame_b = e->model.frame_b;
@@ -1079,7 +1090,7 @@ int func_800D60C8(Entity *e, int arg)
         e->model.frame_a + D_8011F8A0.mesh_id + arg,
     };
 
-    int fac = fixed_div(e->model.current_time + 1, e->model.length);
+    int fac = fixed_div(e->model.current_time, e->model.length);
     int factors[2] = {
         fac,
         ONE - fac,
@@ -1091,7 +1102,29 @@ int func_800D60C8(Entity *e, int arg)
 // Some animation method used by both winning and falling robbit.
 // static
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
-// func_800D6190() {}
+
+void _func_800D6190(Entity *e)
+{
+    SVECTOR pos = {
+        .vx = e->pos_x >> 12,
+        .vy = (e->pos_y >> 12) - 0x90,
+        .vz = e->pos_z >> 12,
+    };
+
+    SVECTOR rot = {
+        .vy = e->angle_y,
+        .vx = -e->angle_x,
+        .vz = e->angle_z,
+    };
+
+    int frame = -1;
+    if (camera_frustum_cull(&pos, e->model.frame_a + D_8011F8A0.mesh_id) > -1) {
+        frame = func_800D60C8(e, 0);
+        draw_model(&pos, &rot, frame);
+    }
+
+    // ...
+}
 
 // e_winner_robbit_render
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
@@ -1099,7 +1132,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
 // robbit_start_winning_sequence
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6450);
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6668);
 void func_800D6668(void)
 {
     func_800E543C(D_8011F880.vx >> 12, D_8011F880.vy >> 12, D_8011F880.vz >> 12);
@@ -1111,7 +1143,11 @@ void func_800D6668(void)
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D66F4);
 
 // e_falling_robbit_render
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D67E4);
+void func_800D67E4(Entity *e, Component *c)
+{
+    (void)c;
+    func_800D6190(e);
+}
 
 // robbit_start_falling_sequence
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6804);
@@ -1702,7 +1738,7 @@ int D_80102744 = 0;
 /* US:80102C5C JP: */ int D_80102C5C = 0;
 /* US:80102C64 JP: */ int D_80102C64 = 0;
 /* US:80102C6C JP: */ int D_80102C6C = 0;
-/* US:80102C74 JP: */ int D_80102C74 = 0;
+/* US:80102C74 JP: */ int D_80102C74 = 0; // feet_roll
 /* US:80102C7C JP: */ int D_80102C7C = 0;
 /* US:80102C84 JP: */ int D_80102C84 = 0;
 /* US:80102C8C JP: */ int D_80102C8C = 0; // winning animation is playing
@@ -1953,8 +1989,9 @@ int func_800DBD1C(void)
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBD2C);
 
 // e_player_ctor
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
-void func_800DBDB0(void)
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DBDB0);
+
+void _func_800DBDB0(void)
 {
     player_entity.id = 0;
     D_80102C1C = 0;
@@ -1980,21 +2017,21 @@ void func_800DBDB0(void)
     player_entity.acc_y = D_8010271C;
     prepare_entity_collision(&player_entity);
     player_entity.unk26 = 3;
-    player_entity.uh2 = 0;
-    player_entity.uh1 = 0;
-    player_entity.uh0 = 0;
+    player_entity.xz_col = 0;
+    player_entity.yz_col = 0;
+    player_entity.xy_col = 0;
     D_80102724 = -32;
     D_80102C3C = 0;
     D_80102C4C = 0;
     D_80142D40 = 0;
     D_80102C5C = 0;
-    player_entity.on_air = ((player_entity.pos_y >> 12) < player_entity.max_y) - 1;
+    player_entity.on_ground = ((player_entity.pos_y >> 12) < player_entity.ground_y) - 1;
     entity_clear_damage(player_entity.id);
     D_80102C64 = 0;
     D_80102C6C = 0;
     D_80102C74 = 0;
     D_80102C7C = 0;
-    D_80102BFC = player_entity.max_y;
+    D_80102BFC = player_entity.ground_y;
     func_800E543C(player_entity.pos_x >> 12, player_entity.pos_y >> 12, player_entity.pos_z >> 12);
     func_800E5458(-player_entity.angle_y, -player_entity.angle_x, 0);
     func_800D0C08(player_entity.pos_x, player_entity.pos_y, player_entity.pos_z);
@@ -2017,8 +2054,9 @@ extern short D_80101B04[];
 // extern short D_80101B14[][3];
 
 // e_player_interaction
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
-void func_800DC0CC(void)
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DC0CC);
+
+void _func_800DC0CC(void)
 {
     Entity *e = &player_entity;
     Component *c = &e->interaction;
@@ -2179,7 +2217,7 @@ void func_800DC4C4(void)
         D_80102C4C = 0x800;
         player_entity.vel_y = 0;
         func_800DC9EC(&player_entity); // land
-        D_80102BFC = player_entity.max_y;
+        D_80102BFC = player_entity.ground_y;
         player_entity.phyisics.state = 0;
     case 0: // grounded
         if (D_80102C9C > 0) {
@@ -2187,10 +2225,10 @@ void func_800DC4C4(void)
         }
         D_80102C6C = 0;
         D_80102724 = 0;
-        D_80102BFC = player_entity.max_y;
+        D_80102BFC = player_entity.ground_y;
         // this and ground jump are more related than I thought. both cases
         // of make_1 are contained here and can be put in a single if
-        if (player_entity.on_air == 0 || player_entity.vel_y < 0) {
+        if (player_entity.on_ground == 0 || player_entity.vel_y < 0) {
             // we're suddenly not on ground anymore. react approprietly
             D_80102724 = -16;
             D_80102C0C = 0;
@@ -2233,7 +2271,7 @@ void func_800DC4C4(void)
             player_entity.acc_y = (player_entity.phyisics.counter + 2) * 0x300 + D_80102718;
         }
     case 2: // jump
-        player_entity.on_air = 0;
+        player_entity.on_ground = 0;
         if (player_entity.vel_y > 0)
             goto make_5; // going down
 
@@ -2260,7 +2298,7 @@ void func_800DC4C4(void)
             player_entity.phyisics.counter = 0;
         }
     case 4: // air jump
-        player_entity.on_air = 0;
+        player_entity.on_ground = 0;
         if (player_entity.phyisics.counter == 0 && func_800DCB50())
             goto make_3;
         if (player_entity.vel_y > 0) {
@@ -2279,7 +2317,7 @@ void func_800DC4C4(void)
 
         if (player_entity.vel_y <= 0)
             player_entity.acc_y = D_80102718;
-        if (player_entity.on_air != 0)
+        if (player_entity.on_ground != 0)
             goto make_0;
 
         break;
@@ -2349,9 +2387,66 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDB58);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDC04);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDC6C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDC6C);
+void func_800DDC6C(Entity *e, int x, int y, int z, short offcenter)
+{
+    SVECTOR pos = {
+        .vx = e->pos_x >> 12,
+        .vy = e->pos_y >> 12,
+        .vz = e->pos_z >> 12,
+    };
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DDDE4);
+    SVECTOR rot = {
+        .vx = D_80102C74,
+        .vz = 0,
+        .vy = e->angle_y + 0x800,
+    };
+
+    VECTOR tmp = {
+        .vy = y - 0xb4,
+        .vx = x,
+        .vz = z,
+    };
+
+    func_800CD550(e->angle_y, 0, &tmp.vx, &tmp.vy, &tmp.vz);
+    pos.vx += tmp.vx;
+    pos.vy += tmp.vy;
+    pos.vz += tmp.vz;
+
+    tmp.vx = 0;
+    tmp.vy = 0xb4;
+    tmp.vz = 0;
+    func_800CD550(e->angle_y, -D_80102C74 / 2, &tmp.vx, &tmp.vy, &tmp.vz);
+    pos.vx += tmp.vx;
+    pos.vy += tmp.vy;
+    pos.vz += tmp.vz;
+
+    rot.vy += offcenter;
+
+    draw_model(&pos, &rot, D_80102BF4 + 2);
+}
+
+// draw_feet
+void func_800DDDE4(Entity *e)
+{
+    int val_big = (sinf(D_80102C64) * 15) >> 10;
+    int val_small = (sinf(D_80102C64) * 5) >> 9;
+
+    int dx, dy;
+    dx = dy = 0;
+    if (val_big > 0) {
+        dx = -val_small;
+        dy = val_big;
+    }
+    func_800DDC6C(e, 0xb4 - dx, 0x50 - dy, -0x58, 0x80);
+
+    dx = dy = 0;
+    if (val_big < 0) {
+        dx = val_small;
+        dy = -val_big;
+    }
+    func_800DDC6C(e, dx - 0xb4, 0x50 - dy, -0x58, -0x80);
+}
 
 void debug_print_decimal(s32 num)
 {
@@ -2369,21 +2464,34 @@ int D_80102798 = 1;
 int D_8010279C = 0;
 SVECTOR D_80141448; // camera rotation?
 
+void debug_print_hex16(u16 half);
+
 void func_800DDF04(void)
 {
     // print debug info
     if (D_80102794) {
-        // TODO: player position here
+        // TODO: Color info
+        // if (player_entity.colptr)
+        //
 
         //
-        debug_set_pos(1, 14);
-        debug_print_str("RENDERING IS FUCKING OFF");
-        debug_set_pos(1, 15);
-        debug_print_str("NO MODEL RENDERING");
-        debug_set_pos(1, 16);
-        debug_print_str("GROUND=");
-        debug_print_decimal(player_entity.max_y);
+        // debug_set_pos(1, 14);
+        // debug_print_str("RENDERING IS FUCKING OFF");
+        // debug_set_pos(1, 15);
+        // debug_print_str("NO MODEL RENDERING");
 
+        debug_set_pos(1, 16);
+        debug_print_hex16(player_entity.ground_y);
+        debug_print_char(' ');
+        debug_print_hex16(player_entity.ceiling_y);
+        debug_print_char(' ');
+        // TODO
+        // debug_print_hex16(player_entity.colptr);
+        debug_print_str("TODO");
+
+        debug_print_char(' ');
+        debug_print_hex8(player_entity.yz_col);
+        debug_print_hex8(player_entity.xy_col);
         debug_set_pos(1, 23);
         debug_print_str("X=");
         debug_print_decimal(player_entity.pos_x >> 12);
@@ -2394,27 +2502,29 @@ void func_800DDF04(void)
         debug_print_str("Z=");
         debug_print_decimal(player_entity.pos_z >> 12);
         debug_set_pos(10, 22);
-        //
+        debug_print_str("TB=");
+        debug_print_hex16(D_80102C9C);
         debug_set_pos(10, 23);
         debug_print_str("ZX=");
         debug_print_hex16(player_entity.angle_y); // wait what
         debug_set_pos(10, 24);
         debug_print_str("AREA=");
-        //
+        debug_print_hex8(func_800DB994());
         debug_set_pos(10, 25);
         debug_print_str("LAND=");
-        //
+        debug_print_hex16(player_entity.unk27);
     }
     // THEN PLAYER ENTITY STUFF
-    // TODO: draw feet too
+    if (!D_80102C8C && (D_80141448.vx > -512)) {
+        func_800DDDE4(&player_entity);
+    }
 
     // player shadow
-    s16 x, y, z;
-    if (player_entity.on_air == 0 && player_entity.max_y <= 0) {
+    if (!player_entity.on_ground && player_entity.ground_y <= 0) {
         func_800E5E60(
             &(SVECTOR) {
                 player_entity.pos_x >> 12,
-                player_entity.max_y,
+                player_entity.ground_y,
                 player_entity.pos_z >> 12 },
             &(SVECTOR) {
                 .vy = player_entity.angle_y + 0x800,
@@ -2506,15 +2616,16 @@ void debug_print_hex8(u8 byte)
 
     nybble = byte >> 4;
     if (nybble > 9)
-        nybble += 7;
+        nybble += 'A' - '9' - 1;
     debug_print_char('0' + nybble);
 
     nybble = byte & 0xF;
     if (nybble > 9)
-        nybble += 7;
+        nybble += 'A' - '9' - 1;
     debug_print_char('0' + nybble);
 }
 
+// US: 800DE6AC
 void debug_print_hex32(u32 word)
 {
     debug_print_hex8(word >> 24);
@@ -2523,12 +2634,14 @@ void debug_print_hex32(u32 word)
     debug_print_hex8(word);
 }
 
+// US: 800DE6F4
 void debug_print_hex16(u16 half)
 {
     debug_print_hex8(half >> 8);
     debug_print_hex8(half);
 }
 
+// US: 800DE728
 void debug_set_pos(u32 x, u32 y)
 {
     debug_char_x = x;
@@ -2536,6 +2649,7 @@ void debug_set_pos(u32 x, u32 y)
 }
 
 // draw and swap
+// US: 800DE740
 void debug_text_draw(void)
 {
     DR_MODE *p;
@@ -2557,6 +2671,7 @@ void debug_text_draw(void)
     func_800E8B5C(&debug_text_ot[debug_ot_index].ot[0], 2);
 }
 
+// US: 800DE8B0
 void func_800DE8B0(u32 x, u32 y)
 {
     debug_font_x = x & 0x3c0;

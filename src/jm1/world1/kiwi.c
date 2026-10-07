@@ -245,7 +245,7 @@ static void do_turning(Entity *e)
 
     if (e->sub.kiwi.turning_counter == 0) {
         // If you hit a wall, turn by a random amount.
-        if (e->uh0 != 0 || e->uh1 != 0) {
+        if (e->xy_col != 0 || e->yz_col != 0) {
             e->sub.kiwi.turning_counter = 0x40;
             e->sub.kiwi.turning_amount = random_number() * 8 - 0x400;
         }
@@ -288,7 +288,7 @@ static void apply_movement(Entity *e)
     func_800D973C(e);
     func_800D7C70(e);
     func_800D8514(e);
-    if (e->uh2) {
+    if (e->xz_col) {
         e->vel_y = 0;
     }
 }
@@ -324,7 +324,7 @@ void e_kiwi_physics(Entity *e, Component *c)
             break;
 
         check_and_goto4:
-            if (e->on_air) {
+            if (e->on_ground) {
                 goto out;
             } else {
                 state = 4;
@@ -365,7 +365,7 @@ void e_kiwi_physics(Entity *e, Component *c)
         case 5:
             do_turning(e);
             polar_to_cart(e->angle_y, e->forward_speed, &e->vel_z, &e->vel_x);
-            if (!e->on_air) {
+            if (!e->on_ground) {
                 goto out;
             }
             state = 6;
@@ -418,7 +418,7 @@ void e_kiwi_physics(Entity *e, Component *c)
         case 12:
             do_turning(e);
             polar_to_cart(e->angle_y, e->forward_speed, &e->vel_z, &e->vel_x);
-            e->on_air = 0;
+            e->on_ground = 0;
             if (e->vel_y > 0) {
                 state = 4;
                 break;
@@ -470,7 +470,7 @@ void e_kiwi_interaction(Entity *e, Component *c)
                 e->sub.kiwi.damage_direction = entity_get_damage_direction(e->id);
                 if (e->sub.kiwi.damage_pushback == 0) {
                     e->sub.kiwi.damage_pushback = 0x30;
-                    if (e->on_air) {
+                    if (e->on_ground) {
                         e->vel_y = -8 * ONE;
                     }
                 }
@@ -526,7 +526,7 @@ void e_kiwi_interaction(Entity *e, Component *c)
             if (c->counter-- > 0) {
                 return;
             }
-            func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->max_y, e->sub.kiwi.drop_kind);
+            func_800D1CBC(e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12, e->ground_y, e->sub.kiwi.drop_kind);
             state = 3;
             break;
 
@@ -611,7 +611,7 @@ void e_kiwi_render(Entity *e, Component *c)
     }
 
     // Shadow
-    pos_int.vy = e->max_y + KIWI_SHADOW_OFFSET;
+    pos_int.vy = e->ground_y + KIWI_SHADOW_OFFSET;
 
     SVECTOR *camera_pos = SCRTCHPAD(0x3C8);
     if (camera_pos->vy < pos_int.vy) {
@@ -680,10 +680,10 @@ void e_kiwi_ctor(Entity *e, Spirit *spirit)
     e->range_z = 0x84;
     e->range_x = 0x84;
     e->range_y = 0xc0;
-    e->on_air = 0;
-    e->uh2 = 0;
-    e->uh1 = 0;
-    e->uh0 = 0;
+    e->on_ground = 0;
+    e->xz_col = 0;
+    e->yz_col = 0;
+    e->xy_col = 0;
     e->sub.kiwi.a = 0;
     e->sub.kiwi.b = kiwi_spirit->unk;
     e->sub.kiwi.drop_kind = kiwi_spirit->drop_kind;

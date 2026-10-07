@@ -116,8 +116,8 @@ void func_800B6820(Entity *e, Spirit *spirit)
     e->range_x = 0x100;
     e->range_y = 0x180;
 
-    e->on_air = 0;
-    e->uh0 = e->uh1 = e->uh2 = 0;
+    e->on_ground = 0;
+    e->xy_col = e->yz_col = e->xz_col = 0;
 }
 
 int D_8010287C = 0; // handle

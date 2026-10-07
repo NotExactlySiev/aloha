@@ -83,12 +83,15 @@ struct Entity {
     /* D0 */ u32 carry_y;
     /* D4 */ u32 carry_z;
     /* D8 */ u32 unk21; // carry_angle_y?
-    /* DC */ s32 max_y; // ground_y
-    /* E0 */ s32 unk22; // ceiling_y
-    /* E4 */ s8 uh0; // Collision on XY plane
-    /* E5 */ s8 uh1; // Collision on YZ plane
-    /* E6 */ s8 uh2; // Collision on ZX plane
-    /* E7 */ s8 on_air; // RENAME: on_ground
+    /* DC */ s32 ground_y;
+    /* E0 */ s32 ceiling_y;
+
+    // These three signify if we're running into an axis aligned plane. 2 means
+    // running into level geometry. 4 means running into an entity.
+    /* E4 */ s8 xy_col; // Collision on XY plane
+    /* E5 */ s8 yz_col; // Collision on YZ plane
+    /* E6 */ s8 xz_col; // Collision on ZX plane
+    /* E7 */ s8 on_ground;
     /* E8 */ s8 unk25;
     /* E9 */ s8 unk26;
     /* EA */ s16 unk27; // id of the entity we will land on. LAND in debug info
@@ -229,8 +232,8 @@ void func_800D0840(EntityClass **classes);
 // func_800D09EC
 void func_800D0AA4(Entity *e, Spirit *spirit);
 // func_800D0B98
-// func_800D0C08
-// func_800D0C28
+void func_800D0C08(int x, int y, int z); // set_simulation_pos
+void func_800D0C28(int x, int y, int z);
 void func_800D0C5C(void);
 //
 //
