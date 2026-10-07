@@ -1093,34 +1093,35 @@ void _func_800F443C(MeshSets *sets_data)
     // }
 }
 
-void func_800F686C(void);
-void func_800F6878(void);
-void func_800F68A4(void);
+void D_800F686C(void);
+void D_800F6878(void);
+void D_800F68A4(void);
 
 // draw_mesh
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
 void *func_800F4548(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3);
 
-void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
+void *_draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
 {
     // printf("MESH: %p\n", mesh_with_flags);
-    return func_800F4548(mesh_with_flags, prim, ot_with_flags, arg3);
+    // return func_800F4548(mesh_with_flags, prim, ot_with_flags, arg3);
 
     // printf("DRAWING %p at %p: %p\n", mesh_with_flags, ot_with_flags, arg3);
     Mesh *mesh = (Mesh *)(mesh_with_flags & ~0x1);
-    if (mesh != (Mesh *)0x80134fb0)
-        return prim;
+    // if (mesh != (Mesh *)0x80134fb0) {
+    //     return prim;
+    // }
 
-    u32 ab = *(u32 *)(&mesh->a);
-    if (ab == 0)
+    if (mesh->a == 0 && mesh->b == 0) {
         return prim;
+    }
 
     u32 *ot = (u32 *)(ot_with_flags & ~0x3);
-    void *t5_routine = func_800F686C;
+    void *t5_routine = D_800F686C;
     if (ot_with_flags & 3) {
-        t5_routine = func_800F6878;
+        t5_routine = D_800F6878;
         if (ot_with_flags & 1) {
-            t5_routine = func_800F68A4;
+            t5_routine = D_800F68A4;
         }
     }
 
@@ -1165,7 +1166,7 @@ void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
     u32 xy = 0;
     u32 z = 0;
     if (arg3) {
-        if (t5_routine != func_800F68A4) {
+        if (t5_routine != D_800F68A4) {
             gte_ldtr(0, 0, 0);
         }
         xy = arg3[0];

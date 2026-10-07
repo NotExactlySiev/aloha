@@ -2899,7 +2899,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF6FC); // debug stuff
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DF884);
 
 // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFC78); // logic_routine
-
 void func_800DFC78(void)
 {
     func_800F3320();
@@ -2948,8 +2947,6 @@ void func_800DFC78(void)
     func_800F8EC4();
     func_800F8DD8();
     func_800DC0CC();
-
-    //
     func_800E1738();
     func_800E18A4();
     func_800EFDEC();
@@ -2962,46 +2959,45 @@ void func_800DFC78(void)
     func_800F28FC();
 }
 
-// 0x400 to 0xC00 camera is glitched
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18); // render_routine
-
-void _func_800DFE18(void)
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DFE18); // render_routine
+// render_routine
+// US: 800DFE18
+void func_800DFE18(void)
 {
     func_800E5CC0();
 
-    // func_800F1FFC();
-    // func_800F2760();
-    // func_800F296C();
-    // func_800E17D0();
-    // func_800EEDB4();
-    // func_800E5D30();
-    // func_800E6668(); //
-    // func_800D4CC8(); // pause menu
-    // func_800F421C(); //
-    // func_800D46CC(); // demo overlay
+    func_800F1FFC();
+    func_800F2760();
+    func_800F296C();
+    func_800E17D0();
+    func_800EEDB4();
+    func_800E5D30();
+    func_800E6668(); //
+    func_800D4CC8(); // pause menu
+    func_800F421C(); //
+    func_800D46CC(); // demo overlay
     func_800EF004(); // ui
 
     if (!func_800F3434()) {
-        // func_800F1A0C();
-        // func_800F87BC();
-        // func_800EFEC4();
-        // func_800E5D30();
-        // func_800D0F24();
+        func_800F1A0C();
+        func_800F87BC();
+        func_800EFEC4();
+        func_800E5D30();
+        func_800D0F24();
     }
 
     if (!func_800DBC24() && !func_800F3434()) {
-        // func_800D0E5C();
+        func_800D0E5C();
     }
 
     if (!func_800F3434()) {
-        // func_800D0FC4();
-        // func_800DDF04();
-        // func_800D0370();
-        // func_800DA998();
-        // func_800DA4E8();
-        // func_800F8EF4();
-        // func_800F8E10();
+        func_800D0FC4();
+        func_800DDF04();
+        func_800D0370();
+        func_800DA998();
+        func_800DA4E8();
+        func_800F8EF4();
+        func_800F8E10();
     }
 
     DRAWENV drawenv;
@@ -3928,6 +3924,9 @@ enum {
 // draw_model
 void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
 {
+    if (id != 406 && id != 407 && id != 409 && id != 479)
+        return;
+
     SVECTOR *dir = SCRTCHPAD(0x00);
     MATRIX *rotation = SCRTCHPAD(0x10);
     MATRIX *light = SCRTCHPAD(0x30);
