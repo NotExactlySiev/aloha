@@ -983,48 +983,137 @@ void func_800D4CC8(void)
     }
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4E30);
+// robbit.c
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4E64);
+/* US:801029FC JP: */ Entity *D_801029FC = NULL;
+/* US:80102A04 JP: */ Entity *D_80102A04 = NULL;
+/* US:80102A0C JP: */ int D_80102A0C = 0;
+/* US:80102A14 JP: */ int D_80102A14 = 0;
+/* US:80102A1C JP: */ int D_80102A1C = 0;
+/* US:80102A24 JP: */ int D_80102A24 = 0;
+/* US:80102A2C JP: */ int D_80102A2C = 0;
+/* US:80102A34 JP: */ int D_80102A34 = 0;
+/* US:80102A3C JP: */ int D_80102A3C = 0;
+/* US:80102A44 JP: */ int D_80102A44 = 0;
+/* US:80102A4C JP: */ int D_80102A4C = 0;
 
+/* US:8011F880 JP: */ VECTOR D_8011F880;
+/* US:8011F890 JP: */ VECTOR D_8011F890;
+/* US:8011F8A0 JP: */ MeshMetadata D_8011F8A0;
+
+// set robbit mesh metadata
+// robbit_set_mesh_metadata
+void func_800D4E30(MeshMetadata *data)
+{
+    D_8011F8A0 = *data;
+}
+
+// spawn winner and falling robbit entities
+// robbit_init?
+void func_800D4E64(void)
+{
+    D_801029FC = entity_create();
+    D_80102A04 = entity_create();
+}
+
+// e_winner_robbit_behavior
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4E9C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D500C);
+// Two functions that control the winning sequence score counting.
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D500C);
+void func_800D500C(void)
+{
+    D_80102A1C = 0;
+    D_80102A14 = 1;
+    D_80102A24 = 0;
+    D_80102A2C = 0;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5038);
 
+// e_winner_robbit_physics_normal
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5190);
 
+// e_winner_robbit_physics_timeattack
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D54B8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D56BC);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D56BC);
+void func_800D56BC(void)
+{
+    int y, z, x;
+    polar_to_cart(D_8011F890.vy + 0x800, D_80102A34, &z, &x);
+    x += D_8011F880.vx;
+    z += D_8011F880.vz;
+    y = D_8011F880.vy - 144 * ONE;
+    func_800E543C(x >> 12, y >> 12, z >> 12);
+    func_800E5458(-D_8011F890.vy, -D_8011F890.vx, 0);
+    func_800D0C08(x, y, z);
+}
 
+// e_winner_robbit_interaction
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5778);
 
+// four functions for drawing the winning sequence UI
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5A48);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5B7C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5CC8);
 
+// static
+// winning animation score counter
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D5D68);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D60C8);
+// This is just like the one from kiwi and frog.
+// static calculate_frame_mesh()
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D60C8);
+int func_800D60C8(Entity *e, int arg)
+{
+    int frame_b = e->model.frame_b;
+    if (frame_b == e->model.frame_a) {
+        return frame_b + D_8011F8A0.mesh_id + arg;
+    }
 
-// render robbit. is acting really weird so I'm gonna disable it for now
+    int frames[2] = {
+        e->model.frame_b + D_8011F8A0.mesh_id + arg,
+        e->model.frame_a + D_8011F8A0.mesh_id + arg,
+    };
+
+    int fac = fixed_div(e->model.current_time + 1, e->model.length);
+    int factors[2] = {
+        fac,
+        ONE - fac,
+    };
+
+    return func_800E6684(frames, factors, 2);
+}
+
+// Some animation method used by both winning and falling robbit.
+// static
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
 // func_800D6190() {}
 
+// e_winner_robbit_render
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
 
+// robbit_start_winning_sequence
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6450);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6668);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6668);
+void func_800D6668(void)
+{
+    func_800E543C(D_8011F880.vx >> 12, D_8011F880.vy >> 12, D_8011F880.vz >> 12);
+    func_800E5458(-D_8011F890.vy, -D_8011F890.vx, -D_8011F890.vz);
+    func_800D0C08(D_8011F880.vx, D_8011F880.vy, D_8011F880.vz);
+}
 
+// e_falling_robbit_interaction
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D66F4);
 
+// e_falling_robbit_render
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D67E4);
 
+// robbit_start_falling_sequence
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6804);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6944);
@@ -1073,10 +1162,6 @@ typedef struct {
     s16 z0, z1;
 } GroundShape;
 
-/* US:80102A34 JP: */ int D_80102A34 = 0;
-/* US:80102A3C JP: */ int D_80102A3C = 0;
-/* US:80102A44 JP: */ int D_80102A44 = 0;
-/* US:80102A4C JP: */ int D_80102A4C = 0;
 /* US:80102A54 JP: */ int D_80102A54 = 0;
 /* US:80102A5C JP: */ int D_80102A5C = 0;
 /* US:80102A64 JP: */ int D_80102A64 = 0;

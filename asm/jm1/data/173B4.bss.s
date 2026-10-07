@@ -370,26 +370,24 @@ glabel D_8011F874
 glabel D_8011F876
 	.space 0xa
 
-glabel D_8011F880
-	.space 0x4
+# glabel D_8011F880
+# 	.space 0x4
 
-glabel D_8011F884
-	.space 0x4
+# glabel D_8011F884
+# 	.space 0x4
 
-glabel D_8011F888
-	.space 0x8
+# glabel D_8011F888
+# 	.space 0x8
 
-glabel D_8011F890
-	.space 0x4
+# glabel D_8011F890
+# 	.space 0x4
 
-glabel D_8011F894
-	.space 0x4
+# glabel D_8011F894
+# 	.space 0x4
 
-glabel D_8011F898
-	.space 0x8
+# glabel D_8011F898
+# 	.space 0x8
 
-glabel D_8011F8A0
-	.space 0x10
 
 glabel D_8011F8B0
 	.space 0x2
