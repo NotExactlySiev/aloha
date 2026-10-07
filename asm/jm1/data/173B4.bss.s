@@ -277,17 +277,7 @@ glabel D_8011EFDC
 glabel D_8011EFE0
 	.space 0x828
 
-glabel D_8011F808
-	.space 0x2
-
-glabel D_8011F80A
-	.space 0x2
-
-glabel D_8011F80C
-	.space 0x2
-
-glabel D_8011F80E
-	.space 0xa
+/* */
 
 glabel D_8011F818
 	.space 0x2
@@ -327,6 +317,8 @@ glabel D_8011F844
 
 glabel D_8011F846
 	.space 0xa
+
+/* */
 
 glabel D_8011F850
 	.space 0x2

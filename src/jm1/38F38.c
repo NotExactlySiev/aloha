@@ -40,7 +40,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8CB0);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8CF8);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8D84);
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8E0C);
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8EBC);
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E8EBC);
 
 // decompress_lz1 (the c version)
 // TODO: can I just replace it with the asm one?
@@ -180,20 +180,21 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800E9FDC);
 
 // draw ui sprites
 // this one draws behind the next one (so behind menu)
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_sprite);
+// US: 800EA2F4
 void ui_draw_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
 {
     GBuffer *gbuf = gbuffer_get_current();
     gbuf->nextfree = func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 563);
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", ui_draw_menu_sprite);
+// US: 800EA37C
 void ui_draw_menu_sprite(u32 x, u32 y, u32 id, u32 color, u32 trans)
 {
     GBuffer *gbuf = gbuffer_get_current();
     gbuf->nextfree = func_800E9FDC(x, y, id, color, trans, gbuf->nextfree, gbuf->ot + 564);
 }
 
+// US: 800EA404
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA404);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EA414);
@@ -278,14 +279,12 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB038);
 
 int D_80102E9C = 0; // score
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB124);
 // get_score
 int func_800EB124(void)
 {
     return D_80102E9C;
 }
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB134);
 // set_score
 void func_800EB134(int v)
 {
@@ -293,8 +292,27 @@ void func_800EB134(int v)
     D_80102E9C = v;
 }
 
+void func_800DB8B8(int);
+int func_800DB838(int);
+int func_800E3BF8(void);
+
 // give_points
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB16C); // DO NEXT
+void func_800EB16C(int amount)
+{
+    func_800DB8B8(amount);
+
+    int a = func_800DB838(D_80102E9C);
+    D_80102E9C += amount;
+    CLAMP(0, 9999999, D_80102E9C);
+    int b = func_800DB838(D_80102E9C);
+
+    if ((b - a > 0) && !func_800E3BF8()) {
+        func_800ED344(b - a);
+        func_800CE304(0x1E00, 110, 0x3f);
+        func_800ED59C();
+        func_800EE26C(0, 4);
+    }
+}
 
 // draw score?
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800EB23C);

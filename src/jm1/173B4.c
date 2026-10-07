@@ -39,19 +39,49 @@ int func_800C6FB8()
     return 0;
 }
 
+extern int D_80101640[];
+extern int D_80101658[];
+extern int D_80101670[];
+extern int D_80101688[];
+
+int func_800B0A68(void);
+int func_800E3B98(void);
+
 // level progressions functions
+int func_800CECB8(void)
+{
+    return func_800E3B98()
+        ? D_80101670[func_800B0A68() / 3]
+        : D_80101688[func_800B0A68()];
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CECB8);
+int func_800CED54(void)
+{
+    return D_80101658[func_800B0A68() / 3];
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CED54);
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEDBC);
+int func_800CEDBC(void)
+{
+    return D_80101640[func_800B0A68() / 3];
+}
 
 // smoke.c
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEE24);
+int D_80102944 = 0;
+int D_8010294C = 0;
+int D_80102954 = 0;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEE34);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEE24);
+void func_800CEE24(int v)
+{
+    D_80102944 = v;
+}
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEE34);
+int func_800CEE34(void)
+{
+    return D_80102944;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CEE44);
 
@@ -74,20 +104,63 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CF1E0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CF308);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CFD78);
+void func_800E5668(MATRIX *m0, MATRIX *m1, SVECTOR *rot);
+
+void func_800E8EBC(SVECTOR *src, SVECTOR *dst, int n);
+
+typedef struct {
+    int count;
+    SVECTOR vecs[];
+} RotationPackVectors;
+
+typedef struct {
+    int count;
+    SVECTOR *ptr;
+    RotationPackVectors *vecs;
+} RotationPack;
+
+extern RotationPack D_80107630[];
+
+void func_800CFD78(int i, SVECTOR *rot)
+{
+    struct {
+        MATRIX m0;
+        MATRIX m1;
+    } *s = SCRTCHPAD(0);
+
+    func_800E5668(&s->m0, &s->m1, rot);
+    func_800E8810();
+    SetRotMatrix(&s->m0);
+
+    RotationPack *p = &D_80107630[i];
+    func_800E8EBC(p->ptr, p->ptr, p->count + 1);
+    func_800E8EBC(p->vecs->vecs, p->vecs->vecs, p->vecs->count);
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CFE28);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CFFB0);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0100);
+extern u32 D_8013CC28; // mesh_array_count
+extern Mesh mesh_array[1024];
+extern u16 D_801381F8[256]; // I think it would be 256? no idea tbh
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0100);
+void func_800D0100(int id)
+{
+    id += D_8010294C;
+    mesh_array[id].b = 0;
+    mesh_array[id].a = 0;
+    mesh_array[id].sets_data = NULL;
+    mesh_array[id].unk1 = NULL;
+    mesh_array[id].verts = NULL;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0138);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0224);
-
 extern Entity D_80106EC8[6];
-extern int D_8010294C;
+
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0224);
 
 // US: 800D0370
 void func_800D0370(void)
@@ -109,8 +182,6 @@ void func_800D0370(void)
         );
     }
 }
-
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D0428);
 
 #define MAX_ENTITIES 128
 #define MAX_CLASSES 64
@@ -141,43 +212,49 @@ typedef struct {
 /* US:8011EE78 JP: */ void (*D_8011EE78[MAX_CLASSES])(Entity *, Spirit *); // level_entity_ctors
 /* US:801383F8 JP: */ extern Entity *entity_ptrs[MAX_ENTITIES];
 
-// 800D0438
+// US: 800D0428
+int func_800D0428(void)
+{
+    return entity_free_count;
+}
+
+// US: 800D0438
 LinkedList *get_list1_head(void)
 {
     return &entity_list_1.head;
 }
 
-// 800D0448
+// US: 800D0448
 LinkedList *get_list1_tail(void)
 {
     return &entity_list_1.tail;
 }
 
-// 800D0458
+// US: 800D0458
 LinkedList *get_list2_head(void)
 {
     return &entity_list_2.head;
 }
 
-// 800D0468
+// US: 800D0468
 LinkedList *get_list2_tail(void)
 {
     return &entity_list_2.tail;
 }
 
-// 800D0478
+// US: 800D0478
 LinkedList *get_list0_head(void)
 {
     return &entity_list_0.head;
 }
 
-// 800D0488
+// US: 800D0488
 LinkedList *get_list0_tail(void)
 {
     return &entity_list_0.tail;
 }
 
-// 800D0498
+// US: 800D0498
 void entity_insert_before(LinkedList *list, LinkedList *node)
 {
     LinkedList *oldprev = list->prev;
@@ -187,7 +264,7 @@ void entity_insert_before(LinkedList *list, LinkedList *node)
     oldprev->next = node;
 }
 
-// 800D04B0
+// US: 800D04B0
 void entity_insert_after(LinkedList *list, LinkedList *node)
 {
     LinkedList *oldnext = list->next;
@@ -197,14 +274,14 @@ void entity_insert_after(LinkedList *list, LinkedList *node)
     oldnext->prev = node;
 }
 
-// 800D04C8
+// US: 800D04C8
 void entity_detach_from_list(LinkedList *node)
 {
     node->prev->next = node->next;
     node->next->prev = node->prev;
 }
 
-// 800D04E8
+// US: 800D04E8
 Entity *entity_create(void)
 {
     if (entity_free_count == 0)
@@ -219,7 +296,7 @@ Entity *entity_create(void)
     return ret;
 }
 
-// 800D053C
+// US: 800D053C
 void entity_destroy(Entity *e)
 {
     e->active = 0;
@@ -229,6 +306,7 @@ void entity_destroy(Entity *e)
 }
 
 // static
+// US: 800D058C
 void func_800D058C(void)
 {
     for (int i = 0; i < MAX_ENTITIES; i++) {
@@ -1101,9 +1179,8 @@ int func_800D60C8(Entity *e, int arg)
 
 // Some animation method used by both winning and falling robbit.
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
-
-void _func_800D6190(Entity *e)
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6190);
+void func_800D6190(Entity *e)
 {
     SVECTOR pos = {
         .vx = e->pos_x >> 12,
@@ -1123,11 +1200,52 @@ void _func_800D6190(Entity *e)
         draw_model(&pos, &rot, frame);
     }
 
-    // ...
+    func_800E5B88(0, -144, 0);
+    draw_model(&pos, &rot, frame | 0x4000);
+    func_800E5B88(0, 0, 0);
 }
 
+void func_800D5B7C(void);
+void func_800D5CC8(void);
+
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 sprite_id;
+    s16 show;
+    u32 value;
+} ScoreDisplay;
+
+s16 D_8011F808;
+s16 D_8011F80A;
+s16 D_8011F80C;
+s16 D_8011F80E;
+extern ScoreDisplay D_8011F818[3];
+
 // e_winner_robbit_render
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D62F4);
+void func_800D62F4(Entity *e, Component *c)
+{
+    (void)c;
+    if (D_8011F80E) {
+        ui_draw_sprite(D_8011F808 - 4, D_8011F80A - 12, D_8011F80C, 0x1808080, 0);
+    }
+
+    if (D_80102A44) {
+        func_800D6190(e);
+    }
+
+    if (func_800E3BF8()) {
+        // TODO
+        //
+    } else {
+        for (int i = 0; i < 3; i++) {
+            func_800D5A48(&D_8011F818[i]);
+        }
+        func_800D5B7C();
+        func_800D5CC8();
+    }
+}
 
 // robbit_start_winning_sequence
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D6450);
@@ -1884,23 +2002,87 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB65C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB66C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB6B4);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB6B4);
+int func_800DB6B4(void)
+{
+    int ret = 0;
+    if (!D_80102B6C) {
+        ret += D_80102B8C * 5;
+    }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB798);
+    if (!D_80102B74) {
+        ret += D_80102B8C * 2;
+    }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB800);
+    if (!D_80102B7C) {
+        ret += D_80102B84 * 100;
+    }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB838);
+    if (D_80102B94 == 4) {
+        ret += 30000;
+    }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB87C);
+    ret += D_80102B9C;
+    CLAMP(0, 9999999, ret);
+    return ret;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB890);
+int func_800DB798(void)
+{
+    return ((func_800EB3DC() + 59) / 60) * 50;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB8A4);
+int func_800DB800(void)
+{
+    return get_player()->health * 100;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB8B8);
+int D_80101AF8[3] = {
+    300000,
+    1000000,
+    -1000000,
+};
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB8D8);
+int func_800DB838(int v)
+{
+    int i = 0;
+    int tmp = 0;
+    for (int ret = 0;; ret++) {
+        tmp -= D_80101AF8[i];
+        if (D_80101AF8[i] > 0) {
+            tmp = D_80101AF8[i];
+            i += 1;
+        }
+        if (tmp > v) {
+            return ret;
+        }
+    }
+}
+
+void func_800DB87C(void)
+{
+    D_80102B6C = 1;
+}
+
+void func_800DB890(void)
+{
+    D_80102B74 = 1;
+}
+
+void func_800DB8A4(void)
+{
+    D_80102B7C = 1;
+}
+
+void func_800DB8B8(int v)
+{
+    D_80102B8C += v;
+}
+
+void func_800DB8D8(int v)
+{
+    D_80102B84 += v;
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800DB8F8);
 
@@ -3498,9 +3680,6 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4BC0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4BE0);
 
-extern u32 D_8013CC28; // mesh_array_count
-extern Mesh mesh_array[1024];
-extern u16 D_801381F8[256]; // I think it would be 256? no idea tbh
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E4C34);
 // load_mesh_from_vo2
 /*u32 _func_800E4C34(u32* data, u32 mesh_palette, u32 texture_palette, u32 texture_id)

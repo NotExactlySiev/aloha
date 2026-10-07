@@ -107,6 +107,31 @@ glabel func_800E88E4
 #
 #
 
+glabel func_800E8EBC
+    blez    $a2, .out
+    nop
+.loop:
+    lwc2    $0, 0x0($a0)
+    lwc2    $1, 0x0($a1)
+    addiu   $a0, 8
+    MVMVA   1, 0, 0, 0, 0
+    cfc2    $zero, $31
+    mfc2    $t0, $25
+    mfc2    $t1, $26
+    mfc2    $t2, $27
+    sh      $t0, 0($a1)
+    sh      $t1, 2($a1)
+    sh      $t2, 4($a1)
+    addiu   $a1, 8
+    addiu   $a2, -1
+    bgtz    $a2, .loop
+.out:
+    jr      $ra
+    nop
+
+#
+#
+
 glabel func_800E9324
     la      $t0, sin_lut
     andi    $v0, $a0, 0xfff

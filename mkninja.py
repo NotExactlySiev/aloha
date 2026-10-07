@@ -316,6 +316,7 @@ compileFlags = [
     "-fno-pic",
     "-DPSYQ47_FIXES",
     "-DEXTRA_DEBUG_LOGS",
+    "-DCUSTOM_PATCHES",
 ]
 
 # Ninja setup
