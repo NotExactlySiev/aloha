@@ -946,45 +946,17 @@ INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4088);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F421C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42A4);
+// The assembly code starts here.
 
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42C8);
-
-// moving these three handwritten assembly functions to src
-
-// these could be assmebly too? this sets the pointer in ot (saved right below it)
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42E0);
-
-// thse set and get the fucky color value in the middle of code
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F42F4);
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4338);
-
-#include <inline_n.h>
-
-// this is the distance from camera calculator thing
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4354);
-// it's probably handwritten assembly? the patterns don't like like inlines
-
-// this function does both rotation and distance calculation. the output vector
-// is only valid if the distance is not -1
-// this really does look like handwritten assembly
-// IT'S NOT UINT
-/*
-int func_800F4354(SVECTOR *in, VECTOR *out, Mesh *m)
-{
-    gte_ldv0(in);
-    if (m->a == 0) {
-        return -1;
-    }
-    gte_mvmva(1, 0, 0, 3, 0);
-    return 0;
-}
-*/
+// The three possible "get face flags" functions. They return the flags in $t5.
+void D_800F686C(void);
+void D_800F6878(void);
+void D_800F68A4(void);
 
 // process and sort sets
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F443C);
-
-// TODO: this breaks and I don't know why. maybe shouldn't be C at all?
+// This isn't a C function. But I'm keeping this around commented out until I
+// fully annotate the assembly version.
+/*
 void _func_800F443C(MeshSets *sets_data)
 {
     void *verts = *(void **)SCRTCHPAD(0x3A0);
@@ -1092,130 +1064,9 @@ void _func_800F443C(MeshSets *sets_data)
     //     dst1[j+1] = l;
     // }
 }
+*/
 
-void D_800F686C(void);
-void D_800F6878(void);
-void D_800F68A4(void);
-
-// draw_mesh
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F4548);
-void *func_800F4548(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3);
-
-void *_draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
-{
-    // printf("MESH: %p\n", mesh_with_flags);
-    // return func_800F4548(mesh_with_flags, prim, ot_with_flags, arg3);
-
-    // printf("DRAWING %p at %p: %p\n", mesh_with_flags, ot_with_flags, arg3);
-    Mesh *mesh = (Mesh *)(mesh_with_flags & ~0x1);
-    // if (mesh != (Mesh *)0x80134fb0) {
-    //     return prim;
-    // }
-
-    if (mesh->a == 0 && mesh->b == 0) {
-        return prim;
-    }
-
-    u32 *ot = (u32 *)(ot_with_flags & ~0x3);
-    void *t5_routine = D_800F686C;
-    if (ot_with_flags & 3) {
-        t5_routine = D_800F6878;
-        if (ot_with_flags & 1) {
-            t5_routine = D_800F68A4;
-        }
-    }
-
-    //
-    //
-
-    // Set up the pointer variables to the mesh data
-    MATRIX *save_rot = SCRTCHPAD(0x380);
-    SVECTOR **verts_p = SCRTCHPAD(0x3A0);
-    void **unk_p = SCRTCHPAD(0x3A4);
-    u16 *faceoffs = SCRTCHPAD(0x3A8);
-
-    MeshSets *sets_data = mesh->sets_data;
-    *verts_p = mesh->verts->data;
-    *unk_p = mesh->unk1->data;
-    int sets_count = sets_data->sets_count + 1;
-
-    // Save it in VXY2 for now
-    __asm__ volatile(
-        "mtc2   %0, $4;" ::"r"(sets_data)
-    );
-
-    // Process and sorts sets
-    if (sets_count > 1) {
-        func_800F443C(sets_data);
-    }
-
-    // Save foreground color in the unused GTE registers VZ2/ZSF3/ZSF4
-    __asm__ volatile(
-        "cfc2   $t0, $21;"
-        "cfc2   $t1, $22;"
-        "cfc2   $t2, $23;"
-
-        "mtc2   $t0, $5;"
-        "ctc2   $t1, $29;"
-        "ctc2   $t2, $30;"
-    );
-
-    //
-    //
-
-    u32 xy = 0;
-    u32 z = 0;
-    if (arg3) {
-        if (t5_routine != D_800F68A4) {
-            gte_ldtr(0, 0, 0);
-        }
-        xy = arg3[0];
-        z = arg3[1];
-    }
-
-    __asm__ volatile(
-        "mtc2   %0, $2;"
-        "mtc2   %1, $3;" ::"r"(xy),
-        "r"(z)
-    );
-
-    //
-    //
-    //
-
-    for (int i = 0; i < sets_count; i++) {
-        void *fs; // Pointer to the faces section
-        __asm__ volatile(
-            "mfc2   %0, $4;"
-            : "=r"(fs)
-        );
-
-        Face *faces = fs + faceoffs[i];
-        // FaceList *subset_faces = fs + offset;  // Skip past the size field and faces
-        // for (int j = 0; j < )
-    }
-
-    gte_ReadRotMatrix(save_rot);
-    // render_object()
-    gte_SetRotMatrix(save_rot);
-
-    // LOOPS
-    //
-    //
-
-    // Restore foreground color
-    __asm__ volatile(
-        "mfc2   $t0, $5;"
-        "cfc2   $t1, $29;"
-        "cfc2   $t2, $30;"
-
-        "ctc2   $t0, $21;"
-        "ctc2   $t1, $22;"
-        "ctc2   $t2, $23;"
-    );
-
-    return prim;
-}
+void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3);
 
 // ## I think the insanity of rendering code is confined to here
 

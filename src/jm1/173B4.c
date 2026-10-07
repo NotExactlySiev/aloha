@@ -14,6 +14,8 @@
 #include "shared.h"
 #include "sound.h"
 
+short func_800E62F0(u32 id);
+
 int func_800DBC24(void);
 int is_outside_simulation_range(int x, int y, int z);
 
@@ -2645,6 +2647,7 @@ u32 D_80102794 = 0;
 int D_80102798 = 1;
 int D_8010279C = 0;
 SVECTOR D_80141448; // camera rotation?
+extern CVECTOR D_80141450;
 
 void debug_print_hex16(u16 half);
 
@@ -3299,6 +3302,7 @@ GBuffer *gbuffer_get_current(void)
     return &gbuffers[gbuffer_current_index];
 }
 
+// Should be gbuffer_get_end
 u32 *gbuffer_get_next_ot(void)
 {
     return gbuffer_prim_buffers[D_80102D3C + 1].ot;
@@ -3866,13 +3870,46 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5B88);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5BA8);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5CC0);
+int D_80138088; // number of meshes drawn
+extern s32 D_801380B0; // lod_distance
+extern s16 D_8013E448[1024]; // lod mesh index offsets
+extern u16 D_8013EC48[1024]; // added flags and stuff
+extern s16 D_80141468[1024]; // z offsets
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5D30);
+extern s32 D_80138620;
+extern s32 D_80141458;
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5D90);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5CC0);
+void func_800E5CC0(void)
+{
+    func_800F42E0(gbuffer_get_next_ot() - 5 * 1024);
+    func_800E5478();
+    SetRotMatrix(D_801027F4);
+    SetLightMatrix(D_801027F8);
+    func_800E7078(D_80141450.r, D_80141450.g, D_80141450.b);
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DA0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5D30);
+void func_800E5D30(void)
+{
+    func_800E5B88(0, 0, 0);
+    func_800E5818(D_80141458, D_80138620);
+    SetRotMatrix(D_801027F4);
+    func_800E5BA8();
+    D_80138088 = 0;
+}
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5D90);
+int func_800E5D90(void)
+{
+    return D_80138088;
+}
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E5DA0);
+int func_800E5DA0(void)
+{
+    return ((int)gbuffer_get_next_ot() - (int)gbuffer_get_current()->nextfree) - 20 * 1024;
+}
 
 int func_800E5DD8(SVECTOR *v, u32 meshid)
 {
@@ -3886,12 +3923,6 @@ int func_800E5DD8(SVECTOR *v, u32 meshid)
     s->in.vz = v->vz - camera_pos->vz;
     return func_800F4354(&s->in, &s->out, &mesh_array[meshid & 0x3FF]);
 }
-
-int D_80138088; // number of meshes drawn
-extern s32 D_801380B0; // lod_distance
-extern s16 D_8013E448[1024]; // lod mesh index offsets
-extern u16 D_8013EC48[1024]; // added flags and stuff
-extern s16 D_80141468[1024]; // z offsets
 
 extern int (*D_80102E3C)(int, VECTOR *, u32); // depth adjuster
 extern SVECTOR D_80102E44;
@@ -4060,9 +4091,17 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
     D_80138088 += 1;
 }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E62F0);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E62F0);
+short func_800E62F0(u32 id)
+{
+    return mesh_array[id & 0x3ff].a;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E6310);
+// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E6310);
+Mesh *func_800E6310(uint id)
+{
+    return &mesh_array[id & 0x3ff];
+}
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E6328);
 
@@ -4094,6 +4133,7 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E68E0);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E6DB4);
 
+// libgte functions again
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E6FC8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E6FD8);
@@ -4164,13 +4204,18 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E723C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E725C);
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E7268);
+// end of libgte functions
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E736C);
+// Maybe libgte, maybe EXACT code?
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E7268); // asm
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E749C);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E736C); // asm
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E75B0);
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E749C); // asm
+
+INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800E75B0); // asm
+
+void evict_icache_line(void *p);
 
 #if PSYQ47_FIXES
 // TEMPORARY FIX FOR LIBGPU

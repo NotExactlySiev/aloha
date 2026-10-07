@@ -3,7 +3,9 @@
 .set noat      /* allow manual use of $at */
 .set noreorder /* don't insert nops after branches */
 
-# Handwritten function
+# void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3)
+
+# US: 800F4548
 glabel draw_mesh
     # Remove the flag and remove them to get the mesh pointer.
     andi        $v1, $a0, 0x1
@@ -217,7 +219,6 @@ glabel draw_mesh
 
     bgtz        $s7, .sets_loop
     xori        $s7, $s7, 0xFFFF
-
 
 .done:
     # We're done. Restore the foreground registers.

@@ -62,6 +62,14 @@
     cop2        0x1A0003E | (\sf<<19)
   .endm
 
+  .macro DPCS
+    cop2        0x0780010
+  .endm
+
+  .macro DPCT
+    cop2        0x0F8002A
+  .endm
+
   .macro INTPL
     cop2        0x0980011
   .endm
@@ -72,4 +80,28 @@
 
   .macro SQR sf
     cop2        0x0A00428 | (\sf<<19)
+  .endm
+
+  .macro NCS
+    cop2        0x0C8041E
+  .endm
+
+  .macro NCT
+    cop2        0x0D80420
+  .endm
+
+  .macro NCCS
+    cop2        0x108041B
+  .endm
+
+  .macro NCCT
+    cop2        0x118043F
+  .endm
+
+  .macro NCDS
+    cop2        0x0E80413
+  .endm
+
+  .macro NCDT
+    cop2        0x0F80416
   .endm
