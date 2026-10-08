@@ -12,10 +12,10 @@
 # and we jump to it. Evicting that line from the icache, and forcing the
 # instruction at p to be reloaded from RAM the next time it's executed.
 
-# We use to mask 0xFF8 instead of 0xFF0. This let's us jump to the middle of a
+# We use the mask 0xFF8 instead of 0xFF0. This lets us jump to the middle of a
 # cache line, where we'll put another return instruction. This won't change the
-# behavior of the function. Pretending we have 512 lines of 8 bytes instead of
-# 256 lines of 4 bytes just lets us return more quickly, executing 1 fewer
+# behavior of the function. Pretending we have 512 lines of 4 bytes instead of
+# 256 lines of 8 bytes just lets us return more quickly, executing 1 fewer
 # instruction on average.
 
 # US: 800E771C
@@ -28,9 +28,9 @@ glabel evict_icache_line
     nop
 
 .lines:
-.rept    256
-    jr         $ra
+.rept 256
+    jr      $ra
     nop
-    jr         $ra
+    jr      $ra
     nop
 .endr

@@ -3955,14 +3955,23 @@ enum {
 // draw_model
 void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
 {
-    if (id != 406 && id != 407 && id != 409 && id != 479)
-        return;
+    // Only draw the frog.
+    // if (id != 406 && id != 407 && id != 409 && id != 479)
+    //     return;
 
     SVECTOR *dir = SCRTCHPAD(0x00);
     MATRIX *rotation = SCRTCHPAD(0x10);
     MATRIX *light = SCRTCHPAD(0x30);
     MATRIX *tmp = SCRTCHPAD(0x50);
     MATRIX *alt_rot = SCRTCHPAD(0x70);
+
+    struct [[gnu::packed]] {
+        SVECTOR dir;
+        MATRIX rotation;
+        MATRIX light;
+        MATRIX tmp;
+        MATRIX alt_rot;
+    } *s = SCRTCHPAD(0);
 
     // World matrices
     SVECTOR *camera = SCRTCHPAD(0x3C8);
@@ -4036,9 +4045,9 @@ void func_800E5E60(SVECTOR *pos, SVECTOR *angle, u32 id)
             func_800E8838(rotation, alt_rot);
             third = &D_80102E44;
             // I'm not sure what's happening here. Is this alt_rot thing ever used?
-            alt_rot->m[0][1] = (D_801380A0.vx * alt_rot->m[0][0] + D_801380A0.vz * alt_rot->m[0][2]) / ONE;
-            alt_rot->m[1][1] = (D_801380A0.vx * alt_rot->m[1][0] + D_801380A0.vz * alt_rot->m[1][2]) / ONE;
-            alt_rot->m[2][1] = (D_801380A0.vx * alt_rot->m[2][0] + D_801380A0.vz * alt_rot->m[2][2]) / ONE;
+            alt_rot->m[0][1] = (D_801380A0.vx * alt_rot->m[0][0] + D_801380A0.vz * alt_rot->m[0][2]) >> 12;
+            alt_rot->m[1][1] = (D_801380A0.vx * alt_rot->m[1][0] + D_801380A0.vz * alt_rot->m[1][2]) >> 12;
+            alt_rot->m[2][1] = (D_801380A0.vx * alt_rot->m[2][0] + D_801380A0.vz * alt_rot->m[2][2]) >> 12;
         } else {
             // Then it can only be 0x1000
             rot_p = &D_80137CD0;

@@ -4,70 +4,104 @@
 .set noreorder /* don't insert nops after branches */
 
 glabel func_800F443C
-/* 44C3C 800F443C */ .word 0x40106000
-/* 44C40 800F4440 */ .word 0x2411FFFE
-/* 44C44 800F4444 */ .word 0x02308824
-/* 44C48 800F4448 */ .word 0x3C0F1F80
-/* 44C4C 800F444C */ .word 0x8DF903A0
-/* 44C50 800F4450 */ .word 0x8C8D0000
-/* 44C54 800F4454 */ .word 0x8C980004
-/* 44C58 800F4458 */ .word 0x24840004
-/* 44C5C 800F445C */ .word 0x330CFFFF
-/* 44C60 800F4460 */ .word 0x01996021
-/* 44C64 800F4464 */ .word 0x25EA03A8
-/* 44C68 800F4468 */ .word 0x25E90288
-/* 44C6C 800F446C */ .word 0x01A07021
-/* 44C70 800F4470 */ .word 0xC9800000
-/* 44C74 800F4474 */ .word 0xC9810004
-/* 44C78 800F4478 */ .word 0x24840004
-/* 44C7C 800F447C */ .word 0x4A480012 # invalid instruction
-/* 44C80 800F4480 */ .word 0x40916000
-/* 44C84 800F4484 */ .word 0x00000000
-/* 44C88 800F4488 */ .word 0x00181C02
-/* 44C8C 800F448C */ .word 0x8C980000
-/* 44C90 800F4490 */ .word 0x4840F800
-/* 44C94 800F4494 */ .word 0x4AA00428 # invalid instruction
-/* 44C98 800F4498 */ .word 0x330CFFFF
-/* 44C9C 800F449C */ .word 0x01996021
-/* 44CA0 800F44A0 */ .word 0x254A0002
-/* 44CA4 800F44A4 */ .word 0x25290004
-/* 44CA8 800F44A8 */ .word 0x40906000
-/* 44CAC 800F44AC */ .word 0xA543FFFE
-/* 44CB0 800F44B0 */ .word 0x4840F800
-/* 44CB4 800F44B4 */ .word 0x4802C800
-/* 44CB8 800F44B8 */ .word 0x4803D000
-/* 44CBC 800F44BC */ .word 0x4808D800
-/* 44CC0 800F44C0 */ .word 0x00431021
-/* 44CC4 800F44C4 */ .word 0x00021083
-/* 44CC8 800F44C8 */ .word 0x00481021
-/* 44CCC 800F44CC */ .word 0xAD22FFFC
-/* 44CD0 800F44D0 */ .word 0x1DA0FFE7
-/* 44CD4 800F44D4 */ .word 0x25ADFFFF
-/* 44CD8 800F44D8 */ .word 0x25F803A8
-/* 44CDC 800F44DC */ .word 0x25EF0288
-/* 44CE0 800F44E0 */ .word 0x01C06821
-/* 44CE4 800F44E4 */ .word 0x01E05021
-/* 44CE8 800F44E8 */ .word 0x03005821
-/* 44CEC 800F44EC */ .word 0x25EF0004
-/* 44CF0 800F44F0 */ .word 0x27180002
-/* 44CF4 800F44F4 */ .word 0x8DE80000
-/* 44CF8 800F44F8 */ .word 0x97090000
-/* 44CFC 800F44FC */ .word 0x01CD6023
-/* 44D00 800F4500 */ .word 0x8D420000
-/* 44D04 800F4504 */ .word 0x95630000
-/* 44D08 800F4508 */ .word 0x0102082B
-/* 44D0C 800F450C */ .word 0x10200007
-/* 44D10 800F4510 */ .word 0x00000000
-/* 44D14 800F4514 */ .word 0xAD420004
-/* 44D18 800F4518 */ .word 0xA5630002
-/* 44D1C 800F451C */ .word 0x254AFFFC
-/* 44D20 800F4520 */ .word 0x256BFFFE
-/* 44D24 800F4524 */ .word 0x1D80FFF6
-/* 44D28 800F4528 */ .word 0x258CFFFF
-/* 44D2C 800F452C */ .word 0xAD480004
-/* 44D30 800F4530 */ .word 0xA5690002
-/* 44D34 800F4534 */ .word 0x25ADFFFF
-/* 44D38 800F4538 */ .word 0x1DA0FFEA
-/* 44D3C 800F453C */ .word 0x00000000
-/* 44D40 800F4540 */ .word 0x03E00008
-/* 44D44 800F4544 */ .word 0x00000000
+    mfc0    $s0, $12
+    addiu   $s1, $zero, -2
+    and     $s1, $s0
+
+    # $t7 will be our scratchpad pointer.
+    lui     $t7, %hi(0x1f800000)
+
+    # Pointer to vertices.
+    lw      $t9, 0x3a0($t7)
+
+    # Read the number of sets.
+    lw      $t5, 0($a0)
+
+    # Offset to the face and vertex data.
+    lw      $t8, 4($a0)
+    addiu   $a0, 4
+    andi    $t4, $t8, 0xffff    # Vertices
+    addu    $t4, $t9            # Pointer to this set's first vertex
+    addiu   $t2, $t7, 0x3a8     # We'll write the sorted face offsets here.
+    addiu   $t1, $t7, 0x288     # We'll write the sorted distances here.
+
+    # Save the number of sets in $t6, so we can use $t5 as our loop counter.
+    move    $t6, $t5
+.loop:
+    # The first vertex is the anchor point of the set. The magnitude of its
+    # projection (so, its distance to the camera) is what we need to calculate
+    # and sort by.
+    lwc2	$0, 0($t4)
+    lwc2	$1, 4($t4)
+    addiu   $a0, 4
+    MVMVA   1, 0, 0, 0, 0
+    mtc0    $s1, $12
+    nop
+    srl     $v1, $t8, 16        # Faces offset
+    lw      $t8, 0($a0)
+    cfc2    $zero, $31
+    SQR     0
+    andi    $t4, $t8, 0xffff
+    addu    $t4, $t9            # Vertices for the next set
+    addiu   $t2, 2
+    addiu   $t1, 4
+    mtc0    $s0, $12
+    sh      $v1, -2($t2)        # Store the face offset in its array
+    cfc2    $zero, $31
+
+    mfc2    $v0, $25
+    mfc2    $v1, $26
+    mfc2    $t0, $27
+
+    # We actually bias the magnitude value somewhat towards favorint the depth
+    # more. The formula is (x^2 + y^2) / 4 + z^2
+    addu    $v0, $v1
+    sra     $v0, 2
+    addu    $v0, $t0
+    sw      $v0, -4($t1)        # Store the magnitude in its array
+
+    bgtz    $t5, .loop
+    addiu   $t5, -1
+
+    # Now we do the sorting. Reset the pointers to the beginning of the arrays.
+    addiu   $t8, $t7, 0x3a8     # Face offsets
+    addiu   $t7, $t7, 0x288     # Magnitudes
+    move    $t5, $t6            # Loop counter
+.sortloop:
+        # Pointers to set i
+        move    $t2, $t7
+        move    $t3, $t8
+
+        # Pointers to set i+1
+        addiu   $t7, 4
+        addiu   $t8, 2
+        lw      $t0, 0($t7)
+        lhu     $t1, 0($t8)
+        subu    $t4, $t6, $t5
+    .insertloop:
+            lw      $v0, 0($t2)
+            lhu     $v1, 0($t3)
+
+            # bltu pseudo-op?
+            # bltu
+            sltu    $at, $t0, $v0
+            beq     $at, $zero, .noswap
+            nop
+
+            # Swap them around
+            sw      $v0, 4($t2)
+            sh      $v1, 2($t3)
+            addiu   $t2, -4
+            addiu   $t3, -2
+        .noswap:
+            bgtz    $t4, .insertloop
+            addiu   $t4, -1
+
+        sw      $t0, 4($t2)
+        sh      $t1, 2($t3)
+        addiu   $t5, -1
+        bgtz    $t5, .sortloop
+        nop
+
+    jr      $ra
+    nop
