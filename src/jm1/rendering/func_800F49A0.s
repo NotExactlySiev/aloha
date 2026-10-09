@@ -112,7 +112,6 @@ glabel func_800F49A0
     jr      $ra
     nop
 
-
 glabel func_800F4A6C
 /* 4526C 800F4A6C */ .word 0x32420400
 /* 45270 800F4A70 */ bne    $v0, $zero, .L800F4A98
@@ -1839,7 +1838,7 @@ what's in t9?
     bgtz    $t4, .L800F63D0
     li      $v0, 36
 
-    # GTE Error was present
+    # GTE Error was present. Subdivide?
 	jal     func_800F6B08
 	nop
 	addiu   $v1, $v0, -24
@@ -2453,14 +2452,19 @@ glabel func_800F6AA8    # .gt4finalize
     b       .continue2
     addu    $a1, $t0
 
-# actual function
+
+# subdivide_polygon
 glabel func_800F6B08
     addiu   $sp, -4
     sw      $ra, 0($sp)
+
+    # Work array pointers.
     lui     $t9, 0x1F80
     addiu   $t6, $t9, 0x288
     addiu   $t9, $t9, 0x2f4
     addu    $t8, $v0, $t6
+
+    # Copy the first vertex at the end.
     lw      $v1, 0x0($t6)
     lw      $t0, 0x4($t6)
     lw      $t1, 0x8($t6)
@@ -2470,6 +2474,8 @@ glabel func_800F6B08
     addiu   $s1, $t9, 12
 .L800F6B3C:
     addiu   $t7, $t6, 12
+
+    # XY and flags/depth
     lw      $t4, 8($t6)
     lw      $t5, 8($t7)
     lh      $t2, 4($t4)
@@ -2527,7 +2533,7 @@ glabel func_800F6B08
     jr      $ra
     nop
 
-
+# Subdivision helper. Merge vertices?
 glabel func_800F6C14
 /* 47414 800F6C14 F4FF3927 */  addiu      $t9, $t9, -0xC
 /* 47418 800F6C18 23103103 */  subu       $v0, $t9, $s1
@@ -2544,9 +2550,6 @@ glabel func_800F6C14
 .L800F6C40:
 /* 47440 800F6C40 0800E003 */  jr         $ra
 /* 47444 800F6C44 00000000 */   nop
-
-# Whole-face depth cue calculation function. Two entry points.
-# $v0 is the offset to the last vertex. 36 for quads and 24 for triangles.
 
 # THIS STUPID FUNCTION FUCKING **FLIPS**!!!!!! THE X AND Y COORDINATES OF THE
 # VERTICES IT PROCESSES!!!!!!! THAT'S WHY IT NEEDS TO BE RUN TWICE. FIRST IT
@@ -2682,10 +2685,12 @@ glabel func_800F6C68
     jr      $ra
     nop
 
+# Interpolate two world space vertices? This one has to be used for subdivision.
 glabel func_800F6D78
     addiu   $sp, -4
     sw      $ra, 0($sp)
 
+    # This time this a a regular processed vertex, with z at offset 6.
     lh      $t1, 6($t5)
     lh      $t0, 6($t4)
     jal     func_800F6E18
@@ -2707,6 +2712,8 @@ glabel func_800F6D78
     b       .L800F6E04
     nop
 
+# Interpolate attributes between two vertices, with the new vertex having the
+# x coordinate give in $v0. Also flip the X and Y values in the new vertex.
 # $v0   new x
 # $v1   added to new Y, for some reason?
 # $t6   ptr to vertex 0

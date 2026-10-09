@@ -220,7 +220,7 @@ extern struct {
     /* 30F */ void        (*snd_reset)(void);
     /* 310 */ void        (*sfx_play_simple)(u32 id);
     /* 311 */ short       (*sfx_play)(u32 id, short pan, short volume);
-    /* 312 */ void        (*sfx_play_modulated)(u32 id, s16 arg1, s16 arg2, s16 arg3);
+    /* 312 */ short       (*sfx_play_modulated)(u32 id, s32 pan, s16 vol, s16 arg3, u16 arg4, s32 prio);
     /* 313 */ void        (*sfx_kill)(u32 handle);
     /* 314 */ int         (*sfx_set_pan)(u32 handle, u16 pan);
     /* 315 */ int         (*sfx_set_vol)(u32 handle, u16 vol);

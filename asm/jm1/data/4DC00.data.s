@@ -7573,11 +7573,11 @@ glabel D_801026C4
 /* 52EC4 801026C4 */ .word 0x5C314D4A
 /* 52EC8 801026C8 */ .word 0x00000000
 
-glabel D_801026CC
-/* 52ECC 801026CC */ .short 0x7FFF
+# glabel D_801026CC
+# /* 52ECC 801026CC */ .short 0x7FFF
 
-glabel D_801026CE
-/* 52ECE 801026CE */ .short 0x7FFF
+# glabel D_801026CE
+# /* 52ECE 801026CE */ .short 0x7FFF
 
 glabel D_801026D0
 /* 52ED0 801026D0 */ .word 0x00000064
