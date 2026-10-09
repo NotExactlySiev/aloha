@@ -62,6 +62,10 @@
     cop2        0x1A0003E | (\sf<<19)
   .endm
 
+  .macro DPCL
+    cop2        0x0680029
+  .endm
+
   .macro DPCS
     cop2        0x0780010
   .endm
@@ -104,4 +108,8 @@
 
   .macro NCDT
     cop2        0x0F80416
+  .endm
+
+  .macro NCLIP
+    cop2        0x1400006
   .endm

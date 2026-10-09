@@ -5,137 +5,263 @@
 
 # transforms and writes the vertices to the start of scratchpad
 
+# Returns:
+#   v0: Collected faults (?)
+#   v1: Min Z
+
 glabel func_800F47B8
-/* 44FB8 800F47B8 */ lui    $t6, 0x1F80
-/* 44FBC 800F47BC */ lw     $s1, 0x3A0($t6)         # address of vertices
-/* 44FC0 800F47C0 */ mfc2   $t3, $2                 # put the offset vector in $t3,$t5
-/* 44FC4 800F47C4 */ mfc2   $t5, $3
-/* 44FC8 800F47C8 */ lw     $at, 0($a0)             # length of subset header (ranges)
-/* 44FCC 800F47CC */ addiu  $t6, -12
-/* 44FD0 800F47D0 */ lui    $t7, 0xff00             # screen position high bytes mask (overflow?)
-/* 44FD4 800F47D4 */ ori    $t7, 0xff00
-/* 44FD8 800F47D8 */ lui    $a3, 0xfffe
-/* 44FDC 800F47DC */ ori    $a3, 0xffff
-/* 44FE0 800F47E0 */ addiu  $a0, 4
-/* 44FE4 800F47E4 */ addu   $at, $a0
-/* 44FE8 800F47E8 */ lw     $v0, 0($a0)             # read first range
-/* 44FEC 800F47EC */ li     $s4, 0x7fff             # INT16_MAX? used to find a min value?
-/* 44FF0 800F47F0 */ srl    $s2, $v0, 0x10          # len
-/* 44FF4 800F47F4 */ andi   $v0, 0xffff             # base offset
-/* 44FF8 800F47F8 */ addu   $s0, $v0, $s1           # go to first vertex (base)
-/* 44FFC 800F47FC */ lw     $t8, 0($s0)             # load vertex
-/* 45000 800F4800 */ lw     $t9, 4($s0)
-/* 45004 800F4804 */ lui    $t2, 0xffff
-/* 45008 800F4808 */ and    $t3, $a3                # add the vector in $t3,$t5
-/* 4500C 800F480C */ and    $t8, $a3                # (offset vector)
-/* 45010 800F4810 */ addu   $t8, $t3
-/* 45014 800F4814 */ and    $t8, $a3
-/* 45018 800F4818 */ addu   $t9, $t5
-.L800F481C:
-/* 4501C 800F481C */ mtc2   $t8, $0
-/* 45020 800F4820 */ mtc2   $t9, $1
-/* 45024 800F4824 */ addiu  $s0, 8                  # go to next vertex
-/* 45028 800F4828 */ .word 0x4A180001               # perspective transform (rtps)
-/* 4502C 800F482C */ bgtz   $s2, .L800F4854         # range still going?
-/* 45030 800F4830 */ addiu  $s2, -1
-/* 45034 800F4834 */ addiu  $a0, 4                  # go to next range
-/* 45038 800F4838 */ beq    $a0, $at, .L800F487C    # no more ranges?
-/* 4503C 800F483C */ nop
-/* 45040 800F4840 */ lw     $v0, 0($a0)             # set base and len again
-/* 45044 800F4844 */ nop
-/* 45048 800F4848 */ srl  $s2, $v0, 0x10
-/* 4504C 800F484C */ andi $v0, 0xFFFF
-/* 45050 800F4850 */ addu $s0, $v0, $s1
-.L800F4854:
-/* 45054 800F4854 */ lw     $t8, 0($s0)             # get next vertex
-/* 45058 800F4858 */ lw     $t9, 4($s0)
-/* 4505C 800F485C */ subu   $v0, $s4, $s3           # don't know what this is
-/* 45060 800F4860 */ blez   $v0, .L800F486C         # finding some min?
-/* 45064 800F4864 */ nop
-/* 45068 800F4868 */ move   $s4, $s3
+    # $t6 is our scratchpad pointer. Where we'll write the projected vertices.
+    lui    $t6, 0x1F80
+
+    # Get the base address of object's vertices.
+    lw     $s1, 0x3A0($t6)
+
+    mfc2   $t3, $2                 # put the offset vector in $t3,$t5
+    mfc2   $t5, $3
+
+    # Length of the subset header in bytes. (ranges)
+    lw     $at, 0($a0)
+
+    # Adjust the pointer for our loop. We'll be writing the vertices at the
+    # beginning of scratchpad.
+    addiu  $t6, -12
+
+
+    # Screen position mask. Used for checking if SX > 255 or SY > 255.
+    lui    $t7, 0xff00
+    ori    $t7, 0xff00
+    # li      $t7, 0xff00ff00   # Doesn't work.
+
+    # Mask for adding two s16 vectors together in parallel.
+    lui    $a3, 0xfffe
+    ori    $a3, 0xffff
+    # li      $a3, 0xfffeffff   # Doesn't work.
+
+    # $a0 points at the header. $at points at the end of the header.
+    addiu   $a0, 4
+    addu    $at, $a0
+
+    # Read first range.
+    lw      $v0, 0($a0)             # read first range
+    li      $s4, 0x7fff             # INT16_MAX? used to find a min value?
+
+    # $s2 = range length
+    # $v0 = range base (offset from the first vertex)
+    srl     $s2, $v0, 0x10          # len
+    andi    $v0, 0xffff             # base offset
+
+    # Go to the first vertex of this range and load it.
+    addu    $s0, $v0, $s1           # go to first vertex (base)
+    lw      $t8, 0($s0)             # load vertex
+    lw      $t9, 4($s0)
+
+    lui     $t2, 0xffff
+
+    # The offset vector was loaded into (t3, t5). We will now add it to this
+    # vertex. The masks let us add the three s16 values with two add commands.
+    and     $t3, $a3
+    and     $t8, $a3
+    addu    $t8, $t3
+    and     $t8, $a3
+    addu    $t9, $t5
+.loop:
+    # Project the vertex.
+    mtc2    $t8, $0
+    mtc2    $t9, $1
+    addiu   $s0, 8
+    RTPS
+
+    # Are there more vertices in this range?
+    bgtz    $s2, .samerange
+    addiu   $s2, -1
+
+    # No, go to the next range.
+    addiu   $a0, 4
+
+    # Was that the final range?
+    beq     $a0, $at, .storevertex
+    nop
+
+    # Load up the pointers for this new range.
+    lw      $v0, 0($a0)
+    nop
+    srl     $s2, $v0, 0x10      # Length
+    andi    $v0, 0xFFFF         # Base offset
+    addu    $s0, $v0, $s1       # Base
+.samerange:
+
+    # Get the next vertex.
+    lw      $t8, 0($s0)
+    lw      $t9, 4($s0)
+
+    # if ($s3 < $s4) $s4 = $s3
+    # Note: The first time this is ran, $s3 is uninitialized.
+    subu    $v0, $s4, $s3
+    blez    $v0, .L800F486C
+    nop
+    move    $s4, $s3
 .L800F486C:
-/* 4506C 800F486C */ and    $t8, $a3                # add the offset vector again
-/* 45070 800F4870 */ addu   $t8, $t3
-/* 45074 800F4874 */ and    $t8, $a3
-/* 45078 800F4878 */ addu   $t9, $t5
-.L800F487C:
-/* 4507C 800F487C */ addiu  $t6, 12                 # go to next translated vector
-/* 45080 800F4880 */ cfc2   $zero, $31              # and write the results (raw and screen)
-/* 45084 800F4884 */ swc2   $25, 0($t6)             # mac1
-/* 45088 800F4888 */ mfc2   $v0, $26                # mac2
-/* 4508C 800F488C */ mfc2   $s3, $27                # mac3
-/* 45090 800F4890 */ mfc2   $t4, $8                 # depth cueing
-/* 45094 800F4894 */ sh     $v0, 2($t6)
-/* 45098 800F4898 */ sh     $s3, 6($t6)
-/* 4509C 800F489C */ cfc2   $v1, $31
-/* 450A0 800F48A0 */ mfc2   $t1, $14                # SXY2
-/* 450A4 800F48A4 */ andi   $t4, 0x1fe0
-/* 450A8 800F48A8 */ bltz   $v1, .L800F48D0         # not overflow?
-/* 450AC 800F48AC */ and    $v0, $t1, $t7           # check high bytes of screen pos
-/* 450B0 800F48B0 */ sw     $t1, 0x0008($t6)        # write screen pos
-/* 450B4 800F48B4 */ bne    $v0, $zero, .L800F493C  # any high bytes set? (x or y > 255)
-/* 450B8 800F48B8 */ andi   $t2, 0xffff
-/* 450BC 800F48BC */ sh     $t4, 0x0004($t6)
-/* 450C0 800F48C0 */ bne    $at, $a0, .L800F481C
-/* 450C4 800F48C4 */ nop
-/* 450C8 800F48C8 */ b      .L800F4984
-/* 450CC 800F48CC */ nop
-.L800F48D0:
-/* 450D0 800F48D0 */ sw     $t1, 8($t6)        # write screen pos
-/* 450D4 800F48D4 */ sll    $v0, $v1, 0xe # .word 0x00031380
-/* 450D8 800F48D8 */ bltz   $v0, .L800F4968 # .word 0x04400023
-/* 450DC 800F48DC */ ori   $t0, $zero, 0x8000 # .word 0x34088000
-/* 450E0 800F48E0 */ .word 0x4808D800
-/* 450E4 800F48E4 */ lui    $t1, 0x0004 # .word 0x3C090004
-/* 450E8 800F48E8 */ .word 0x0128001A   # divu    $t1, $t0
-/* 450EC 800F48EC */ mfc0   $v1, $12   # .word 0x40036000
-/* 450F0 800F48F0 */ addiu   $v0, $zero, 0xfffe # .word 0x2402FFFE
-/* 450F4 800F48F4 */ and    $v0, $v1 # .word 0x00431024
-/* 450F8 800F48F8 */ .word 0x40826000
-/* 450FC 800F48FC */ nop    # .word 0x00000000
-/* 45100 800F4900 */ mflo   $v0 # .word 0x00001012
-/* 45104 800F4904 */ mtc2   $v0, $8       #.word 0x48824000
-/* 45108 800F4908 */ nop    # .word 0x00000000
-/* 4510C 800F490C */ nop    # .word 0x00000000
-/* 45110 800F4910 */ .word 0x4B98003D # invalid instruction
-/* 45114 800F4914 */ .word 0x4840F800
-/* 45118 800F4918 */ .word 0x4809C800
-/* 4511C 800F491C */ .word 0x4802D000
-/* 45120 800F4920 */ .word 0x25290080
-/* 45124 800F4924 */ .word 0x24420080
-/* 45128 800F4928 */ .word 0x40836000
-/* 4512C 800F492C */ .word 0xA5C90008
-/* 45130 800F4930 */ .word 0xA5C2000A
-/* 45134 800F4934 */ .word 0x10000002
-/* 45138 800F4938 */ nop
 
-.L800F493C:     # screen x or y > 255
-/* 4513C 800F493C */ .word 0x00091403
-/* 45140 800F4940 */ .word 0x3129FF00
-/* 45144 800F4944 */ .word 0x11200003
-/* 45148 800F4948 */ .word 0x3042FF00
-/* 4514C 800F494C */ .word 0x00094BC2
-/* 45150 800F4950 */ .word 0x25290001
-/* 45154 800F4954 */ .word 0x10400004
-/* 45158 800F4958 */ .word 0x00094080
-/* 4515C 800F495C */ .word 0x000213C2
-/* 45160 800F4960 */ .word 0x24420001
-/* 45164 800F4964 */ .word 0x01024021
+    # Add the offset vector to the next vertex.
+    and     $t8, $a3
+    addu    $t8, $t3
+    and     $t8, $a3
+    addu    $t9, $t5
+.storevertex:
+    # Get the result of the vertex we just calculated and store it.
+    # Here's the 12 byte structure each transformed vertex is stored in:
+    #   s16   x'
+    #   s16   y'
+    #   u16   depth
+    #   s16   z'
+    #   s16   sx
+    #   s16   sy
+    addiu   $t6, 12
+    cfc2    $zero, $31
+    swc2    $25, 0($t6)             # mac1 = X'
+    mfc2    $v0, $26                # mac2 = Y'
+    mfc2    $s3, $27                # mac3 = Z'
+    mfc2    $t4, $8                 # depth cueing
+    sh      $v0, 2($t6)
+    sh      $s3, 6($t6)
+    cfc2    $v1, $31
+    mfc2    $t1, $14                # SXY2
 
-.L800F4968:
-/* 45168 800F4968 */ or     $t4, $t0 # .word 0x01886025
-/* 4516C 800F496C */ sh     $t4, 0x0004($t6) # .word 0xA5CC0004
-/* 45170 800F4970 */ or     $t2, $t0 # .word 0x01485025
-/* 45174 800F4974 */ sll    $t0, 0x10 # .word 0x00084400
-/* 45178 800F4978 */ ori    $t0, 0xffff # .word 0x3508FFFF
-/* 4517C 800F497C */ bne    $at, $a0, .L800F481C # .word 0x1424FFA7
-/* 45180 800F4980 */ and    $t2, $t0 # .word 0x01485024
-.L800F4984:
-/* 45184 800F4984 */ subu   $v0, $s4, $s3 # .word 0x02931023
-/* 45188 800F4988 */ blez   $v0, .L800F4994 # .word 0x18400002
-/* 4518C 800F498C */ nop     # .word 0x00000000
-/* 45190 800F4990 */ .word 0x0260A021
+    # Depth cue mask
+    andi    $t4, 0x1fe0
+
+    # Check for calculation error.
+    bltz    $v1, .rtpserr
+    and     $v0, $t1, $t7           # check high bytes of screen pos
+
+    sw      $t1, 8($t6)
+
+    # any high bytes set? (x or y > 255 or negative)
+    bne     $v0, $zero, .outsidescr
+    andi    $t2, 0xffff             # ???
+
+    sh      $t4, 4($t6)
+
+    # Was this the final vertex?
+    bne     $at, $a0, .loop
+    nop
+    b       .done
+    nop
+
+.rtpserr:
+    # Store the screen position.
+    sw      $t1, 8($t6)
+
+    # Division overflow?
+    sll     $v0, $v1, 0xe
+    bltz    $v0, .faultprocessed
+    ori     $t0, $zero, 0x8000
+
+    # Fine. We'll do the division ourselves.
+
+    # Read MAC3 == SZ3.
+    mfc2    $t0, $27
+
+    # Calculate the factor as 0x40000 / SZ3.
+    lui     $t1, 0x0004
+    divu    $t1, $t0
+
+    # Save SR.
+    mfc0    $v1, $12
+    li      $v0, -2
+    and     $v0, $v1
+
+    # Disable interrupts.
+    mtc0    $v0, $12
+    nop
+
+    # Put the division result into IR0 and multiply the vertex by it using GPF.
+    # [X, Y, Z] = (0x40000 / Z) * [X, Y, Z] >> 12
+    # Keep in mind that the matrix multiplication has already taken place.
+    mflo    $v0
+    mtc2    $v0, $8
+    nop
+    nop
+    GPF     1
+    cfc2    $zero, $31
+
+
+    mfc2    $t1, $25
+    mfc2    $v0, $26
+
+    # Add the screen offset, as RTPS would.
+    addiu   $t1, $t1, 0x80
+    addiu   $v0, $v0, 0x80
+
+    # Enable interrupts.
+    mtc0    $v1, $12
+
+    # Store the calculated screen coordinates.
+    sh      $t1, 8($t6)
+    sh      $v0, 10($t6)
+    b       .L800F4940
+    nop
+
+.outsidescr:     # screen x or y > 255
+    # Put SX and SY into separate registers as the next section expects.
+    sra     $v0, $t1, 16
+
+.L800F4940:
+    # At this point $t1 == SX and $v0 == SY.
+
+    # X overflow?
+    andi    $t1, 0xff00
+    beqz    $t1, .notxclip
+    andi    $v0, 0xff00
+    srl     $t1, 15             # Sign bit
+    addiu   $t1, 1
+.notxclip:
+
+    # Y overflow?
+    beqz    $v0, .notyclip
+    sll     $t0, $t1, 2
+    srl     $v0, 15             # Sign bit
+    addiu   $v0, 1
+    addu    $t0, $v0
+.notyclip:
+
+    # Now $t0 is a bitfield XXYY where the pairs mean:
+    #   00: Not outside screen
+    #   01: Outisde screen to the positive side
+    #   10: Outisde screen to the negative side
+    #
+    # Therefore we get one of nine possible numbers depending on where the
+    # vertex has ended up:
+    #  ________ ________ ________
+    # |        |        |        |
+    # |  1010  |  1000  |  1001  |
+    # |________|________|________|
+    # |        |        |        |
+    # |  0010  |  0000  |  0001  |
+    # |________|________|________|
+    # |        |        |        |
+    # |  0110  |  0100  |  0101  |
+    # |________|________|________|
+    #
+
+.faultprocessed:
+    # Store the errors that have occured (GTE or screen clipping) in the flags
+    # field, alongside the depth value.
+    or      $t4, $t0
+    sh      $t4, 0x0004($t6)
+    or      $t2, $t0
+    sll     $t0, 0x10
+    ori     $t0, 0xffff
+
+    bne     $at, $a0, .loop
+    and     $t2, $t0
+
+.done:
+    subu    $v0, $s4, $s3
+    blez    $v0, .L800F4994
+    nop
+    move    $s4, $s3
 .L800F4994:
-/* 45194 800F4994 */ move   $v1, $s4 # .word 0x02801821
-/* 45198 800F4998 */ jr     $ra # .word 0x03E00008
-/* 4519C 800F499C */ move   $v0, $t2 # .word 0x01401021
+    move    $v1, $s4
+    jr      $ra
+    move    $v0, $t2

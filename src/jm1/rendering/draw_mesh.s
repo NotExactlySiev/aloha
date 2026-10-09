@@ -165,6 +165,8 @@ glabel draw_mesh
     srl         $v0, $v0, 16
     beqz        $v0, .draw_subset
     nop
+
+    # Subset is entirely clipped, skip it?
     lw          $v0, 0x0($a0)
     addiu       $a0, $a0, 0x4
     b           .subset_done

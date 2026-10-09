@@ -955,28 +955,22 @@ void D_800F68A4(void);
 void func_800F443C(MeshSets *sets_data);
 void *draw_mesh(u32 mesh_with_flags, void *prim, u32 ot_with_flags, u32 *arg3);
 
-// ## I think the insanity of rendering code is confined to here
-
-// moving the handwritten assembly stuff to src
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F47B8);   // not disassembled
-// FUCK rendering code
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F49A0);   // not disassembled, LOOOONG
-// smol function. assembly?
-// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C14);   // disassembled
 // weird function with two entry points
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C48); // disassembled
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6C48); // disassembled
 // more stupid assembly shit using $t9
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6D78); // disassembled
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E18); // disassembled
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C); // disassembled
+
+// Ooops deleted this one. Oh no.
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6D78); // disassembled
+
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E18); // disassembled
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6E5C); // disassembled
 
 // big function, probably C?
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6EE0); // disassembled
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F6EE0); // disassembled
 
 // stupid shit using weird registers, but very small
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C); // disassembled
-INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7130); // disassembled
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F710C); // disassembled
+// INCLUDE_ASM("asm/jm1/nonmatchings/38F38", func_800F7130); // disassembled
 
 // ## Insanity over
 

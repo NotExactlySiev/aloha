@@ -9,66 +9,89 @@
 
 # a0:   subset faces
 # a1:   prim buffer
-# a2:   weird ot lwl pointr
-# a3:   count
+# a2:   weird ot lwl pointer (ready for swl)
+# a3:   clipping and overflow flags (from )
+# v1:   minimum Z (from )
 
 # draw_subset
 # US: 800F49A0
 glabel func_800F49A0
-    addiu   $sp, 0xfffc
-    sw      $ra, 0x0000($sp)
-    lw      $s4, 0x0000($a0)
+    addiu   $sp, -4
+    sw      $ra, 0($sp)
 
+    # Size of the subset in bytes
+    lw      $s4, 0($a0)
+
+    # Check clipping and overflow flags.
     andi    $v0, $a3, 0x800f
     beq     $v0, $zero, .L0
     move    $s2, $zero
     ori     $s2, 0x8000
 .L0:
 
-    # Okay I'm already confused. This is uninitialized so what are we doing?
-    addiu   $v1, 0xf800
+    # Do we clip the near plane? (I think that's what this is checking?)
+    addiu   $v1, -0x800
     bltz    $v1, .L1
     nop
+    # We don't. Remember that.
     ori     $s2, 0x1000
 .L1:
 
-    #
-    lw      $a3, 0x0004($a0)
-    la      $s5, 0x1f800000 - 12
+    # Read the first subset's vertex indices.
+    lw      $a3, 4($a0)
 
+    # Load the scratchpad pointer and get the meshid flag we saved at 0x1f800372
+    # in draw_mesh.
+    la      $s5, 0x1f800000 - 12
     lh      $v0, 0x037e($s5)
-    addiu   $a0, 0x0004
+
+    # Go to the first subset.
+    addiu   $a0, 4
+
+    # Get a pointer to the final subset.
     addu    $s4, $a0
-    addiu   $s4, 0xffe4     # this is the next subset
+    addiu   $s4, -28
+
+    # Accumulate the flags in $s2.
     or      $s2, $v0
+
+    # Get the pointer at 0x1f8003a4. This is the pointer to the unk section of
+    # the mesh.
     lw      $s3, 0x03b0($s5)
 
-    # t6 = vert indices
+    # $t6: Current subset's indices
+    # $a3: Next subset's indices
     move    $t6, $a3
     lw      $a3, 0x001c($a0)
 
-    srl     $t9, $t6, 0x18      # t9 <- v3 index
+    # $t9 <- V3
+    # $t8 <- 4 * V2
+    # $t7 <- 4 * V1
+    # $t6 <- 4 * V0
+    srl     $t9, $t6, 0x18
     srl     $t8, $t6, 0x0e
-    andi    $t8, 0x03fc         # t8 <- 4 * v2
+    andi    $t8, 0x03fc
     srl     $t7, $t6, 0x06
-    andi    $t7, 0x03fc         # t7 <- 4 * v1
+    andi    $t7, 0x03fc
     sll     $t6, 0x02
-    andi    $t6, 0x03fc         # t6 <- 4 * v0
+    andi    $t6, 0x03fc
 
-    # And calculate the pointers to those vertices.
+    # Calculate the pointers to the first three vertices.
     addu    $t6, $s5
     addu    $t7, $s5
     addu    $t8, $s5
 
-    # if v3 >= 3 it's a quad
-    addiu   $t9, 0xfffe
-    bgtz    $t9,        .QUAD
-    addiu   $t9, 0x0002
+    # If V3 >= 3 it's a quad.
+    addiu   $t9, -2
+    bgtz    $t9, .QUAD
+    addiu   $t9, 2
 
-    # if
-    bne     $t6, $t8,   .TRI
+    # If V0 != V2 it's a triangle.
+    bne     $t6, $t8, .TRI
     nop
-    b                   .LINE
+
+    # Otherwise it's a line.
+    b      .LINE
     nop
 
 # return here after the primitive is done:
@@ -1484,7 +1507,7 @@ glabel func_800F5E04
 /* 467C4 800F5FC4 */ .word 0x05A1002C
 /* 467C8 800F5FC8 */ nop
 .L800F5FCC:
-    jal func_800F68B0               # go to funky color function
+    jal     func_800F68B0   # Get color
     nop
 
     andi    $v0, $t5, 1
@@ -1498,23 +1521,23 @@ glabel func_800F5E04
     andi    $v0, 0x7fff
     beq     $v1, $zero, .L800F6038  # what are we bypassing here?
     nop
-.L800F5FF8:
-    jal     func_800F6798           # step 1 (shading?)
+.L800F5FF8: # TriSimpleUnlit
+    jal     func_800F6798
     nop
-.TRI_FLAT:
-    jal     func_800F6808           # I think we run this on every vertex
+.TRI_FLAT: # .TriSimpleFlat
+    jal     func_800F6808       # Color 0 Calculate
     lh      $t1, 4($t6)
-	jal     func_800F6928           # set 2 of the verts
+	jal     func_800F6928       # Prim V0 V2
     nop
-	jal     func_800F6808
-	lh      $t1, 4($t7)
-    sw      $t0, 8($a1)
-	jal     func_800F6958           # set the actual primitive command
-    li      $t0, 0x0730
-	jal     func_800F6808
-    lh      $t1, 4($t8)
-    sw      $t0, 0x0018($a1)        # color 2
-	j       .finalize0           # finalize
+	jal     func_800F6808       # Color 1 Calculate
+	lh      $t1, 4($t7)         # Depth 1
+    sw      $t0, 8($a1)         # Color 0 Write
+	jal     func_800F6958       #
+    li      $t0, 0x0730         # G3
+	jal     func_800F6808       # Color 2 Calculate
+    lh      $t1, 4($t8)         # Depth 2
+    sw      $t0, 0x18($a1)      # Color 1 Write
+	j       .finalize_tri
     li      $t0, 0x20
 .L800F6038:
 	jal func_800F682C
@@ -1531,7 +1554,7 @@ glabel func_800F5E04
 	jal func_800F682C
 /* 46868 800F6068 */ .word 0x87090004
 /* 4686C 800F606C */ .word 0xACA80018
-	j .finalize0
+	j .finalize_tri
 /* 46874 800F6074 */ .word 0x24080020
 	jal func_800F69A0
 /* 4687C 800F607C */ nop
@@ -1651,115 +1674,181 @@ what's in t9?
 */
 
 .QUAD:
+    # This is a quad, so index for V3 also needs to be converted into a pointer.
     sll     $t9, 0x2
     addu    $t9, $s5
-/* 46A28 800F6228 */ .word 0x32428000
-/* 46A2C 800F622C */ .word 0x10400011
+
+    # WHAT IS THIS FLAG AAAAA
+    andi    $v0, $s2, 0x8000
+    beqz    $v0, .donclip
     move    $t4, $zero
+
+    # Load the flags of each vertex.
     lh      $v0, 4($t6)
     lh      $v1, 4($t7)
     lh      $t0, 4($t8)
     lh      $t1, 4($t9)
+
+    # Is the polygon entirely outside the screen? Or have all 4 vertices made
+    # a GTE error?
     and     $at, $v0, $v1
     and     $at, $t0
     and     $at, $t1
     andi    $at, 0x800F
-/* 46A54 800F6254 */ .word 0x1420F9FC
+    bnez    $at, .continue1         # Don't draw it.
+
+    # Accumulate the error and clipping flags.
     or      $t4, $v0, $v1
     or      $t4, $t0
     or      $t4, $t1
     andi    $t4, 0x800F
     sll     $t4, 0x10
-/* 46A6C 800F626C */ .word 0x0580001C
-    addiu   $t2, $s5, 0x294
-	jal     func_800F671C
-    nop
-/* 46A7C 800F627C */ .word 0x1180005C
-/* 46A80 800F6280 */ nop
-/* 46A84 800F6284 */ .word 0x26AA0300
-/* 46A88 800F6288 */ .word 0x85C20004
-/* 46A8C 800F628C */ .word 0x85E30004
-/* 46A90 800F6290 */ .word 0x87080004
-/* 46A94 800F6294 */ .word 0x87290004
-/* 46A98 800F6298 */ .word 0x30421FE0
-/* 46A9C 800F629C */ .word 0x30631FE0
-/* 46AA0 800F62A0 */ .word 0x31081FE0
-/* 46AA4 800F62A4 */ .word 0x31291FE0
-/* 46AA8 800F62A8 */ .word 0xA5420004
-/* 46AAC 800F62AC */ .word 0xA5430010
-/* 46AB0 800F62B0 */ .word 0xA548001C
-/* 46AB4 800F62B4 */ .word 0xA5490028
-/* 46AB8 800F62B8 */ .word 0x8DC20008
-/* 46ABC 800F62BC */ .word 0x8DE30008
-/* 46AC0 800F62C0 */ .word 0xAD420008
-/* 46AC4 800F62C4 */ .word 0xAD430014
-/* 46AC8 800F62C8 */ .word 0x8F020008
-/* 46ACC 800F62CC */ .word 0x8F230008
-/* 46AD0 800F62D0 */ .word 0xAD420020
-/* 46AD4 800F62D4 */ .word 0xAD43002C
-/* 46AD8 800F62D8 */ .word 0x10000007
-/* 46ADC 800F62DC */ nop
-	jal func_800F65B0
-/* 46AE4 800F62E4 */ nop
-/* 46AE8 800F62E8 */ .word 0xAD4E0008
-/* 46AEC 800F62EC */ .word 0xAD4F0014
-/* 46AF0 800F62F0 */ .word 0xAD580020
-/* 46AF4 800F62F4 */ .word 0xAD59002C
-/* 46AF8 800F62F8 */ .word 0x03C0F809
-/* 46AFC 800F62FC */ nop
-/* 46B00 800F6300 */ .word 0x05A00009
-/* 46B04 800F6304 */ .word 0x31A30001
-/* 46B08 800F6308 */ .word 0x8C880010
-/* 46B0C 800F630C */ .word 0x8C890014
-/* 46B10 800F6310 */ .word 0xA5480006
-/* 46B14 800F6314 */ .word 0x00084402
-/* 46B18 800F6318 */ .word 0xA5480012
-/* 46B1C 800F631C */ .word 0xA549001E
-/* 46B20 800F6320 */ .word 0x00094C02
-/* 46B24 800F6324 */ .word 0xA549002A
-/* 46B28 800F6328 */ .word 0x1060000C
-/* 46B2C 800F632C */ .word 0x34021000
-/* 46B30 800F6330 */ .word 0x84820008
-/* 46B34 800F6334 */ .word 0x32432000
-/* 46B38 800F6338 */ .word 0x04410003
-/* 46B3C 800F633C */ .word 0x30427FFF
-/* 46B40 800F6340 */ .word 0x1060000C
-/* 46B44 800F6344 */ nop
-	jal func_800F67D0
-/* 46B4C 800F634C */ nop
-/* 46B50 800F6350 */ cfc2 $zero, $31
-/* 46B54 800F6354 */ .word 0x48024800
-/* 46B58 800F6358 */ nop
-/* 46B5C 800F635C */ .word 0xA5420000
-/* 46B60 800F6360 */ .word 0xA542000C
-/* 46B64 800F6364 */ .word 0xA5420018
-/* 46B68 800F6368 */ .word 0xA5420024
-/* 46B6C 800F636C */ .word 0x10000011
-/* 46B70 800F6370 */ nop
-	jal func_800F67D0
-/* 46B78 800F6378 */ nop
-/* 46B7C 800F637C */ .word 0x8482000A
-	jal func_800F67D0
-/* 46B84 800F6384 */ nop
-/* 46B88 800F6388 */ .word 0x8482000C
-/* 46B8C 800F638C */ .word 0xAD480000
-	jal func_800F67D0
-/* 46B94 800F6394 */ nop
-/* 46B98 800F6398 */ .word 0x8482000E
-/* 46B9C 800F639C */ .word 0xAD48000C
-	jal func_800F67D0
-/* 46BA4 800F63A4 */ nop
-/* 46BA8 800F63A8 */ .word 0xAD480018
-/* 46BAC 800F63AC */ cfc2 $zero, $31
-/* 46BB0 800F63B0 */ .word 0xE9490024
-/* 46BB4 800F63B4 */ .word 0x1D800006
-/* 46BB8 800F63B8 */ .word 0x24020024
-	jal func_800F6B08
-/* 46BC0 800F63C0 */ nop
-/* 46BC4 800F63C4 */ .word 0x2443FFE8
-/* 46BC8 800F63C8 */ .word 0x0460F99F
-/* 46BCC 800F63CC */ nop
 
+    # Was there a GTE error on any of the vertices?
+    bltz    $t4, .L800F62E0
+
+    # Pointer to 0x1f800288
+    addiu   $t2, $s5, 0x294
+
+.donclip: # No subdivision is needed
+	jal     func_800F671C           # nclip_gte
+    nop
+
+    # There was no GTE overflow error. But are some of the vertices lying
+    # outside of the screen area?
+    beqz    $t4, .L800F63F0 # Is this flat or should we depth cue?
+    nop
+
+    # Subdivision time. Welcome to hell.
+
+    # When not doing depth cuing, we do all this extra calculations. What is
+    # this for? Depth cuing the entire face once?
+
+    # Pointer to 0x1f8002f4
+    addiu   $t2, $s5, 0x300
+
+    # Load the vertex flags again. Get the depth values.
+    lh      $v0, 4($t6)
+    lh      $v1, 4($t7)
+    lh      $t0, 4($t8)
+    lh      $t1, 4($t9)
+    andi    $v0, 0x1FE0
+    andi    $v1, 0x1FE0
+    andi    $t0, 0x1FE0
+    andi    $t1, 0x1FE0
+    sh      $v0, 0x04($t2)
+    sh      $v1, 0x10($t2)
+    sh      $t0, 0x1C($t2)
+    sh      $t1, 0x28($t2)
+    lw      $v0, 8($t6)
+    lw      $v1, 8($t7)
+    sw      $v0, 0x08($t2)
+    sw      $v1, 0x14($t2)
+    lw      $v0, 8($t8)
+    lw      $v1, 8($t9)
+    sw      $v0, 0x20($t2)
+    sw      $v1, 0x2C($t2)
+    b       .L800F62F8 # .QuadSimple
+    nop
+
+.L800F62E0:
+	jal     func_800F65B0       # nclip_cpu
+	nop
+	sw      $t6, 0x08($t2) # .word 0xAD4E0008
+	sw      $t7, 0x14($t2) # .word 0xAD4F0014
+	sw      $t8, 0x20($t2) # .word 0xAD580020
+	sw      $t9, 0x2C($t2) # .word 0xAD59002C
+
+.L800F62F8: # .QuadSimple
+    # We don't do per-vertex depth cueing for this polygon's individial vertex
+    # colors. However, this doesn't mean we won't do the per-vertex depth
+    # calculations. We still do that, but we then simply average them out and
+    # apply the resulting color to the entire face.
+    jalr    $s8
+    nop
+
+    # Is it untextured?
+    bltz    $t5, .quaduntextured
+    andi    $v1, $t5, 1
+
+    # Load the UVs into the temporary working space.
+    lw      $t0, 0x10($a0)
+    lw      $t1, 0x14($a0)
+    sh      $t0, 0x06($t2)
+    srl     $t0, 16
+    sh      $t0, 0x12($t2)
+    sh      $t1, 0x1E($t2)
+    srl     $t1, 16
+    sh      $t1, 0x2A($t2)
+
+.quaduntextured: # .QuadSimple_untextured
+    beqz    $v1, .L800F635C
+    ori     $v0, $zero, 0x1000
+
+    # Load the lighting data. nv0.
+    lh      $v0, 8($a0)
+
+    # Flat shading override. If this is set, always shade it flat?
+    andi    $v1, $s2, 0x2000
+
+    # nv0 & 0x8000? Or are we checking if it's textured...
+    bgez    $v0, .quadflatshaded
+    andi    $v0, 0x7fff
+
+    # Fully shaded?
+    beqz    $v1, .quadsmoothshaded
+    nop
+
+.quadflatshaded: # .QuadSimpleFlat
+    # Calculate once for all four vertices.
+	jal     func_800F67D0
+	nop
+	cfc2    $zero, $31
+	mfc2    $v0, $9
+	nop
+.L800F635C: # .QuadSimpleUnlit
+    # No per vertex lighting and no per vertex depth coloring means no per
+    # vertex calculation is needed.
+    sh      $v0, 0x00($t2)
+    sh      $v0, 0x0C($t2)
+    sh      $v0, 0x18($t2)
+    sh      $v0, 0x24($t2)
+    b       .L800F63B4
+    nop
+
+.quadsmoothshaded: # .QuadSimpleSmooth
+    # We have to calculate the light for each vertex.
+    jal     func_800F67D0
+    nop
+    lh      $v0, 10($a0)
+	jal     func_800F67D0
+	nop
+    lh      $v0, 12($a0)
+    sw      $t0, 0x00($t2)
+	jal     func_800F67D0
+	nop
+    lh      $v0, 14($a0)
+    sw      $t0, 0x0C($t2)
+	jal     func_800F67D0
+	nop
+	sw      $t0, 0x18($t2)
+	cfc2    $zero, $31
+	swc2    $9, 0x24($t2)
+
+.L800F63B4: # .QuadSimple_calculateDepth
+    bgtz    $t4, .L800F63D0
+    li      $v0, 36
+
+    # GTE Error was present
+	jal     func_800F6B08
+	nop
+	addiu   $v1, $v0, -24
+	bltz    $v1, .continue1
+	nop
+
+.L800F63D0:
+    # Finally assemble the calculated vertex attributes into a primitive.
+    # No subdivide: $v0 = 36
     jal     func_800F6C48
     nop
     jal     func_800F6C68
@@ -1769,123 +1858,164 @@ what's in t9?
     b       .continue2
     nop
 
-
+.L800F63F0: # .QuadDepth
+    # Get the face flags.
     jalr    $s8
     nop
-/* 46BF8 800F63F8 */ .word 0x05A10037
+
+    # Is this face textured?
+    bgez    $t5, .L800F64D8
     nop
+
+    # Set the GTE foreground and background color registers.
 	jal     func_800F68B0
     nop
-    andi    $v0, $t5, 1
-/* 46C0C 800F640C */ .word 0x10400009
-    nop
-/* 46C14 800F6414 */ .word 0x84820008
-/* 46C18 800F6418 */ .word 0x32432000
-/* 46C1C 800F641C */ .word 0x04410003
-/* 46C20 800F6420 */ .word 0x30427FFF
-/* 46C24 800F6424 */ .word 0x10600016
-    nop
-	jal func_800F6798
-    nop
-	jal func_800F6808
-/* 46C38 800F6438 */ .word 0x85C90004
-	jal func_800F6928
-    nop
-	jal func_800F6808
-/* 46C48 800F6448 */ .word 0x85E90004
-/* 46C4C 800F644C */ .word 0xACA80008
-	jal func_800F6940
-    nop
-	jal func_800F6808
-/* 46C5C 800F645C */ .word 0x87090004
-/* 46C60 800F6460 */ .word 0xACA80018
-	jal func_800F6958
-/* 46C68 800F6468 */ .word 0x34080938
-	jal func_800F6808
-/* 46C70 800F6470 */ .word 0x87290004
-/* 46C74 800F6474 */ .word 0xACA80020
-	j .finalize
-/* 46C7C 800F647C */ .word 0x24080028
-	jal func_800F682C
-/* 46C84 800F6484 */ .word 0x85C90004
-/* 46C88 800F6488 */ .word 0x8482000A
-	jal func_800F6928
-    nop
-	jal func_800F682C
-/* 46C98 800F6498 */ .word 0x85E90004
-/* 46C9C 800F649C */ .word 0xACA80008
-/* 46CA0 800F64A0 */ .word 0x8482000C
-	jal func_800F6940
-    nop
-	jal func_800F682C
-/* 46CB0 800F64B0 */ .word 0x87090004
-/* 46CB4 800F64B4 */ .word 0xACA80018
-/* 46CB8 800F64B8 */ .word 0x8482000E
-	jal func_800F6958
-/* 46CC0 800F64C0 */ .word 0x34080938
-	jal func_800F682C
-/* 46CC8 800F64C8 */ .word 0x87290004
-/* 46CCC 800F64CC */ .word 0xACA80020
-	j .finalize
-/* 46CD4 800F64D4 */ .word 0x24080028
-	jal func_800F69A0
-    nop
-/* 46CE0 800F64E0 */ .word 0x31A20001
-/* 46CE4 800F64E4 */ .word 0x10400009
-/* 46CE8 800F64E8 */ .word 0x24AC0038
-/* 46CEC 800F64EC */ .word 0x84820008
-/* 46CF0 800F64F0 */ .word 0x32432000
-/* 46CF4 800F64F4 */ .word 0x04410003
-/* 46CF8 800F64F8 */ .word 0x30427FFF
-/* 46CFC 800F64FC */ .word 0x10600016
-/* 46D00 800F6500 */ nop
-	jal func_800F6798
-/* 46D08 800F6508 */ nop
-	jal func_800F6808
-/* 46D10 800F6510 */ .word 0x85C90004
-	jal func_800F69BC
-/* 46D18 800F6518 */ nop
-	jal func_800F6808
-/* 46D20 800F6520 */ .word 0x85E90004
-/* 46D24 800F6524 */ .word 0xACA80008
-	jal func_800F6A0C
-/* 46D2C 800F652C */ .word 0x34080D3C
-	jal func_800F6808
-/* 46D34 800F6534 */ .word 0x87090004
-/* 46D38 800F6538 */ .word 0xACA80020
-	jal func_800F6A58
-/* 46D40 800F6540 */ nop
-	jal func_800F6808
-/* 46D48 800F6548 */ .word 0x87290004
-/* 46D4C 800F654C */ .word 0xACA8002C
-	j func_800F6AA8
-/* 46D54 800F6554 */ .word 0x2408006C
-	jal func_800F682C
-/* 46D5C 800F655C */ .word 0x85C90004
-/* 46D60 800F6560 */ .word 0x8482000A
-	jal func_800F69BC
-/* 46D68 800F6568 */ nop
-	jal func_800F682C
-/* 46D70 800F6570 */ .word 0x85E90004
-/* 46D74 800F6574 */ .word 0xACA80008
-/* 46D78 800F6578 */ .word 0x8482000C
-	jal func_800F6A0C
-/* 46D80 800F6580 */ .word 0x34080D3C
-	jal func_800F682C
-/* 46D88 800F6588 */ .word 0x87090004
-/* 46D8C 800F658C */ .word 0xACA80020
-/* 46D90 800F6590 */ .word 0x8482000E
-	jal func_800F6A58
-/* 46D98 800F6598 */ nop
-	jal func_800F682C
-/* 46DA0 800F65A0 */ .word 0x87290004
-/* 46DA4 800F65A4 */ .word 0xACA8002C
-	j func_800F6AA8
-/* 46DAC 800F65AC */ .word 0x2408006C
 
+    # If the face is not lit, skip normal lighting and go straight to depth
+    # coloring with the current values.
+    andi    $v0, $t5, 1
+    beqz    $v0, .L800F6434
+    nop
+
+    # Get the nv0 field. (lighting flags + normal vector index)
+    lh      $v0, 8($a0)
+
+    # Get the global lighting override flag.
+    andi    $v1, $s2, 0x2000
+
+    # Is this face lit/not lit?
+    bgez    $v0, .L800F642C # flat lighting (one normal)
+    andi    $v0, 0x7FFF
+    beqz    $v1, .L800F6480 # smooth lighting (multiple normal)
+    nop
+.L800F642C: # .QuadDepthFlat
+    # Flat lit face. Do a single normal vector calculation for the entire face.
+	jal     func_800F6798   # do_nccs
+    nop
+.L800F6434: # .QuadDepthUnlit
+    # Calculate and set all four vertex colors.
+	jal     func_800F6808
+	lh      $t1, 4($t6)
+	jal     func_800F6928
+    nop
+	jal     func_800F6808
+	lh      $t1, 4($t7)
+	sw      $t0, 8($a1)
+	jal     func_800F6940
+    nop
+	jal     func_800F6808
+	lh      $t1, 4($t8)
+	sw      $t0, 0x18($a1)
+	jal     func_800F6958
+	li      $t0, 0x938              # G4
+	jal     func_800F6808
+	lh      $t1, 4($t9)
+	sw      $t0, 0x20($a1)
+	j       .finalize
+	li      $t0, 0x28
+
+.L800F6480: # .QuadDepthSmooth
+    # Use NCDS for each vertex. Lighting and depth coloring together.
+	jal     func_800F682C       # Color 0 Calculate
+	lh      $t1, 0x4($t6)       # Depth 0
+	lh      $v0, 0xA($a0)       # NV1
+	jal     func_800F6928
+    nop
+	jal     func_800F682C       # Color 1 Calculate
+	lh      $t1, 0x4($t7)       # Depth 1
+	sw      $t0, 0x8($a1)       # Color 0 Write
+	lh      $v0, 0xC($a0)       # NV2
+	jal     func_800F6940
+    nop
+	jal     func_800F682C       # Color 2 Calculate
+	lh      $t1, 0x4($t8)       # Depth 2
+	sw      $t0, 0x18($a1)      # Color 1 Write
+	lh      $v0, 0xE($a0)       # NV3
+	jal     func_800F6958
+	li      $t0, 0x938          # G4
+	jal     func_800F682C       # Color 3 Calculate
+	lh      $t1, 0x4($t9)       # Depth 3
+	sw      $t0, 0x20($a1)      # Color 2 Write
+	j       .finalize
+	li      $t0, 0x28
+
+.L800F64D8: # .QuadDepthTex
+    # Load default fully lit colors into the GTE registers.
+	jal     func_800F69A0
+    nop
+
+    # If the face is not lit, skip normal lighting and go straight to depth
+    # coloring with the current values.
+    andi    $v0, $t5, 1
+    beqz    $v0, .L800F650C
+    addiu   $t4, $a1, 0x38      # texwin word pointer
+
+    # Get the nv0 field. (lighting flags + normal vector index)
+    lh      $v0, 8($a0)
+
+    # Get the global lighting override flag.
+    andi    $v1, $s2, 0x2000
+
+    # Is this face lit/not lit?
+    bgez    $v0, .L800F6504 # flat lighting (one normal)
+    andi    $v0, 0x7FFF
+    beqz    $v1, .L800F6558 # smooth lighting (multiple normal)
+    nop
+
+.L800F6504: # quadsimpletextured1n
+    # Flat lit face. Do a single normal vector calculation for the entire face.
+	jal     func_800F6798
+	nop
+.L800F650C: # quadsimpletextured
+    jal     func_800F6808       # Color 0 Calculate
+    lh      $t1, 0x4($t6)       # Depth 0
+    jal     func_800F69BC       # Prim
+    nop
+    jal     func_800F6808       # Color 1 Calculate
+    lh      $t1, 0x4($t7)       # Depth 1
+    sw      $t0, 0x8($a1)       # Color 0 Write
+    jal     func_800F6A0C
+    li      $t0, 0xd3c          # GT4
+    jal     func_800F6808       # Color 2 Calculate
+    lh      $t1, 0x4($t8)       # Depth 2
+    sw      $t0, 0x20($a1)      # Color 1 Write
+    jal     func_800F6A58
+    nop
+    jal     func_800F6808       # Color 3 Calculate
+    lh      $t1, 0x4($t9)       # Depth 3
+    sw      $t0, 0x2c($a1)      # Color 2 Write
+    j       func_800F6AA8
+    li      $t0, 0x6c
+
+.L800F6558: # quadsimpletextured4n
+	jal     func_800F682C       # Color 0 Calculate
+	lh      $t1, 0x4($t6)       # Depth 0
+	lh      $v0, 0xa($a0)       # NV1
+	jal     func_800F69BC
+	nop
+	jal     func_800F682C       # Color 1 Calculate
+	lh      $t1, 0x4($t7)       # Depth 1
+	sw      $t0, 0x8($a1)       # Color 0 Write
+	lh      $v0, 0xc($a0)       # NV2
+	jal     func_800F6A0C
+	li      $t0, 0xd3c          # GT4
+	jal     func_800F682C       # Color 2 Calculate
+	lh      $t1, 0x4($t8)       # Depth 2
+	sw      $t0, 0x20($a1)      # Color 1 Write
+	lh      $v0, 0xe($a0)       # NV3
+	jal     func_800F6A58
+	nop
+	jal     func_800F682C       # Color 3 Calculate
+	lh      $t1, 0x4($t9)       # Depth 3
+	sw      $t0, 0x2c($a1)      # Color 2 Write
+	j       func_800F6AA8
+	li      $t0, 0x6c
+
+# Normal clipping done on the CPU.
 glabel func_800F65B0
 /* 46DB0 800F65B0 */ .word 0x85E80000
 /* 46DB4 800F65B4 */ .word 0x85E90002
+
 /* 46DB8 800F65B8 */ .word 0x85E10006
 /* 46DBC 800F65BC */ .word 0x48C80000
 /* 46DC0 800F65C0 */ .word 0x48C91000
@@ -1976,34 +2106,38 @@ glabel func_800F65B0
 /* 46F14 800F6714 */ jr    $ra
 /* 46F18 800F6718 */ nop
 
-# clipping
+# Normal clipping done on the GTE.
 # this function has 4 possible results
 # if $t9 is 1 it takes a different branch that's almost the same
 # except one of the 3 results (mesh done, return, goto folan) is different
 # if the face isn't clipped and should be drawn, simply returns
 glabel func_800F671C
-    lwc2   $12, 0x0008($t6)
-    lwc2   $13, 0x0008($t8)
-    lwc2   $14, 0x0008($t7)
+    # Load the three vertices.
+    lwc2    $12, 0x0008($t6)
+    lwc2    $13, 0x0008($t8)
+    lwc2    $14, 0x0008($t7)
     nop
     nop
-    .word 0x4B400006        # nclip
-    lui    $at, %hi(D_800F42F0)
-    lw     $at, %lo(D_800F42F0)($at)
-    addiu  $t9, -1
-    beq    $t9, $zero, .L800F6770  # oh t9 is the fourth vertex!
-    addiu  $t9, 1
+    NCLIP
+
+    lui     $at, %hi(D_800F42F0)
+    lw      $at, %lo(D_800F42F0)($at)
+
+    # Is V3 == 1? In that case we need to also check func_800F65B0.
+    addiu   $t9, -1
+    beq     $t9, $zero, .L800F6770
+    addiu   $t9, 1
 
 # branch 1
-    subu   $at, $a1             # check the critical point in prims
-    blez   $at, .ALLDONE        # if too many prims, stop drawing
+    subu    $at, $a1             # check the critical point in prims
+    blez    $at, .ALLDONE        # if too many prims, stop drawing
     nop
-    cfc2   $zero, $31
-    mfc2   $at, $24
+    cfc2    $zero, $31
+    mfc2    $at, $24
     nop
-    blez   $at, .continue2      # negative? clipped. don't draw
+    blez    $at, .continue2      # negative? clipped. don't draw
     nop
-    jr     $ra
+    jr      $ra
     nop
 
 # branch 2, almost the same as the other branch
@@ -2019,7 +2153,9 @@ glabel func_800F671C
     jr     $ra
     nop
 
-# shading
+# Update color matrix with a single normal vector. This is used when we want
+# to use one normal for the entire face (flat shading). Keep in mind that the
+# polygon drawn could still be gouraud shaded, as the vertices are depth cued.
 glabel func_800F6798
     addu   $v0, $s3
     lw     $v0, 0($v0)          # get the normal vector
@@ -2030,32 +2166,33 @@ glabel func_800F6798
     mtc2   $v0, $0
     mtc2   $v1, $1
     nop
-    .word 0x4B08041B # nccs
+    NCCS
     cfc2   $zero, $31
     mfc2   $v0, $22             # and the shuffle something around?
     jr     $ra
     mtc2   $v0, $6
 
-# Actual function
-# v0 vertex offset
-# s3 points to vertex data
-
+# vertex_color_light
 glabel func_800F67D0
-/* 46FD0 800F67D0 */ addu $v0, $v0, $s3 # .word 0x00531021
-/* 46FD4 800F67D4 */ lw   $v0, 0x0($v0) # .word 0x8C420000
-/* 46FD8 800F67D8 */ nop
-/* 46FDC 800F67DC */ andi $v1, $v0, 0xff00 # .word 0x3043FF00
-/* 46FE0 800F67E0 */ subu $v0, $v0, $v1 # .word 0x00431023
-/* 46FE4 800F67E4 */ sll $v0, 8 # .word 0x00021200
-/* 46FE8 800F67E8 */ cfc2 $zero, $31
-/* 46FEC 800F67EC */ .word 0x48084800
-/* 46FF0 800F67F0 */ .word 0x48820000
-/* 46FF4 800F67F4 */ .word 0x48830800
-/* 46FF8 800F67F8 */ nop
-/* 46FFC 800F67FC */ .word 0x4AC8041E # NCS
-/* 47000 800F6800 */ jr    $ra
-/* 47004 800F6804 */ nop
+    # Load the vector. UNK CONTAINS THE NORMAL VECTORS!!!
+    addu    $v0, $s3
+    lw      $v0, 0x0($v0) # .word 0x8C420000
+    nop
+    andi    $v1, $v0, 0xff00
+    subu    $v0, $v0, $v1
+    sll     $v0, 8
+    cfc2    $zero, $31
+    mfc2    $t0, $9
+    mtc2    $v0, $0
+    mtc2    $v1, $1
+    nop
+    NCS
+    jr    $ra
+    nop
 
+# $t0 -> previous result
+# $t1 <- IR0 (depth)
+# vertex_color_depth_cue
 glabel func_800F6808
     cfc2    $zero, $31
     mfc2    $t0, $22
@@ -2067,9 +2204,10 @@ glabel func_800F6808
     jr      $ra
     nop
 
+# vertex_color_light_and_depth_cue
 glabel func_800F682C
     addu    $v0, $s3
-    lw      $v0, 0($v0)
+    lw      $v0, 0($v0) # this
     nop
     andi    $v1, $v0, 0xff00
     subu    $v0, $v1
@@ -2084,6 +2222,11 @@ glabel func_800F682C
     NCDS
     jr      $ra
     nop
+
+# The $t5 flags:
+#   0x80000000  no texture
+#   0x00000004  ???
+#   0x00000001  not lit / flat lit?
 
 # This loads the face flags into t5.
 glabel D_800F686C
@@ -2114,73 +2257,81 @@ glabel D_800F68A4
     jr        $ra
     addiu     $t5, 4
 
-# color thing
+# G_load_colors
 glabel func_800F68B0
-# these two instructions are modified by code from somewhere
-# else to load different immediate values
-    lui    $t0, 0x0000         # clut addr
-    ori    $t0, 0x0000         # changed in runtime
-    andi   $v1, $t5, 0xfffc    # get color index (already shifted)
-    addu   $v1, $t0            # look it up
-    lw     $v1, 0x0000($v1)
+    # Self-modifying code. The immediate value here is changed by calling the
+    # function func_800F42F4.
+    lui     $t0, 0x0000
+    ori     $t0, 0x0000
+    andi    $v1, $t5, 0xfffc    # get color index (already shifted)
+    addu    $v1, $t0            # look it up
+    lw      $v1, 0x0000($v1)
     nop
-    bgez   $v1, .L800F690C     # high bit of color set?
-/* 470CC 800F68CC */ .word 0x48833000
-/* 470D0 800F68D0 */ .word 0x00031A00
-/* 470D4 800F68D4 */ .word 0x00031A02
-/* 470D8 800F68D8 */ .word 0x48833000
-/* 470DC 800F68DC */ nop
-/* 470E0 800F68E0 */ .word 0x00031900
-/* 470E4 800F68E4 */ .word 0x30680FF0
-/* 470E8 800F68E8 */ .word 0x00031A02
-/* 470EC 800F68EC */ .word 0x30690FF0
-/* 470F0 800F68F0 */ .word 0x00031A02
-/* 470F4 800F68F4 */ .word 0x30630FF0
-/* 470F8 800F68F8 */    .word 0x48C8A800
-/* 470FC 800F68FC */    .word 0x48C9B000
-/* 47100 800F6900 */    .word 0x48C3B800
-/* 47104 800F6904 */ jr     $ra
-/* 47108 800F6908 */ nop
+    bgez    $v1, .L800F690C     # high bit of color set?
+    mtc2    $v1, $6
+
+    # Branch 1
+    sll     $v1, 8
+    srl     $v1, 8
+    mtc2    $v1, $6
+    nop
+    sll     $v1, 4
+    andi    $t0, $v1, 0xff0
+    srl     $v1, 8
+    andi    $t1, $v1, 0xff0
+    srl     $v1, 8
+    andi    $v1, $v1, 0xff0
+    ctc2    $t0, $21
+    ctc2    $t1, $22
+    ctc2    $v1, $23
+    jr      $ra
+    nop
 
 .L800F690C:
-    mfc2   $t0, $5              # put the far color values in the registers
-    cfc2   $t1, $29
-    cfc2   $v1, $30
-    ctc2   $t0, $21
-    ctc2   $t1, $22
-    jr     $ra
-    ctc2   $v1, $23
+    # Branch 2
+    mfc2    $t0, $5              # put the far color values in the registers
+    cfc2    $t1, $29
+    cfc2    $v1, $30
+    ctc2    $t0, $21
+    ctc2    $t1, $22
+    jr      $ra
+    ctc2    $v1, $23
 
+# G_set_V0_V2
 glabel func_800F6928
     lw     $t0, 8($t6)
     lw     $t1, 8($t7)
-    sw     $t0, 0x0c($a1)       # vert 0
-    sw     $t1, 0x1c($a1)       # vert 2
+    sw     $t0, 0x0c($a1)       # Prim V0
+    sw     $t1, 0x1c($a1)       # Prim V2
     jr     $ra
     nop
 
+# G_set_v1_v3
 glabel func_800F6940
     lw     $t0, 8($t8)
     lw     $t1, 8($t9)
-    sw     $t0, 0x24($a1)
-    sw     $t1, 0x14($a1)
+    sw     $t0, 0x24($a1)       # Prim V3
+    sw     $t1, 0x14($a1)       # Prim V1
     jr     $ra
     nop
 
-#
+# $t0 <- (size << 8) | cmd
+# G_set_code_len
 glabel func_800F6958
-    andi   $t1, $t5, 2          # set something from attribute flags
+    # Set the semi-transparency bit if it's set in $t5.
+    andi   $t1, $t5, 2
     or     $t0, $t1
     sb     $t0, 0xb($a1)        # set command (30 = POLY_F3)
     swr    $t0, 0x2($a1)        # set size
     jr     $ra
     nop
 
-.finalize0:
+.finalize_tri: # .g3finalize
+    # Put the third vertex in the packet.
     lw      $v0, 0x8($t8)
     nop
     sw      $v0, 0x14($a1)
-.finalize:
+.finalize: # .g4finalize
     # Set draw mode to regular values. DTD | DFE
     lui     $v0, 0xE100
     ori     $v0, 0x0600
@@ -2195,7 +2346,7 @@ glabel func_800F6958
     b       .continue2
     addu    $a1, $t0 # go to next free prim
 
-# actual function
+# GT_load_colors
 glabel func_800F69A0
     ctc2    $zero, $21
     ctc2    $zero, $22
@@ -2205,99 +2356,100 @@ glabel func_800F69A0
     jr      $ra
     mtc2    $v0, $6
 
-# actual function
+# GT_set_v0_tpage_clut
 glabel func_800F69BC
-/* 471BC 800F69BC */ .word 0x00094942
-/* 471C0 800F69C0 */ .word 0x00094200
-/* 471C4 800F69C4 */ .word 0x01094021
-/* 471C8 800F69C8 */ .word 0x00084200
-/* 471CC 800F69CC */ .word 0x01284821
-/* 471D0 800F69D0 */ .word 0x8DC80008
-/* 471D4 800F69D4 */ .word 0xAD890004
-/* 471D8 800F69D8 */ .word 0xACA8000C
-/* 471DC 800F69DC */ .word 0xAD880008
-/* 471E0 800F69E0 */ .word 0x000D4402
-/* 471E4 800F69E4 */ .word 0x310801FF
-/* 471E8 800F69E8 */ .word 0xA4A8001E
-/* 471EC 800F69EC */ .word 0x35080020
-/* 471F0 800F69F0 */ .word 0xA588001A
-/* 471F4 800F69F4 */ .word 0x31A8FFFC
-/* 471F8 800F69F8 */ .word 0xA4A80012
-/* 471FC 800F69FC */ .word 0x25080040
-/* 47200 800F6A00 */ .word 0xA588000E
-/* 47204 800F6A04 */ jr    $ra
-/* 47208 800F6A08 */ nop
+    srl     $t1, $t1, 5
+    sll     $t0, $t1, 8
+    addu    $t0, $t1
+    sll     $t0, $t0, 8
+    addu    $t1, $t0
+    lw      $t0, 0x8($t6)
+    sw      $t1, 0x4($t4)
+    sw      $t0, 0xc($a1)       # Prim V0
+    sw      $t0, 0x8($t4)
+    srl     $t0, $t5, 16
+    andi    $t0, 0x1ff
+    sh      $t0, 0x1e($a1)      # Prim Texpage
+    ori     $t0, 0x20
+    sh      $t0, 0x1a($t4)
+    andi    $t0, $t5, 0xfffc
+    sh      $t0, 0x12($a1)      # Prim Clut
+    addiu   $t0, 0x40
+    sh      $t0, 0xe($t4)
+    jr      $ra
+    nop
 
-# actual function
+# GT_set_v2_code_len
 glabel func_800F6A0C
-/* 4720C 800F6A0C */ .word 0x00094942
-/* 47210 800F6A10 */ .word 0x00090A00
-/* 47214 800F6A14 */ .word 0x00290821
-/* 47218 800F6A18 */ .word 0x00010A00
-/* 4721C 800F6A1C */ .word 0x01214821
-/* 47220 800F6A20 */ .word 0xAD89001C
-/* 47224 800F6A24 */ .word 0x31A90002
-/* 47228 800F6A28 */ .word 0x01094025
-/* 4722C 800F6A2C */ .word 0xA0A8000B
-/* 47230 800F6A30 */ .word 0x35080002
-/* 47234 800F6A34 */ .word 0xA1880007
-/* 47238 800F6A38 */ .word 0x8DE90008
-/* 4723C 800F6A3C */ .word 0xB8A80002
-/* 47240 800F6A40 */ .word 0x2508FF00
-/* 47244 800F6A44 */ .word 0xB9880002
-/* 47248 800F6A48 */ .word 0xACA90024
-/* 4724C 800F6A4C */ .word 0xAD890020
-/* 47250 800F6A50 */ jr    $ra
-/* 47254 800F6A54 */ nop
+    srl     $t1, $t1, 5
+    sll     $at, $t1, 8
+    addu    $at, $t1
+    sll     $at, $at, 8
+    addu    $t1, $at
+    sw      $t1, 0x1c($t4)
+    andi    $t1, $t5, 2
+    or      $t0, $t1
+    sb      $t0, 0xb($a1)       # Prim Command
+    ori     $t0, 2
+    sb      $t0, 0x7($t4)
+    lw      $t1, 0x8($t7)
+    swr     $t0, 0x2($a1)       # Prim Length
+    addiu   $t0, -0x100
+    swr     $t0, 0x2($t4)
+    sw      $t1, 0x24($a1)      # Prim V2
+    sw      $t1, 0x20($t4)
+    jr      $ra
+    nop
 
-# actual function
+# GT_set_v3_uv1_uv3
 glabel func_800F6A58
-/* 47258 800F6A58 */ .word 0x00094942
-/* 4725C 800F6A5C */ .word 0x00090A00
-/* 47260 800F6A60 */ .word 0x00290821
-/* 47264 800F6A64 */ .word 0x00010A00
-/* 47268 800F6A68 */ .word 0x01214821
-/* 4726C 800F6A6C */ .word 0xAD890028
-/* 47270 800F6A70 */ .word 0x8F080008
-/* 47274 800F6A74 */ .word 0x8C890014
-/* 47278 800F6A78 */ .word 0xACA80030
-/* 4727C 800F6A7C */ .word 0xAD88002C
-/* 47280 800F6A80 */ .word 0xA4A90034
-/* 47284 800F6A84 */ .word 0xA5890030
-/* 47288 800F6A88 */ .word 0xA8A9001D
-/* 4728C 800F6A8C */ .word 0xA9890019
+    # TODO: This is repeated throughout. Make it into a macro.
+    srl     $t1, $t1, 5
+    sll     $at, $t1, 8
+    addu    $at, $t1
+    sll     $at, $at, 8
+    addu    $t1, $at
+    sw      $t1, 0x28($t4)
+    lw      $t0, 0x08($t8)
+    lw      $t1, 0x14($a0)
+    sw      $t0, 0x30($a1)      # Prim V3
+    sw      $t0, 0x2C($t4)
+    sh      $t1, 0x34($a1)      # Prim UV3
+    sh      $t1, 0x30($t4)
+    swl     $t1, 0x1D($a1)      # Prim UV1
+    swl     $t1, 0x19($t4)
     jr      $ra
     nop
 
 
-glabel func_800F6A98
-/* 47298 800F6A98 */ .word 0x84820014
-/* 4729C 800F6A9C */ .word 0x0300C821
-/* 472A0 800F6AA0 */ .word 0xA4A2001C
-/* 472A4 800F6AA4 */ .word 0xA5820018
-glabel func_800F6AA8
-/* 472A8 800F6AA8 */ .word 0x8F220008
-/* 472AC 800F6AAC */ .word 0x00094942
-/* 472B0 800F6AB0 */ .word 0x00090A00
-/* 472B4 800F6AB4 */ .word 0x00290821
-/* 472B8 800F6AB8 */ .word 0x00010A00
-/* 472BC 800F6ABC */ .word 0x01214821
-/* 472C0 800F6AC0 */ .word 0xAD890010
-/* 472C4 800F6AC4 */ .word 0xACA20018
-/* 472C8 800F6AC8 */ .word 0xAD820014
-/* 472CC 800F6ACC */ .word 0x8C890018
-/* 472D0 800F6AD0 */ .word 0x8C820010
-/* 472D4 800F6AD4 */ .word 0xACA90004
-/* 472D8 800F6AD8 */ .word 0xA4A20010
-/* 472DC 800F6ADC */ .word 0xA582000C
-/* 472E0 800F6AE0 */ .word 0xA8A20029
-/* 472E4 800F6AE4 */ .word 0xA9820025
-/* 472E8 800F6AE8 */ .word 0x000C1200
-/* 472EC 800F6AEC */ .word 0xA8A20002
-/* 472F0 800F6AF0 */ .word 0xA9860002
-/* 472F4 800F6AF4 */ .word 0x00053200
-/* 472F8 800F6AF8 */ cfc2 $zero, $31
-/* 472FC 800F6AFC */ .word 0xE8B60014
+glabel func_800F6A98    # .gt3finalize
+    lh      $v0, 0x14($a0)
+    move    $t9, $t8
+    sh      $v0, 0x1c($a1)      # UV1 + Texpage
+    sh      $v0, 0x18($t4)
+glabel func_800F6AA8    # .gt4finalize
+    lw      $v0, 8($t9)
+    srl     $t1, $t1, 5
+    sll     $at, $t1, 8
+    addu    $at, $t1
+    sll     $at, $at, 8
+    addu    $t1, $at
+    sw      $t1, 0x10($t4)
+    sw      $v0, 0x18($a1)      # V1
+    sw      $v0, 0x14($t4)
+    lw      $t1, 0x18($a0)      # Texwin Load
+    lw      $v0, 0x10($a0)
+    sw      $t1, 0x04($a1)      # Texwin Write
+    sh      $v0, 0x10($a1)      # UV0 + Clut
+    sh      $v0, 0x0C($t4)
+    swl     $v0, 0x29($a1)      # Color 3
+    swl     $v0, 0x25($t4)
+    sll     $v0, $t4, 8
+    swl     $v0, 0x02($a1)      #
+    swl     $a2, 0x02($t4)
+    sll     $a2, $a1, 8
+    cfc2    $zero, $31
+    swc2    $22, 0x14($a1)      # Color 1
     b       .continue2
     addu    $a1, $t0
 
@@ -2374,3 +2526,500 @@ glabel func_800F6B08
     addiu   $sp, 4
     jr      $ra
     nop
+
+
+glabel func_800F6C14
+/* 47414 800F6C14 F4FF3927 */  addiu      $t9, $t9, -0xC
+/* 47418 800F6C18 23103103 */  subu       $v0, $t9, $s1
+/* 4741C 800F6C1C 06004004 */  bltz       $v0, .L800F6C38
+/* 47420 800F6C20 00000000 */   nop
+/* 47424 800F6C24 0800288F */  lw         $t0, 0x8($t9)
+/* 47428 800F6C28 FCFF298F */  lw         $t1, -0x4($t9)
+/* 4742C 800F6C2C 00000000 */  nop
+/* 47430 800F6C30 03000911 */  beq        $t0, $t1, .L800F6C40
+/* 47434 800F6C34 00000000 */   nop
+.L800F6C38:
+/* 47438 800F6C38 0800E003 */  jr         $ra
+/* 4743C 800F6C3C 0C003927 */   addiu     $t9, $t9, 0xC
+.L800F6C40:
+/* 47440 800F6C40 0800E003 */  jr         $ra
+/* 47444 800F6C44 00000000 */   nop
+
+# Whole-face depth cue calculation function. Two entry points.
+# $v0 is the offset to the last vertex. 36 for quads and 24 for triangles.
+
+# THIS STUPID FUNCTION FUCKING **FLIPS**!!!!!! THE X AND Y COORDINATES OF THE
+# VERTICES IT PROCESSES!!!!!!! THAT'S WHY IT NEEDS TO BE RUN TWICE. FIRST IT
+# RUNS ON ALL THE X COORDINATES, SWAPPING THEM WITH THE Y IN THE RESULTS. THE
+# NEXT TIME IT'S RAN, IT TRIES PROCESSING THE X COORDINATES AGAIN, WHICH ARE Now
+# THE ORIGINAL Y COORDINATES!!!! WHICH THEN GET SWAPPED BACK AROUND TO THEIR
+# NORMAL PLACE. WHAT IN THE FUCK.
+
+# depth_calc_2f4_to_288 (step 1)
+glabel func_800F6C48
+    bltz        $v0, .L800F6D70
+    lui         $t9, %hi(D_1F8002F4)
+    addiu       $t4, $zero, 0x2
+    addiu       $t5, $zero, 0xFD
+    addiu       $t6, $t9, %lo(D_1F8002F4)
+    addiu       $t9, $t9, %lo(D_1F800288)
+    b           .L800F6C84
+    addiu       $s0, $zero, 0x1
+
+# depth_calc_288_to_2f4 (step 2)
+glabel func_800F6C68
+    bltz        $v0, .L800F6D70
+    lui         $t9, %hi(D_1F800288)
+    addiu       $t4, $zero, 0x0
+    addiu       $t5, $zero, 0xFD
+    addiu       $t6, $t9, %lo(D_1F800288)
+    addiu       $t9, $t9, %lo(D_1F8002F4)
+    addiu       $s0, $zero, -0x1
+.L800F6C84:
+    # The preparations are done. Here's the actual function.
+    # $t6 points to the src area.
+    # $t9 points to the dst area.
+    # They both have a 12 byte entry per vertex like this:
+    #   u32     color (results)
+    #   u16     depth
+    #   u16     uv
+    #   u16     xy
+
+    # Save RA.
+    addiu       $sp, $sp, -0x4
+    sw          $ra, 0x0($sp)
+
+    # Copy the V0 data to the end of the array. The src array now look like:
+    # V0 V1 V2 V3 V0
+    addu        $t8, $v0, $t6
+    lw          $v1, 0x0($t6)
+    lw          $t0, 0x4($t6)
+    lw          $t1, 0x8($t6)
+    sw          $v1, 0xC($t8)
+    sw          $t0, 0x10($t8)
+    sw          $t1, 0x14($t8)
+    addiu       $s1, $t9, 0xC
+.L800F6CAC: # .loop
+    # Get vertex i and i + 1.
+    addiu   $t7, $t6, 0xC
+
+    # Get their x coordinates.
+    lh      $t2, 0x8($t6)
+    lh      $t3, 0x8($t7)
+
+    # if (v[i].x < $t4) goto .L800F6CE8
+    subu    $v0, $t2, $t4
+    bltz    $v0, .L800F6CE8
+
+    # if (v[i].x <= $t5) goto .L800F6D08
+    subu    $v0, $t2, $t5
+    blez    $v0, .L800F6D08
+
+    # vx0 out to the right
+    # if (v[i+1].x >= $t5) goto .L800F6D5C
+    subu    $v0, $t3, $t5
+    bgtz    $v0, .L800F6D5C
+    neg     $v1, $s0
+
+    # vx1 inside or left, vx0 right
+    jal     func_800F6DCC
+    move    $v0, $t5
+    lh      $t3, 0x8($t7)
+    b       .L800F6D2C
+    nop
+.L800F6CE8:
+    # vx0 out to the left
+    subu    $v0, $t3, $t4
+    bltz    $v0, .L800F6D5C
+    addu    $v1, $zero, $s0
+    jal     func_800F6DCC
+    addu    $v0, $t4, $zero
+
+    # Reload X.
+    lh      $t3, 0x8($t7)
+    b       .L800F6D2C
+    nop
+
+.L800F6D08: # vx0 is inside
+    # Include it.
+    lh      $v0, 0x8($t6)
+    lh      $v1, 0xA($t6)
+    lw      $t0, 0x4($t6)
+    lw      $t1, 0x0($t6)
+    sh      $v0, 0xA($t9)
+    sh      $v1, 0x8($t9)
+    sw      $t0, 0x4($t9)
+    sw      $t1, 0x0($t9)
+    addiu   $t9, $t9, 0xC
+.L800F6D2C:
+    # Now check the second vertex.
+    subu    $v0, $t3, $t4
+    bltz    $v0, .L800F6D50
+
+    # This one is also inside? Then we're good. This side of the polygon is
+    # fully inside.
+    subu    $v0, $t3, $t5
+    blez    $v0, .L800F6D5C
+    addu    $v1, $zero, $s0
+    jal     func_800F6DCC
+    addu    $v0, $t5, $zero
+    b       .L800F6D5C
+    nop
+.L800F6D50:
+    negu    $v1, $s0
+    jal     func_800F6DCC
+    addu    $v0, $t4, $zero
+.L800F6D5C:
+    # Go to next and repeat.
+    bne     $t6, $t8, .L800F6CAC
+    addiu   $t6, $t6, 0xC
+
+    # Done.
+    subu    $v0, $t9, $s1
+    lw      $ra, 0x0($sp)
+    addiu   $sp, $sp, 0x4
+.L800F6D70:
+    jr      $ra
+    nop
+
+glabel func_800F6D78
+    addiu   $sp, -4
+    sw      $ra, 0($sp)
+
+    lh      $t1, 6($t5)
+    lh      $t0, 6($t4)
+    jal     func_800F6E18
+    li      $v0, 0x21
+
+    andi    $t0, $t2, 0x1fe0
+    andi    $t1, $t3, 0x1fe0
+    lh      $t2, 0($t4)
+    lh      $t3, 0($t5)
+    lh      $t4, 2($t4)
+    jal     func_800F6E5C
+    lh      $t5, 2($t5)
+    mfc2    $t2, $11    # IR3
+    sll     $t1, 1
+    sll     $t2, 1
+    addiu   $t1, 0x80
+    addiu   $t2, 0x80
+    sh      $t2, 10($t9)
+    b       .L800F6E04
+    nop
+
+# $v0   new x
+# $v1   added to new Y, for some reason?
+# $t6   ptr to vertex 0
+# $t7   ptr to vertex 1
+# $t9   ptr to out vertex?
+glabel func_800F6DCC
+    addiu   $sp, -4
+    sw      $ra, 0($sp)
+
+    lh      $t1, 8($t7)     # X1
+    lh      $t0, 8($t6)     # X0
+    sh      $v0, 10($t9)    # y??
+    jal     func_800F6E18
+    nop
+    lh      $t0, 4($t6)     # Depth 0
+    lh      $t1, 4($t7)     # Depth 1
+    lh      $t2, 10($t6)    # Y0
+    lh      $t3, 10($t7)    # Y1
+    jal     func_800F6E5C
+    nop
+    addu    $t1, $v1
+.L800F6E04:
+    sh      $t1, 8($t9)
+    lw      $ra, 0($sp)
+    addiu   $sp, 4
+    jr      $ra
+    addiu   $t9, 12
+
+# this is general interpolation, not just color
+# $v0   factor?
+# $t0   x0
+# $t1   x1
+# $t6   ptr to vertex 0
+# $t7   ptr to vertex 1
+glabel func_800F6E18
+    # (factor - x1) / (x0 - x1)
+    subu    $v0, $t1
+    subu    $t0, $t1
+    sll     $v0, $v0, 12
+    div     $zero, $v0, $t0
+
+    # We wanna do 3 interpolations in parallel:
+    #   IR1 - RFC:  Color (???)
+    #   IR2 - GFC:  U
+    #   IR3 - BFC:  V
+    lh      $t0, 0x0($t6)       # Value 0
+    lh      $t1, 0x0($t7)       # Value 1
+    lbu     $v0, 0x6($t6)       # TU0
+    ctc2    $t0, $21
+    mtc2    $t1, $9
+    ctc2    $v0, $22
+    lbu     $t0, 0x6($t7)       # TU1
+    lbu     $t1, 0x7($t6)       # TV0
+    lbu     $v0, 0x7($t7)       # TV1
+    mtc2    $t0, $10
+    ctc2    $t1, $23
+    jr      $ra
+    mtc2    $v0, $11
+
+# do_interp
+# Does interpolation using the preloaded factor and coordinates, on the
+# following pairs of values:
+# $t0   $t1
+# $t2   $t3
+# $t4   $t5
+glabel func_800F6E5C
+    mfc0    $at, $12
+    addiu   $v0, $zero, 0xfffe
+    and     $v0, $at
+
+    # Disable interrupts.
+    mtc0    $v0, $12
+    nop
+
+    # We are interpolating five different attributes. So we need to run the
+    # command at least twice.
+    # First we do U, V, and Value, which have been previously loaded.
+
+    # Load the main interpolation factor we previously calculated.
+    mflo    $v0
+    mtc2    $v0, $8
+    nop
+    nop
+    nop
+    INTPL
+    cfc2    $zero, $31
+    mfc2    $v0, $9
+
+    # The first set of attributes:
+    ctc2    $t0, $21
+    ctc2    $t2, $22
+    ctc2    $t4, $23
+
+    # The interpolated U and V
+    mfc2    $t0, $10
+    mfc2    $t2, $11
+
+    # The second set of attributes:
+    mtc2    $t1, $9
+    mtc2    $t3, $10
+    mtc2    $t5, $11
+
+    # Write the resulting value.
+    sh      $v0, 0($t9)         # New value
+    nop
+    INTPL
+
+    # Write the resulting UV.
+    sb      $t0, 0x6($t9)    # New U
+    sb      $t2, 0x7($t9)    # New V
+    cfc2    $zero, $31
+
+    mfc2    $t0, $9             # New depth
+    mfc2    $t1, $10            # New Y
+    mtc0    $at, $12
+
+    # Write the resulting depth value.
+    sh      $t0, 0x4($t9)
+
+    # And simply return the custom ones in $t1 and IR3.
+    jr      $ra
+    nop
+
+# Create new polygons from the subdivided vertices?
+# $v0   size of verts in bytes (12 each)
+glabel func_800F6EE0
+    # We can't subdivide 2 or fewer vertices.
+    addiu   $v1, $v0, -0x18
+    bltz    $v1, .L800F7104
+    nop
+
+    # Save some registers.
+    sw      $ra, 0x380($s5)
+    sw      $s6, 0x384($s5)
+    sw      $s7, 0x388($s5)
+
+    # Prepare $s6 and $s7 for quickly masking and unmasking interrupts.
+    mfc0    $s6, $12 # handwritten instruction
+    addiu   $s7, $zero, -0x2
+    and     $s7, $s7, $s6
+
+    # Pointer to the working area.
+    la      $s0, 0x1F8002F4
+
+    # $s0 will be the pointer to the current vertex.
+
+    # Pointer to the last vertex.
+    addu    $s1, $s0, $v0
+
+    # Get t5 flags.
+    jalr    $fp
+    nop
+
+    # Is this polygon textured?
+    bgez    $t5, .L800F6FC8
+    nop
+
+    # Not textured.
+    jal     func_800F68B0       # G_load_colors
+    nop
+
+    jal     func_800F710C       # Calculate color.
+    lw      $t6, 0x8($s0)       # Get the vertex's coordinates. Delay slot.
+    andi    $v0, $t5, 0x2       #   Waiting for GTE. So take this time to
+    ori     $v0, $v0, 0x30      #   make the primitive command code.
+    sll     $v0, $v0, 24        #
+    mtc0    $s6, $12            # Enable interrupts.
+    cfc2    $zero, $31          # Read GTE flags.
+    mfc2    $t8, $22            # Read the calculated color value.
+    addiu   $s0, $s0, 0xC       # Go to the next vertex.
+    or      $t8, $t8, $v0
+    jal     func_800F710C       # Calculate color.
+    lw      $t7, 0x8($s0)       # Get the vertex's coordinates. Delay slot.
+    ori     $t0, $zero, 0x7     #   Waiting for GTE. Combine the color value
+    li      $t1, 0xE1000600     #   with the command code.
+    mtc0    $s6, $12            # Enable interrupts.
+    cfc2    $zero, $31          # Read GTE flags.
+    mfc2    $t9, $22            # Read the calculated color value.
+    addiu   $s0, $s0, 0xC       # Go to the next vertex.
+
+    # We now have the first two vertices ready to go. We can start looping over
+    # all the other ones. Shifting them in and out to make polygons with them.
+.L800F6F74: # .loop
+        jal     func_800F710C       # Calculate color.
+        nop
+        sw      $t7, 0x1C($a1)      # Prim V2
+        lw      $t7, 0x8($s0)       # Current vertex position.
+        sw      $t6, 0xC($a1)       # Prim V0
+        sw      $t7, 0x14($a1)      # Prim V1
+        mtc0    $s6, $12            # Disable Interrupts.
+        sw      $t9, 0x18($a1)      # Prim Color 2
+        sw      $t8, 0x8($a1)       # Prim Color 0 + Code
+        sb      $t0, 0x3($a1)       # Prim Packet length (7)
+        sw      $t1, 0x4($a1)       # Prim Draw Mode
+        swl     $a2, 0x2($a1)       # Prim Link
+        cfc2    $zero, $31
+        mfc2    $t9, $22            # Current vertex color.
+        sll     $a2, $a1, 8
+        sw      $t9, 0x10($a1)      # Prim Color 1
+        addiu   $a1, $a1, 0x20      # Go to next prim.
+        bne     $s0, $s1, .L800F6F74
+        addiu   $s0, $s0, 0xC
+    b           .L800F70F8
+    nop
+
+.L800F6FC8:
+    # Textured.
+    jal     func_800F69A0       # GT_load_colors
+    nop
+
+    jal     func_800F710C       # Calculate color.
+    lw      $t6, 0x8($s0)       # Get the vertex's coordinates. Delay slot.
+    lh      $t0, 0x6($s0)       # Get the vertex's UV.
+    jal     func_800F7130       # ???
+    nop
+    move    $t2, $t3
+    andi    $v0, $t5, 0x2       # Make the primitive command code for GT3.
+    ori     $v0, $v0, 0x34      # |
+    sll     $v0, $v0, 24        # |
+    cfc2    $zero, $31          # Read GTE flags.
+    mfc2    $t8, $22            # First vertex's color.
+    addiu   $s0, 12             # Next vertex.
+    or      $t8, $v0
+    srl     $t4, $t5, 16
+    andi    $t4, $t4, 0x1FF
+    andi    $t5, $t5, 0xFFFC
+    jal     func_800F710C       # Calculate color.
+    lw      $t7, 0x8($s0)
+    lh      $t1, 0x6($s0)       # Get the vertex's UV.
+    jal     func_800F7130       # ???
+    nop
+    lw      $v1, 0x18($a0)
+    cfc2    $zero, $31
+    mfc2    $t9, $22
+    addiu   $s0, $s0, 0xC
+    nop
+    .L800F7038:
+    jal     func_800F710C
+    nop
+    sw      $t3, 0x48($a1)
+    sw      $t2, 0x30($a1)
+    jal     func_800F7130
+    or      $at, $t2, $t3
+    or      $at, $at, $t3
+    sw      $t3, 0x3C($a1)
+    sw      $t7, 0x24($a1)
+    sw      $t7, 0x4C($a1)
+    lw      $t7, 0x8($s0)
+    sw      $t6, 0xC($a1)
+    sw      $t6, 0x34($a1)
+    sw      $t7, 0x18($a1)
+    sw      $t7, 0x40($a1)
+    sw      $t9, 0x20($a1)
+    sw      $t8, 0x8($a1)
+    sh      $t1, 0x28($a1)
+    sh      $t1, 0x50($a1)
+    lh      $t1, 0x6($s0)
+    sh      $t0, 0x10($a1)
+    sh      $t0, 0x38($a1)
+    sh      $t1, 0x1C($a1)
+    sh      $t1, 0x44($a1)
+    sh      $t4, 0x1E($a1)
+    ori     $v0, $t4, 0x20
+    sh      $v0, 0x46($a1)
+    sh      $t5, 0x12($a1)
+    addiu   $v0, $t5, 0x40
+    sh      $v0, 0x3A($a1)
+    addiu   $v0, $a1, 0x2C
+    sw      $v0, 0x0($a1)
+    ori     $v0, $zero, 0xA
+    sb      $v0, 0x3($a1)
+    ori     $v0, $zero, 0x9
+    sb      $v0, 0x2F($a1)
+    sw      $v1, 0x4($a1)
+    swl     $a2, 0x2E($a1)
+    bnez    $at, .L800F70DC
+    nop
+    swl     $a2, 0x2($a1)
+.L800F70DC:
+    cfc2    $zero, $31
+    mfc2    $t9, $22
+    sll     $a2, $a1, 8
+    sw      $t9, 0x14($a1)
+    addiu   $a1, $a1, 0x54
+    bne     $s0, $s1, .L800F7038
+    addiu   $s0, $s0, 0xC
+
+.L800F70F8: # .out
+    lw      $ra, 0x380($s5)
+    lw      $s6, 0x384($s5)
+    lw      $s7, 0x388($s5)
+.L800F7104: # .return
+    jr      $ra
+    nop
+
+glabel func_800F710C
+    lwc2    $9, 0x0($s0)
+    mtc0    $s7, $12
+    lwc2    $10, 0x0($s0)
+    lwc2    $11, 0x0($s0)
+    lwc2    $8, 0x4($s0)
+    nop
+    DPCL
+    jr      $ra
+    nop
+
+glabel func_800F7130
+    lhu     $v0, 0x4($s0)
+    mtc0    $s6, $12
+    srl     $v0, $v0, 5
+    ori     $t3, $v0, 0x3600
+    sll     $t3, $t3, 8
+    or      $t3, $t3, $v0
+    sll     $t3, $t3, 8
+    jr      $ra
+    or      $t3, $t3, $v0
