@@ -1011,17 +1011,31 @@ INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4480);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D45C4);
 
+// demo_controller_overlay
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D46CC);
 
+// boss health bar UI elements
+
+/* US:801026D0 JP: */ int D_801026D0 = 100;
+/* US:801026D4 JP: */ int D_801026D4 = 100;
+/* US:801026D8 JP: */ int D_801026D8 = 1;
+
+// set_in_boss_fight
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D484C);
 
+// set_not_in_boss_fight
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4870);
 
+// set_boss_health
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4880);
 
+// draw_boss_health_bar
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D48C0);
 
+// boss_ui_render
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4928);
+
+// bonus level balloon collecting UI elements
 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800D4A60);
 
@@ -3927,21 +3941,6 @@ int func_800E5DD8(SVECTOR *v, u32 meshid)
 extern int (*D_80102E3C)(int, VECTOR *, u32); // depth adjuster
 extern SVECTOR D_80102E44;
 extern SVECTOR D_801380A0;
-
-// The id parameter in this function has this format:
-//          ffff ffii iiii iiii
-// Where the lower bits are the mesh index and the upper ones are flags defined
-// in this enum.
-
-enum {
-    MODEL_FLAG_BIT0 = 0x400, // Unk
-    MODEL_STATIC_OT = 0x800, // Has static OT layer
-    MODEL_FLAG_BIT2 = 0x1000, // Also has to do with facing the camera
-    MODEL_FLAG_BIT3 = 0x2000, // Face the camera?
-    MODEL_BLACK_SHADOW = 0x4000, // Also has to do with facing the camera
-    MODEL_WHITE_SHADOW = 0x8000,
-    MODEL_SHADE_AT_MEDIUM = 0x10000, // Don't use flat shading for medium distance.
-};
 
 enum {
     MESH_FLAG_FLAT_SHADE = 0x1,

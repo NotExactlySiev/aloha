@@ -67,3 +67,4 @@ static inline int fixed_div(int a, int b) { return (a * ONE) / b; }
 #define random_number func_800CD0BC
 #define vector_mag2 func_800E8868
 #define polar_to_cart func_800E9324
+#define catan2 func_800CD1C4

@@ -674,6 +674,19 @@ void func_800BE8F8(void)
 {
 }
 
+// boss1.c
+
+extern s16 D_801001F0[]; // bytecode
+
+enum {
+    SFX_BOSS1_WINGS = 0x1810,
+};
+
+enum {
+    BOSS1_ACTION_JUMP_AND_TURN = 2,
+    BOSS1_ACTION_FLY = 4,
+};
+
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BE900);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800BE92C);
@@ -722,14 +735,18 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C093C);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C0C20);
 
+// e_boss_subentity2_physics
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C1290);
 
+// e_boss_subentity2_interaction
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C1664);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C177C);
 
+// e_boss_subentity2_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C19F4);
 
+// e_boss_subentity2_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C1BE8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C204C);
@@ -740,42 +757,255 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C22B8);
 
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C253C);
 
+// e_boss_subentity1_interaction
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C286C);
 
+// calculate_frame_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C2960);
 
+// e_boss_subentity1_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C2A2C);
 
+// e_boss_subentity1_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C2C20);
 
+// e_boss_subentity0_physics
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C300C);
 
+// e_boss_subentity0_interaction
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C321C);
 
+// calculate_frame_mesh
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C32E0);
 
+// e_boss_subentity0_render
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C33AC);
 
-// static
+// e_boss_subentity0_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3524);
 
 // e_boss1_comp0
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3798);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3798);
+void func_800C3798(Entity *e, Component *c)
+{
+    int state = c->state;
+    while (1) {
+        switch (state) {
+        case 0:
+            c->state = 0;
+            [[fallthrough]];
+        case 1: // Read Operand
+            state = *e->vm.pc++;
+            break;
+
+        case 2: // Wait
+            c->state = 3;
+            c->counter = *e->vm.pc++;
+            [[fallthrough]];
+        case 3:
+            if (c->counter-- > 0) {
+                return;
+            }
+            state = 0;
+            break;
+
+        case 4: // Loop
+            state = (e->vm.loop-- > 0) ? 5 : 7;
+            break;
+
+        case 5: // Take Branch
+            state = 1;
+            e->vm.pc = e->vm.labels[*e->vm.pc];
+            break;
+
+        case 6: { // Pick Random Branch
+            int r = (random_number() + 1) * (random_number() + 1);
+            state = *e->vm.pc++ > r ? 5 : 7;
+        } break;
+
+        case 7: // Skip Branch
+            state = 1;
+            e->vm.pc++;
+            break;
+
+        case 8: // Set Loop Counter
+            state = 1;
+            e->vm.loop = *e->vm.pc++;
+            break;
+
+        case 9: { // Set Loop Counter Randomly
+            int val = random_number();
+            int window = *e->vm.pc++;
+            int start = *e->vm.pc++;
+            e->vm.loop = (val % window) + start;
+            state = 1;
+        } break;
+
+        case 10: // Boss1: Set Speed
+            e->forward_speed = *e->vm.pc++;
+            state = 1;
+            break;
+
+        case 11: // Boss1: Set Action
+            e->sub.boss1.action = *e->vm.pc++;
+            printf("ACTION: %d\n", e->sub.boss1.action);
+            state = 1;
+            break;
+
+        case 12: { // Boss1: Set Destination
+            s16 arg = *e->vm.pc++;
+            if (arg) {
+                e->sub.boss1.destination_counter = (random_number() >> 2) + 0x40;
+                e->sub.boss1.destination_force = random_number() << 4;
+            } else {
+                e->sub.boss1.destination_counter = 0;
+            }
+            state = 1;
+        } break;
+
+        case 13: { // Boss1: Compare Action
+            s16 word = *e->vm.pc++;
+            if (word < 0) {
+                state = e->sub.boss1.action != ~word ? 5 : 7;
+            } else {
+                state = e->sub.boss1.action == word ? 5 : 7;
+            }
+        } break;
+
+        case 14: { // Boss1: Distance Less Than Or Equal
+            Entity *player = get_player();
+            int distance = SquareRoot0(vector_mag2(
+                (player->pos_x - e->pos_x) >> 12,
+                (player->range_y - e->range_y) / 2 - ((player->pos_y - e->pos_y) >> 12),
+                (player->pos_z - e->pos_z) >> 12
+            ));
+            state = distance <= *e->vm.pc++ ? 5 : 7;
+        } break;
+
+        case 15: { // Boss1: Check player's position
+            Entity *player = get_player();
+            int distance = SquareRoot0(vector_mag2(
+                player->pos_x >> 12,
+                0,
+                player->pos_z >> 12
+            ));
+            state = distance <= *e->vm.pc++ ? 5 : 7;
+        } break;
+
+        case 16: { // Boss1: Compare angle to player
+            Entity *player = get_player();
+            int angle = catan2(
+                (player->pos_z - e->pos_z) >> 12,
+                (player->pos_x - e->pos_x) >> 12
+            );
+
+            int rotated = func_800CD444(e->angle_y, angle, *e->vm.pc++);
+            state = angle != rotated ? 5 : 7;
+        } break;
+
+        default:
+            return;
+        }
+    }
+}
 
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3B7C);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3B7C);
+// This runs while the boss is flying.
+void func_800C3B7C(Entity *e)
+{
+    Entity *player = get_player();
+
+    int target;
+    if (e->sub.boss1.action == 4) {
+        e->sub.boss1.destination_counter += 1;
+        if (random_number() < 8) {
+            e->sub.boss1.destination_force = catan2((player->pos_z - e->pos_z) >> 12, (player->pos_x - e->pos_x) >> 12)
+                + random_number() * 4
+                - 0x200;
+        }
+    }
+
+    if (e->sub.boss1.destination_counter == 0) {
+        target = catan2((player->pos_z - e->pos_z) >> 12, (player->pos_x - e->pos_x) >> 12);
+    } else {
+        e->sub.boss1.destination_counter -= 1;
+        target = e->sub.boss1.destination_force;
+    }
+
+    int angle0 = e->angle_y;
+    e->angle_y = func_800CD444(angle0, target, 12);
+    e->unk21 = e->angle_y - angle0;
+}
 
 // static
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3C88);
 
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3E90);
+// apply_movement
+void func_800C3E90(Entity *e)
+{
+    func_800D95E8(e, &e->vel_z, &e->vel_x);
+    func_800D9A00(e, &e->vel_z, &e->vel_x, &e->vel_y);
+    func_800D96B0(e, e->vel_z, e->vel_x, e->vel_y);
+    func_800D973C(e);
+    func_800D7C70(e);
+    func_800D8514(e);
+    if (e->xz_col) {
+        e->vel_y = 0;
+    }
+}
 
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3F28);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C3F28);
+// Probably working? Kinda hard to test.
+int func_800C3F28(Entity *e)
+{
+    // Only deal this damage when going down.
+    if (e->vel_y <= 0) {
+        return 0;
+    }
+
+    Entity *player = get_player();
+    int dx = player->pos_x - e->pos_x;
+    dx = dx < 0 ? -dx : dx;
+    int dz = player->pos_z - e->pos_z;
+    dz = dz < 0 ? -dz : dz;
+
+    if (dx >> 12 >= e->range_x) {
+        return 0;
+    }
+
+    if (dz >> 12 >= e->range_z) {
+        return 0;
+    }
+
+    int dy = (player->pos_y - e->pos_y) >> 12;
+    if (dy <= player->range_y && dy > 0) {
+        func_800D05F0(0, 16, -1, 50);
+        return -1;
+    }
+
+    return 0;
+}
 
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4000);
+void func_800C4000(Entity *e)
+{
+    // Coutner runs while the boss is in the air.
+    if (--e->sub.boss1.unk22 < 0) {
+        e->sub.boss1.unk22 = 0;
+    }
+
+    if (e->sub.boss1.unk22 == 0) {
+        func_800CE304(
+            SFX_BOSS1_WINGS,
+            func_800CEC30(110, e->pos_x >> 12, e->pos_y >> 12, e->pos_z >> 12),
+            func_800CEB6C(e->pos_z >> 12, e->pos_x >> 12)
+        );
+        e->sub.boss1.unk22 = 32;
+    }
+}
 
 // e_boss1_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C40A4);
@@ -784,16 +1014,88 @@ INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C40A4);
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C44A8);
 
 // static
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4B8C);
+// calculate_frame_mesh
+int func_800C4B8C(Entity *e, int arg)
+{
+    int frame_b = e->model.frame_b;
+    if (frame_b == e->model.frame_a) {
+        return frame_b + D_8010353C[0].mesh_id + arg;
+    }
+
+    int frames[2] = {
+        e->model.frame_b + D_8010353C[0].mesh_id + arg,
+        e->model.frame_a + D_8010353C[0].mesh_id + arg,
+    };
+
+    int fac = fixed_div(e->model.current_time + 1, e->model.length);
+    int factors[2] = {
+        fac,
+        ONE - fac,
+    };
+
+    return func_800E6684(frames, factors, 2);
+}
 
 // e_boss1_render
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4C58);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4C58);
+void func_800C4C58(Entity *e, Component *c)
+{
+    (void)c;
+
+    func_800EC408(e->pos_z, e->pos_x, 0);
+    int id = -1;
+    func_800D4880(e->health, e->sub.boss1.max_health);
+
+    SVECTOR pos = {
+        .vx = e->pos_x >> 12,
+        .vy = e->pos_y >> 12,
+        .vz = e->pos_z >> 12,
+    };
+
+    SVECTOR rot = {
+        .vy = e->angle_y,
+        .vx = -e->angle_x,
+        .vz = e->angle_z,
+    };
+
+    if (camera_frustum_cull(&pos, D_8010353C[0].mesh_id + e->model.frame_a) > -1) {
+        id = func_800C4B8C(e, 0);
+        if (e->unk5 > 0) {
+            id |= 0x8000;
+        }
+        draw_model(&pos, &rot, id);
+    }
+
+    SVECTOR *cam = SCRTCHPAD(0x3CA);
+    pos.vy = e->ground_y + 2;
+    if (cam->vy < pos.vy && camera_frustum_cull(&pos, D_8010353C[0].mesh_id + e->model.frame_a) > -1) {
+        if (id < 0) {
+            id = func_800C4B8C(e, 0);
+        }
+
+        func_800E5B88(0, 0, 0);
+        draw_model(&pos, &rot, id | MODEL_BLACK_SHADOW);
+        func_800E5B88(0, 0, 0);
+    }
+
+    if (e->unk5) {
+        e->unk5 = -1;
+    }
+}
 
 // e_boss1_ctor
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C4DE8);
 
 // e_boss1_class_ctor
-INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5044);
+// INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5044);
+void func_800C5044(void)
+{
+    func_800D484C(); // init_boss_ui
+    func_800BF768(); // init_boss1
+    func_800BE900(); // init_fire_array
+}
+
+// yuge.c
 
 // e_yuge_comp1
 INCLUDE_ASM("asm/jm1/nonmatchings/1268", func_800C5074);

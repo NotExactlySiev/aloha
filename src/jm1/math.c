@@ -1,10 +1,9 @@
 #include "math.h"
+#include "common.h"
 #include "include_asm.h"
 
 int D_801028F4 = 0; // rng
 int D_801028FC = 0; // prng
-
-// seed arrs
 
 // seed
 u8 D_8010154C[64] = {
@@ -28,7 +27,8 @@ u8 D_8010158C[16] = {
 u8 D_80106D28[64];
 u8 D_80106D68[64];
 
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD010);
+/* US:8013F448 JP: */ s16 sin_lut[4096];
+
 void func_800CD010(void)
 {
     D_801028F4 = 0;
@@ -70,8 +70,6 @@ int rsin(int angle)
 }
 #endif
 
-/* US:8013F448 JP: */ s16 sin_lut[4096];
-
 // US: 800CD070
 void make_sin_lut(void)
 {
@@ -84,14 +82,55 @@ void make_sin_lut(void)
 }
 
 // more rand stuff
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD0BC);
+u8 func_800CD0BC(void)
+{
+    D_801028F4 = (D_801028F4 + 1) & 0x3f;
+    u32 buttons = func_800F3320();
+    u8 ret = D_8010158C[buttons & 0xf];
+    ret += D_80106D28[(D_801028F4 - 0x37) & 0x3f];
+    ret ^= D_80106D28[(D_801028F4 - 0x18) & 0x3f];
+    D_80106D28[D_801028F4 & 0x3f] = ret;
+    return ret;
+}
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD158);
+u8 func_800CD158(void)
+{
+    D_801028FC = (D_801028FC + 1) & 0x3f;
+    u8 ret = D_80106D68[(D_801028FC - 0x18) & 0x3f];
+    ret ^= D_80106D68[(D_801028FC - 0x37) & 0x3f];
+    D_80106D68[D_801028FC & 0x3f] = ret;
+    return ret;
+}
 
 // atan2
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD1C4);
+int func_800CD1C4(int y, int x)
+{
+    int y0 = y < 0 ? -y : y;
+    int x0 = x < 0 ? -x : x;
+    int ret;
+    if (y0 == x0) {
+        if (x0 == 0) {
+            return 0;
+        }
+        ret = 0x200;
+    } else if (x0 < y0) {
+        ret = catan(fixed_div(x0, y0));
+    } else {
+        ret = 0x400 - catan(fixed_div(y0, x0));
+    }
 
-INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD2C4);
+    if (x < 0) {
+        ret = 0x1000 - ret;
+    }
+
+    if (y < 0) {
+        ret = 0x800 - ret;
+    }
+
+    return ret & 0xfff;
+}
+
+NOT_IMPL_FN(func_800CD2C4)
 
 // cart_to_sperical
 void func_800CD3BC(int x, int y, int z, int *ay, int *ax)
@@ -113,10 +152,6 @@ void func_800CD4D4(int ay, int ax, int r, int *x, int *y, int *z)
 
 // rotate_vector
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD550);
-
-// end of math.c
-
-// model anim stuff
 
 // model_set_anim
 void func_800CD684(Model *model, const ModelKeyframe *initial, const ModelKeyframe *const *anims)
@@ -140,29 +175,7 @@ void func_800CD6B0(Model *model, const ModelKeyframe *next, const ModelKeyframe 
 INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD6BC);
 
 // math_init?
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD780);
 void func_800CD780(void)
 {
     func_800CD010();
 }
-
-// libgte functions
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD7A0); // RotMatrixC
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CD920); // csincos
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDA40); // csin_1
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDAE0); // ccos
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDBA4); // csin
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDCD0); // cln_1
-
-// // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDD68); // cln
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDDD4); // csqrt_1
-
-// // INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDF28); // csqrt
-
-// INCLUDE_ASM("asm/jm1/nonmatchings/173B4", func_800CDFC4); // catan

@@ -139,6 +139,20 @@ struct Entity {
         } frog;
 
         struct {
+            /* 00 */ s16 unk0;
+            /* 02 */ s16 action;
+            /* 04 */ s16 destination_counter;
+            /* 06 */ s16 destination_force;
+            /* 08 */ Entity *unk8;
+            /* 0C */ Entity *unkC;
+            /* 10 */ Entity *unk10;
+            /* 14 */ u8 unk14[0x8];
+            /* 1C */ s16 max_health;
+            /* 1E */ u8 unk1E[4];
+            /* 22 */ short unk22; // counter
+        } boss1;
+
+        struct {
             s16 unk0;
             s16 unk1;
         } coin;

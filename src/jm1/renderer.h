@@ -4,6 +4,21 @@
 #include <ints.h>
 #include <libgpu.h>
 
+// The id parameter in this function has this format:
+//          ffff ffii iiii iiii
+// Where the lower bits are the mesh index and the upper ones are flags defined
+// in this enum.
+
+enum {
+    MODEL_FLAG_BIT0 = 0x400, // Unk
+    MODEL_STATIC_OT = 0x800, // Has static OT layer
+    MODEL_FLAG_BIT2 = 0x1000, // Also has to do with facing the camera
+    MODEL_FLAG_BIT3 = 0x2000, // Face the camera?
+    MODEL_BLACK_SHADOW = 0x4000, // Also has to do with facing the camera
+    MODEL_WHITE_SHADOW = 0x8000,
+    MODEL_SHADE_AT_MEDIUM = 0x10000, // Don't use flat shading for medium distance.
+};
+
 void func_800E543C(s16 x, s16 y, s16 z); // set_camera_position
 void func_800E5458(s16 x, s16 y, s16 z); // set_camera_angle
 void func_800E5B88(s16, s16, s16); // does this do anything?
