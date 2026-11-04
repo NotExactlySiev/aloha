@@ -60,7 +60,7 @@ void func_800B0CCC(Entity *e, Component *c)
             break;
 
         case 4: // Loop
-            state = (e->vm.loop-- > 0) ? 5 : 7;
+            state = (--e->vm.loop > 0) ? 5 : 7;
             break;
 
         case 5: // Take Branch
@@ -103,7 +103,7 @@ void func_800B0CCC(Entity *e, Component *c)
         case 12: { // Frog: Set Destination
             s16 arg = *e->vm.pc++;
             if (arg) {
-                e->sub.frog.destination_counter = (random_number() >> 2) + 0x20;
+                e->sub.frog.destination_counter = (random_number() / 2) + 0x80;
                 e->sub.frog.destination_force = random_number() << 4;
             } else {
                 e->sub.frog.destination_counter = 0;

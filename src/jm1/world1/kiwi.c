@@ -130,7 +130,7 @@ void e_kiwi_behavior(Entity *e, Component *c)
             break;
 
         case 4: // Loop
-            state = (e->vm.loop-- > 0) ? 5 : 7;
+            state = (--e->vm.loop > 0) ? 5 : 7;
             break;
 
         case 5: // Take Branch
