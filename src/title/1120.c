@@ -351,7 +351,7 @@ int D_800F4E50 = 0;
 int D_800F4E58 = 0;
 int D_800F4E60 = 0;
 int D_800F4E68 = 0;
-int D_800F4E70 = 0;
+int D_800F4E70 = 0; // logo_is_bouncing
 int D_800F4E78 = 0;
 int D_800F4E80 = 0;
 
@@ -516,12 +516,15 @@ void func_800E1F60(void)
     D_800F4EB0 = 1;
 }
 
-INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1FB8);
+int D_800F4D14 = 0; // logo_x
+int D_800F4D18 = 0; // logo_y
+int D_800F4EC0 = 0; // logo_brightness
 
-extern int D_800F4D14;
-extern int D_800F4D18;
-extern int D_800F4E70;
-extern int D_800F4EC0;
+void func_800E5F58(int x, int y, int h);
+void func_800E6300(int x, int y, int h, int brightness);
+void func_800E5C00(int x, int y);
+
+INCLUDE_ASM("asm/title/nonmatchings/1120", func_800E1FB8);
 
 // draw logo
 void func_800E2234(int page_index)
@@ -1972,7 +1975,7 @@ void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
             setClut(p, 320, 480 + fog_level);
             p->tpage = tpage;
 
-            addPrim(current_bgbuffer->ot[2], p);
+            addPrim(&current_bgbuffer->ot[2], p);
 
             p += 1;
             u += step;
@@ -1987,7 +1990,7 @@ void func_800E6E80(int cols, int rows, int step, uint u0, uint v0)
 
     DR_MODE *q = current_bgbuffer->next;
     jt.SetDrawMode(q, 0, 0, tpage, &(RECT) { 0, 0, 128, 128 });
-    addPrim(current_bgbuffer->ot[2], q);
+    addPrim(&current_bgbuffer->ot[2], q);
 
     current_bgbuffer->next = q + 1;
 }
